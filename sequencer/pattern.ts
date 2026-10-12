@@ -22,7 +22,7 @@ export interface Pattern {
   bars?: number;
   loop?: boolean;
   from?: number;
-  notes: PatternNote[];
+  events: PatternNote[];
   name?: string;
   shape?: string;
   vibrato?: number;
@@ -47,9 +47,9 @@ export function lengthOf(pat: Pattern, meter: Meter = MASTER): number {
 export function patternOf(record: PatternNote[], cycle: number, meter: Meter = MASTER): Pattern {
   const bar = barTicks(meter);
   const from = Math.floor(Math.min(...record.map((ev) => ev.start)) / bar) * bar;
-  const notes = record
+  const events = record
     .map((ev) => ({ ...ev, start: ev.start - from }))
     .sort((first, second) => first.start - second.start);
-  const end = Math.max(...notes.map((note) => note.start + (note.duration || 1))); // a long note as long as it lasts
-  return { meter, bars: (Math.ceil(end / cycle) * cycle) / bar, loop: true, from, notes };
+  const end = Math.max(...events.map((event) => event.start + (event.duration || 1))); // a long one as long as it lasts
+  return { meter, bars: (Math.ceil(end / cycle) * cycle) / bar, loop: true, from, events };
 }

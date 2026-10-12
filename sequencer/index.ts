@@ -1,6 +1,6 @@
 // ---------- libs/sequencer: tracks of patterns, played on the grid. Pure: no Web Audio, nothing of the garden's ----------
-// After Ableton's session view (mockup/architecture/sequencer.md). A pattern is like a clip: { meter, bars, loop, notes }, its time
-// signature (the master's when it's left out), its length in bars, whether it loops or plays once when triggered, and its notes, each
+// After Ableton's session view (mockup/architecture/sequencer.md). A pattern is like a clip: { meter, bars, loop, events }, its time
+// signature (the master's when it's left out), its length in bars, whether it loops or plays once when triggered, and its events, each
 // { start, duration, … }: where it starts and how long it lasts, in ticks (PPQ to a quarter), on the straight grid. A rest isn't stored: it's
 // the gap between notes. A pattern starts on the one of its first bar, so nothing comes before 0: an upbeat is written where it falls,
 // in a loop at the end of its last bar. Played once (place()) or repeating (due());

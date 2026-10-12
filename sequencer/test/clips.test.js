@@ -28,7 +28,7 @@ const to = (track) => ({ track, clip: { kind: track }, live: false });
 const pattern = {
   bars: 1,
   loop: true,
-  notes: [
+  events: [
     { start: 0, duration: STEP, pitch: 40 },
     { start: STEP, duration: 2 * STEP, pitch: 38 },
   ],
@@ -83,7 +83,10 @@ test('one clip a track: a launch replaces what it played, stop() ends it; each t
   const clips = new ClipPlayer({ input: into, grid });
   clips.launch({ to: to('drums'), pattern });
   clips.launch({ to: to('bass'), pattern, straight: true });
-  clips.launch({ to: to('drums'), pattern: { bars: 1, loop: true, notes: [{ start: 0, duration: STEP, pitch: 50 }] } });
+  clips.launch({
+    to: to('drums'),
+    pattern: { bars: 1, loop: true, events: [{ start: 0, duration: STEP, pitch: 50 }] },
+  });
   clips.step(0, 0);
   assert.deepEqual(
     into.sent.map(({ to: where, messages }) => [where.track, messages[0].pitch]),

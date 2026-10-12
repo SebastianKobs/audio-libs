@@ -12,14 +12,14 @@ export interface Grid {
 }
 // a looping pattern's next count notes from a place (ticks from the grid's start), round the loop, each where it sounds from the grid's start
 export function upcoming(pat: Pattern, at: number, count: number, meter: Meter = MASTER): PatternNote[] {
-  if (!pat.notes.length) {
+  if (!pat.events.length) {
     return [];
   }
   const loopLength = lengthOf(pat, meter);
   const next: PatternNote[] = [];
   const from = pat.from!; // a record's pattern: where it was played
   for (let lap = Math.floor((at - from) / loopLength); next.length < count; lap++) {
-    for (const note of pat.notes) {
+    for (const note of pat.events) {
       if (from + lap * loopLength + note.start >= at && next.length < count) {
         next.push({ ...note, start: from + lap * loopLength + note.start });
       }
@@ -30,21 +30,21 @@ export function upcoming(pat: Pattern, at: number, count: number, meter: Meter =
 // a pattern played whole, as a launched clip: from its first note to its last, once, its first in the beat at a place (ticks from the
 // grid's start), each note in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats
 export function whole(pat: Pattern, at: number, meter: Meter = MASTER): PatternNote[] {
-  const [firstNote] = pat.notes;
+  const [firstNote] = pat.events;
   if (!firstNote) {
     return [];
   }
   const beat = (PPQ * 4) / meter[1];
   const first = firstNote.start;
   const shift = at + (((first % beat) + beat) % beat) - first;
-  return pat.notes.map((note) => ({ ...note, start: note.start + shift }));
+  return pat.events.map((note) => ({ ...note, start: note.start + shift }));
 }
 // what a repeating pattern plays in the grid's 16th i: its notes whose place comes round within it, every length from the grid's
 // start, in the pattern's order, each with its offset, how many ticks into the 16th it starts
 export function due(pat: Pattern, i: number, meter: Meter = MASTER): PatternNote[] {
   const loopLength = lengthOf(pat, meter);
   const t0 = i * STEP;
-  return pat.notes.flatMap((note) => {
+  return pat.events.flatMap((note) => {
     const offset = (((note.start - t0) % loopLength) + loopLength) % loopLength;
     return offset < STEP ? [{ ...note, offset }] : [];
   }); // + loopLength: % keeps the sign, so a note already gone would count as due
@@ -59,13 +59,13 @@ export function liveNotes(
   to: number,
   meter: Meter = MASTER,
 ): PatternNote[] {
-  if (!pat.notes.length) {
+  if (!pat.events.length) {
     return [];
   }
   const loopLength = lengthOf(pat, meter) / scale;
   const found: PatternNote[] = [];
   for (let lap = Math.max(0, Math.floor((from - start) / loopLength)); start + lap * loopLength < to; lap++) {
-    for (const note of pat.notes) {
+    for (const note of pat.events) {
       const at = start + lap * loopLength + note.start / scale;
       if (at >= from && at < to) {
         found.push({ ...note, start: at, ...(note.duration ? { duration: note.duration / scale } : {}) });
