@@ -1,13 +1,12 @@
-// ---------- sequencer/clips: clips the sequencer plays on its own, each looping on its track (G0.1a) ----------
+// ---------- midi-sequencer/clips: clips the sequencer plays on its own, each looping on its track (G0.1a) ----------
 // As Ableton's session view plays a launched clip: a pattern of notes on a track, looping on the grid, its notes sent into the sequencer's
 // input as they come due, so they reach their instrument and the stream as a played note does; each with its note on and its note off
 // together, its length known as it starts, a fresh index each, the player one source (note rotation). The looping and when each note
 // comes due the clip launcher's (launcher.ts): here only the notes as MIDI's messages
 import type { Seconds } from '../clock/index.ts';
 import type { Address, Input } from './input.ts';
-import { ClipLauncher, type ClipGrid } from './launcher.ts';
+import { ClipLauncher, STEP, type ClipGrid } from '../sequencer/index.ts';
 import type { NotePattern, PatternNote } from './pattern-note.ts';
-import { STEP } from './pattern.ts';
 import { NoteRotation } from './rotation.ts';
 
 // a clip as launched: where its notes go, its pattern, its notes in pitches; straight under the grid's swing, or on it; its notes'

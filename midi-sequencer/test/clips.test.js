@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ClipPlayer } from '../clips.ts';
-import { STEP } from '../index.ts';
+import { STEP } from '../../sequencer/index.ts';
 
 const SIXTEENTH = 0.2;
 const SWING = 0.05; // every odd 16th this much late

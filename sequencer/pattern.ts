@@ -3,7 +3,7 @@ import type { Meter } from '../clock/index.ts';
 
 // time as a pattern counts it: 96 ticks to the quarter, as a MIDI file's
 export type Ticks = number;
-// an event of a pattern: where it starts and how long it lasts, in ticks, and how far off its 16th it sounds, as due() hands it on; and
+// an event of a pattern: where it starts and how long it lasts, in ticks, and how far off its 16th it falls, as due() hands it on; and
 // whatever else its caller gives it, which the sequencer passes on and never reads
 export interface PatternEvent {
   start: Ticks;
@@ -35,7 +35,7 @@ export function startsBar(i: number, meter: Meter = MASTER): boolean {
 export function lengthOf(pat: Pick<Pattern, 'bars' | 'meter'>, meter: Meter = MASTER): number {
   return (pat.bars ?? 1) * barTicks(pat.meter ?? meter);
 }
-// a record as the pattern it is: from the one of the bar its first note fell in, as many whole cycles long as it needs, each note where it
+// a record as the pattern it is: from the one of the bar its first event fell in, as many whole cycles long as it needs, each event where it
 // fell in it, in time order. A record keeps places from the grid's start; its pattern loops from where it was played (from), every its length
 export function patternOf<Event extends PatternEvent>(
   record: Event[],

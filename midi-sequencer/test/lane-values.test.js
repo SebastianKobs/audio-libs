@@ -1,4 +1,4 @@
-// A lane's value at a time, the sequencer's (mockup/src/libs/sequencer/lanes.ts, the timeline's until L1c2; mockup/architecture/tests.md): as Web
+// A lane's value at a time, the sequencer's (mockup/src/libs/midi-sequencer/lanes.ts, the timeline's until L1c2; mockup/architecture/tests.md): as Web
 // Audio plays its points, a jump at once, a glide by its time constant, as setTargetAtTime goes; and its last point's, its glide not followed
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

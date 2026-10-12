@@ -1,5 +1,5 @@
-// ---------- libs/sequencer/pattern-note: a pattern's note, the music's: its pitch, its step of the scale, its phrase, its vibrato ----------
-import type { Pattern, PatternEvent } from './pattern.ts';
+// ---------- midi-sequencer/pattern-note: a pattern's note, the music's: its pitch, its step of the scale, its phrase, its vibrato ----------
+import type { Pattern, PatternEvent } from '../sequencer/index.ts';
 
 // a note of a pattern: an event, and what else its pattern gives it: a step of the scale from the pattern's own note, a note number of its
 // own, a drum's (the brushes'), the phrase of a record it's in, its vibrato; and what a record keeps beside (where it was swung, its

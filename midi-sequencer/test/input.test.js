@@ -1,10 +1,10 @@
-// The sequencer's input's unit tests (mockup/src/libs/sequencer/input.ts, messages.ts, rotation.ts; G0a, mockup/architecture/done.md):
+// The sequencer's input's unit tests (mockup/src/libs/midi-sequencer/input.ts, messages.ts, rotation.ts; G0a, mockup/architecture/done.md):
 // a control surface's messages, MIDI 2.0's channel voice messages as values; a note's index, handed out by note rotation; and the input,
 // which passes a track's messages on to its instrument at once and puts the play they make into the stream. What the garden plays
 // through it is held to the recordings (replays.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { NoteRotation, Sequencer, notesIn } from '../index.ts';
+import { NoteRotation, Sequencer, Stream, notesIn } from '../index.ts';
 
 const noteOn = (index, t, more = {}) => ({ type: 'note on', index, pitch: 60, velocity: 1, t, ...more });
 const noteOff = (index, t) => ({ type: 'note off', index, t });
@@ -490,4 +490,14 @@ test("a note ringing out after its note off still gets its sender's changes and 
   assert.equal(off.index, on.index);
   assert.notEqual(other.index, on.index, 'the other note a new index, the one freed last in turn');
   assert.deepEqual([change.index, detach.index], [on.index, on.index], 'ringing out, still its own');
+});
+
+test('the stream: every play to whoever listens, until they stop', () => {
+  const stream = new Stream();
+  const got = [];
+  const stop = stream.onPlay((p) => got.push(p.kind));
+  stream.played({ kind: 'tap', notes: [] });
+  stop();
+  stream.played({ kind: 'vine', notes: [] });
+  assert.deepEqual(got, ['tap']);
 });

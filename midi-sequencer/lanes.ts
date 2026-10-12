@@ -1,4 +1,4 @@
-// ---------- sequencer/lanes: a lane's points, as automation is, and its value at a time as Web Audio plays it (L1c2) ----------
+// ---------- midi-sequencer/lanes: a lane's points, as automation is, and its value at a time as Web Audio plays it (L1c2) ----------
 // A point a value at a time, jumping there, or gliding there by a time constant, as Web Audio's setTargetAtTime goes: the music's, on the
 // timeline as an event that holds until the next of its lane (libs/timeline/); the timeline's until L1c2
 import type { Seconds } from '../clock/index.ts';

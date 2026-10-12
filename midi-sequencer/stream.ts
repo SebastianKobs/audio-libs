@@ -1,4 +1,4 @@
-// ---------- libs/sequencer/stream: every play, the garden's and yours as you play it, to whoever listens ----------
+// ---------- midi-sequencer/stream: every play, the garden's and yours as you play it, to whoever listens ----------
 import type { Seconds } from '../clock/index.ts';
 import type { PerNoteControllerName, PerNoteValues } from './messages.ts';
 

@@ -1,4 +1,4 @@
-// ---------- sequencer/recorder: what was heard, kept as regions, the last 30 minutes, for an arrangement to show (G1b) ----------
+// ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes, for an arrangement to show (G1b) ----------
 // As Ableton records the session into its arrangement (mockup/architecture/views.md): every play the stream carries, the garden's, yours
 // and the background's, into the region it's of (play.region, G1a), told apart by its element and its number, a region's number its
 // source's; a play with none, a region of its own; a launched clip's plays left out (E2), as nothing a user launches is recorded. A region

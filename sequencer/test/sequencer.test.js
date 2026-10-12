@@ -1,22 +1,22 @@
-// The sequencer's unit tests (mockup/src/libs/sequencer/, a package of its own since L1e; mockup/architecture/sequencer.md): ticks, patterns
-// and their lengths, a theme's cycle, a record as the pattern it is, and what a replay unmutes, placing and repeating on the grid in ticks,
-// a rhythm played live and its speed, the stream, on a grid of the tests' own. The garden's phrasing, once here, is its own
-// (mockup/test/unit/phrasing.test.js). What the garden plays through it is held to the recordings (replays.test.js)
+// The generic sequencer's unit tests (mockup/src/libs/sequencer/, a package of its own since L1e, MIDI's part apart since S1d;
+// mockup/architecture/sequencer.md): ticks, patterns and their lengths, a record as the pattern it is, placing and repeating on the grid in
+// ticks, a rhythm played live and its speed, on a grid of the tests' own; their events carry a pitch or a step, passed on, never read. The
+// garden's phrasing, once here, a theme's cycle and a replay's run among it, is its own (mockup/test/unit/phrasing.test.js). What the
+// garden plays through it is held to the recordings (replays.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   PPQ,
   STEP,
-  Stream,
   barTicks,
   due,
   lengthOf,
-  liveNotes,
+  liveEvents,
   patternOf,
   place,
   placeOn,
   rescaled,
-  soundingAt,
+  underWayAt,
   startsBar,
   upcoming,
   whole,
@@ -48,7 +48,7 @@ test("placing a pattern on the grid, in ticks: from the beat it starts on, or at
   assert.equal(swung(24), 0.145, 'with the swing as the grid has it now');
 });
 
-// a phrase sent as its notes come due needs their places, not their times: worked out when each comes, with the grid as it is then (P3c2)
+// a phrase sent as its events come due needs their places, not their times: worked out when each comes, with the grid as it is then (P3c2)
 test('where a pattern lies on the grid, in 16ths, as place() times it: from the beat it starts on, or at its phrase’s own place in the beat', () => {
   const on = placeOn(144, 2, grid); // starts on the beat at 2 s, the 16th 16
   assert.deepEqual([144, 168, 240].map(on), [16, 17, 20]);
@@ -60,7 +60,7 @@ test('where a pattern lies on the grid, in 16ths, as place() times it: from the 
   );
 });
 
-test('a repeating pattern plays its notes in the 16ths they come round in, and in no other', () => {
+test('a repeating pattern plays its events in the 16ths they come round in, and in no other', () => {
   const brushes = {
     meter: [2, 4],
     bars: 1,
@@ -95,7 +95,7 @@ test('a repeating pattern plays its notes in the 16ths they come round in, and i
   );
 });
 
-test('a record as the pattern it is: from the one of the bar its first note fell in, in whole cycles, its notes in time order', () => {
+test('a record as the pattern it is: from the one of the bar its first event fell in, in whole cycles, its events in time order', () => {
   const bar = 384;
   const b5 = 5 * bar; // the record keeps places from the grid's start
   const one = patternOf(
@@ -124,11 +124,11 @@ test('a record as the pattern it is: from the one of the bar its first note fell
     4,
     'into the third bar: two cycles of two',
   );
-  assert.equal(patternOf([{ start: b5 + 288, duration: 192 }], bar).bars, 2, 'a long note: as long as it lasts');
+  assert.equal(patternOf([{ start: b5 + 288, duration: 192 }], bar).bars, 2, 'a long event: as long as it lasts');
   assert.equal(patternOf([{ start: b5 + 360 }], bar).bars, 1, 'the last 16th of the bar is in it');
 });
 
-test("a looping pattern's next notes from a place, round the loop, where each sounds", () => {
+test("a looping pattern's next events from a place, round the loop, where each falls", () => {
   const pat = {
     bars: 1,
     loop: true,
@@ -160,7 +160,7 @@ test("a looping pattern's next notes from a place, round the loop, where each so
   assert.deepEqual(upcoming({ ...pat, events: [] }, 2120, 2), [], 'nothing to play');
 });
 
-test("a pattern played whole, as a launched clip: from its first note to its last, starting in the beat it's given, each note in its place in the beat", () => {
+test("a pattern played whole, as a launched clip: from its first event to its last, starting in the beat it's given, each event in its place in the beat", () => {
   const pat = {
     bars: 1,
     loop: true,
@@ -185,11 +185,11 @@ test("a pattern played whole, as a launched clip: from its first note to its las
     ],
     'whole: its first in the beat at 2112, half a beat in as kept, the others as far from it',
   );
-  assert.equal(whole(pat, 2112)[1].duration, 48, 'a long note as long');
+  assert.equal(whole(pat, 2112)[1].duration, 48, 'a long event as long');
   assert.deepEqual(whole({ ...pat, events: [] }, 2112), [], 'nothing to play');
 });
 
-test('a rhythm played live: from where it started, round its loop, its notes in a stretch of the grid, each where it sounds', () => {
+test('a rhythm played live: from where it started, round its loop, its events in a stretch of the grid, each where it falls', () => {
   const r = {
     bars: 1,
     loop: true,
@@ -201,7 +201,7 @@ test('a rhythm played live: from where it started, round its loop, its notes in 
   };
   const start = 1944; // started on the 16th 81
   assert.deepEqual(
-    liveNotes(r, start, 1, 1920, 2300).map((n) => [n.start, n.duration]),
+    liveEvents(r, start, 1, 1920, 2300).map((n) => [n.start, n.duration]),
     [
       [1944, 48],
       [2088, 48],
@@ -210,17 +210,17 @@ test('a rhythm played live: from where it started, round its loop, its notes in 
     'nothing before it started',
   );
   assert.deepEqual(
-    liveNotes(r, start, 1, 2300, 2500).map((n) => n.start),
+    liveEvents(r, start, 1, 2300, 2500).map((n) => n.start),
     [2328, 2472],
     'round its loop: its one again a bar on',
   );
   assert.deepEqual(
-    liveNotes(r, start, 1, 2088, 2089).map((n) => n.start),
+    liveEvents(r, start, 1, 2088, 2089).map((n) => n.start),
     [2088],
     'from a place, on it; up to one, not on it',
   );
-  assert.deepEqual(liveNotes(r, start, 1, 2089, 2232), [], 'nothing between its notes');
-  assert.deepEqual(liveNotes({ ...r, events: [] }, start, 1, 0, 4000), [], 'no notes');
+  assert.deepEqual(liveEvents(r, start, 1, 2089, 2232), [], 'nothing between its events');
+  assert.deepEqual(liveEvents({ ...r, events: [] }, start, 1, 0, 4000), [], 'no events');
 });
 
 test("a rhythm's speed: double time halves its places and lengths, half time doubles them; one in its own meter loops at its length", () => {
@@ -233,7 +233,7 @@ test("a rhythm's speed: double time halves its places and lengths, half time dou
     ],
   };
   assert.deepEqual(
-    liveNotes(r, 0, 2, 0, 384).map((n) => [n.start, n.duration]),
+    liveEvents(r, 0, 2, 0, 384).map((n) => [n.start, n.duration]),
     [
       [0, 24],
       [72, 24],
@@ -243,7 +243,7 @@ test("a rhythm's speed: double time halves its places and lengths, half time dou
     'twice a bar',
   );
   assert.deepEqual(
-    liveNotes(r, 0, 0.5, 0, 768).map((n) => [n.start, n.duration]),
+    liveEvents(r, 0, 0.5, 0, 768).map((n) => [n.start, n.duration]),
     [
       [0, 96],
       [288, 96],
@@ -252,30 +252,30 @@ test("a rhythm's speed: double time halves its places and lengths, half time dou
   );
   const three = { meter: [3, 16], bars: 1, loop: true, events: [{ start: 0 }, { start: 24 }] };
   assert.deepEqual(
-    liveNotes(three, 0, 1, 0, 384).map((n) => n.start / STEP),
+    liveEvents(three, 0, 1, 0, 384).map((n) => n.start / STEP),
     [0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15],
     "three 16ths against the bar's 16",
   );
 });
 
-test("the note of a rhythm sounding at a place, as what's left of it, so a soloist coming in mid-note plays it at once", () => {
+test("the event of a rhythm under way at a place, as what's left of it, so one coming in partway, as a soloist mid-note, takes it up at once", () => {
   const long = { bars: 1, loop: true, events: [{ start: 0, duration: 336 }] }; // one tone of 3½ beats a bar
   assert.deepEqual(
-    soundingAt(long, 0, 1, 1000),
+    underWayAt(long, 0, 1, 1000),
     { start: 1000, duration: 104 },
     'in the third bar, 232 ticks into its tone: the 104 left',
   );
   assert.deepEqual(
-    soundingAt(long, 0, 0.5, 400),
+    underWayAt(long, 0, 0.5, 400),
     { start: 400, duration: 272 },
     'in half time, its tone two bars long',
   );
-  assert.equal(soundingAt(long, 0, 1, 1110), undefined, 'in its breath: nothing');
-  assert.equal(soundingAt(long, 0, 1, 1088), undefined, 'less than a 16th left: nothing, it waits for the next');
+  assert.equal(underWayAt(long, 0, 1, 1110), undefined, 'in its breath: nothing');
+  assert.equal(underWayAt(long, 0, 1, 1088), undefined, 'less than a 16th left: nothing, it waits for the next');
   assert.equal(
-    soundingAt(long, 0, 1, 768),
+    underWayAt(long, 0, 1, 768),
     undefined,
-    "a note starting on the place itself isn't sounding yet: it comes as the next",
+    "an event starting on the place itself isn't under way yet: it comes as the next",
   );
 });
 
@@ -286,25 +286,15 @@ test('a change of speed runs on where the rhythm had got to, with no jump', () =
   const next = rescaled(start, 1, 2, at); // at normal from the 16th 1; double from the beat
   assert.equal(next, 60, 'as if it had always played double time from there');
   assert.deepEqual(
-    liveNotes(r, next, 2, at, 384).map((n) => n.start),
+    liveEvents(r, next, 2, at, 384).map((n) => n.start),
     [108, 156, 204, 252, 300, 348],
-    '24 ticks of it to the next note, 12 at double time, then every 8th',
+    '24 ticks of it to the next event, 12 at double time, then every 8th',
   );
-  assert.equal(rescaled(start, 1, 0.5, at), -48, 'half time: a start before it can be, which liveNotes() places from');
+  assert.equal(rescaled(start, 1, 0.5, at), -48, 'half time: a start before it can be, which liveEvents() places from');
   assert.deepEqual(
-    liveNotes(r, rescaled(start, 1, 0.5, at), 0.5, at, 600).map((n) => n.start),
+    liveEvents(r, rescaled(start, 1, 0.5, at), 0.5, at, 600).map((n) => n.start),
     [144, 336, 528],
   );
-});
-
-test('the stream: every play to whoever listens, until they stop', () => {
-  const stream = new Stream();
-  const got = [];
-  const stop = stream.onPlay((p) => got.push(p.kind));
-  stream.played({ kind: 'tap', notes: [] });
-  stop();
-  stream.played({ kind: 'vine', notes: [] });
-  assert.deepEqual(got, ['tap']);
 });
 
 test("a 16th that starts a bar, in its time signature: every 16th one in 4/4, the master's when none is given, every 12th in 3/4 (G0.1c)", () => {

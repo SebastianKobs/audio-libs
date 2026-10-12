@@ -29,7 +29,7 @@ test("its owner's last track busy, a play takes the lowest free one", () => {
   r.place(a, 0, 2);
   r.place(b, 1, 10);
   r.place(c, 3, 10); // a's track, free again, taken by c
-  assert.equal(r.place(b, 4, 6), 2, "b's track still sounding, and c on track 0: a new one");
+  assert.equal(r.place(b, 4, 6), 2, "b's track still taken, and c on track 0: a new one");
 });
 
 test('a track is free only once its tail has died away: at its end exactly, and not before', () => {

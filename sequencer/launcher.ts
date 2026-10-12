@@ -1,6 +1,6 @@
 // ---------- libs/sequencer/launcher: clips launched on tracks, each looping on the grid, its events handed on as they come due ----------
 // As Ableton's session view launches a clip: a pattern on a track, one a track, looping on the beat grid; each 16th (step()), every
-// clip's events due there handed on at the clock times they sound, on the swing or straight under it, an event off its 16th where it
+// clip's events due there handed on at the clock times they fall at, on the swing or straight under it, an event off its 16th where it
 // falls in it. Knows nothing of what its events are: whoever launched them plays them (play()). Each launch a number of its own
 import type { Meter, Seconds } from '../clock/index.ts';
 import { STEP, type Pattern, type PatternEvent } from './pattern.ts';
@@ -12,14 +12,14 @@ export interface LaunchedClip<Track extends string, Event extends PatternEvent> 
   pattern: Pattern<Event>;
   straight?: boolean | undefined;
 }
-// the grid a clip plays on, the clock's: its time signature, a 16th's length and swing, when a place on it sounds
+// the grid a clip plays on, the clock's: its time signature, a 16th's length and swing, the clock time a place on it falls at
 export interface ClipGrid {
   meter(): Meter;
   stepDuration(): Seconds;
   swingAt(i: number): Seconds;
   timeAt(place: number): Seconds;
 }
-// an event handed on: its track, the event, the clock time it sounds at, and its clip's launch
+// an event handed on: its track, the event, the clock time it falls at, and its clip's launch
 export type PlayEvent<Track extends string, Event extends PatternEvent> = (
   track: Track,
   event: Event,
@@ -47,7 +47,7 @@ export class ClipLauncher<Track extends string, Event extends PatternEvent = Pat
   stop(track: Track): void {
     this.#playing.delete(track);
   }
-  // the 16th i, sounding at a clock time: every clip's events due there handed on, each at its time
+  // the 16th i, falling at a clock time: every clip's events due there handed on, each at its time
   step(i: number, t: Seconds): void {
     for (const { clip, launch } of this.#playing.values()) {
       for (const event of due(clip.pattern, i, this.#grid.meter())) {
@@ -55,7 +55,7 @@ export class ClipLauncher<Track extends string, Event extends PatternEvent = Pat
       }
     }
   }
-  // when an event due on the 16th i sounds: straight, the 16th's swing taken back, its offset on the straight grid; else on the swing, an
+  // when an event due on the 16th i falls: straight, the 16th's swing taken back, its offset on the straight grid; else on the swing, an
   // event off the 16th, a triplet say, where it falls in it
   #timeOf(clip: LaunchedClip<Track, Event>, event: Event, i: number, t: Seconds): Seconds {
     const grid = this.#grid;

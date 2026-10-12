@@ -1,4 +1,4 @@
-// ---------- sequencer/input: where a control surface plays into the sequencer, which alone plays the synths ----------
+// ---------- midi-sequencer/input: where a control surface plays into the sequencer, which alone plays the synths ----------
 // G0 (mockup/architecture/done.md): as a track's monitoring passes a controller on, a track's messages go to its
 // instrument at once, a function call, no latency added; and into its stream as the play they make (onPlay(), its own,
 // L1b), so what's heard is what's recorded. The way back (G0e), as Ableton lights a controller's pads: each note passed
