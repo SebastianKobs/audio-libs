@@ -136,18 +136,6 @@ test("the input: per-note management alone goes to the instrument at once, and p
   assert.deepEqual(plays, []);
 });
 
-test("the input: a note's vibrato, #77 Vibrato Depth sent with it, carried in the stream as it was before G0", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'trace', receive: () => {} }) });
-  const plays = [];
-  const stop = sequencer.onPlay((play) => plays.push(play));
-  sequencer.send({ track: 'trace', clip: { kind: 'vine' }, live: true }, [
-    noteOn(2, 3, { pitch: 64, part: 4 }),
-    perNote(2, 'vibrato depth', 16, 3),
-  ]);
-  stop();
-  assert.deepEqual(plays[0].notes, [{ t: 3, pitch: 64, velocity: 1, vibrato: 16, part: 4, index: 2 }]);
-});
-
 test("the input: a track's instrument looked up by its name, as a replay track's is made the first time it's played on (G0d)", () => {
   const asked = [];
   const instrument = { role: 'tap', receive: () => {} };

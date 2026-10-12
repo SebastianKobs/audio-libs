@@ -78,31 +78,25 @@ test("a clip's velocity is read as each note comes due; none leaves the note out
   );
 });
 
-test('one clip a track: a launch replaces what it played, stop() ends it; each track its own, in the order launched', () => {
+// which clip a track plays, in what order, and stop() the launcher's (launcher.test.js): here a launch's own address and velocity
+test("one clip a track: launched again, its notes the new clip's, sent where it sends them, at its velocity; stop() ends it", () => {
   const into = input();
   const clips = new ClipPlayer({ input: into, grid });
   clips.launch({ to: to('drums'), pattern });
-  clips.launch({ to: to('bass'), pattern, straight: true });
   clips.launch({
-    to: to('drums'),
+    to: { track: 'drums', clip: { kind: 'kit' }, live: false },
     pattern: { bars: 1, loop: true, events: [{ start: 0, duration: STEP, pitch: 50 }] },
+    velocity: () => 0.5,
   });
   clips.step(0, 0);
   assert.deepEqual(
-    into.sent.map(({ to: where, messages }) => [where.track, messages[0].pitch]),
-    [
-      ['drums', 50],
-      ['bass', 40],
-    ],
-    'the drums its new clip, first as launched first',
+    into.sent.map(({ to: where, messages }) => [where.track, where.clip.kind, messages[0].pitch, messages[0].velocity]),
+    [['drums', 'kit', 50, 0.5]],
+    "the new clip's notes, to its clip, at its velocity",
   );
   clips.stop('drums');
   clips.step(16, 16 * SIXTEENTH);
-  assert.deepEqual(
-    into.sent.slice(2).map(({ to: where }) => where.track),
-    ['bass'],
-    'the drums stopped',
-  );
+  assert.equal(into.sent.length, 1, 'stopped');
 });
 
 test("a launched clip's notes carry its launch's region, the clip player's own; launched again in its place, a new one (G1a)", () => {
