@@ -1,0 +1,37 @@
+// ---------- the tests' gesture tracker: one of its own, by the names its functions had before it was a class ----------
+// The unit tests and the vectors' writer (run-gestures.js) drive it whole, its input in and its events out, a tracker as the garden
+// makes one (garden.ts), from its package's entry, on a clock and settings of its own, so its tests go wherever it goes (R14); the
+// replays' recorder drives the garden's own
+import { Clock } from '../../clock/index.ts';
+import { GestureTracker, type TrackerSettings } from '../index.ts';
+
+// its settings, as the tool starts them (2026-10-12), each vector's case setting its own as it runs (run-gestures.js)
+export const settings: TrackerSettings = {
+  moveThreshold: 8,
+  holdDelay: 0.4,
+  handSmooth: 0.25,
+  twoFinger: 0.3,
+  shapeSpan: 0.13,
+  cornerAngle: 70,
+  bendAngle: 90,
+  curveAngle: 35,
+  circleTurn: 0.8,
+  circleReversal: 120,
+  circleOneWay: 0.9,
+  circleMin: 40,
+  circleRound: 0.4,
+  circleSize: 4,
+};
+// its clock, the tests' own: the tracker asks it only its time and its ticks, never its grid
+export const clock = new Clock({ settings: { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16' } });
+
+const tracker = new GestureTracker({ settings, clock });
+export { EVENTS } from '../index.ts';
+export const configure: GestureTracker['configure'] = (options) => tracker.configure(options);
+export const on: GestureTracker['on'] = (type, listener) => tracker.on(type, listener);
+export const restingFor: GestureTracker['restingFor'] = (id) => tracker.restingFor(id);
+export const speedOf: GestureTracker['speedOf'] = (id) => tracker.speedOf(id);
+export const down: GestureTracker['down'] = (input) => tracker.down(input);
+export const move: GestureTracker['move'] = (input) => tracker.move(input);
+export const up: GestureTracker['up'] = (input) => tracker.up(input);
+export const cancel: GestureTracker['cancel'] = (id, t) => tracker.cancel(id, t);

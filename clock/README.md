@@ -1,0 +1,27 @@
+# clock
+
+The one clock: everything asks it what time it is, and nothing reads another time source. A package of its own since R12, moved out of `sound/`: music time for anything, a sound, an animation synced to the beat, an event quantized to the grid; the sound system uses it as the garden and the tool do. One timeline, in seconds of page time, the browser's own steady clock, which pointer events and frames already arrive on.
+
+```js
+import { Clock } from './index.ts';
+const clock = new Clock({ settings: { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16' } });   // read live: change them, and it follows
+clock.start();                                   // the ticks, from a worker, so they keep going in a hidden tab
+clock.onStep((i, t) => { /* the 16th i sounds at t, swung, scheduled a little ahead */ });
+clock.useAudio(audioContext);                    // the grid starts with the audio, and clock.audio.toContext(t) maps onto its time
+const { at, on } = clock.snap(clock.now(), { nearest: true, late: 0.05 });   // a tap: when it sounds, and the step it belongs to
+```
+
+| | |
+|---|---|
+| `new Clock({ settings })` | the clock (`clock.ts`, `Clock`; `index.ts` its entry), with an object it reads live: `bpm`; `swing`, 0 straight, 1 a triplet swing, 2 twice as late; `swingOn`, `'16ths'` or `'8ths'`; `quantize`, the grid `snap()` uses unless told another; `meter` |
+| `now()`, `fromEvent(ms)` | the time; a pointer event's `timeStamp` on the same timeline |
+| `grid.hold(t)`, `grid.release(t)`, `grid.held`, `grid.heldAt` | the transport's stop (P1): the grid's place, the song position, kept while the clock's time runs on, `straightAt()` giving it from the time held on, a time before it where it was (P2), no 16th handed out; the place the first 16th not handed out yet, those before it already played, so nothing jumps; released, going on from there, its next 16th at once; `grid.holdFrom(t)` holding it from a time on, the 16ths before it handed out, none from it (P3b) |
+| `grid.songTime(t)`, `grid.timeOfSong(song)` | a clock time's song time, the time the music played up to it, the grid's holds taken out, a stop's or the live garden's while the arrangement played back, its holds kept for the recording's 30 minutes; within a hold, where the music stood, at the 16th it was held at, those handed out before it playing on; held now, all from it at it; and back (P3b) |
+| `start()`, `onTick(fn(t))` | the ticks, about every 25 ms |
+| `onStep(fn(i, t))` | every 16th of the grid, with its swung time, `LOOKAHEAD` (0.12 s) ahead. Missed steps are skipped, and the grid keeps its place |
+| `grid`: `stepDuration()`, `swingAt(i)`, `straightAt(t)`, `stepAt(t)`, `timeAt(s)`, `straightTime(s)`, `meter()`, `nextStepTime`, `nextStepNumber` | the beat grid (`beat-grid.ts`, `BeatGrid`): places on it are kept straight, and played with the swing as it is now |
+| `snap(t, { straight, nearest, late, grid })`, `quantize()` | where a time lands on a grid (`quantizer.ts`, `GRIDS`: off, 1/4, 1/4t, 1/8, 1/8t, 1/16, 1/16t; triplets always straight): `{ at, on }` |
+| `useAudio(context)`; `audio`: `started()`, `toContext(t)`, `fromContext(c)`, `contextNow()`, `soonest()`, `latency()`, `settled()` | the edge to Web Audio (`audio-clock.ts`, `AudioClock`), from when its context is handed over: the offset to the context's time, found on every tick, never mapping into the audio's past; while the context doesn't run, its time standing still, mapping to where it stands |
+| `useFake(t0)`, `advance(s, { ticks })`, `faking()` | fake mode, for tests: time moves only when told, and every tick and step of the time passed runs in order |
+
+A frame time is the caller's: the tool's (`tool/clock.ts`, `FrameClock`) keeps `time` and `step`, set each frame by `advance(ms)`, and hands them to the garden's (`garden-surface/frame-time.ts`), which has its motion time and visuals on a note's time (`garden-surface/visuals.ts`). Tested in node, in its `test/` folder, on a clock and settings of its own (`test/clock.test.js`), with vectors in `shared/test-vectors/clock/`; the frame times and a note's visuals in the tool's tests (`mockup/test/unit/frame-time.test.js`). How it works: `mockup/architecture/clock-and-gestures.md`.
