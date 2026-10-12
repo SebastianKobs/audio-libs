@@ -27,11 +27,6 @@ export function upcoming(pat: Pattern, at: number, count: number, meter: Meter =
   }
   return next;
 }
-// the notes a replay unmutes, the pattern running on silently where it was played: from the next one at a place on, a random number of
-// them, 1 up to all, round the loop. One draw
-export function unmute(pat: Pattern, at: number, rand: () => number, meter: Meter = MASTER): PatternNote[] {
-  return upcoming(pat, at, 1 + Math.floor(rand() * pat.notes.length), meter);
-}
 // a pattern played whole, as a launched clip: from its first note to its last, once, its first in the beat at a place (ticks from the
 // grid's start), each note in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats
 export function whole(pat: Pattern, at: number, meter: Meter = MASTER): PatternNote[] {

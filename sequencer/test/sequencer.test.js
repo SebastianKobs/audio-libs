@@ -9,26 +9,19 @@ import {
   STEP,
   Stream,
   barTicks,
-  cycleOf,
   due,
   lengthOf,
   liveNotes,
   patternOf,
-  patternsIn,
   place,
   placeOn,
   rescaled,
   soundingAt,
   startsBar,
-  unmute,
   upcoming,
   whole,
 } from '../index.ts';
 
-const draws = (...xs) => {
-  let i = 0;
-  return () => xs[i++];
-}; // rand() giving these, in order
 const grid = { stepAt: (t) => t * 8, timeAt: (s) => s / 8 }; // 16ths an 8th of a second apart, from 0, straight
 
 test('ticks: 96 to a quarter, so a 16th is 24, a 16th triplet 16 and an 8th triplet 32, all whole', () => {
@@ -100,28 +93,6 @@ test('a repeating pattern plays its notes in the 16ths they come round in, and i
     [[0], [8], [16], []],
     'off the 16th: how far into it',
   );
-});
-
-test("a theme's cycle: its longest pattern, in whole bars of the master's, at least one", () => {
-  assert.equal(cycleOf([{ bars: 2 }, { meter: [3, 4], bars: 1 }]), 768, 'two bars of 4/4');
-  assert.equal(
-    cycleOf([
-      { meter: [3, 4], bars: 1 },
-      { meter: [9, 16], bars: 1 },
-    ]),
-    384,
-    'under a bar: one bar',
-  );
-  assert.equal(cycleOf([{ meter: [3, 4], bars: 2 }]), 768, 'a bar and a half: two');
-  assert.equal(cycleOf([]), 384, 'nothing: one bar');
-  assert.equal(cycleOf([{ bars: 1 }], [3, 4]), 288, "in the master's own time signature");
-  const bank = {
-    ASK: { notes: [] },
-    WALKS: [[0, 1]],
-    SETS: { a: [{ bars: 2, notes: [] }, { notes: [] }] },
-    STYLES: { b: { duration: 2 } },
-  };
-  assert.equal(patternsIn(bank).length, 3, "a bank's patterns: anything with notes, in it or in its sets");
 });
 
 test('a record as the pattern it is: from the one of the bar its first note fell in, in whole cycles, its notes in time order', () => {
@@ -216,20 +187,6 @@ test("a pattern played whole, as a launched clip: from its first note to its las
   );
   assert.equal(whole(pat, 2112)[1].duration, 48, 'a long note as long');
   assert.deepEqual(whole({ ...pat, notes: [] }, 2112), [], 'nothing to play');
-});
-
-test('a replay unmutes a run of notes: from the next one on, a random number of them, 1 up to all', () => {
-  const pat = { bars: 1, loop: true, from: 0, notes: [{ start: 0 }, { start: 96 }, { start: 240 }] };
-  assert.deepEqual(
-    unmute(pat, 100, draws(0)).map((n) => n.start),
-    [240],
-    'one note: the next',
-  );
-  assert.deepEqual(
-    unmute(pat, 100, draws(0.99)).map((n) => n.start),
-    [240, 384, 480],
-    'all three, round the loop',
-  );
 });
 
 test('a rhythm played live: from where it started, round its loop, its notes in a stretch of the grid, each where it sounds', () => {

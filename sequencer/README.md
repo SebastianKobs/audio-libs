@@ -3,9 +3,9 @@
 Patterns played on the grid, after Ableton's session view. A **pattern** is a clip: `{ meter, bars, loop, notes }`, its time signature (the master's when it's left out), its length in bars, whether it loops, and its notes, each `{ start, duration, … }` in ticks, 96 to a quarter (`PPQ`), on the straight grid. A rest isn't stored: it's the gap between notes. What's played is kept as a **record**, which is a pattern too. Pure: no Web Audio, nothing of the app's. A package of its own since L1e (`mockup/architecture/done.md`), moved out of `sound/`, on the timeline (`libs/timeline/`), its tests in its `test/` folder. It's given `rand()` and the clock's grid as functions, and draws from `rand()` in a fixed order, so a seeded replay is always the same. Why it's built so: `mockup/architecture/sequencer.md`.
 
 ```js
-import { NoteRotation, Sequencer, patternOf, unmute } from './index.ts';
+import { NoteRotation, Sequencer, patternOf, upcoming } from './index.ts';
 import { ReplayTracks } from './tracks.ts';
-const notes = unmute(patternOf(flower.seq, cycle), at, Math.random);    // a replay: a run of the record, running silently where it was played
+const notes = upcoming(patternOf(flower.seq, cycle), at, 3);            // a record's next three notes from a place, round the loop
 const track = replays.place(flower, notes[0].at, until);                // on one of its kind's replay tracks (tracks.ts)
 const sequencer = new Sequencer({ instruments: (track) => instrumentOf(track) });   // the input a control surface plays into, which alone plays the synths
 sequencer.onPlay((play) => recorder.heard(play));                      // every play it passes on, into its own stream, for whoever listens (L1b)
@@ -21,9 +21,8 @@ sequencer.onNote((to, note) => light(to.clip, note.noteOn.part));       // the w
 | | |
 |---|---|
 | `PPQ`, `STEP`, `barTicks(meter)`, `startsBar(i, meter)`, `lengthOf(pat, meter)` | ticks to a quarter (96) and to a 16th (24); a bar's length, whether a 16th starts a bar, where a change waits for (G0.1c), a pattern's length |
-| `patternsIn(bank)`, `cycleOf(patterns, meter)` | every pattern in a theme's bank; its cycle, its longest pattern in whole bars |
 | `patternOf(record, cycle)` | a record as the pattern it is: from the one of its first bar, whole cycles long, looping where it was played (`from`) |
-| `upcoming(pat, at, n)`, `unmute(pat, at, rand)` | a looping pattern's next notes from a place, round the loop; a replay's run of them, 1 up to all |
+| `upcoming(pat, at, n)` | a looping pattern's next notes from a place, round the loop |
 | `whole(pat, at)` | a pattern played whole, as a launched clip: from its first note to its last, once, its first in the beat at `at`, each note in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats |
 | `due(pat, i)` | what a repeating pattern plays in the grid's 16th `i` |
 | `liveNotes(pat, start, scale, from, to)` | a rhythm played live from where it started, at half, normal or double time (`scale`), its notes between two places |

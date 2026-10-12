@@ -42,24 +42,6 @@ export function startsBar(i: number, meter: Meter = MASTER): boolean {
 export function lengthOf(pat: Pattern, meter: Meter = MASTER): number {
   return (pat.bars ?? 1) * barTicks(pat.meter ?? meter);
 }
-// every pattern in a bank: anything with notes, in it or in its sets
-export function patternsIn(bank: unknown, found: Pattern[] = []): Pattern[] {
-  const part = bank as { notes?: unknown } | null | undefined;
-  if (part?.notes) {
-    found.push(part as Pattern);
-  } else if (part && typeof part === 'object') {
-    for (const inner of Object.values(part)) {
-      patternsIn(inner, found);
-    }
-  }
-  return found;
-}
-// a theme's cycle, in ticks: its longest pattern, in whole bars of the master's, at least one. What's recorded is as long, or longer in
-// whole cycles, so a pattern played along with the longest stays with it
-export function cycleOf(patterns: Pattern[], meter: Meter = MASTER): number {
-  const bar = barTicks(meter);
-  return Math.max(1, ...patterns.map((pattern) => Math.ceil(lengthOf(pattern, meter) / bar))) * bar;
-}
 // a record as the pattern it is: from the one of the bar its first note fell in, as many whole cycles long as it needs, each note where it
 // fell in it, in time order. A record keeps places from the grid's start; its pattern loops from where it was played (from), every its length
 export function patternOf(record: PatternNote[], cycle: number, meter: Meter = MASTER): Pattern {

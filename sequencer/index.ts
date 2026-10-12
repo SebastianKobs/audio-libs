@@ -4,10 +4,9 @@
 // { start, duration, … }: where it starts and how long it lasts, in ticks (PPQ to a quarter), on the straight grid. A rest isn't stored: it's
 // the gap between notes. A pattern starts on the one of its first bar, so nothing comes before 0: an upbeat is written where it falls,
 // in a loop at the end of its last bar. Played once (place()) or repeating (due());
-// a track is endless and plays one pattern at a time. What's played into a track is kept as its record, the garden's (keep(), with a cap,
-// garden-surface/phrasing/ since L1a). A record is a pattern too (patternOf()), looping where it was played, a whole number of the theme's
-// cycles long (cycleOf()), and a replay unmutes a run of it (unmute()); or a replay plays a slice of it, reshaped, the garden's, placed on
-// the grid (place()), as a vine's does. Everything played,
+// a track is endless and plays one pattern at a time. What's played into a track is kept as its record, the garden's (keep()). A record
+// is a pattern too (patternOf()), looping where it was played, as many whole cycles long as it needs; a replay plays a run of it or a
+// slice, reshaped, the garden's, placed on the grid (place()), as a vine's does. Everything played,
 // the garden's and your own as you play it, goes through its sequencer's stream (onPlay(), L1b), for whoever listens: a session view, a
 // recorder. rand() and the clock's grid (stepAt, timeAt) are given, so it runs anywhere and draws what it's given in a fixed order.
 // A control surface plays into it (input.ts, G0): a track's messages (messages.ts), each note a fresh index (rotation.ts), passed on to
@@ -15,9 +14,9 @@
 // Its parts: a pattern (pattern.ts), a pattern played (playing.ts), the stream (stream.ts), the messages (messages.ts), a note's index
 // (rotation.ts), the input (input.ts); the replay tracks (tracks.ts). Speed and feel, a contour walked, a record kept and sliced and a
 // pattern reshaped are the garden's (garden-surface/phrasing/), what a session view shows of the stream its own (session.ts), since L1a
-export { PPQ, STEP, MASTER, barTicks, startsBar, lengthOf, patternsIn, cycleOf, patternOf } from './pattern.ts';
+export { PPQ, STEP, MASTER, barTicks, startsBar, lengthOf, patternOf } from './pattern.ts';
 export type { Ticks, PatternNote, Pattern } from './pattern.ts';
-export { upcoming, unmute, whole, due, liveNotes, soundingAt, rescaled, place, placeOn } from './playing.ts';
+export { upcoming, whole, due, liveNotes, soundingAt, rescaled, place, placeOn } from './playing.ts';
 export type { Grid } from './playing.ts';
 export { Stream } from './stream.ts';
 export type { NoteEnd, NoteGlide, Play, PlayedNote, PlayListener } from './stream.ts';
