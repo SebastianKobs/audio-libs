@@ -1,13 +1,13 @@
-// The replay tracks' unit tests (mockup/src/libs/sequencer/tracks.ts; mockup/architecture/views.md): a kind's plays go on its replay
+// The track pool's unit tests (mockup/src/libs/sequencer/track-pool.ts; mockup/architecture/views.md): a kind's plays go on its replay
 // tracks as a polysynth's notes go on its voices, one play at a time on each, free again once its tail has died away
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ReplayTracks } from '../tracks.ts';
+import { TrackPool } from '../track-pool.ts';
 
 const flower = (n) => ({ kind: 'tap', n }); // an owner: any object, as a plant is
 
 test('plays that overlap go on tracks of their own, the lowest free first, and a track is added only when all are busy', () => {
-  const r = new ReplayTracks();
+  const r = new TrackPool();
   const [a, b, c, d] = [1, 2, 3, 4].map(flower);
   assert.deepEqual([r.place(a, 0, 4), r.place(b, 1, 5), r.place(c, 2, 6)], [0, 1, 2], 'three at once: three tracks');
   assert.equal(r.place(d, 4.5, 8), 0, 'the first free again: the lowest free');
@@ -15,7 +15,7 @@ test('plays that overlap go on tracks of their own, the lowest free first, and a
 });
 
 test('a play goes on the track its owner played on last, if that one is free, even when a lower one is', () => {
-  const r = new ReplayTracks();
+  const r = new TrackPool();
   const [a, b] = [1, 2].map(flower);
   r.place(a, 0, 4);
   r.place(b, 1, 5);
@@ -24,7 +24,7 @@ test('a play goes on the track its owner played on last, if that one is free, ev
 });
 
 test("its owner's last track busy, a play takes the lowest free one", () => {
-  const r = new ReplayTracks();
+  const r = new TrackPool();
   const [a, b, c] = [1, 2, 3].map(flower);
   r.place(a, 0, 2);
   r.place(b, 1, 10);
@@ -33,7 +33,7 @@ test("its owner's last track busy, a play takes the lowest free one", () => {
 });
 
 test('a track is free only once its tail has died away: at its end exactly, and not before', () => {
-  const r = new ReplayTracks();
+  const r = new TrackPool();
   const [a, b] = [1, 2].map(flower);
   r.place(a, 0, 4);
   assert.equal(r.place(b, 3.99, 6), 1, "a's tail still ringing");
@@ -42,7 +42,7 @@ test('a track is free only once its tail has died away: at its end exactly, and 
 });
 
 test('tracks are never taken away: as many as ever played at once', () => {
-  const r = new ReplayTracks();
+  const r = new TrackPool();
   const owners = [1, 2, 3, 4].map(flower);
   owners.forEach((o, k) => r.place(o, k * 0.5, 3)); // four at once
   r.place(owners[0], 10, 11); // then one alone

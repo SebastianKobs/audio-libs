@@ -15,7 +15,8 @@
 // (rotation.ts), the input (input.ts); the replay tracks (tracks.ts). Speed and feel, a contour walked, a record kept and sliced and a
 // pattern reshaped are the garden's (garden-surface/phrasing/), what a session view shows of the stream its own (session.ts), since L1a
 export { PPQ, STEP, MASTER, barTicks, startsBar, lengthOf, patternOf } from './pattern.ts';
-export type { Ticks, PatternNote, Pattern } from './pattern.ts';
+export type { Ticks, Pattern, PatternEvent } from './pattern.ts';
+export type { NotePattern, PatternNote } from './pattern-note.ts';
 export { upcoming, whole, due, liveNotes, soundingAt, rescaled, place, placeOn } from './playing.ts';
 export type { Grid } from './playing.ts';
 export { Stream } from './stream.ts';
@@ -37,9 +38,11 @@ export { Sequencer } from './input.ts';
 export { ClipPlayer } from './clips.ts';
 export { Recorder } from './recorder.ts';
 export { RecordingPlayer } from './playback.ts';
-export { ReplayTracks } from './tracks.ts';
+export { TrackPool } from './track-pool.ts';
 export type { PlayedFrom, TimeMap } from '../timeline/index.ts';
 export type { Lane, Region } from './recorder.ts';
-export type { Clip, ClipGrid } from './clips.ts';
+export type { Clip } from './clips.ts';
+export { ClipLauncher } from './launcher.ts';
+export type { ClipGrid, LaunchedClip, PlayEvent } from './launcher.ts';
 export type { Address, Instrument, Input, NoteListener, NoteOffListener } from './input.ts';
 export type { Meter } from '../clock/index.ts';

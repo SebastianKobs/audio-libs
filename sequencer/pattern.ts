@@ -1,31 +1,24 @@
-// ---------- libs/sequencer/pattern: a pattern, as a clip, and its ticks: its length, its cycle, a record as a pattern ----------
+// ---------- libs/sequencer/pattern: a pattern of events, as a clip, and its ticks: its length, a record as a pattern ----------
 import type { Meter } from '../clock/index.ts';
 
 // time as a pattern counts it: 96 ticks to the quarter, as a MIDI file's
 export type Ticks = number;
-// a note of a pattern: where it starts and how long it lasts, in ticks; and what else its pattern gives it: a step of the scale from the
-// pattern's own note, a note number of its own, a drum's (the brushes'), the phrase of a record it's in, its vibrato, how far off its 16th
-// it sounds; and what a record keeps beside (where it was swung, its bulb, segment or leaf, its shape, its glides), the garden's own
-export interface PatternNote {
+// an event of a pattern: where it starts and how long it lasts, in ticks, and how far off its 16th it sounds, as due() hands it on; and
+// whatever else its caller gives it, which the sequencer passes on and never reads
+export interface PatternEvent {
   start: Ticks;
   duration?: Ticks | undefined;
-  step?: number | undefined;
-  pitch?: number | undefined;
-  phrase?: number | undefined;
-  vibrato?: number | undefined; // a field given as undefined is one not given: a record keeps its pattern's, which may have none
-  offset?: Ticks | undefined; // as due() hands it on: how far off its 16th it sounds
+  offset?: Ticks | undefined;
   [value: string]: unknown;
 }
-// a pattern, as a clip: its time signature, its length in bars, whether it loops, where a record was played from, its notes
-export interface Pattern {
+// a pattern, as a clip: its time signature, its length in bars, whether it loops, where a record was played from, its events, its name
+export interface Pattern<Event extends PatternEvent = PatternEvent> {
   meter?: Meter;
   bars?: number;
   loop?: boolean;
   from?: number;
-  events: PatternNote[];
+  events: Event[];
   name?: string;
-  shape?: string;
-  vibrato?: number;
 }
 
 export const PPQ = 96; // ticks to a quarter note: a 16th is 24, a 16th triplet 16, an 8th triplet 32, all whole
@@ -39,12 +32,16 @@ export function barTicks([beats, unit]: Meter = MASTER): number {
 export function startsBar(i: number, meter: Meter = MASTER): boolean {
   return (i * STEP) % barTicks(meter) === 0;
 }
-export function lengthOf(pat: Pattern, meter: Meter = MASTER): number {
+export function lengthOf(pat: Pick<Pattern, 'bars' | 'meter'>, meter: Meter = MASTER): number {
   return (pat.bars ?? 1) * barTicks(pat.meter ?? meter);
 }
 // a record as the pattern it is: from the one of the bar its first note fell in, as many whole cycles long as it needs, each note where it
 // fell in it, in time order. A record keeps places from the grid's start; its pattern loops from where it was played (from), every its length
-export function patternOf(record: PatternNote[], cycle: number, meter: Meter = MASTER): Pattern {
+export function patternOf<Event extends PatternEvent>(
+  record: Event[],
+  cycle: number,
+  meter: Meter = MASTER,
+): Pattern<Event> {
   const bar = barTicks(meter);
   const from = Math.floor(Math.min(...record.map((ev) => ev.start)) / bar) * bar;
   const events = record

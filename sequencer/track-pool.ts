@@ -1,4 +1,4 @@
-// ---------- libs/sequencer/tracks: the replay tracks a kind's plays go on, as a polysynth's notes go on its voices. Pure ----------
+// ---------- libs/sequencer/track-pool: overlapping plays allotted to tracks, as a polysynth allots its voices. Pure ----------
 // (mockup/architecture/views.md) A track plays one play at a time, from its first note until its last note's tail has died away, so a
 // play never catches another's tail. A play goes on the track its owner played on last, if that's free, else the lowest free one; with
 // none free, a track is added. Tracks are never taken away, so there are as many as ever played at once. Times are the caller's
@@ -8,7 +8,7 @@ export interface Track {
   from?: number;
   until?: number;
 }
-export class ReplayTracks {
+export class TrackPool {
   readonly tracks: Track[] = [];
   readonly #last = new WeakMap<object, number>(); // an owner's last track, let go with the owner
 

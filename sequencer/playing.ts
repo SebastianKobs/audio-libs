@@ -1,7 +1,7 @@
-// ---------- libs/sequencer/playing: a pattern played: its notes due on the grid, upcoming round its loop, unmuted or whole, live at a ----------
-// speed, sounding, placed
+// ---------- libs/sequencer/playing: a pattern played: its events due on the grid, upcoming round its loop, whole, live at a speed, ----------
+// under way, placed
 import { MASTER, PPQ, STEP, lengthOf } from './pattern.ts';
-import type { Pattern, PatternNote } from './pattern.ts';
+import type { Pattern, PatternEvent } from './pattern.ts';
 import type { Meter } from '../clock/index.ts';
 
 // the grid a pattern is placed on: where a clock time lies on it, in 16ths, and when a place on it sounds (the clock's)
@@ -11,12 +11,17 @@ export interface Grid {
   timeAt: (place: number) => number;
 }
 // a looping pattern's next count notes from a place (ticks from the grid's start), round the loop, each where it sounds from the grid's start
-export function upcoming(pat: Pattern, at: number, count: number, meter: Meter = MASTER): PatternNote[] {
+export function upcoming<Event extends PatternEvent>(
+  pat: Pattern<Event>,
+  at: number,
+  count: number,
+  meter: Meter = MASTER,
+): Event[] {
   if (!pat.events.length) {
     return [];
   }
   const loopLength = lengthOf(pat, meter);
-  const next: PatternNote[] = [];
+  const next: Event[] = [];
   const from = pat.from!; // a record's pattern: where it was played
   for (let lap = Math.floor((at - from) / loopLength); next.length < count; lap++) {
     for (const note of pat.events) {
@@ -29,7 +34,7 @@ export function upcoming(pat: Pattern, at: number, count: number, meter: Meter =
 }
 // a pattern played whole, as a launched clip: from its first note to its last, once, its first in the beat at a place (ticks from the
 // grid's start), each note in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats
-export function whole(pat: Pattern, at: number, meter: Meter = MASTER): PatternNote[] {
+export function whole<Event extends PatternEvent>(pat: Pattern<Event>, at: number, meter: Meter = MASTER): Event[] {
   const [firstNote] = pat.events;
   if (!firstNote) {
     return [];
@@ -41,7 +46,7 @@ export function whole(pat: Pattern, at: number, meter: Meter = MASTER): PatternN
 }
 // what a repeating pattern plays in the grid's 16th i: its notes whose place comes round within it, every length from the grid's
 // start, in the pattern's order, each with its offset, how many ticks into the 16th it starts
-export function due(pat: Pattern, i: number, meter: Meter = MASTER): PatternNote[] {
+export function due<Event extends PatternEvent>(pat: Pattern<Event>, i: number, meter: Meter = MASTER): Event[] {
   const loopLength = lengthOf(pat, meter);
   const t0 = i * STEP;
   return pat.events.flatMap((note) => {
@@ -51,19 +56,19 @@ export function due(pat: Pattern, i: number, meter: Meter = MASTER): PatternNote
 }
 // a rhythm played live, as a tower's while you circle: looping from where it started (start, in ticks from the grid's start), at a time
 // scale (2: double time, 0.5: half), its notes whose places fall from a place up to another, each where it sounds, as long as it lasts then
-export function liveNotes(
-  pat: Pattern,
+export function liveNotes<Event extends PatternEvent>(
+  pat: Pattern<Event>,
   start: number,
   scale: number,
   from: number,
   to: number,
   meter: Meter = MASTER,
-): PatternNote[] {
+): Event[] {
   if (!pat.events.length) {
     return [];
   }
   const loopLength = lengthOf(pat, meter) / scale;
-  const found: PatternNote[] = [];
+  const found: Event[] = [];
   for (let lap = Math.max(0, Math.floor((from - start) / loopLength)); start + lap * loopLength < to; lap++) {
     for (const note of pat.events) {
       const at = start + lap * loopLength + note.start / scale;
@@ -76,13 +81,13 @@ export function liveNotes(
 }
 // the note of a rhythm played live sounding at a place, as what's left of it from there, if that's a 16th or more: so a soloist coming in
 // mid-note plays it at once. One starting on the place isn't sounding yet: it comes as the next
-export function soundingAt(
-  pat: Pattern,
+export function soundingAt<Event extends PatternEvent>(
+  pat: Pattern<Event>,
   start: number,
   scale: number,
   at: number,
   meter: Meter = MASTER,
-): PatternNote | undefined {
+): Event | undefined {
   const sounding = liveNotes(pat, start, scale, at - lengthOf(pat, meter) / scale, at, meter)
     .filter((note) => note.start + (note.duration || 0) - at >= STEP)
     .pop();
