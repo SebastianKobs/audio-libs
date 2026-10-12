@@ -17,10 +17,10 @@ export interface GridSettings {
 const ROUNDING = 1e-9; // s: a 16th's time added up step by step and worked out at once may differ by as much (P3b)
 const KEEP_HOLDS = 31 * 60; // s: the holds kept for song time, the recording's 30 minutes and a minute more
 
-// the beat grid: 16ths at the settings' tempo, swung as they are now; it runs once the audio starts (start()), the next 16th to schedule
-// its straight time on the clock (nextStepTime) and its number (nextStepNumber). Held, its place, the song position, stays while the
-// clock's time runs on, no 16th handed out, and released it goes on from there (hold(), release(), the transport's stop, P1); its holds
-// kept, so a time's song time, the time the music played, takes them out (songTime(), timeOfSong(), P3b)
+// the beat grid: 16ths at the settings' tempo, swung as they are now; it runs once the audio starts (start()), standing at its first 16th
+// until then, the next 16th to schedule its straight time on the clock (nextStepTime) and its number (nextStepNumber). Held, its place,
+// the song position, stays while the clock's time runs on, no 16th handed out, and released it goes on from there (hold(), release(), the
+// transport's stop, P1); its holds kept, so a time's song time, the time the music played, takes them out (songTime(), timeOfSong(), P3b)
 export class BeatGrid {
   readonly #settings: GridSettings;
   #nextStepTime = 0;
@@ -62,8 +62,12 @@ export class BeatGrid {
   swingAt(i: number): number {
     return (this.#warp(i) - i) * this.stepDuration();
   }
-  // where a time near now lies on the grid if nothing swung, in 16ths; while held, from the time it was held at, the place it's held at
+  // where a time near now lies on the grid if nothing swung, in 16ths; while held, from the time it was held at, the place it's held at;
+  // not started yet, its first 16th, where the music will start, whatever the time: not counted from the page's load
   straightAt(t: number): number {
+    if (!this.#running) {
+      return this.#nextStepNumber;
+    }
     if (this.#held !== null && t >= this.#heldAt) {
       return this.#held;
     }
@@ -87,7 +91,7 @@ export class BeatGrid {
     if (this.#held !== null) {
       return;
     }
-    this.#held = this.#running ? Math.max(this.#nextStepNumber, this.straightAt(t)) : this.#nextStepNumber;
+    this.#held = Math.max(this.#nextStepNumber, this.straightAt(t));
     this.#heldAt = t;
     this.#stoodAt = this.#running ? Math.max(t, this.straightTime(this.#held)) : t;
   }

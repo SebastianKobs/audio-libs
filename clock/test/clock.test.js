@@ -477,6 +477,21 @@ test("a pointer event's timestamp is on the same timeline", () => {
   near(clock.fromEvent(1500), 1.5, 1e-12);
 });
 
+// before the audio starts: the music hasn't, so the song position stands where it will start, as the transport's lane shows it, not
+// counting from the page's load and jumping back on the first click (2026-10-12)
+test("a grid not started stands at its first 16th, whatever the clock's time, as one held does; started with the audio, it goes on from there", () => {
+  const own = new Clock({ settings: { ...SETTINGS } });
+  own.useFake(100);
+  assert.equal(own.grid.running, false);
+  assert.equal(own.grid.straightAt(own.now()), 0, 'made at 100 s: at its first 16th');
+  own.advance(5);
+  assert.equal(own.grid.straightAt(own.now()), 0, 'five seconds on: still there');
+  assert.equal(own.grid.stepAt(own.now()), 0, 'swung too');
+  own.useAudio(fakeAudio({ of: own }));
+  const start = own.grid.nextStepTime;
+  near(own.grid.straightAt(start + 4 * own.grid.stepDuration()), 4, 1e-9, 'started: going on from its first 16th:');
+});
+
 // the transport's stop (P1, mockup/architecture/done.md): the clock's time running on, the grid's place, the song position, held
 test("held, the grid hands out no 16th, its place held at the first 16th not handed out, those before it played, while the clock's time runs on; a time before the hold where it was; released, it goes on from that place, its next 16th at once, none skipped (P1, P2)", () => {
   clock.useAudio(fakeAudio());

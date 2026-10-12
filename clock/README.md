@@ -7,7 +7,7 @@ import { Clock } from './index.ts';
 const clock = new Clock({ settings: { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16' } });   // read live: change them, and it follows
 clock.start();                                   // the ticks, from a worker, so they keep going in a hidden tab
 clock.onStep((i, t) => { /* the 16th i sounds at t, swung, scheduled a little ahead */ });
-clock.useAudio(audioContext);                    // the grid starts with the audio, and clock.audio.toContext(t) maps onto its time
+clock.useAudio(audioContext);                    // the grid starts with the audio, standing at its first 16th until then, and clock.audio.toContext(t) maps onto its time
 const { at, on } = clock.snap(clock.now(), { nearest: true, late: 0.05 });   // a tap: when it sounds, and the step it belongs to
 ```
 
@@ -19,7 +19,7 @@ const { at, on } = clock.snap(clock.now(), { nearest: true, late: 0.05 });   // 
 | `grid.songTime(t)`, `grid.timeOfSong(song)` | a clock time's song time, the time the music played up to it, the grid's holds taken out, a stop's or the live garden's while the arrangement played back, its holds kept for the recording's 30 minutes; within a hold, where the music stood, at the 16th it was held at, those handed out before it playing on; held now, all from it at it; and back (P3b) |
 | `start()`, `onTick(fn(t))` | the ticks, about every 25 ms |
 | `onStep(fn(i, t))` | every 16th of the grid, with its swung time, `LOOKAHEAD` (0.12 s) ahead. Missed steps are skipped, and the grid keeps its place |
-| `grid`: `stepDuration()`, `swingAt(i)`, `straightAt(t)`, `stepAt(t)`, `timeAt(s)`, `straightTime(s)`, `meter()`, `nextStepTime`, `nextStepNumber` | the beat grid (`beat-grid.ts`, `BeatGrid`): places on it are kept straight, and played with the swing as it is now |
+| `grid`: `stepDuration()`, `swingAt(i)`, `straightAt(t)`, `stepAt(t)`, `timeAt(s)`, `straightTime(s)`, `meter()`, `nextStepTime`, `nextStepNumber`, `running` | the beat grid (`beat-grid.ts`, `BeatGrid`): places on it are kept straight, and played with the swing as it is now; it runs once the audio starts it, and until then stands at its first 16th, where the music will start, whatever the time |
 | `snap(t, { straight, nearest, late, grid })`, `quantize()` | where a time lands on a grid (`quantizer.ts`, `GRIDS`: off, 1/4, 1/4t, 1/8, 1/8t, 1/16, 1/16t; triplets always straight): `{ at, on }` |
 | `useAudio(context)`; `audio`: `started()`, `toContext(t)`, `fromContext(c)`, `contextNow()`, `soonest()`, `latency()`, `settled()` | the edge to Web Audio (`audio-clock.ts`, `AudioClock`), from when its context is handed over: the offset to the context's time, found on every tick, never mapping into the audio's past; while the context doesn't run, its time standing still, mapping to where it stands |
 | `useFake(t0)`, `advance(s, { ticks })`, `faking()` | fake mode, for tests: time moves only when told, and every tick and step of the time passed runs in order |
