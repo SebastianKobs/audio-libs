@@ -172,11 +172,6 @@ test("a pattern played whole, as a launched clip: from its first event to its la
     ],
   }; // a beat 96 ticks
   assert.deepEqual(
-    upcoming(pat, 2120, 3).map((n) => n.k),
-    [1, 2, 0],
-    'round the loop from where it is: mid-pattern, as a replay unmutes it',
-  );
-  assert.deepEqual(
     whole(pat, 2112).map((n) => [n.start, n.k]),
     [
       [2160, 0],

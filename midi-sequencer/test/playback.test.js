@@ -257,7 +257,7 @@ test('played in song time, a note sent with its length rings that long across a 
     return Math.max(5, t - 3);
   };
   const timeOfSong = (song) => (song <= 5 ? song : song + 3);
-  const { sent } = playerWith();
+  const sent = [];
   const player = new RecordingPlayer({
     input: { send: (to, messages) => sent.push({ to, messages }) },
     trackOf: () => 'replay bloom 1',

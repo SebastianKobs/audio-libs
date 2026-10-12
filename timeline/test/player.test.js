@@ -30,6 +30,7 @@ test('events played back from a time, each moment as it comes due on a tick, hea
   const events = [
     { t: 1, finger: 0, duration: 2, pressure: [{ t: 2, value: 0.5 }] },
     { t: 2, finger: 1, duration: 1 },
+    { t: 3, finger: 2, duration: 1 },
   ];
   player.play({ events }, { from: 0, at: 10, end: 5 });
   player.due(11.5);
@@ -39,8 +40,10 @@ test('events played back from a time, each moment as it comes due on a tick, hea
     ['start', 0, 11, 1],
     ['start', 1, 12, 2],
     ['point', 0, 0.5, 12],
+    ['start', 2, 13, 3],
     ['end', 0, 13],
     ['end', 1, 13],
+    ['end', 2, 14],
   ]);
 });
 

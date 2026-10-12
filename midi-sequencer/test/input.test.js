@@ -31,12 +31,11 @@ test('note rotation: an index let go is handed out again only once round the 128
 
 test('note rotation: an index still on is passed over, so two notes of one pitch keep apart', () => {
   const rotation = new NoteRotation();
-  const held = rotation.noteOn(); // 0, never let go
+  rotation.noteOn(); // 0, never let go
   for (let k = 1; k < 128; k++) {
     rotation.noteOff(rotation.noteOn());
   }
   assert.equal(rotation.noteOn(), 1, 'round again: 0 is still on, so 1');
-  assert.notEqual(held, 1);
 });
 
 test('note rotation: with all 128 on, the next in turn, its note taken over', () => {

@@ -61,16 +61,18 @@ test("kept for a window: an event that ended before it let go, an open one kept;
 test("what's past the window let go as events are added, at most once a second of their time, without settling", () => {
   const gone = [];
   const timeline = new Timeline({ keep: 10, onLetGo: (events) => gone.push(...events) });
-  timeline.add([press(1, 0, 1)]);
+  timeline.add([press(1, 0, 1), press(80, 2, 10.5)]);
   timeline.add([press(100, 1, 1)]);
-  assert.deepEqual(timeline.events(), [press(100, 1, 1)]);
-  assert.deepEqual(gone, [press(1, 0, 1)]);
-  timeline.add([press(80, 2, 5)]);
   assert.deepEqual(
-    timeline.events().length,
-    2,
-    'not a second on yet: nothing let go, though it ended before the window',
+    timeline.events(),
+    [press(80, 2, 10.5), press(100, 1, 1)],
+    'the window from 90: one ending at 90.5 kept',
   );
+  assert.deepEqual(gone, [press(1, 0, 1)]);
+  timeline.add([press(100.6, 3, 1)]);
+  assert.equal(timeline.events().length, 3, 'not a second on yet: nothing let go, though one ended before the window');
+  timeline.add([press(101, 4, 1)]);
+  assert.deepEqual(gone, [press(1, 0, 1), press(80, 2, 10.5)], 'a second on: let go');
 });
 
 test("an event that holds what the one before it of its key held, by the caller's equality, thinned once it's a second past; one not settled yet kept; none by default", () => {

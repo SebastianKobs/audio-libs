@@ -1,5 +1,5 @@
-// The track pool's unit tests (mockup/src/libs/sequencer/track-pool.ts; mockup/architecture/views.md): a kind's plays go on its replay
-// tracks as a polysynth's notes go on its voices, one play at a time on each, free again once its tail has died away
+// The track pool's unit tests (mockup/src/libs/sequencer/track-pool.ts; mockup/architecture/views.md): plays go on a pool's tracks as a
+// polysynth's notes go on its voices, one play at a time on each, free again once its tail has died away
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TrackPool } from '../track-pool.ts';

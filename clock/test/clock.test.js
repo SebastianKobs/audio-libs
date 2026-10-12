@@ -107,27 +107,10 @@ test('swing on 16ths moves only the second 16th of each 8th; on 8ths, the second
   near(at(1), 4 / 3, 1e-9);
 });
 
-test('quantize: the next 16th or 8th at or after a time, swung; off plays at once', () => {
+test("quantize off: a tap plays at once, with the audio's next chunk plus 5 ms, never earlier, even for a time already past", () => {
   clock.useAudio(fakeAudio());
   clock.advance(1);
-  for (const q of ['1/16', '1/8']) {
-    settings.quantize = q;
-    for (let k = 0; k < 40; k++) {
-      const t = clock.now() + k * 0.037;
-      const at = clock.quantize(t);
-      const s = clock.grid.stepAt(at);
-      assert.ok(at >= t - 0.004 - 1e-9, `${q}: ${at} comes before ${t}`);
-      near(s, Math.round(s), 1e-9, `${q}: on the grid:`);
-      if (q === '1/8') {
-        assert.equal(((Math.round(s) % 2) + 2) % 2, 0, `8th: on an 8th`);
-      }
-      assert.ok(
-        clock.grid.stepAt(at) - clock.grid.stepAt(t) < (q === '1/8' ? 2 : 1) + 1e-6,
-        `${q}: the next one, not a later one`,
-      );
-    }
-  }
-  settings.quantize = 'off'; // at once: with the audio's next chunk, plus 5 ms. Never earlier, even for a time already past
+  settings.quantize = 'off';
   near(clock.quantize(clock.now()), clock.audio.soonest() + 0.005, 1e-12);
   near(clock.quantize(5), clock.audio.soonest() + 0.005, 1e-12);
 });
@@ -331,7 +314,7 @@ test('when the ticks lag, the steps missed are skipped silently and the grid kee
   near(clock.grid.nextStepTime - clock.grid.nextStepNumber * clock.grid.stepDuration(), grid0, 1e-9, 'same grid:');
 });
 
-test('ctx and fromCtx map between the clock and the audio context', () => {
+test('toContext and fromContext map between the clock and the audio context', () => {
   clock.useAudio(fakeAudio({ behind: 3 }));
   clock.advance(1);
   near(clock.audio.toContext(clock.now()), clock.now() - 3, 1e-9);

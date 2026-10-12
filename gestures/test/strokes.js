@@ -38,11 +38,6 @@ export function rng(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-// a small trembling movement: a finger wobbling round a spot a few px across, with seeded noise
-export function tremble(cx, cy, r, turns, n, seed) {
-  const rnd = rng(seed);
-  return circle(cx, cy, r, turns, n).map(([x, y]) => [x + (rnd() - 0.5) * r * 0.5, y + (rnd() - 0.5) * r * 0.5]);
-}
 // jitter, as the circle fix sees it. Today's circle check turned almost all of these into towers:
 // - rubbing: to and fro along a line that drifts a little, amp px each way, `per` moves for each stroke across
 export function rub(cx, cy, amp, n, per, seed) {
