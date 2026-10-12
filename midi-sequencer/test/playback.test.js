@@ -118,6 +118,43 @@ test('a note sounding where it starts, a drone held from before, chased: started
   );
 });
 
+test('a note chased as it was where playback starts: at the pitch it had glided to, its per-note controllers as changed by then, its bend, a slide in, over (P3a)', () => {
+  const { sent, player } = playerWith();
+  player.play(
+    [
+      region([
+        {
+          t: 2,
+          pitch: 60,
+          velocity: 1,
+          duration: 2,
+          controllers: { pan: -0.5 },
+          pitchBend: -1,
+          vibrato: 10,
+          pitchGlides: [[3, 62]],
+          lanes: { volume: [{ t: 2.5, value: 0.4, glide: 0.08 }] },
+        },
+      ]),
+    ],
+    [],
+    { from: 3.2, at: 50, end: 10 },
+  );
+  player.due(51);
+  assert.deepEqual(
+    messagesOf(sent, 'note on').map(({ pitch, t }) => [pitch, t]),
+    [[62, 50]],
+  );
+  assert.deepEqual(
+    messagesOf(sent, 'per-note controller').map(({ controller, value, t }) => [controller, value, t]),
+    [
+      ['pan', -0.5, 50],
+      ['volume', 0.4, 50],
+      ['vibrato depth', 10, 50],
+    ],
+    'no glide nor change of before sent after it',
+  );
+});
+
 test("stopped, what's sounding let go at once and nothing more sent; to the track the tool names, with its clip, as you played it or not, marked played back, its own sender (P3a)", () => {
   const { sent, player } = playerWith();
   player.play(

@@ -58,6 +58,19 @@ test("kept for a window: an event that ended before it let go, an open one kept;
   assert.equal(gone.length, 2, 'each told once');
 });
 
+test('its window, unless told: the last 30 minutes', () => {
+  const timeline = new Timeline();
+  timeline.add([press(0, 0, 1)]);
+  timeline.add([press(1800.5, 1, 1)]);
+  assert.equal(timeline.events().length, 2, 'ended 30 minutes ago, less half a second: kept');
+  timeline.add([press(1802, 2, 1)]);
+  assert.deepEqual(
+    timeline.events(),
+    [press(1800.5, 1, 1), press(1802, 2, 1)],
+    'ended more than 30 minutes ago: let go',
+  );
+});
+
 test("what's past the window let go as events are added, at most once a second of their time, without settling", () => {
   const gone = [];
   const timeline = new Timeline({ keep: 10, onLetGo: (events) => gone.push(...events) });
