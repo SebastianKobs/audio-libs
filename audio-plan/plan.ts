@@ -15,7 +15,7 @@ export type Automation =
 // a buffer a plan's node names, the engine making it: so many seconds of white noise, or a reverb's impulse response, noise darkening as it
 // decays (W2b)
 export type BufferSpec = { noise: Seconds } | { impulse: Seconds };
-// the kinds of node a plan names, each one of Web Audio's but a limiter, built from several (sound/engine/)
+// the kinds of node a plan names, each one of Web Audio's but a limiter, built from several (libs/web-audio-engine/)
 export type NodeKind = 'oscillator' | 'gain' | 'biquad' | 'buffer' | 'panner' | 'delay' | 'convolver' | 'limiter';
 export interface PlanNode {
   id: number;
