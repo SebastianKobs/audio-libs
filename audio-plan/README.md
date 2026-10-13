@@ -1,6 +1,6 @@
 # audio-plan
 
-An audio graph as data: what to build, not built. A plan's nodes, each of a kind Web Audio has, with its props, its params' values and automation, its starts and stops; its edges, by sound or into a param, `'out'` its one output; its input, where it has one. A package of its own since W2c, moved out of the synth: the synth plans a note into one (`sound/synth/`), and the engine builds one in Web Audio (`sound/engine/`), neither knowing the other.
+An audio graph as data: what to build, not built. A plan's nodes, each of a kind Web Audio has, with its props, its params' values and automation, its starts and stops; its edges, by sound or into a param, `'out'` its one output; its input, where it has one. A package of its own since W2c, moved out of the synth: the synth plans a note into one (`libs/synth/`), and the engine builds one in Web Audio (`libs/web-audio-engine/`), neither knowing the other.
 
 Its words are Web Audio's: `biquad`, `convolver`, a buffer source; automation as an `AudioParam` schedules it, `setTargetAtTime()`'s time constant among it. It isn't neutral to the engine: another engine, flutter_soloud's say, builds a plan by doing what those words mean there, and `levelAt()` is the automation's half of that already, Web Audio's curves worked out in plain code.
 

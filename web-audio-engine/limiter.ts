@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-engine/limiter: how a limiter holds at its ceiling, as hard as Web Audio's compressor goes ----------
-// Its settings are the Limiter module's (sound/fx/inserts.ts) and a limiter block's (sound/synth/blocks/limiter.ts); Web Audio's quirk, the
+// Its settings are the Limiter module's (sound/fx/inserts.ts) and a limiter block's (libs/synth/blocks/limiter.ts); Web Audio's quirk, the
 // makeup gain its compressor adds, is taken back here, at the edge, where Web Audio is
 import { CompositeNode } from './composite.ts';
 import { ParamInUnits } from './param-in-units.ts';
@@ -10,7 +10,7 @@ const HOLD = { ratio: 20, knee: 0, attack: 0.003 }; // as hard as Web Audio's co
 export function makeupOf(threshold: number, ratio: number): number {
   return 0.6 * -threshold * (1 - 1 / ratio);
 }
-// a limiter as Web Audio holds it, as a limiter block plans it (sound/synth/blocks/limiter.ts): its gain (drive) into a compressor at its
+// a limiter as Web Audio holds it, as a limiter block plans it (libs/synth/blocks/limiter.ts): its gain (drive) into a compressor at its
 // ceiling, as hard as it goes, and the gain (back) that takes its makeup back; its params in the plan's units, its gain in dB, its ceiling
 // in dBFS, its release in s. Read as Ableton's: its in after its gain, its out, and how much it takes away now, in dB
 export function limiterNodes(audioContext: BaseAudioContext): CompositeNode {

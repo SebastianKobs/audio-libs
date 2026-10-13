@@ -1,7 +1,7 @@
 // ---------- libs/audio-plan/automation: a param's automation as Web Audio plays it, its level at a time ----------
 // I1h1 (mockup/architecture/done.md): set at once; a ramp, linear or exponential, from where the event before left it to its value at its
 // time, an exponential one from or to nothing holding, then jumping at its end, as Web Audio's does; a target approached from its start by
-// its time constant. Where an envelope's release starts from at a note-off (sound/synth/shapes.ts), and what a surface draws
+// its time constant. Where an envelope's release starts from at a note-off (libs/synth/shapes.ts), and what a surface draws
 // (synth-surface/curve.ts); what another engine's automation would have to match
 import type { Automation } from './plan.ts';
 

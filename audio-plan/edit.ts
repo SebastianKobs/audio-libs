@@ -6,7 +6,7 @@
 // control's set) is played on both plans, so a note let go fades on as it plays, and a value a control set stays the control's. A change
 // of structure, a node, an edge, a node's kind, its props (an osc's wave, a buffer) or its starts, comes back as none: a rebuild's, the
 // old graph faded out through one of its gains (fadeOutThrough()) as a new one, its plan faded in through its own (fadeInThrough()),
-// comes in (G0.2b); a synth's voice's through its out (sound/synth/fades.ts)
+// comes in (G0.2b); a synth's voice's through its out (libs/synth/fades.ts)
 import { levelAt } from './automation.ts';
 import type { AudioPlan, Automation, Operation, PlanNode } from './plan.ts';
 import type { Seconds } from '../clock/index.ts';

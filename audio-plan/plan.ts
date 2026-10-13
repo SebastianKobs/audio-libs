@@ -2,7 +2,7 @@
 // An audio plan is a graph, as data (AudioPlan): its nodes, each of a kind Web Audio has (NodeKind), with its props, its params' values
 // and automation, its starts and stops, and the block it belongs to; its edges, by sound or into a param, 'out' being its one output;
 // and its input, where it has one. Times are seconds from its start. What a sounding one is told (Operation): a param's new automation,
-// or a node's stop. A synth's note's plan is one, with what a voice adds (sound/synth/plan.ts, W0)
+// or a node's stop. A synth's note's plan is one, with what a voice adds (libs/synth/plan.ts, W0)
 import type { Seconds } from '../clock/index.ts';
 
 // a param's automation, as Web Audio's: ['set', value, at], ['exp' | 'linear', value, at], ['target', value, at, tc], ['value', value],

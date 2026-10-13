@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-engine/nodes: the kinds of node a plan names, each made in the context ----------
-// What each kind a plan's node names (sound/synth/'s blocks) is in Web Audio: an oscillator, a gain, a biquad, a buffer's source, a delay,
+// What each kind a plan's node names (libs/synth/'s blocks) is in Web Audio: an oscillator, a gain, a biquad, a buffer's source, a delay,
 // a convolver, one of Web Audio's each, made with the props it can only be made with (a delay's max); a panner, a stereo panner where the
 // context has one, up-mixed or a pan pot, else a gain passing the sound through; a limiter, built from several (limiter.ts). Its props and
 // params are set on it, and it's started and wired, as a plan's node (build.ts)

@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-engine/build: a plan's nodes made, started, wired and automated ----------
-// A plan's node (sound/synth/) made by its kind (nodes.ts), its props set by name, a buffer the one it names (buffers.ts), its params
+// A plan's node (libs/synth/) made by its kind (nodes.ts), its props set by name, a buffer the one it names (buffers.ts), its params
 // automated by name, a source started and stopped at its times; then wired by the plan's edges, into another's input or param, or out
 // to where its sound goes. A handle's operations run on them later, by the node's id (index.ts, apply())
 import { CompositeNode } from './composite.ts';
