@@ -53,3 +53,12 @@ test('tracks are never taken away: as many as ever played at once', () => {
     'each track knows what it plays last, from when until when',
   );
 });
+
+test("a play held open, its end not known as it starts, holds its track until it's ended; then free once its tail has died away (N2)", () => {
+  const r = new TrackPool();
+  const [a, b] = [1, 2].map(flower);
+  const held = r.place(a, 0, Infinity);
+  assert.equal(r.place(b, 100, 101), 1, 'held: its track not free, however long');
+  r.end(held, 3);
+  assert.equal(r.place(b, 3, 4), 0, 'ended: free again from its end, the lowest');
+});
