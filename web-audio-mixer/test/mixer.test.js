@@ -1,0 +1,490 @@
+// The mixer's unit tests (mockup/src/libs/web-audio-mixer/, its test/ folder since X4; mockup/architecture/mixer-and-fx.md), on the engine
+// (libs/web-audio-engine/) and its stand-in for Web Audio, whose time is set by each test. What the garden builds with them is held to the
+// recordings (mockup/test/unit/instruments.test.js); these are their parts on their own; the routing's on its own in libs/mixer/
+import { test, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { Engine } from '../../web-audio-engine/index.ts';
+import { FxChain, RING_OUT } from '../../web-audio-fx/index.ts';
+import { Mixer } from '../index.ts';
+
+let time = 0;
+class Context extends StandInContext {
+  constructor(opts) {
+    super(() => time);
+    Context.opts = opts;
+  }
+  resume() {
+    super.resume();
+    Context.resumed = (Context.resumed ?? 0) + 1;
+  }
+}
+const engine = (more = {}) => {
+  time = 10;
+  return new Engine({ AudioContext: Context, ...more });
+};
+const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
+const beat = 60 / 72; // a beat at 72 BPM, for an FX chain's context
+
+test('the mixer: the sum into the master and the master to the output, the master fading in from 0, never at full volume; an insert on the master between them', () => {
+  const e = engine();
+  const m = new Mixer(e, { volume: 0.6 });
+  assert.deepEqual(into(e.audioContext, m.master), [m.sum], 'with none, the sum into the master');
+  assert.deepEqual(into(e.audioContext, e.audioContext.destination), [m.master]);
+  assert.deepEqual(m.master.gain.events, [
+    ['value', 0],
+    ['target', 0.6, 10, 0.25],
+  ]);
+  assert.deepEqual(m.sum.gain.events, [['value', 1]], 'the sum built by the engine from the Gain module, at 1 (F5b)');
+  const other = engine();
+  const ac = other.audioContext;
+  const insert = { input: ac.createGain(), output: ac.createGain() };
+  const n = new Mixer(other, { master: insert });
+  assert.deepEqual(
+    [insert.input, n.master].map((node) => into(ac, node)),
+    [[n.sum], [insert.output]],
+    'the sum through its insert, a limiter the caller built, into the master',
+  );
+});
+
+test("the master's insert's readings: what it takes away, in dB, and its points, read as peaks; with none, nothing taken away", () => {
+  const e = engine();
+  const ac = e.audioContext;
+  assert.equal(new Mixer(e).reduction(), 0, 'no insert: nothing taken away');
+  const [after, out] = [ac.createGain(), ac.createGain()];
+  const insert = {
+    input: ac.createGain(),
+    output: out,
+    points: { 'limiter in': after, 'limiter out': out },
+    reduction: () => 4.5,
+  };
+  const m = new Mixer(e, { master: insert });
+  assert.equal(m.reduction(), 4.5, 'what it takes away');
+  m.peak('limiter in');
+  m.peak('limiter out');
+  assert.ok(
+    ac.rec.edges.some((x) => x.from === after && x.to.kind === 'splitter'),
+    'in: where it says, after its gain',
+  );
+  assert.ok(
+    ac.rec.edges.some((x) => x.from === out && x.to.kind === 'splitter'),
+    'out: after it, before the master volume',
+  );
+});
+
+test("a channel's input, fader, pan, sends and room, each built by the engine from the Gain or the Pan module (F5c); with no stereo panner, no pan", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  m.fx('reverb', {});
+  const c = m.channel('tap', { volume: 0.7, pan: -0.2, sends: [{ to: 'reverb', amount: 0.3 }], room: 'reverb' });
+  assert.deepEqual(
+    [c.input.gain.events, c.fader.gain.events, c.pan.pan.events, c.sends.reverb.gain.events, c.room.gain.events],
+    [[['value', 1]], [['value', 0.7]], [['value', -0.2]], [['value', 0.3]], [['value', 0.7]]],
+    "each written by its module's plan, its input's unity too",
+  );
+  const unpanned = engine();
+  unpanned.audioContext.createStereoPanner = undefined;
+  const flat = new Mixer(unpanned).channel('tap', { pan: -0.2 });
+  assert.equal(flat.pan, null, 'a context with no stereo panner: none, as before');
+  flat.panTo(0.5); // nothing to glide
+});
+
+test("an FX channel's input, level, pan, output and sends, each built by the engine from the Gain or the Pan module (F5d); its input into nothing till its chain is built", () => {
+  const e = engine();
+  const ac = e.audioContext;
+  const m = new Mixer(e);
+  m.fx('reverb', {});
+  const d = m.fx('delay 1', { level: 0.8, pan: -0.45, sends: { reverb: 0.4 } });
+  assert.deepEqual(
+    [d.input.gain.events, d.level.gain.events, d.pan.pan.events, d.output.gain.events, d.sends.reverb.gain.events],
+    [[['value', 1]], [['value', 0.8]], [['value', -0.45]], [['value', 1]], [['value', 0.4]]],
+    "each written by its module's plan, its input's and output's unity too",
+  );
+  assert.deepEqual(
+    ac.rec.edges.filter((x) => x.from === d.input),
+    [],
+    'where its sends arrive, into nothing yet: its chain is built between it and its level',
+  );
+  assert.equal(d.chainOut, d.level, 'with no inserts, its chain into its level');
+});
+
+test("the desk's channels: a fader into the sum, or a bus, sent after it to an FX channel; a room input only to it; a volume glides both", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb', { level: 0.4 });
+  const sings = m.bus('sings', { volume: 1, room: 'reverb' });
+  const a = m.channel('tap', { volume: 0.7, sends: ['reverb'], room: 'reverb' });
+  const b = m.channel('ambient', { volume: 0.5 });
+  const c = m.channel('late', { out: 'sings' });
+  assert.ok(
+    into(e.audioContext, m.sum).includes(a.fader)
+      && into(e.audioContext, m.sum).includes(b.fader)
+      && into(e.audioContext, m.sum).includes(sings.fader),
+  );
+  assert.deepEqual(into(e.audioContext, a.fader), [a.input], 'in through its mute, at 1');
+  assert.deepEqual(into(e.audioContext, sings.input), [c.fader], 'out into a bus');
+  assert.deepEqual(
+    into(e.audioContext, r.input).sort((x, y) => x.id - y.id),
+    [sings.room, a.fader, a.room],
+    "the send and the rooms go to the FX channel's input",
+  );
+  assert.equal(b.room, null);
+  time = 11;
+  a.volume(0.2);
+  for (const g of [a.fader, a.room]) {
+    assert.deepEqual(g.gain.events, [
+      ['value', 0.7],
+      ['target', 0.2, 11, 0.05],
+    ]);
+  }
+  assert.throws(
+    () => m.channel('x', { sends: ['echo'] }),
+    /not on the desk as a return: echo/,
+    "a send only to what's on the desk already, so no loops",
+  );
+  assert.throws(() => m.channel('y', { out: 'tap' }), /as a bus: tap/);
+});
+
+test('an FX channel: its input, then its level, its pan, and after the pan its sends and its output; the chain goes between input and level', () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb', { level: 0.6 });
+  const sings = m.bus('sings');
+  const d = m.fx('delay 1', { level: 0.8, pan: -0.45, sends: { reverb: 0.4 }, out: 'sings' });
+  assert.deepEqual(r.level.gain.events, [['value', 0.6]]);
+  assert.deepEqual(into(e.audioContext, r.output), [r.level], 'no pan: its mute after its level');
+  assert.ok(into(e.audioContext, m.sum).includes(r.output), 'and out to the master');
+  assert.equal(r.pan, null);
+  assert.deepEqual(d.level.gain.events, [['value', 0.8]]);
+  assert.deepEqual(into(e.audioContext, d.pan), [d.level]);
+  assert.deepEqual(d.pan.pan.events, [['value', -0.45]]);
+  assert.deepEqual(into(e.audioContext, d.output), [d.pan], 'its mute after its pan');
+  assert.deepEqual(into(e.audioContext, d.sends.reverb), [d.output], 'its send after both, so it keeps its panning');
+  assert.deepEqual(d.sends.reverb.gain.events, [['value', 0.4]]);
+  assert.deepEqual(into(e.audioContext, r.input), [d.sends.reverb]);
+  assert.equal(
+    d.sendStages.reverb.input,
+    d.sends.reverb,
+    'its sends handed out as stages, as a channel hands out its own (F6b)',
+  );
+  assert.deepEqual(into(e.audioContext, sings.input), [d.output], 'out into the bus');
+  assert.deepEqual(into(e.audioContext, d.input), [], 'its input: nothing sends to it yet');
+  assert.deepEqual(m.fx('c', { pan: 0 }).pan.pan.events, [['value', 0]], 'a pan in the middle is a pan too');
+  time = 11;
+  d.volume(0.5);
+  d.panTo(0.2);
+  d.sendTo('reverb', 0.1);
+  d.sendTo('nowhere', 1);
+  assert.deepEqual(d.level.gain.events.slice(1), [['target', 0.5, 11, 0.05]]);
+  assert.deepEqual(d.pan.pan.events.slice(1), [['target', 0.2, 11, 0.05]]);
+  assert.deepEqual(
+    d.sends.reverb.gain.events.slice(1),
+    [['target', 0.1, 11, 0.05]],
+    'its level, its pan and a send glide',
+  );
+});
+
+test('a pan on a channel or bus: a stereo panner after its fader, so a mono sound is as loud in the middle; its way out and its sends after it, so they keep its panning', () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb');
+  const you = m.bus('you', { pan: 0, sends: [{ to: 'reverb', amount: 1 }] });
+  assert.deepEqual(
+    [you.pan.channelCountMode, you.pan.channelCount],
+    ['explicit', 2],
+    "stereo: a mono sound isn't 3 dB down in the middle",
+  );
+  assert.deepEqual(into(e.audioContext, you.pan), [you.fader]);
+  assert.ok(
+    into(e.audioContext, m.sum).includes(you.pan) && !into(e.audioContext, m.sum).includes(you.fader),
+    'its way out after it',
+  );
+  assert.deepEqual(into(e.audioContext, you.sends.reverb), [you.pan], 'a send after the fader, after it too');
+  assert.deepEqual(into(e.audioContext, r.input), [you.sends.reverb]);
+  time = 11;
+  you.panTo(-0.3);
+  assert.deepEqual(
+    you.pan.pan.events,
+    [
+      ['value', 0],
+      ['target', -0.3, 11, 0.05],
+    ],
+    'it glides',
+  );
+  assert.equal(m.channel('a').pan, null, 'none asked for, none');
+  assert.equal(m.fx('d', { pan: 0.2 }).pan.channelCountMode, 'explicit', "an FX channel's pan stereo too");
+});
+
+test("a meter: a strip's peak after its fader and pan, the louder side; the master's after the limiter; nothing listens until it's first read", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const tap = m.channel('tap', { pan: -0.5 });
+  const dry = m.channel('dry');
+  const analysers = () => e.audioContext.rec.nodes.filter((n) => n.kind === 'analyser');
+  assert.equal(analysers().length, 0, 'unread: no analyser');
+  assert.equal(m.peak('tap'), 0, 'silent');
+  const split =
+    into(e.audioContext, tap.pan).length
+    && e.audioContext.rec.edges.find((x) => x.from === tap.pan && x.to.kind === 'splitter')?.to;
+  assert.ok(split, 'after the fader and the pan');
+  const [left, right] = [0, 1].map(
+    (k) => e.audioContext.rec.edges.find((x) => x.from === split && (x.output ?? 0) === k).to,
+  );
+  left.samples = [0.1, -0.5, 0.2];
+  right.samples = [0.3];
+  assert.equal(m.peak('tap'), 0.5, 'the loudest sample, either side');
+  assert.equal(analysers().length, 2, 'read again: the same two');
+  m.peak('dry');
+  assert.ok(
+    e.audioContext.rec.edges.some((x) => x.from === dry.fader && x.to.kind === 'splitter'),
+    'without a pan: after the fader',
+  );
+  m.peak('master');
+  assert.ok(
+    e.audioContext.rec.edges.some((x) => x.from === m.master && x.to.kind === 'splitter'),
+    'the master: after the limiter and its volume',
+  );
+  assert.throws(() => m.peak('echo'), /not on the desk: echo/);
+});
+
+// an FX channel's inserts, as a channel's, but after its chain: a Utility after the reverb, as an Ableton chain ends
+test("an FX channel's inserts: after its chain, before its level, in order; its chain ends into the first", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const u = e.audioContext.createGain();
+  const v = e.audioContext.createGain();
+  const r = m.fx('reverb', {
+    inserts: [
+      { name: 'utility', input: u, output: u },
+      { name: 'more', input: v, output: v },
+    ],
+  });
+  assert.equal(r.chainOut, u, 'its chain into its first insert');
+  assert.deepEqual(
+    [into(e.audioContext, v), into(e.audioContext, r.level)],
+    [[u], [v]],
+    'each into the next, the last into its level',
+  );
+  assert.equal(m.fx('d').chainOut, m.strips.d.level, 'none: its chain into its level');
+});
+
+// a channel's room, the far reverb its far sounds get, a send of its own to the FX channel it names: its amount times its fader's level
+test("a room as a send: its amount times its fader's level, set by sendTo() as any send, following the fader, muted with the strip", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const far = m.fx('far reverb');
+  const s = m.bus('sings', { volume: 0.8, room: 'far reverb', roomAmount: 0.5 });
+  assert.equal(s.room.gain.value, 0.4, "its amount times its fader's level");
+  assert.deepEqual(into(e.audioContext, far.input), [s.room]);
+  time = 11;
+  s.sendTo('far reverb', 1);
+  assert.deepEqual(s.room.gain.events.at(-1), ['target', 0.8, 11, 0.05], 'set as any send');
+  s.volume(0.5);
+  assert.deepEqual(s.room.gain.events.at(-1), ['target', 0.5, 11, 0.05], 'following the fader');
+  s.muted(true);
+  s.muted(false);
+  assert.equal(s.room.gain.events.at(-1)[1], 0.5, 'back at its level when unmuted');
+  assert.equal(m.channel('c', { room: 'far reverb' }).room.gain.value, 1, 'an amount of 1 when none is given');
+});
+
+test("a bus with sends, a group: what's routed into it summed, through its fader, sent after it, out to the master", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb');
+  const bg = m.bus('background', { volume: 0.35, sends: ['reverb'] });
+  const held = m.channel('held', { out: 'background' });
+  const bass = m.channel('bass', { out: 'background' });
+  assert.deepEqual(into(e.audioContext, bg.input), [held.fader, bass.fader], 'its tracks into it');
+  assert.deepEqual(bg.fader.gain.events, [['value', 0.35]]);
+  assert.deepEqual(into(e.audioContext, r.input), [bg.fader], 'sent after its fader');
+  assert.ok(
+    into(e.audioContext, m.sum).includes(bg.fader) && !into(e.audioContext, m.sum).includes(held.fader),
+    'it to the master, its tracks only through it',
+  );
+});
+
+test("route(): a strip's output moved while it plays, to the master or a bus, and never into a loop", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  m.fx('reverb'); // the room the sings bus sends to
+  const sings = m.bus('sings', { room: 'reverb' });
+  const bg = m.bus('background', { sends: ['reverb'] });
+  const a = m.channel('a');
+  const d = m.fx('delay', { pan: 0.4, out: 'sings' });
+  m.route('a', 'background');
+  assert.deepEqual(into(e.audioContext, bg.input), [a.fader], 'into the bus');
+  assert.ok(!into(e.audioContext, m.sum).includes(a.fader), 'and no longer into the master');
+  m.route('a', 'master');
+  assert.ok(
+    into(e.audioContext, m.sum).includes(a.fader) && !into(e.audioContext, bg.input).includes(a.fader),
+    'and back',
+  );
+  m.route('delay', 'background');
+  assert.deepEqual(into(e.audioContext, bg.input), [d.output], 'an FX channel too, from after its pan and its mute');
+  assert.ok(!into(e.audioContext, sings.input).includes(d.output));
+  assert.throws(() => m.route('a', 'nowhere'), /not on the desk as a bus: nowhere/);
+  m.bus('x');
+  m.bus('y', { out: 'x' });
+  assert.throws(() => m.route('x', 'y'), /a loop: y feeds x/, 'out into what feeds it');
+  m.fx('f', { out: 'x' });
+  m.route('y', 'master');
+  m.channel('z', { sends: ['f'] });
+  m.bus('w', { sends: ['f'] });
+  assert.throws(() => m.route('x', 'w'), /a loop: w feeds x/, 'through a send too');
+});
+
+test("a channel with inserts: its input through each insert in order, then its fader; a send taken from an insert's tap, before its level", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb');
+  const d = m.fx('delay');
+  const lp = e.audioContext.createGain();
+  const lvl = e.audioContext.createGain();
+  const dull = e.audioContext.createGain(); // stand-ins for an insert's nodes: in, a tap before its level, out
+  lp.connect(lvl);
+  const t = m.channel('track', {
+    volume: 0.8,
+    inserts: [
+      { name: 'dull', input: dull, output: dull },
+      { name: 'distance', input: lp, output: lvl, tap: lp },
+    ],
+    sends: [
+      { to: 'reverb', amount: 0.5 },
+      { to: 'delay', amount: 0.3, from: 'distance' },
+    ],
+  });
+  assert.deepEqual(into(e.audioContext, dull), [t.input], 'its input into the first insert');
+  assert.deepEqual(into(e.audioContext, lp), [dull], 'and on into the next');
+  assert.deepEqual(into(e.audioContext, t.fader), [lvl], 'the last into its fader');
+  assert.deepEqual(
+    t.input.gain.events,
+    [['value', 1]],
+    'its input passes the sound on: at 1, its Gain module writes it',
+  );
+  assert.deepEqual(t.fader.gain.events, [['value', 0.8]]);
+  assert.deepEqual(into(e.audioContext, t.sends.reverb), [t.fader], 'a send after the fader');
+  assert.deepEqual(into(e.audioContext, t.sends.delay), [lp], "a send from the insert's tap, before its level");
+  assert.deepEqual([t.sends.reverb.gain.events, t.sends.delay.gain.events], [[['value', 0.5]], [['value', 0.3]]]);
+  assert.deepEqual([into(e.audioContext, r.input), into(e.audioContext, d.input)], [[t.sends.reverb], [t.sends.delay]]);
+  time = 11;
+  t.sendTo('delay', 0.6);
+  t.volume(0.4);
+  assert.deepEqual(t.sends.delay.gain.events.slice(1), [['target', 0.6, 11, 0.05]], 'a send glides');
+  assert.deepEqual(t.fader.gain.events.slice(1), [['target', 0.4, 11, 0.05]], 'and so does the fader');
+  assert.equal(t.faderStage.input, t.fader, 'its fader handed out as a stage, the Gain module it is (F6b)');
+  assert.equal(t.sendStages.delay.input, t.sends.delay, 'and each send');
+  t.faderStage.setAt('gain.gain', 0.2, 12);
+  t.sendStages.reverb.setAt('gain.gain', 0.1, 12);
+  assert.deepEqual(
+    [t.fader.gain.events.at(-1), t.sends.reverb.gain.events.at(-1)],
+    [
+      ['set', 0.2, 12],
+      ['set', 0.1, 12],
+    ],
+    "set at a note's time through them",
+  );
+  assert.throws(
+    () => m.channel('x', { inserts: [{ name: 'a', input: lp, output: lvl }], sends: [{ to: 'reverb', from: 'b' }] }),
+    /no insert b on x/,
+  );
+});
+
+test('a pre-fader send: taken after the inserts, before the fader, so the fader sets only the dry sound', () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb');
+  const dull = e.audioContext.createGain();
+  const plain = m.channel('plain', { volume: 0.7, sends: [{ to: 'reverb', amount: 0.4, from: 'pre' }] });
+  assert.notEqual(plain.input, plain.fader, 'an input of its own, before the fader');
+  assert.deepEqual(into(e.audioContext, plain.fader), [plain.input]);
+  assert.deepEqual(into(e.audioContext, plain.sends.reverb), [plain.input], 'from its input');
+  const tower = m.channel('tower', {
+    inserts: [{ name: 'dull', input: dull, output: dull }],
+    sends: [{ to: 'reverb', from: 'pre' }],
+  });
+  assert.deepEqual(into(e.audioContext, tower.sends.reverb), [dull], 'after its inserts');
+  assert.ok(
+    into(e.audioContext, r.input).includes(plain.sends.reverb)
+      && into(e.audioContext, r.input).includes(tower.sends.reverb),
+  );
+});
+
+test('a strip mutes at its input, so its sends go quiet too; an FX channel at its output, so its own tail does', () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const r = m.fx('reverb', { pan: 0 });
+  const c = m.channel('tap', { volume: 0.7, sends: [{ to: 'reverb', amount: 0.5, from: 'pre' }] });
+  assert.equal(c.input.kind, 'gain', 'a gain in front of everything');
+  assert.deepEqual(c.input.gain.events, [['value', 1]], 'at 1, its Gain module writes it: it passes the sound on');
+  assert.deepEqual(into(e.audioContext, c.sends.reverb), [c.input], 'its sends after it');
+  time = 11;
+  c.muted(true);
+  assert.deepEqual(c.input.gain.events.at(-1), ['target', 0, 11, 0.01], 'muted: to 0 at once, with no click');
+  c.muted(false);
+  assert.deepEqual(c.input.gain.events.at(-1), ['target', 1, 11, 0.01]);
+  assert.ok(into(e.audioContext, m.sum).includes(r.output), 'an FX channel: out through its mute');
+  r.muted(true);
+  assert.deepEqual(r.output.gain.events.at(-1), ['target', 0, 11, 0.01], 'its output to 0, after its unity');
+});
+
+test('the mixer pauses: the master fades out and the context stops once it has; it fades in again, from 0 once it had stopped', () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    const e = engine();
+    const m = new Mixer(e, { volume: 0.6 });
+    const ev = () => m.master.gain.events.slice(2);
+    m.pause();
+    assert.deepEqual(ev(), [['target', 0, 10, 0.08]]);
+    mock.timers.tick(399);
+    assert.equal(e.audioContext.state, 'running', 'still fading');
+    m.resume(); // back before it stopped: from where the fade got to
+    assert.deepEqual(ev().slice(1), [['target', 0.6, 10, 0.25]]);
+    mock.timers.tick(10);
+    assert.equal(e.audioContext.state, 'running', 'it never stops');
+    m.volume(0.3);
+    m.pause();
+    mock.timers.tick(400);
+    assert.equal(e.audioContext.state, 'suspended');
+    time = 20;
+    m.resume();
+    assert.deepEqual(
+      ev().slice(-3),
+      [
+        ['cancel', 20],
+        ['set', 0, 20],
+        ['target', 0.3, 20, 0.25],
+      ],
+      'from 0, to the volume set last',
+    );
+    assert.equal(e.audioContext.state, 'running');
+  } finally {
+    mock.timers.reset();
+  }
+});
+
+// an FX chain built into an FX channel (out of fx.test.js in X4, the mixer's since it's below it): a limiter, a module made of several
+test('a chain of a module made of several, a limiter: the channel comes in at its gain, out of what takes its makeup back; rebuilt, the old one let go of', () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    time = 10;
+    const e = new Engine({ AudioContext: Context });
+    const ac = e.audioContext;
+    const ch = new Mixer(e).fx('limited', { level: 1 });
+    const patch = { effect: true, chain: ['limiter'], limiter: { gain: 6, ceiling: -1, release: 0.2 } };
+    const c = new FxChain(e, {
+      between: ch,
+      modules: [{ name: 'limiter', patch, params: () => ({}) }],
+      context: { beat, random: () => 0.5 },
+    });
+    const [compressor] = ac.rec.nodes.filter((o) => o.kind === 'compressor'); // the chain's: the mixer has none of its own
+    const [drive] = into(ac, compressor);
+    assert.ok(into(ac, drive).includes(ch.input), "the channel's input into its gain");
+    const [back] = ac.rec.edges.filter((edge) => edge.from === compressor).map((edge) => edge.to);
+    assert.ok(into(ac, ch.level).includes(back), 'out of the gain that takes the makeup back, into the level');
+    c.rebuild();
+    mock.timers.tick(RING_OUT);
+    assert.ok(ac.rec.disconnects.includes(back), "the old one's way out let go of");
+  } finally {
+    mock.timers.reset();
+  }
+});

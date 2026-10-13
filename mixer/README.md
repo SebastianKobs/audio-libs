@@ -1,6 +1,6 @@
 # mixer
 
-A mixer's routing, for signals of any kind: sound, video, a stream of a sensor's values. Where each strip goes, not how much, nor how signals combine: sound and a stream of values are summed, video layered or crossfaded, and that's the desk's that uses it (the audio mixer, `sound/mixer/`). A package of its own since X3b, drawn out of the audio mixer in X3a. It imports nothing.
+A mixer's routing, for signals of any kind: sound, video, a stream of a sensor's values. Where each strip goes, not how much, nor how signals combine: sound and a stream of values are summed, video layered or crossfaded, and that's the desk's that uses it (the audio mixer, `libs/web-audio-mixer/`). A package of its own since X3b, drawn out of the audio mixer in X3a. It imports nothing.
 
 A strip is a `channel`, a `bus`, a submix, what's routed into it combined, or a `return`, an FX channel, fed by sends. Each has one way out, the master or a bus, and sends, to returns. A way out or a send goes only to what's on the desk already, of its kind, so there are no loops.
 

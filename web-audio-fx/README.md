@@ -1,6 +1,6 @@
 # web-audio-fx
 
-FX modules in Web Audio, chained between two points of the mixer's (`sound/mixer/`): an FX channel's, a strip's inserts, the master's. A package of its own since X2, moved out of `sound/`, on the synth, the audio plan and the engine (`libs/synth/`, `libs/audio-plan/`, `libs/web-audio-engine/`); it makes no node itself, but connects the nodes the engine built, so another engine needs its own. An FX module is a patch (`libs/synth/`, with `effect: true`) with an input and an output: one effect. So it's data until the engine builds it, it can be drawn by the editor's flow, and it goes to another platform as data.
+FX modules in Web Audio, chained between two points of the mixer's (`libs/web-audio-mixer/`): an FX channel's, a strip's inserts, the master's. A package of its own since X2, moved out of `sound/`, on the synth, the audio plan and the engine (`libs/synth/`, `libs/audio-plan/`, `libs/web-audio-engine/`); it makes no node itself, but connects the nodes the engine built, so another engine needs its own. An FX module is a patch (`libs/synth/`, with `effect: true`) with an input and an output: one effect. So it's data until the engine builds it, it can be drawn by the editor's flow, and it goes to another platform as data.
 
 The blocks it's made of are the synth's: a delay line (`delay`: its time, a note value, its feedback, and its tone, a lowpass in its loop), a reverb (`reverb`: a convolver with an impulse response the engine makes), and the synth's others, such as an `lfo` wobbling a delay's time.
 
