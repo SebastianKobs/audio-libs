@@ -1,4 +1,4 @@
-// ---------- util/objects: a set's key toggled, an object updated in place ----------
+// ---------- util/objects: a set's key toggled, an object updated in place or frozen all the way down ----------
 
 // a key toggled in a set, or put in (on) or taken out (!on) as asked
 export function toggleIn<Key>(set: Set<Key>, key: Key, on = !set.has(key)): void {
@@ -29,4 +29,14 @@ export function updateInPlace<T extends object>(target: T, from: T): T {
       : structuredClone(v);
   }
   return target;
+}
+// data frozen all the way down, so a write throws (every module is strict); a module's namespace can't be frozen, and needn't be: nobody
+// can write its exports (out of the themes in Z2). Returns data
+export function frozen<T extends object>(data: T): T {
+  for (const v of Object.values(data)) {
+    if (v !== null && typeof v === 'object' && !Object.isFrozen(v)) {
+      frozen(v);
+    }
+  }
+  return (data as { [Symbol.toStringTag]?: unknown })[Symbol.toStringTag] === 'Module' ? data : Object.freeze(data);
 }

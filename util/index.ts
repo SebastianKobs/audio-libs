@@ -3,5 +3,5 @@
 // (random.ts)
 export { clamp01, wrapAngle, easeOut, smoothstep, wrapToTile } from './maths.ts';
 export { Events } from './events.ts';
-export { toggleIn, updateInPlace } from './objects.ts';
+export { frozen, toggleIn, updateInPlace } from './objects.ts';
 export { seeded } from './random.ts';
