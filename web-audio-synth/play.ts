@@ -1,7 +1,7 @@
 // ---------- libs/web-audio-synth/play: a note played on a patch, built from its time into where it goes, its controls (Z7) ----------
 // Its times clock times, the engine's edge turning them into the context's (libs/web-audio-engine/), never in its past: the note planned
 // from the patch with its context and params (libs/synth/), built, and kept as it sounds by the patches it plays on (patches.ts), so an
-// edit to its patch reaches it. The tool's voices play a role's note through it (tool/audio/voices/voices.ts; theirs until Z7)
+// edit to its patch reaches it. An instrument plays each of its notes through it (instrument.ts, V3); the tool's voices did until V5
 import type { Context, Note, Params, Patch } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import type { Patches } from './patches.ts';
