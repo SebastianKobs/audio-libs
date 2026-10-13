@@ -42,6 +42,8 @@ export class Mixer {
   readonly #insert: MasterInsert | undefined;
   readonly #points: Record<string, AudioNode>; // besides the strips: the master, and its insert's (the limiter's in and out)
   #volume: number;
+  #muting: { muted: ReadonlySet<string>; soloed: ReadonlySet<string> } = { muted: new Set(), soloed: new Set() };
+  readonly #silent = new Set<string>(); // the strips silent now, as mute and solo have them
   #pausing: ReturnType<typeof setTimeout> | undefined; // the timer that stops it once it has faded
 
   // routing: where its strips go, its owner's, made before the desk is built, so what's on it is known before there's any sound (Z3);
@@ -74,6 +76,7 @@ export class Mixer {
     const out = this.#placed(name, { kind, out: options.out, to: sentTo(options.sends ?? [], options.room ?? null) });
     const channel = new Channel(this.#engine, this.#desk, name, { ...options, out });
     this.strips[name] = channel;
+    this.#silence(); // muted or soloed as it's made
     return channel;
   }
   bus(name: string, options: StripOptions = {}): Channel {
@@ -84,6 +87,7 @@ export class Mixer {
     const out = this.#placed(name, { kind: 'return', out: options.out, to: Object.keys(options.sends ?? {}) });
     const fxChannel = new FxChannel(this.#engine, this.#desk, { ...options, out });
     this.strips[name] = fxChannel;
+    this.#silence();
     return fxChannel;
   }
   // a strip's way out moved, as the routing allows, then wired: away from where it went, into where it goes now
@@ -128,6 +132,16 @@ export class Mixer {
     ]);
     void audioContext.resume(); // fire and forget, as suspend()
   }
+  // which strips are muted and which soloed, as Ableton's mute and solo, by name: each strip silenced as the routing says (silenced()),
+  // now, and one made later as it's made; a name not built yet waiting for it (Z4)
+  mutes(muted: ReadonlySet<string>, soloed: ReadonlySet<string>): void {
+    this.#muting = { muted: new Set(muted), soloed: new Set(soloed) };
+    this.#silence();
+  }
+  // the strips silent now
+  get silent(): ReadonlySet<string> {
+    return new Set(this.#silent);
+  }
   // how much the master's insert, the limiter, takes away now, in dB; nothing, with none
   reduction(): number {
     return this.#insert?.reduction?.() ?? 0;
@@ -154,6 +168,23 @@ export class Mixer {
       throw new Error(`a strip is built where the routing says: ${name}, ${placeOf(routed)}; asked ${placeOf(asked)}`);
     }
     return routed.out;
+  }
+  // each strip silenced or heard as mute and solo say, of those built; only those that change
+  #silence(): void {
+    const built = (names: ReadonlySet<string>): Set<string> =>
+      new Set([...names].filter((name) => name in this.strips));
+    const silent = this.routing.silenced(built(this.#muting.muted), built(this.#muting.soloed));
+    for (const [name, strip] of Object.entries(this.strips)) {
+      if (silent.has(name) === this.#silent.has(name)) {
+        continue;
+      }
+      strip.muted(silent.has(name));
+      if (silent.has(name)) {
+        this.#silent.add(name);
+      } else {
+        this.#silent.delete(name);
+      }
+    }
   }
   // a strip on the desk by its name
   #on(name: string): Strip {

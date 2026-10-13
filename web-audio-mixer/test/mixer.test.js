@@ -515,3 +515,28 @@ test("a mixer handed a routing: a strip already on it built where it says, its w
   m.channel('replay tap 1', { out: 'you' });
   assert.equal(routing.outOf('replay tap 1'), 'you', 'one not on it put on it as asked');
 });
+
+test("mute and solo kept by the mixer: each strip silenced as its routing says, now, and one made later as it's made; a solo of one not built yet waiting for it (Z4)", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  m.fx('reverb');
+  m.bus('you');
+  const tap = m.channel('tap', { out: 'you' });
+  const hold = m.channel('hold', { out: 'you' });
+  time = 11;
+  m.mutes(new Set(['tap']), new Set());
+  assert.deepEqual([...m.silent].sort(), ['tap'], 'the strip muted');
+  assert.deepEqual(tap.input.gain.events.at(-1), ['target', 0, 11, 0.01], 'silenced at its input');
+  m.mutes(new Set(), new Set(['hold']));
+  assert.deepEqual([...m.silent].sort(), ['tap'], 'a solo silences what it needs not, but never a return');
+  assert.deepEqual(tap.input.gain.events.at(-1), ['target', 0, 11, 0.01], 'tap still silent');
+  const trace = m.channel('trace', { out: 'you' });
+  assert.deepEqual(trace.input.gain.events.at(-1), ['target', 0, 11, 0.01], 'one made later silenced as it is made');
+  assert.deepEqual([...m.silent].sort(), ['tap', 'trace']);
+  m.mutes(new Set(), new Set(['replay tap 1'])); // soloed before it's built: nothing silenced till it is
+  assert.deepEqual([...m.silent], [], 'a solo of one not built yet waits for it');
+  assert.deepEqual(tap.input.gain.events.at(-1), ['target', 1, 11, 0.01], 'tap heard again');
+  m.channel('replay tap 1', { out: 'you' });
+  assert.deepEqual([...m.silent].sort(), ['hold', 'tap', 'trace'], 'built, its solo silences the rest');
+  assert.deepEqual(hold.input.gain.events.at(-1), ['target', 0, 11, 0.01], 'hold among them');
+});
