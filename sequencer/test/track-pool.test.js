@@ -62,3 +62,38 @@ test("a play held open, its end not known as it starts, holds its track until it
   r.end(held, 3);
   assert.equal(r.place(b, 3, 4), 0, 'ended: free again from its end, the lowest');
 });
+
+test("a play may join its owner's track while the owner holds it, as notes from one place share a voice: the same track, held until the later end; one that doesn't join takes another (N5)", () => {
+  const r = new TrackPool();
+  const [a, b] = [1, 2].map(flower);
+  assert.equal(r.place(a, 0, 4), 0);
+  assert.equal(r.place(a, 1, 3, { join: true }), 0, 'joined: its tail inside the first');
+  assert.equal(r.place(a, 2, 6, { join: true }), 0, 'joined: ringing on past it');
+  assert.deepEqual(r.tracks[0], { owner: a, from: 0, until: 6 }, 'held from the first until the later end');
+  assert.equal(r.place(a, 2.5, 5), 1, "not joining: another track, a's busy");
+  assert.equal(r.place(b, 3, 4, { join: true }), 2, "b holds no track: there's none to join");
+  assert.equal(r.tracks.length, 3);
+});
+
+test("a play joins only a track its owner still holds: free again, it's placed there afresh; taken by another, the lowest free (N5)", () => {
+  const r = new TrackPool();
+  const [a, b] = [1, 2].map(flower);
+  r.place(a, 0, 2);
+  assert.equal(r.place(a, 3, 4, { join: true }), 0);
+  assert.deepEqual(r.tracks[0], { owner: a, from: 3, until: 4 }, 'afresh: from its own start');
+  r.place(b, 5, 9); // a's track, free, taken by b
+  assert.equal(r.place(a, 6, 7, { join: true }), 1, "a's last track b's now");
+});
+
+test("joined, a play held open keeps the track until it's ended, and one ringing on past that end keeps it longer (N5)", () => {
+  const r = new TrackPool();
+  const a = flower(1);
+  const held = r.place(a, 0, Infinity);
+  r.place(a, 1, 8, { join: true }); // rings on past where the held one ends
+  r.end(held, 3);
+  assert.equal(r.tracks[0].until, 8, 'the later end');
+  assert.equal(r.place(flower(2), 5, 6), 1, 'still held');
+  const again = r.place(a, 7, Infinity, { join: true });
+  r.end(again, 7.5);
+  assert.equal(r.tracks[0].until, 8, 'two held open, each ended: the latest end of all');
+});
