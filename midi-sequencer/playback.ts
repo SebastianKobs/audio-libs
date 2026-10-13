@@ -14,9 +14,8 @@ import type { Seconds } from '../clock/index.ts';
 import { Player, type PlayedFrom, type TimeMap } from '../timeline/index.ts';
 import type { Address, Input } from './input.ts';
 import { lastValueAt, valueAt, type LanePoint } from './lanes.ts';
-import type { Message, PerNoteControllerName } from './messages.ts';
+import { NoteRotation, type Message, type PerNoteControllerName } from '../midi/index.ts';
 import type { Lane, RecordedNote, Region } from './recorder.ts';
-import { NoteRotation } from './rotation.ts';
 
 // a note's point after its start: a glide to a pitch, or a change to one of its per-note controllers, gliding there where it came with
 // a time constant

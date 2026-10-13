@@ -3,7 +3,14 @@
 // instrument at once, a function call, no latency added; and into its stream as the play they make (onPlay(), its own,
 // L1b), so what's heard is what's recorded. The way back (G0e), as Ableton lights a controller's pads: each note passed
 // on handed to whoever listens (onNote()), the surface lighting it
-import { notesIn, type Message, type PerNoteController, type SentNote } from './messages.ts';
+import {
+  NoteRotation,
+  notesIn,
+  type Message,
+  type PerNoteController,
+  type Receiver,
+  type SentNote,
+} from '../midi/index.ts';
 import {
   Stream,
   type ControlChange,
@@ -14,7 +21,6 @@ import {
   type PlayedNote,
   type PlayListener,
 } from './stream.ts';
-import { NoteRotation } from './rotation.ts';
 
 // where messages go: the track they play on, the clip they're of (its element, by its kind), as notes are, whether they're played as you
 // play; and what the stream carries of a replay beside its notes (play: its replay track's number, until when, its draws), until G1 to G3
@@ -27,10 +33,9 @@ export interface Address<Track extends string> {
   play?: Partial<Play> | undefined;
   source?: string | undefined;
 }
-// a track's instrument, as the sequencer plays it: its role, and the messages handed it, at once
-export interface Instrument {
+// a track's instrument, as the sequencer plays it: its role, and the messages handed it, at once (Receiver, libs/midi/)
+export interface Instrument extends Receiver {
   readonly role: string;
-  receive(messages: readonly Message[]): void;
 }
 // a note passed on, handed back where it went: its track, any of the sequencer's, its clip, whether it's played as you play it
 export type NoteListener = (to: Address<string>, note: SentNote) => void;

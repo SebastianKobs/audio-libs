@@ -1,6 +1,6 @@
 // ---------- midi-sequencer/stream: every play, the garden's and yours as you play it, to whoever listens ----------
 import type { Seconds } from '../clock/index.ts';
-import type { PerNoteControllerName, PerNoteValues } from './messages.ts';
+import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 
 // a play, as the stream carries it: whose it is, its kind and role, whether it's played as you play it, its notes at clock times; the
 // replay track it's on and until when, the clip it's of, the sends it drew, and the seed its draws came from (G0g); the region it's of, a

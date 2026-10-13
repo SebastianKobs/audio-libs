@@ -7,7 +7,7 @@ import type { Seconds } from '../clock/index.ts';
 import type { Address, Input } from './input.ts';
 import { ClipLauncher, STEP, type ClipGrid } from '../sequencer/index.ts';
 import type { NotePattern, PatternNote } from './pattern-note.ts';
-import { NoteRotation } from './rotation.ts';
+import { NoteRotation } from '../midi/index.ts';
 
 // a clip as launched: where its notes go, its pattern, its notes in pitches; straight under the grid's swing, or on it; its notes'
 // velocity as it plays, read as each comes due, as a velocity device sets it, full if it has none, none leaving the note out

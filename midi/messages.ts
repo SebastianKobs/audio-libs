@@ -1,4 +1,4 @@
-// ---------- midi-sequencer/messages: what a control surface plays into the sequencer, MIDI 2.0's channel voice messages as values ----------
+// ---------- libs/midi/messages: what a control surface plays, MIDI 2.0's channel voice messages as values (the sequencer's until V1) ----------
 // MIDI 2.0's model and names, not its packets (M2-104-UM): the app's values, a velocity 0 to 1, a pitch a MIDI note number, each at a
 // clock time. A note's index is its note number as its source hands it out (rotation.ts), so two notes of one pitch keep apart. Each
 // kind comes with the step that first sends it (G0, mockup/architecture/done.md): note on and note off with your taps (G0a), per-note

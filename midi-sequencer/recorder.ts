@@ -14,7 +14,7 @@
 import type { Seconds } from '../clock/index.ts';
 import { Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
-import type { PerNoteControllerName, PerNoteValues } from './messages.ts';
+import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { NoteChange, NoteEnd, NoteGlide, Play, PlayedNote } from './stream.ts';
 
 // what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of
