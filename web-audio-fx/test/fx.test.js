@@ -131,3 +131,19 @@ test('a module built on its own is a stage: a port set now, at a time or gliding
   ]);
   assert.throws(() => air.value('gain.gain'), /no port gain\.gain/);
 });
+
+// a stage gliding from a time to come, as an instrument's note's stage takes a per-note controller at its message's time (V3): a hush
+// timed to a beat
+test('a module built on its own glides from a time to come where it is given one, from now where it is not', async () => {
+  const { BuiltModule, GAIN } = await import('../index.ts');
+  time = 10;
+  const e = new Engine({ AudioContext: Context });
+  const m = new BuiltModule(e, { patch: GAIN });
+  m.set('gain.gain', 0, 0.25, 10.5);
+  m.set('gain.gain', 1, 0.25);
+  assert.deepEqual(m.input.gain.events, [
+    ['value', 1],
+    ['target', 0, 10.5, 0.25],
+    ['target', 1, 10, 0.25],
+  ]);
+});

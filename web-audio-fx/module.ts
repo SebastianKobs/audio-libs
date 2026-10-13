@@ -27,8 +27,9 @@ export class BuiltModule {
     this.input = inputOf(this.#node(this.#plan.input!)); // an effect module's plan names its input
     this.output = outputOf(this.#node(this.#plan.edges.find(([, to]) => to === 'out')![0])); // and goes out
   }
-  set(port: string, value: number, timeConstant = MOVE_GLIDE): void {
-    this.#move(port, value, this.#engine.now(), timeConstant);
+  // a port gliding there by its time constant, from a time to come, a context time, else from now (V3)
+  set(port: string, value: number, timeConstant = MOVE_GLIDE, from = this.#engine.now()): void {
+    this.#move(port, value, from, timeConstant);
   }
   setAt(port: string, value: number, at: number): void {
     this.#move(port, value, at, 0);

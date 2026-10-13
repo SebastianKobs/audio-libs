@@ -24,10 +24,12 @@ export interface SoundingNote {
 }
 // what a note is told while it sounds, as its plan turns it into operations: its release, a control's set, a glide, a hit
 export type Told = (current: Plan) => Operation[];
-// a note as it plays on: its plan as it plays now, an edit's, and what it's told, turned into operations by that plan and applied
+// a note as it plays on: its plan as it plays now, an edit's, and what it's told, turned into operations by that plan and applied; and
+// whether it has stopped by now, a context time (V3)
 export interface Played {
   readonly plan: Plan;
   tell(told: Told): void;
+  stopped(now: number): boolean;
 }
 // a note as it's kept: as it plays now; what it was told, as asked and as the operations its plan made of it; its sources' stops by id
 interface Kept {
@@ -52,6 +54,7 @@ export class Sounding {
         return kept.note.plan;
       },
       tell: (told) => tell(kept, told),
+      stopped: (now) => stoppedBy(kept, now),
     };
   }
   // an edited patch's notes that sound at now, a context time, each following it from now
@@ -172,10 +175,14 @@ function stopsOf(planned: Plan): Map<number, number> {
 // the notes whose sources have all stopped by now, a context time, let go of
 function letGoOfStopped(notes: Set<Kept>, now: number): void {
   for (const kept of notes) {
-    if (now - kept.note.start > Math.max(...kept.stops.values())) {
+    if (stoppedBy(kept, now)) {
       notes.delete(kept);
     }
   }
+}
+// whether a note's sources have all stopped by now, a context time
+function stoppedBy(kept: Kept, now: number): boolean {
+  return now - kept.note.start > Math.max(...kept.stops.values());
 }
 // a source's last stop, from its note's start; none, it sounds for good
 function lastStop(node: PlanNode): number {

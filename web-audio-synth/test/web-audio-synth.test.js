@@ -72,3 +72,15 @@ test('patches as they play: copies of those they start from, an edit reaching a 
   patches.reset('voice');
   assert.deepEqual(patches.current('voice'), VOICE, 'the one it started from');
 });
+
+test('a note says whether it has stopped: held, never; let go, once each of its sources has stopped after its release (V3)', () => {
+  const { play } = played();
+  const controls = play({ pitch: 69, t: 10 });
+  time = 30;
+  assert.equal(controls.stopped(), false, 'held open');
+  controls.release(31);
+  time = 31.1;
+  assert.equal(controls.stopped(), false, 'still ringing out');
+  time = 40;
+  assert.equal(controls.stopped(), true, 'rung out');
+});
