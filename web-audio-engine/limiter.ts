@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-engine/limiter: how a limiter holds at its ceiling, as hard as Web Audio's compressor goes ----------
-// Its settings are the Limiter module's (sound/fx/inserts.ts) and a limiter block's (libs/synth/blocks/limiter.ts); Web Audio's quirk, the
+// Its settings are the Limiter module's (libs/web-audio-fx/inserts.ts) and a limiter block's (libs/synth/blocks/limiter.ts); Web Audio's quirk, the
 // makeup gain its compressor adds, is taken back here, at the edge, where Web Audio is
 import { CompositeNode } from './composite.ts';
 import { ParamInUnits } from './param-in-units.ts';
