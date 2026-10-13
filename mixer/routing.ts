@@ -3,7 +3,7 @@
 // channel, a bus (a submix, what's routed into it combined) or a return (an FX channel, fed by sends). Each has one way out, the master
 // or a bus, and sends, to returns. A way out or a send goes only to what's on the desk already, of its kind, so there are no loops;
 // route() moves a way out, and refuses one that feeds the strip, through a way out or a send. silenced(): which strips are silent, as
-// Ableton's mute and solo
+// Ableton's mute and solo. reached(): what strips feed, as a desk's lights follow a signal (Z3)
 
 // what a strip is: a channel, a bus, or a return
 export type StripKind = 'channel' | 'bus' | 'return';
@@ -40,11 +40,37 @@ export class Routing {
     }
     strip.out = out;
   }
+  // whether a strip is on the desk; the master is where they end, not one of them
+  has(name: string): boolean {
+    return this.#strips.has(name);
+  }
+  kindOf(name: string): StripKind {
+    return this.#on(name).kind;
+  }
   outOf(name: string): string {
     return this.#on(name).out;
   }
   sentTo(name: string): readonly string[] {
     return this.#on(name).to;
+  }
+  // everything the strips named feed, they among it: each through its way out, and the sends sendsUp lets through (all, unless it says),
+  // on to the master, which isn't one of them; a name not on the desk kept, not followed
+  reached(names: Iterable<string>, sendsUp: (from: string, to: string) => boolean = () => true): Set<string> {
+    const reached = new Set(names);
+    // a Set's loop visits what's added while it runs: what those feed too
+    for (const name of reached) {
+      const strip = this.#strips.get(name);
+      if (!strip) {
+        continue;
+      }
+      if (strip.out !== MASTER) {
+        reached.add(strip.out);
+      }
+      for (const to of strip.to.filter((target) => sendsUp(name, target))) {
+        reached.add(to);
+      }
+    }
+    return reached;
   }
   // which strips are silent, as Ableton's mute and solo: those muted; and with any soloed, every one but what a soloed strip needs to be
   // heard, its own way out to the master and what feeds it, a return never silenced by a solo

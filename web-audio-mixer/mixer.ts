@@ -1,7 +1,7 @@
 // ---------- libs/web-audio-mixer/mixer: the desk, its strips by name, the sum, the master's insert, the master and their peaks ----------
 import { Channel, sentTo } from './channel.ts';
 import type { StripOptions } from './channel.ts';
-import { Routing } from '../mixer/index.ts';
+import { Routing, type StripKind } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
 import type { FxOptions } from './fx-channel.ts';
@@ -34,7 +34,7 @@ export class Mixer {
   readonly sum: GainNode;
   readonly master: GainNode;
   readonly strips: Record<string, Strip> = {}; // the desk: every channel, bus and FX channel, by name
-  readonly routing = new Routing(); // where each strip goes: its kind, its way out and its sends, mute and solo (X3a)
+  readonly routing: Routing; // where each strip goes: its kind, its way out and its sends, mute and solo (X3a); its own, or handed in (Z3)
   readonly #engine: MixerEngine;
   readonly #master: BuiltModule; // the master volume: a Gain module, as the sum
   readonly #desk: Desk;
@@ -44,8 +44,14 @@ export class Mixer {
   #volume: number;
   #pausing: ReturnType<typeof setTimeout> | undefined; // the timer that stops it once it has faded
 
-  constructor(engine: MixerEngine, { volume = 1, master }: { volume?: number; master?: MasterInsert } = {}) {
+  // routing: where its strips go, its owner's, made before the desk is built, so what's on it is known before there's any sound (Z3);
+  // its own otherwise
+  constructor(
+    engine: MixerEngine,
+    { volume = 1, master, routing = new Routing() }: { volume?: number; master?: MasterInsert; routing?: Routing } = {},
+  ) {
     this.#engine = engine;
+    this.routing = routing;
     this.#master = new BuiltModule(engine, {
       patch: GAIN,
       params: { level: 0 },
@@ -65,8 +71,8 @@ export class Mixer {
   }
   // a channel (see Channel), on the desk by its name, where the routing says it may go
   channel(name: string, options: StripOptions = {}, kind: 'channel' | 'bus' = 'channel'): Channel {
-    this.routing.add(name, { kind, out: options.out, to: sentTo(options.sends ?? [], options.room ?? null) });
-    const channel = new Channel(this.#engine, this.#desk, name, options);
+    const out = this.#placed(name, { kind, out: options.out, to: sentTo(options.sends ?? [], options.room ?? null) });
+    const channel = new Channel(this.#engine, this.#desk, name, { ...options, out });
     this.strips[name] = channel;
     return channel;
   }
@@ -75,8 +81,8 @@ export class Mixer {
   }
   // an FX channel (see FxChannel), a return, as a channel is
   fx(name: string, options: FxOptions = {}): FxChannel {
-    this.routing.add(name, { kind: 'return', out: options.out, to: Object.keys(options.sends ?? {}) });
-    const fxChannel = new FxChannel(this.#engine, this.#desk, options);
+    const out = this.#placed(name, { kind: 'return', out: options.out, to: Object.keys(options.sends ?? {}) });
+    const fxChannel = new FxChannel(this.#engine, this.#desk, { ...options, out });
     this.strips[name] = fxChannel;
     return fxChannel;
   }
@@ -133,6 +139,22 @@ export class Mixer {
     const meter = (this.#meters[name] ??= this.#engine.meter(this.#points[name] ?? this.#on(name).tail));
     return meter.peak();
   }
+  // a strip's place on the routing, and so its way out: where the routing says, if it's on it, what's asked agreeing, a way out asked or
+  // not; else put on it as asked
+  #placed(name: string, asked: { kind: StripKind; out: string | undefined; to: readonly string[] }): string {
+    const { routing } = this;
+    if (!routing.has(name)) {
+      routing.add(name, asked);
+      return routing.outOf(name);
+    }
+    const routed = { kind: routing.kindOf(name), out: routing.outOf(name), to: routing.sentTo(name) };
+    const agrees =
+      asked.kind === routed.kind && (asked.out ?? routed.out) === routed.out && sameTargets(asked.to, routed.to);
+    if (!agrees) {
+      throw new Error(`a strip is built where the routing says: ${name}, ${placeOf(routed)}; asked ${placeOf(asked)}`);
+    }
+    return routed.out;
+  }
   // a strip on the desk by its name
   #on(name: string): Strip {
     const strip = this.strips[name];
@@ -148,4 +170,12 @@ export class Mixer {
     }
     return this.#on(out).input;
   }
+}
+// whether two strips send to the same, in whichever order
+function sameTargets(asked: readonly string[], routed: readonly string[]): boolean {
+  return asked.length === routed.length && asked.every((target) => routed.includes(target));
+}
+// a strip's place, as an error names it
+function placeOf({ kind, out, to }: { kind: StripKind; out: string | undefined; to: readonly string[] }): string {
+  return `a ${kind} out to ${out ?? 'where it says'}, sending to ${to.length ? to.join(', ') : 'none'}`;
 }

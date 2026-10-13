@@ -84,3 +84,40 @@ test("solo, as Ableton's: what a soloed strip needs to be heard stays, its way o
     "a mute wins over a solo's way out",
   );
 });
+
+test('has() and kindOf(): whether a strip is on the desk, and what it is; the master is where they end, not one of them (Z3)', () => {
+  const routing = new Routing();
+  routing.add('reverb', { kind: 'return' });
+  routing.add('sings', { kind: 'bus', to: ['reverb'] });
+  assert.deepEqual(
+    ['reverb', 'sings', 'tap', 'master'].map((name) => routing.has(name)),
+    [true, true, false, false],
+  );
+  assert.deepEqual(
+    ['reverb', 'sings'].map((name) => routing.kindOf(name)),
+    ['return', 'bus'],
+  );
+  assert.throws(() => routing.kindOf('tap'), /not on the desk: tap/);
+});
+
+test("reached(): everything the strips named feed, through each one's way out and the sends let through, on to the master, which isn't one of them; a name not on the desk kept, not followed (Z3)", () => {
+  const routing = new Routing();
+  routing.add('reverb', { kind: 'return' });
+  routing.add('delay', { kind: 'return', to: ['reverb'] });
+  routing.add('sings', { kind: 'bus', to: ['reverb'] });
+  routing.add('you', { kind: 'bus', to: ['reverb', 'delay'] });
+  routing.add('tap', { kind: 'channel', out: 'you', to: ['reverb'] });
+  routing.add('vine', { kind: 'channel', out: 'sings' });
+  const sorted = (names) => [...names].sort();
+  assert.deepEqual(sorted(routing.reached(['tap'])), ['delay', 'reverb', 'tap', 'you'], 'every send, with none to say');
+  assert.deepEqual(
+    sorted(routing.reached(['tap'], (from, to) => from === 'you' && to === 'delay')),
+    ['delay', 'tap', 'you'],
+    'only the sends let through: the delay feeds the reverb, but not by a send let through',
+  );
+  assert.deepEqual(
+    sorted(routing.reached(['clips tap', 'vine'], () => false)),
+    ['clips tap', 'sings', 'vine'],
+    'a name not on the desk kept, not followed',
+  );
+});

@@ -7,6 +7,7 @@ import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { FxChain, RING_OUT } from '../../web-audio-fx/index.ts';
 import { Mixer } from '../index.ts';
+import { Routing } from '../../mixer/index.ts';
 
 let time = 0;
 class Context extends StandInContext {
@@ -487,4 +488,30 @@ test('a chain of a module made of several, a limiter: the channel comes in at it
   } finally {
     mock.timers.reset();
   }
+});
+
+test("a mixer handed a routing: a strip already on it built where it says, its way out and what it sends to the routing's, what's asked agreeing; one not on it put on it as asked (Z3)", () => {
+  const e = engine();
+  const routing = new Routing();
+  routing.add('reverb', { kind: 'return' });
+  routing.add('you', { kind: 'bus', to: ['reverb'] });
+  routing.add('tap', { kind: 'channel', out: 'you', to: ['reverb'] });
+  routing.add('hold', { kind: 'channel', out: 'you' });
+  const m = new Mixer(e, { routing });
+  assert.equal(m.routing, routing, 'the routing it was handed');
+  m.fx('reverb');
+  const you = m.bus('you', { sends: [{ to: 'reverb', amount: 0.5 }] });
+  const tap = m.channel('tap', { sends: [{ to: 'reverb', amount: 0.2 }] }); // its way out not asked: the routing's
+  assert.deepEqual(into(e.audioContext, you.input), [tap.fader], 'into its bus, as the routing says');
+  assert.ok(!into(e.audioContext, m.sum).includes(tap.fader), 'and not into the master');
+  assert.throws(() => m.channel('hold', { out: 'master' }), /built where the routing says: hold/, 'another way out');
+  assert.throws(
+    () => m.channel('hold', { out: 'you', sends: ['reverb'] }),
+    /built where the routing says: hold/,
+    'a send it has none of',
+  );
+  assert.throws(() => m.channel('you'), /built where the routing says: you/, 'a bus as a channel');
+  assert.equal(m.strips.hold, undefined, 'none built');
+  m.channel('replay tap 1', { out: 'you' });
+  assert.equal(routing.outOf('replay tap 1'), 'you', 'one not on it put on it as asked');
 });

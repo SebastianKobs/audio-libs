@@ -18,7 +18,9 @@ routing.silenced(new Set(), new Set(['tap']));          // Set { 'sings' }: tap 
 |---|---|
 | `add(name, { kind, out, to })` | a strip put on the desk, its way out (`'master'` if none is given) and what it sends to checked first: a way out only to the master or a bus on the desk, a send only to a return on it; anything else throws |
 | `route(name, out)` | a strip's way out moved, to the master or a bus, refusing one that feeds it, through a way out or a send (`a loop: … feeds …`) |
+| `has(name)`, `kindOf(name)` | whether a strip is on the desk, the master not one of them, and what it is (Z3) |
 | `outOf(name)`, `sentTo(name)` | a strip's way out, and what it sends to |
+| `reached(names, sendsUp)` | everything the strips named feed, they among it: each through its way out, and the sends `sendsUp(from, to)` lets through, all unless it says, on to the master, which isn't one of them; a name not on the desk kept, not followed. A desk's lights follow a signal by it (Z3) |
 | `silenced(muted, soloed)` | which strips are silent, as Ableton's mute and solo: those muted; and with any soloed, every one but what a soloed strip needs to be heard, its own way out to the master and what feeds it, a return never silenced by a solo |
 
 Tested in node, on routings written by hand, with no signal (`test/routing.test.js`).
