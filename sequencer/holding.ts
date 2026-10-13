@@ -1,11 +1,13 @@
-// ---------- libs/sequencer/holding: how long the plays on one track hold it. Pure ----------
-// (N5) Never while one is held open, its end not known yet, else until the latest end of those that aren't, as several notes from one
-// place share a voice (track-pool.ts). Times are the caller's
+// ---------- libs/sequencer/holding: how long the plays on one track hold it ----------
+// Pure. Times are the caller's.
+// A track is held for good while any play on it is held open (its end not known yet).
+// Otherwise it is held until the latest end of the plays on it.
+// Several notes from one place share a track this way (see track-pool.ts).
 export class Holding {
   #open = 0;
   #latest = -Infinity;
 
-  // a play on it: held open (until never), or ending then
+  // A play added: held open when until is Infinity, else ending at until.
   add(until: number): void {
     if (until === Infinity) {
       this.#open += 1;
@@ -13,7 +15,7 @@ export class Holding {
     }
     this.#latest = Math.max(this.#latest, until);
   }
-  // a play held open, ended then
+  // A play that was held open has ended.
   end(until: number): void {
     this.#open = Math.max(0, this.#open - 1);
     this.#latest = Math.max(this.#latest, until);

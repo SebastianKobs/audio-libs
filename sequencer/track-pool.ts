@@ -1,12 +1,17 @@
-// ---------- libs/sequencer/track-pool: overlapping plays allotted to tracks, as a polysynth allots its voices. Pure ----------
-// (mockup/architecture/views.md) A track plays one play at a time, from its start until its tail has died away, so a
-// play never catches another's tail. A play goes on the track its owner played on last, if that's free, else the lowest free one; with
-// none free, a track is added. Tracks are never taken away, so there are as many as ever played at once. A play held open, its end not
-// known as it starts, holds its track until it's ended (end()). A play may join its owner's track while the owner still holds it, as notes
-// from one place share a voice, the track held until the later end (N5). Times are the caller's
+// ---------- libs/sequencer/track-pool: overlapping plays shared out over tracks ----------
+// Pure. Times are the caller's. Works as a polysynth shares out its voices.
+// A track holds one play at a time, until the play's tail has died away,
+// so a play never cuts off another's tail.
+// Where a play goes:
+//   1. Joining: the track its owner still holds, if the caller asks to join.
+//   2. The track its owner played on last, if that track is free.
+//   3. The lowest free track.
+//   4. A new track, when none is free.
+// Tracks are never taken away: there are as many as ever played at once.
+// A play held open (its end not known yet) holds its track until end() is called.
 import { Holding } from './holding.ts';
 
-// a track: whose play holds it, from when until its tail has died away
+// A track: the owner of its play, and when the play starts and dies away.
 export interface Track {
   owner?: object;
   from?: number;
@@ -14,11 +19,14 @@ export interface Track {
 }
 export class TrackPool {
   readonly tracks: Track[] = [];
-  readonly #last = new WeakMap<object, number>(); // an owner's last track, let go with the owner
-  readonly #holding: Holding[] = []; // how long each track is held, by its index
+  // Each owner's last track; forgotten with the owner.
+  readonly #last = new WeakMap<object, number>();
+  readonly #holding: Holding[] = []; // how long each track is held, by track index
 
-  // puts a play of an owner's, lasting from one time until another, on a track; its index. join: it may go on the track its owner still
-  // holds, a play from the same place, the track held until the later end (N5)
+  // Puts a play on a track and returns the track's index.
+  // join: the play may share the track its owner still holds,
+  // e.g. a note from the same place.
+  // A shared track is held until the later of the two ends.
   place(owner: object, from: number, until: number, { join = false }: { join?: boolean } = {}): number {
     const held = this.#heldBy(owner, from);
     if (join && held !== null) {
@@ -38,8 +46,8 @@ export class TrackPool {
     this.#last.set(owner, index);
     return index;
   }
-  // a play's end, once it's known: one held open as it started (until Infinity) ended, its track free once its tail, and those of the
-  // plays that joined it, have died away (N2, N5)
+  // A play that was held open (until Infinity) now ends at until.
+  // The track is free once every play on it has died away.
   end(index: number, until: number): void {
     const holding = this.#holding[index];
     if (!holding) {
@@ -48,7 +56,7 @@ export class TrackPool {
     holding.end(until);
     this.#setUntil(index);
   }
-  // the track an owner still holds at a time, its last one, if it's still its and busy
+  // The owner's last track, if the owner still holds it and it is busy at that time.
   #heldBy(owner: object, at: number): number | null {
     const index = this.#last.get(owner);
     if (index == null || this.tracks[index]?.owner !== owner || this.#free(index, at)) {
@@ -56,16 +64,17 @@ export class TrackPool {
     }
     return index;
   }
-  // a play on a track: held open, never ending until it's ended, or ending at its time
+  // A play added to a track's holding: held open, or ending at until.
   #hold(index: number, until: number): void {
-    this.#holding[index]!.add(until); // set as the track's play was placed
+    this.#holding[index]!.add(until); // set when the first play was placed
     this.#setUntil(index);
   }
   #setUntil(index: number): void {
-    this.tracks[index]!.until = this.#holding[index]!.until; // set as the track's play was placed
+    // The holding exists: set when the track's first play was placed.
+    this.tracks[index]!.until = this.#holding[index]!.until;
   }
   #free(index: number, from: number): boolean {
-    const until = this.tracks[index]?.until; // a track just added holds nothing yet, and isn't free
+    const until = this.tracks[index]?.until; // just added: no until yet, not free
     return until !== undefined && until <= from;
   }
 }
