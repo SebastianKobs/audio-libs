@@ -1,6 +1,7 @@
 // An instrument's unit tests (mockup/src/libs/web-audio-synth/instrument.ts, its test/ folder, V3), on the engine's stand-in for Web Audio:
-// MIDI 2.0's messages in (libs/midi/), its patch's notes out of its output, held until their note off; the per-note controllers it
-// answers, a stage each, its room out of a second output; a later change at its time; its stages let go as its sender detaches a note,
+// MIDI 2.0's messages in (libs/midi/), its patch's notes out of its output, where it was patched as it was made, held until their note
+// off; the per-note controllers it answers, a stage each, its room out of a second output; #7 Volume, with no stage for it, on the
+// voice's out; a later change at its time; its stages let go as its sender detaches a note,
 // or once its voice has stopped; its knobs, the tempo and its draws handed in, read as each note starts; its patch from a bank, by name
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,21 +37,32 @@ const perNote = (index, controller, value, t, glide) => ({
   glide,
 });
 
-// an engine on the stand-in, its time 10, a bank of the voice, and an instrument playing it, as the test makes it
+// an engine on the stand-in, its time 10, a bank of the voice, and an instrument playing it, as the test makes it, its outputs patched
+// into a desk's two gains, a channel's and a room's (V4)
 function setup(more = {}) {
   time = 10;
   const engine = new Engine({ AudioContext: Context });
-  const patches = new Patches({ patches: { voice: VOICE }, now: () => time });
-  const instrument = new Instrument({ engine, patches, patch: 'voice', beat: () => 0.8, ...more });
   const ac = engine.audioContext;
-  return { ac, patches, instrument, nodes: () => ac.rec.nodes };
+  const patches = new Patches({ patches: { voice: VOICE }, now: () => time });
+  const out = ac.createGain();
+  const room = ac.createGain();
+  const instrument = new Instrument({
+    engine,
+    patches,
+    patch: 'voice',
+    beat: () => 0.8,
+    into: out,
+    effects: room,
+    ...more,
+  });
+  return { ac, out, room, patches, instrument, nodes: () => ac.rec.nodes };
 }
 const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 const oscillators = (nodes, wave = 'triangle') =>
   nodes.filter((node) => node.kind === 'oscillator' && node.props.type === wave);
 
 test('an instrument: a note on played on its patch from its time, out of its output, held until its note off lets it go at its time, one sent with it too (V3)', () => {
-  const { ac, instrument, nodes } = setup();
+  const { ac, out, room, instrument, nodes } = setup();
   instrument.receive([noteOn(0, 69, 11), noteOff(0, 12)]);
   instrument.receive([noteOn(1, 64, 11.5)]);
   const [first, second] = oscillators(nodes());
@@ -62,8 +74,8 @@ test('an instrument: a note on played on its patch from its time, out of its out
   assert.equal(second.stops.length, 0, 'the second held');
   instrument.receive([noteOff(1, 13)]);
   assert.ok(second.stops.at(-1)[0] >= 13.2, 'let go at its note off');
-  assert.equal(into(ac, instrument.output).length, 2, "both voices into its output, the instrument's own way out");
-  assert.equal(instrument.effects, null, 'no second output, answering no #91 Effects 1 Depth');
+  assert.equal(into(ac, out).length, 2, 'both voices out of its output, where it was patched');
+  assert.deepEqual(into(ac, room), [], 'nothing out of its second, answering no #91 Effects 1 Depth');
 });
 
 test("an instrument: a note's #3 Pitch changes sent with it its glides, planned into it, each at its time (V3)", () => {
@@ -77,7 +89,7 @@ test("an instrument: a note's #3 Pitch changes sent with it its glides, planned 
 });
 
 test('an instrument answering the per-note controllers a note is heard by: a stage each, its pan pot, its air, its dry gain into its output and its room gain into its second output; a later change gliding from its time; detached, its stages let go (V3)', () => {
-  const { ac, instrument } = setup({ answers: ['brightness', 'volume', 'pan', 'effects 1 depth'] });
+  const { ac, out, room: roomOut, instrument } = setup({ answers: ['brightness', 'volume', 'pan', 'effects 1 depth'] });
   instrument.receive([
     noteOn(0, 69, 10),
     perNote(0, 'pan', -0.5, 10),
@@ -85,8 +97,8 @@ test('an instrument answering the per-note controllers a note is heard by: a sta
     perNote(0, 'volume', 0.5, 10),
     perNote(0, 'effects 1 depth', 0.2, 10),
   ]);
-  const [dry] = into(ac, instrument.output);
-  const [room] = into(ac, instrument.effects);
+  const [dry] = into(ac, out);
+  const [room] = into(ac, roomOut);
   assert.deepEqual(dry.gain.events, [
     ['value', 1],
     ['value', 0.5],
@@ -106,9 +118,9 @@ test('an instrument answering the per-note controllers a note is heard by: a sta
 });
 
 test("an instrument answering #7 Volume alone: a gain after the voice, a later change from its time, as a background's held note is hushed on a beat; its stages let go once its voice has stopped, as the next note starts, its sender detaching none (V3)", () => {
-  const { ac, instrument, nodes } = setup({ answers: ['volume'] });
+  const { ac, out, instrument, nodes } = setup({ answers: ['volume'] });
   instrument.receive([noteOn(0, 57, 10)]);
-  const [dry] = into(ac, instrument.output);
+  const [dry] = into(ac, out);
   const [voiceOut] = into(ac, dry);
   assert.equal(dry.kind, 'gain');
   assert.ok(!nodes().some((node) => node.kind === 'panner'), 'no pan pot');
@@ -122,6 +134,23 @@ test("an instrument answering #7 Volume alone: a gain after the voice, a later c
   instrument.receive([noteOn(2, 62, 20)]);
   assert.deepEqual(ac.rec.disconnects, [dry], 'rung out, let go as the next note starts');
   assert.ok(voiceOut, 'a voice into it');
+});
+
+test("an instrument with no stage for #7 Volume: a note's volume on its voice's out, times its patch's own, gliding from its time, as a background's held note is hushed on a beat and brought back (P3b, V4)", () => {
+  time = 10;
+  const engine = new Engine({ AudioContext: Context });
+  const ac = engine.audioContext;
+  const patches = new Patches({ patches: { loud: { ...VOICE, out: { volume: 0.8 } } }, now: () => time });
+  const out = ac.createGain();
+  const instrument = new Instrument({ engine, patches, patch: 'loud', beat: () => 0.8, into: out });
+  instrument.receive([noteOn(0, 57, 10)]);
+  const [voiceOut] = into(ac, out);
+  instrument.receive([perNote(0, 'volume', 0, 10.8, 0.25)]);
+  instrument.receive([perNote(0, 'volume', 1, 12, 0.25)]);
+  assert.deepEqual(voiceOut.gain.events.slice(-2), [
+    ['target', 0, 10.8, 0.25],
+    ['target', 0.8, 12, 0.25],
+  ]);
 });
 
 test("an instrument's knobs, its tempo and its draws handed in, read as each note starts; its patch the bank's as it plays, by name (V3)", () => {
@@ -154,7 +183,14 @@ test("an instrument's draws its own, handed in, else Math.random's; a patch the 
   time = 10;
   const engine = new Engine({ AudioContext: Context });
   const patches = new Patches({ patches: { drawn }, now: () => time });
-  const instrument = new Instrument({ engine, patches, patch: 'drawn', beat: () => 0.8, random: () => 0.5 });
+  const instrument = new Instrument({
+    engine,
+    patches,
+    patch: 'drawn',
+    beat: () => 0.8,
+    random: () => 0.5,
+    into: engine.audioContext.destination,
+  });
   instrument.receive([noteOn(0, 69, 10)]);
   const levels = engine.audioContext.rec.nodes
     .filter((node) => node.kind === 'gain')
@@ -163,5 +199,6 @@ test("an instrument's draws its own, handed in, else Math.random's; a patch the 
     levels.some((value) => Math.abs(value - 0.4) < 1e-9),
     `its osc's level drawn halfway: ${levels}`,
   );
-  assert.throws(() => new Instrument({ engine, patches, patch: 'none', beat: () => 0.8 }), /no patch none/);
+  const into = engine.audioContext.destination;
+  assert.throws(() => new Instrument({ engine, patches, patch: 'none', beat: () => 0.8, into }), /no patch none/);
 });

@@ -13,7 +13,7 @@ const perNote = (index, controller, value, t) => ({ type: 'per-note controller',
 test("the input: a track's messages go to its instrument at once, as they're sent", () => {
   const received = [];
   const sequencer = new Sequencer({
-    instruments: () => ({ role: 'tap', receive: (messages) => received.push(messages) }),
+    tracks: () => ({ role: 'tap', receive: (messages) => received.push(messages) }),
   });
   const messages = [noteOn(0, 2), noteOff(0, 2.125)];
   sequencer.send({ track: 'tap', clip: { kind: 'tap' }, live: true }, messages);
@@ -22,9 +22,9 @@ test("the input: a track's messages go to its instrument at once, as they're sen
 
 // the stream a sequencer's own (L1b): no module state, so two sequencers, a page's and a test's, are heard apart
 test("each sequencer's own stream: its listeners hear its plays, not another sequencer's, until they stop", () => {
-  const instruments = () => ({ role: 'tap', receive: () => {} });
-  const mine = new Sequencer({ instruments });
-  const other = new Sequencer({ instruments });
+  const tracks = () => ({ role: 'tap', receive: () => {} });
+  const mine = new Sequencer({ tracks });
+  const other = new Sequencer({ tracks });
   const heard = [];
   const stop = mine.onPlay((play) => heard.push(play.notes.length));
   const note = (t) => [
@@ -40,7 +40,7 @@ test("each sequencer's own stream: its listeners hear its plays, not another seq
 
 test('the input: and into the stream as the play they make, its notes as the stream carries them, after the instrument has them', () => {
   const order = [];
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => order.push('instrument') }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => order.push('instrument') }) });
   const flower = { kind: 'tap' };
   const plays = [];
   const stop = sequencer.onPlay((play) => {
@@ -67,7 +67,7 @@ test('the input: and into the stream as the play they make, its notes as the str
 test("the input: per-note management alone goes to the instrument at once, and puts no play into the stream: a note's bookkeeping, nothing heard", () => {
   const received = [];
   const sequencer = new Sequencer({
-    instruments: () => ({ role: 'tap', receive: (messages) => received.push(messages) }),
+    tracks: () => ({ role: 'tap', receive: (messages) => received.push(messages) }),
   });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -82,7 +82,7 @@ test("the input: a track's instrument looked up by its name, as a replay track's
   const asked = [];
   const instrument = { role: 'tap', receive: () => {} };
   const sequencer = new Sequencer({
-    instruments: (track) => {
+    tracks: (track) => {
       asked.push(track);
       return instrument;
     },
@@ -94,7 +94,7 @@ test("the input: a track's instrument looked up by its name, as a replay track's
 test("the input: a controller, a track's parameter by name, a value at a time, jumping there or gliding by its time constant, to its instrument; into the stream a play of its own on its track, no element, its kind and number as a replay's where they come with it (G3a)", () => {
   const received = [];
   const sequencer = new Sequencer({
-    instruments: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
+    tracks: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
   });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -120,7 +120,7 @@ test("the input: a controller, a track's parameter by name, a value at a time, j
 });
 
 test("the input: a track's controller with nothing to name its kind, named by its track (G3a)", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   sequencer.send({ track: 'tap' }, [{ type: 'controller', controller: 'level', value: 0.5, t: 4 }]);
@@ -130,7 +130,7 @@ test("the input: a track's controller with nothing to name its kind, named by it
 });
 
 test("the input: a replay's play into the stream with what the stream carries of it beside its notes, its replay track, until when, its draws, as before G0", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   const flower = { kind: 'tap' };
@@ -156,7 +156,7 @@ test("the input: a replay's play into the stream with what the stream carries of
 });
 
 test("the input: a vine's replayed note in the stream with its bend, its vibrato and its glides, as before G0", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'trace', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   sequencer.send({ track: 'replay vine 1', clip: { kind: 'vine' } }, [
@@ -195,7 +195,7 @@ test("the input: a vine's replayed note in the stream with its bend, its vibrato
 
 test('the way back: each note the input passes on handed to its listeners at once, with where it went, after the instrument and the stream have it (G0e)', () => {
   const order = [];
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => order.push('instrument') }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => order.push('instrument') }) });
   const back = [];
   const stopPlays = sequencer.onPlay(() => order.push('stream'));
   sequencer.onNote((address, note) => {
@@ -223,7 +223,7 @@ test('the way back: each note the input passes on handed to its listeners at onc
 });
 
 test('the way back: messages with no note on hand nothing back; a listener stopped hears no more (G0e)', () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const back = [];
   const stop = sequencer.onNote((address, note) => back.push(note));
   sequencer.send({ track: 'replay tap 1' }, [{ type: 'controller', controller: 'level', value: 0.5, t: 3 }]);
@@ -235,7 +235,7 @@ test('the way back: messages with no note on hand nothing back; a listener stopp
 });
 
 test("a held note's glide and note off sent later (G2a): each a play of its own, no notes, by the note's index; every note with its index", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'trace', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   const to = { track: 'trace', clip: { kind: 'vine' }, live: true, play: { region: 3 } };
@@ -254,7 +254,7 @@ test("a held note's glide and note off sent later (G2a): each a play of its own,
 });
 
 test("a send with new notes and others' note offs, as a held part's key changes (G2a): one play, its notes and its ends", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'held 1', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'held 1', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   sequencer.send({ track: 'background 1', clip: { kind: 'ambient' } }, [noteOff(1, 4), noteOn(2, 4, { pitch: 43 })]);
@@ -266,7 +266,7 @@ test("a send with new notes and others' note offs, as a held part's key changes 
 });
 
 test("the way back hands on each note off sent after its note, a held note's, with where it went (G2b); one sent with its note on, its length, not", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'hold', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'hold', receive: () => {} }) });
   const ends = [];
   const stop = sequencer.onNoteOff((address, end) => ends.push({ track: address.track, ...end }));
   const to = { track: 'hold', clip: { kind: 'bloom' }, live: true };
@@ -279,7 +279,7 @@ test("the way back hands on each note off sent after its note, a held note's, wi
 });
 
 test('every note in the stream with its velocity, 0 to 1, as its note on had it (G3a)', () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   sequencer.send({ track: 'replay tap 1', clip: { kind: 'tap' } }, [
@@ -295,7 +295,7 @@ test('every note in the stream with its velocity, 0 to 1, as its note on had it 
 });
 
 test("a note's per-note controllers sent with it in the stream as its controllers, its values as it starts: how it's heard from its own place, its rise; those it carries already, its bend, vibrato and glides, not twice (G3a)", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'hold', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'hold', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   sequencer.send({ track: 'hold', clip: { kind: 'bloom' }, live: true }, [
@@ -319,7 +319,7 @@ test("a note's per-note controllers sent with it in the stream as its controller
 });
 
 test('a note with no per-note controllers but those it carries already has none in the stream (G3a)', () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'trace', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   sequencer.send({ track: 'replay vine 1', clip: { kind: 'vine' } }, [
@@ -332,7 +332,7 @@ test('a note with no per-note controllers but those it carries already has none 
 });
 
 test("a per-note controller sent after its note, but #3 Pitch, its glide: a play of its own by the note's index, a change, jumping there or gliding by its time constant (G3a)", () => {
-  const sequencer = new Sequencer({ instruments: () => ({ role: 'tap', receive: () => {} }) });
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   const to = { track: 'tap', clip: { kind: 'tap' }, live: true, play: { region: 2 } };
@@ -367,7 +367,7 @@ test("a per-note controller sent after its note, but #3 Pitch, its glide: a play
 test("two senders' notes of one index on one track kept apart: the instrument hears each note by an index of its own, a note off ending its own; the stream keeps each sender's index (P3a)", () => {
   const received = [];
   const sequencer = new Sequencer({
-    instruments: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
+    tracks: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
   });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -391,7 +391,7 @@ test("two senders' notes of one index on one track kept apart: the instrument he
 test("a note ringing out after its note off still gets its sender's changes and its detach, though its index is free again for a new note, last in turn (P3a)", () => {
   const received = [];
   const sequencer = new Sequencer({
-    instruments: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
+    tracks: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
   });
   sequencer.send({ track: 'tap' }, [noteOn(7, 1)]);
   sequencer.send({ track: 'tap' }, [noteOff(7, 2)]);

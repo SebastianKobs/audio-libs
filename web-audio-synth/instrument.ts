@@ -1,16 +1,17 @@
 // ---------- libs/web-audio-synth/instrument: an instrument, messages in, its patch's notes out of its output (V3) ----------
 // As a bass, a keyboard or a rack synth is one: MIDI 2.0's channel voice messages in (libs/midi/), whoever sends them, a keyboard or a
-// sequencer; its notes out of its output, which whoever has it patches into a desk, and, where it answers #91 Effects 1 Depth, each
-// note's room out of a second, as a multi-out synth's. Each note a voice of the patch it plays, from a bank (patches.ts), by name, as
+// sequencer; its notes out of its output, patched as it's made, into a desk, say, and, where it answers #91 Effects 1 Depth, each note's
+// room out of a second, as a multi-out synth's: where they go handed in, no node of its own, so what it builds is only its voices and
+// their stages (V4). Each note a voice of the patch it plays, from a bank (patches.ts), by name, as
 // MIDI's program change picks one, so an edit to it reaches every note of it that sounds, any instrument's; held until its note off lets
 // it go, one sent with it too, as a keyboard plays a synth (G0i2). Its knobs (params), the tempo (beat) and its draws (random) handed in,
 // read as each note starts. The per-note controllers it answers each a stage of the note's own (note-stages.ts), set as the note starts
 // and glided to by a change that comes later, from its time; let go once its sender detaches the note, or once its voice has stopped, as
-// the next note starts, so a sender that never detaches leaves none behind. A track's controllers aren't its: whoever plays it maps them
+// the next note starts, so a sender that never detaches leaves none behind. #7 Volume with no stage for it sets the voice's own out, times
+// its patch's own volume, as a background's held note is hushed (P3b). A track's controllers aren't its: whoever plays it maps them
 import { notesIn, type Message, type PerNoteController, type Receiver, type SentNote } from '../midi/index.ts';
 import type { Params } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
-import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
 import { NoteStages, type StageController } from './note-stages.ts';
 import type { Patches } from './patches.ts';
 import { playNote, type NoteControls, type NoteToPlay } from './play.ts';
@@ -23,8 +24,6 @@ interface Voice {
 }
 
 export class Instrument implements Receiver {
-  readonly output: AudioNode; // its way out, patched into a desk
-  readonly effects: AudioNode | null; // its second, each note's room, where it answers #91 Effects 1 Depth
   readonly #engine: Engine;
   readonly #patches: Patches;
   readonly #patch: string;
@@ -32,13 +31,14 @@ export class Instrument implements Receiver {
   readonly #beat: () => number;
   readonly #random: () => number;
   readonly #answers: readonly StageController[];
-  readonly #out: BuiltModule;
-  readonly #room: BuiltModule | null;
+  readonly #into: AudioNode;
+  readonly #effects: AudioNode | null;
   readonly #voices = new Map<number, Voice>(); // each note as it sounds, by its index
   readonly #sounding = new Set<Voice>(); // every voice not yet let go, one whose index a new note has taken too
 
   // patch: the bank's patch it plays, by name. params: its knobs, as a note starts. beat: a beat's length now. random: its draws, its own
-  // where they're kept apart, else Math.random's. answers: the per-note controllers it answers, a stage each, none unless it says
+  // where they're kept apart, else Math.random's. answers: the per-note controllers it answers, a stage each, none unless it says. into:
+  // where its output goes; effects: its second's, each note's room, where it answers #91 Effects 1 Depth
   constructor({
     engine,
     patches,
@@ -47,6 +47,8 @@ export class Instrument implements Receiver {
     beat,
     random = Math.random,
     answers = [],
+    into,
+    effects = null,
   }: {
     engine: Engine;
     patches: Patches;
@@ -55,6 +57,8 @@ export class Instrument implements Receiver {
     beat: () => number;
     random?: () => number;
     answers?: readonly StageController[];
+    into: AudioNode;
+    effects?: AudioNode | null;
   }) {
     if (!patches.of(patch)) {
       throw new Error(`no patch ${patch}: the bank has none by that name`);
@@ -66,10 +70,8 @@ export class Instrument implements Receiver {
     this.#beat = beat;
     this.#random = random;
     this.#answers = answers;
-    this.#out = new BuiltModule(engine, { patch: GAIN });
-    this.output = this.#out.output;
-    this.#room = answers.includes('effects 1 depth') ? new BuiltModule(engine, { patch: GAIN }) : null;
-    this.effects = this.#room?.output ?? null;
+    this.#into = into;
+    this.#effects = effects;
   }
   // the messages handed it, at once: each note on a voice, a note off letting its note go, one sent with it too; a per-note controller sent
   // with its note planned into it, one sent later a change; a note detached, its stages let go
@@ -96,8 +98,8 @@ export class Instrument implements Receiver {
     const stages =
       this.#answers.length ?
         new NoteStages(this.#engine, {
-          into: this.#out.input,
-          room: this.#room?.input ?? null,
+          into: this.#into,
+          room: this.#effects,
           heard: note.controllers,
           answers: this.#answers,
         })
@@ -107,14 +109,15 @@ export class Instrument implements Receiver {
       note: noteOf(note),
       context: { beat: this.#beat(), random: this.#random },
       params: this.#params(),
-      into: stages ? stages.input : this.#out.input,
+      into: stages ? stages.input : this.#into,
     }); // it follows its patch's edits as it sounds (G0.2b)
     const voice = { index: note.noteOn.index, controls, stages };
     this.#voices.set(voice.index, voice);
     this.#sounding.add(voice);
   }
   // a note's controller changed as it sounds: its pitch, #3 Pitch 7.25, glides its voice there at its time, where its patch has a glide;
-  // another glides its stage by the time constant it comes with, or with none sets it, from its time
+  // #7 Volume with no stage for it its voice's out, times its patch's own volume (P3b); another glides its stage by the time constant it
+  // comes with, or with none sets it, from its time
   #changed({ index, controller, value, t, glide }: PerNoteController): void {
     const voice = this.#voices.get(index);
     if (!voice) {
@@ -122,6 +125,11 @@ export class Instrument implements Receiver {
     }
     if (controller === 'pitch') {
       voice.controls.glide?.(value, t);
+      return;
+    }
+    if (controller === 'volume' && !this.#answers.includes('volume')) {
+      const own = this.#patches.of(this.#patch)!.out?.volume ?? 1; // one the bank has; 1 at 0 dB
+      voice.controls.set('out.volume', own * value, t, glide);
       return;
     }
     voice.stages?.glide(controller, value, glide ?? 0, this.#engine.at(t));

@@ -26,15 +26,16 @@ import {
 // play; and what the stream carries of a replay beside its notes (play: its replay track's number, until when, its draws), until G1 to G3
 // record it from the messages, and of a track's own controllers, its kind and number as its replays carry them (G3a); and who sends, kept
 // apart on a track from another sender, so two senders' notes of one index don't meet at its instrument (P3a)
-export interface Address<Track extends string> {
-  track: Track;
+export interface Address<Name extends string> {
+  track: Name;
   clip?: { kind: string } | undefined;
   live?: boolean | undefined;
   play?: Partial<Play> | undefined;
   source?: string | undefined;
 }
-// a track's instrument, as the sequencer plays it: its role, and the messages handed it, at once (Receiver, libs/midi/)
-export interface Instrument extends Receiver {
+// a track, as the sequencer plays it: the messages handed it, at once (Receiver, libs/midi/), its notes to its instrument, its controllers
+// to its strip, its user's; and its role, the stream's label for what it plays (the track's instrument until V4)
+export interface Track extends Receiver {
   readonly role: string;
 }
 // a note passed on, handed back where it went: its track, any of the sequencer's, its clip, whether it's played as you play it
@@ -49,31 +50,31 @@ interface AfterTheirNotes {
 }
 // what a control surface plays into: its tracks' messages, each at its clock time; and the way back, each note as it's passed on, until
 // stopped (onNote() returns how): every surface's, on every track, as one sequencer has them all, a surface lighting its own (G0f)
-export interface Input<Track extends string> {
-  send(to: Address<Track>, messages: readonly Message[]): void;
+export interface Input<Name extends string> {
+  send(to: Address<Name>, messages: readonly Message[]): void;
   onNote(listener: NoteListener): () => void;
   onNoteOff(listener: NoteOffListener): () => void;
 }
 
-// a track's instrument, looked up by its name, as a replay track's is made the first time it's played on (G0d)
-export class Sequencer<Track extends string> implements Input<Track> {
-  readonly #instruments: (track: Track) => Instrument;
+// each track, looked up by its name, as a replay track's is made the first time it's played on (G0d)
+export class Sequencer<Name extends string> implements Input<Name> {
+  readonly #tracks: (track: Name) => Track;
   readonly #listeners = new Set<NoteListener>(); // the way back's
   readonly #offListeners = new Set<NoteOffListener>(); // and its note offs' (G2b)
   readonly #stream = new Stream(); // every play it passes on, to whoever listens, its own (L1b)
   readonly #apart = new Map<string, { rotation: NoteRotation; indices: Map<string, number> }>(); // each track's indices, by sender (P3a)
 
-  constructor({ instruments }: { instruments: (track: Track) => Instrument }) {
-    this.#instruments = instruments;
+  constructor({ tracks }: { tracks: (track: Name) => Track }) {
+    this.#tracks = tracks;
   }
-  send(to: Address<Track>, messages: readonly Message[]): void {
-    const instrument = this.#instruments(to.track);
-    instrument.receive(this.#keptApart(to, messages));
+  send(to: Address<Name>, messages: readonly Message[]): void {
+    const track = this.#tracks(to.track);
+    track.receive(this.#keptApart(to, messages));
     const notes = notesIn(messages);
     const after = afterTheirNotes(messages);
     const controls = controlsIn(messages);
     if (notes.length || heardAfter(after) || controls.length) {
-      this.#stream.played(playOf(to, instrument.role, notes, after, controls)); // a note's per-note management alone is its bookkeeping
+      this.#stream.played(playOf(to, track.role, notes, after, controls)); // a note's per-note management alone is its bookkeeping
     }
     this.#handBack(to, notes);
     for (const end of after.ends) {
@@ -100,7 +101,7 @@ export class Sequencer<Track extends string> implements Input<Track> {
   // index don't meet there; the stream and the way back keep each sender's own (P3a, M's brought forward). A note off frees the track's
   // index for a new note, last in turn; what the sender sends for its note after, as it rings out, still goes to it, until the sender
   // detaches it or starts another note on its index
-  #keptApart(to: Address<Track>, messages: readonly Message[]): Message[] {
+  #keptApart(to: Address<Name>, messages: readonly Message[]): Message[] {
     let track = this.#apart.get(to.track);
     if (!track) {
       track = { rotation: new NoteRotation(), indices: new Map<string, number>() };
@@ -126,7 +127,7 @@ export class Sequencer<Track extends string> implements Input<Track> {
     });
   }
   // each note, once its instrument and the stream have it, to whoever listens
-  #handBack(to: Address<Track>, notes: readonly SentNote[]): void {
+  #handBack(to: Address<Name>, notes: readonly SentNote[]): void {
     for (const note of notes) {
       for (const listener of this.#listeners) {
         listener(to, note);
