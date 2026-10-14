@@ -1,12 +1,12 @@
-// A parameter's target on a built strip (mockup/src/libs/web-audio-mixer/target.ts, U2c4b1a): where its key lands, a stage and its
-// port, and a value set there now, at a time or gliding. On the engine and its stand-in for Web Audio, as build.test.js
+// A change set on a built strip by its key (mockup/src/libs/web-audio-mixer/target.ts, U2c4b1a, DRY9c): where its key lands, and a
+// value set there now, at a time or gliding; when a change lands. On the engine and its stand-in for Web Audio, as build.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
-import { Mixer, buildChannel, buildFxChannel, targetOf } from '../index.ts';
+import { Mixer, buildChannel, buildFxChannel, setOn, timingOf } from '../index.ts';
 
 let time = 0;
 class Context extends StandInContext {
@@ -15,47 +15,46 @@ class Context extends StandInContext {
   }
 }
 
-test("a key's target on a built strip: its volume and its pan, a send built, a slot's chain at its device's port; none for a mute, a send not built, a port its device lacks", () => {
+test("a change set on a built strip by its key, by a timing: its volume and its pan, a send, a slot's param at its device's port; none for a mute, a send to no return, a port its device lacks", () => {
   const { track, reverb } = desk();
   const slots = (slot) =>
     slot === 'utility' ? { chain: track.chains.utility, ports: DEVICES.utility.ports } : undefined;
-  const on = (key) => targetOf(track.strip, { strip: 'track', ...key }, slots);
+  const set = (key, value, timing) => setOn(track.strip, { strip: 'track', ...key }, value, timing, slots);
+  time = 12;
+  assert.equal(set({ param: 'volume' }, 0.5, 'now'), true);
+  assert.deepEqual(track.strip.fader.gain.events.at(-1), ['value', 0.5], 'its volume, its fader, now');
+  set({ param: 'pan' }, 0.25, { at: 13 });
+  assert.deepEqual(track.strip.panStage.input.pan.events.at(-1), ['set', 0.25, 13], 'its pan, at its time');
+  set({ slot: SEND, param: 'reverb' }, 0.75, { glide: 0.1, from: 13 });
   assert.deepEqual(
-    on({ param: 'volume' }),
-    { stage: track.strip.volumeStage, port: 'gain.gain' },
-    'its volume, its fader',
+    track.strip.sends.reverb.gain.events.at(-1),
+    ['target', 0.75, 13, 0.1],
+    'a send, gliding from its time',
   );
-  assert.deepEqual(on({ param: 'pan' }), { stage: track.strip.panStage, port: 'pan.pan' }, 'its pan');
+  set({ slot: 'utility', param: 'level' }, 0.4, 'now');
+  assert.deepEqual(track.chains.utility.paramOf('gain.gain').events.at(-1), ['value', 0.4], "a slot's, at its port");
   assert.deepEqual(
-    on({ slot: SEND, param: 'reverb' }),
-    { stage: track.strip.sendStages.reverb, port: 'gain.gain' },
-    'a send',
+    [
+      set({ param: 'mute' }, 1, 'now'),
+      set({ slot: SEND, param: 'nowhere' }, 1, 'now'),
+      set({ slot: 'utility', param: 'width' }, 1, 'now'),
+    ],
+    [false, false, false],
   );
-  assert.deepEqual(
-    on({ slot: 'utility', param: 'level' }),
-    { stage: track.chains.utility, port: 'gain.gain' },
-    "a slot's",
+  assert.equal(
+    setOn(reverb.strip, { strip: 'reverb', param: 'volume' }, 0.3, 'now', () => undefined),
+    true,
   );
-  assert.deepEqual(
-    [on({ param: 'mute' }), on({ slot: SEND, param: 'delay' }), on({ slot: 'utility', param: 'width' })],
-    [null, null, null],
-  );
-  const fx = targetOf(reverb.strip, { strip: 'reverb', param: 'volume' }, () => undefined);
-  assert.deepEqual(fx, { stage: reverb.strip.volumeStage, port: 'gain.gain' }, "an FX channel's volume, its level");
+  assert.deepEqual(reverb.strip.level.gain.events.at(-1), ['value', 0.3], "an FX channel's volume, its level");
 });
 
-test('a value set on its target now, at a time, or gliding', () => {
-  const { track } = desk();
-  const target = targetOf(track.strip, { strip: 'track', param: 'volume' }, () => undefined);
-  const events = track.strip.fader.gain.events;
-  time = 12;
-  target.stage.set(target.port, 0.5, 'now');
-  assert.deepEqual(events.at(-1), ['value', 0.5], 'now');
-  target.stage.set(target.port, 0.25, { at: 13 });
-  assert.deepEqual(events.at(-1), ['set', 0.25, 13], 'at its time');
-  target.stage.set(target.port, 0.75, { glide: 0.1 });
-  assert.deepEqual(events.at(-1).slice(0, 2), ['target', 0.75], 'gliding');
-  assert.equal(events.at(-1)[3], 0.1, 'by its time constant');
+test("when a change lands: gliding by its time constant, from its time where that's to come, else from now; at its time on the audio's clock; else now", () => {
+  const clocks = { now: 10, at: (t) => t + 100 }; // the audio's clock 100 s on
+  assert.equal(timingOf({ t: 10, value: 1 }, clocks), 'now');
+  assert.equal(timingOf({ t: 9, value: 1 }, clocks), 'now', 'its time passed');
+  assert.deepEqual(timingOf({ t: 11, value: 1 }, clocks), { at: 111 });
+  assert.deepEqual(timingOf({ t: 11, value: 1, glide: 0.05 }, clocks), { glide: 0.05, from: 111 });
+  assert.deepEqual(timingOf({ t: 10, value: 1, glide: 0.05 }, clocks), { glide: 0.05 });
 });
 
 // a desk of a reverb and a track sending to it, through a Utility

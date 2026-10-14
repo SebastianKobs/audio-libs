@@ -6,13 +6,13 @@
 //   - made(): the strip as its owner knows it, from the strip and its slots' chains;
 //   - setByNotes(): whether a param is set on the strip as the track's notes change it; one
 //     that isn't, its owner sets otherwise (a live mix).
-// A change is set by its key through its target (target.ts): now, at its time on the audio's
-// clock, or gliding by a time constant.
-import type { FxChain, Timing } from '../web-audio-fx/index.ts';
+// A change is set by its key on the strip (target.ts's setOn()), when it says (timingOf()): now,
+// at its time on the audio's clock, or gliding from it by a time constant.
+import type { FxChain } from '../web-audio-fx/index.ts';
 import type { Change, ParamKey, StripEntry } from '../desk-plan/index.ts';
 import { buildChannel, type BuildOn, type StripValues } from './build.ts';
 import type { Channel } from './channel.ts';
-import { targetOf } from './target.ts';
+import { setOn, timingOf } from './target.ts';
 
 // a track's template: its strip as data, and the values it's built at
 interface Template {
@@ -79,12 +79,8 @@ export class TrackStrips<TrackStrip> {
     if (!made || !this.#setByNotes(change.key)) {
       return false;
     }
-    const target = targetOf(made.strip, change.key, (slot) => this.#slotted(made, slot));
-    if (!target) {
-      return false;
-    }
-    target.stage.set(target.port, change.value, this.#timingOf(change));
-    return true;
+    const timing = timingOf(change, { now: this.#now(), at: (t) => this.#on().engine.at(t) });
+    return setOn(made.strip, change.key, change.value, timing, (slot) => this.#slotted(made, slot));
   }
   // a track's strip, made from its template the first time; none for a track with no template
   #madeOn(track: string): Made<TrackStrip> | null {
@@ -112,16 +108,5 @@ export class TrackStrips<TrackStrip> {
       return undefined;
     }
     return { chain, ports: this.#on().devices[device]?.ports ?? {} };
-  }
-  // When a change lands: gliding by its time constant, at its time on the audio's clock, or
-  // now once its time has passed.
-  #timingOf({ t, glide }: Change): Timing {
-    if (glide !== undefined) {
-      return { glide };
-    }
-    if (t > this.#now()) {
-      return { at: this.#on().engine.at(t) };
-    }
-    return 'now';
   }
 }

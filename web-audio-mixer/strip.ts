@@ -1,6 +1,6 @@
 // ---------- libs/web-audio-mixer/strip: what a channel and an FX channel share ----------
 import type { Desk, MixerEngine } from './mixer.ts';
-import { BuiltModule, DEVICES, GAIN } from '../web-audio-fx/index.ts';
+import { BuiltModule, DEVICES, GAIN, MOVED, type Timing } from '../web-audio-fx/index.ts';
 import { MUTE } from './gains.ts';
 
 // An insert on a strip: modules the caller built in the context, in at input, out at output.
@@ -29,7 +29,8 @@ const LEVEL = DEVICES.gain.ports.level; // where a Gain's level is set: a volume
 // A channel strip, as a console has one: a channel's or an FX channel's:
 //   - its inserts, in order, and its sends, each to a return, a stage of its own (sendStages);
 //   - its volume, its pan and its mute, each a stage, set at its port;
-//   - a control set by its name (set()): 'volume', 'pan', or a send by its return's name.
+//   - a control set by its name (set()): 'volume', 'pan', or a send by its return's name,
+//     by a timing, gliding there unless it says.
 // A send to a return its setup doesn't give is built when first turned up, from its tail, from 0.
 export abstract class ChannelStrip {
   readonly inserts: Insert[];
@@ -55,31 +56,34 @@ export abstract class ChannelStrip {
   // where it's muted
   protected abstract get muteStage(): BuiltModule;
 
-  volume(volume: number): void {
-    this.volumeStage.set(LEVEL, volume);
+  volume(volume: number, timing: Timing = MOVED): void {
+    this.volumeStage.set(LEVEL, volume, timing);
   }
-  panTo(position: number): void {
-    this.panStage?.set(DEVICES.pan.ports.pan, position);
+  panTo(position: number, timing: Timing = MOVED): void {
+    this.panStage?.set(DEVICES.pan.ports.pan, position, timing);
   }
   muted(muting: boolean): void {
     this.muteStage.set(LEVEL, muting ? 0 : 1, MUTE);
   }
   // A send turned up or down, gliding there; one to a return its setup doesn't give built as it's first turned up.
-  sendTo(to: string, amount: number): void {
+  // Returns whether it has one.
+  sendTo(to: string, amount: number, timing: Timing = MOVED): boolean {
     const sendStage = this.sendStages[to] ?? this.#turnedUp(to, amount);
-    sendStage?.set(LEVEL, amount);
+    sendStage?.set(LEVEL, amount, timing);
+    return sendStage !== null && sendStage !== undefined;
   }
-  // A control by its name, as a desk's remote control has them: its volume, its pan, or a send by its return's name.
-  set(control: string, value: number): void {
+  // A control by its name, as a desk's remote control has them: its volume, its pan, or a send
+  // by its return's name. Returns whether it has it: a strip with no pan, a mute, none.
+  set(control: string, value: number, timing: Timing = MOVED): boolean {
     if (control === 'volume') {
-      this.volume(value);
-      return;
+      this.volume(value, timing);
+      return true;
     }
     if (control === 'pan') {
-      this.panTo(value);
-      return;
+      this.panTo(value, timing);
+      return this.panStage !== null;
     }
-    this.sendTo(control, value);
+    return this.sendTo(control, value, timing);
   }
   // The sends its setup gives. By name: at 1, from its tail. With an amount: a gain of its own,
   // from where it's taken; preFader is after its inserts, before its volume.

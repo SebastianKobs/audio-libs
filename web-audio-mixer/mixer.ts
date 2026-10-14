@@ -4,7 +4,7 @@ import { sentTo, type StripOptions } from './strip.ts';
 import { Routing, type StripKind, MASTER } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
-import { BuiltModule, DEVICES, GAIN } from '../web-audio-fx/index.ts';
+import { BuiltModule, DEVICES, GAIN, MOVED, type Timing } from '../web-audio-fx/index.ts';
 import { restartAt } from '../audio-plan/index.ts';
 // what the mixer and its strips need of the engine: the context, its time, a meter on a node, a plan built and set, and whether it can pan
 export type MixerEngine = Pick<Engine, 'audioContext' | 'now' | 'meter' | 'build' | 'apply' | 'canPan'>;
@@ -102,9 +102,9 @@ export class Mixer {
     strip.tail.disconnect(this.#outOf(from));
     strip.tail.connect(this.#outOf(out));
   }
-  volume(value: number): void {
+  volume(value: number, timing: Timing = MOVED): void {
     this.#volume = value;
-    this.#master.set(LEVEL, value);
+    this.#master.set(LEVEL, value, timing);
   }
   // The master faded out, quickly. Switching the audio off once it's quiet is the
   // desk's owner's: a desk has no power switch of its own.

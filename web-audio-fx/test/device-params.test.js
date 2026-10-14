@@ -46,6 +46,17 @@ test('a param set on the chain that plays it: at the port its module declares, g
       ['target', 0.25, 10, SMOOTHING],
       'at its port, gliding',
     );
+    devices.set('tap/utility', 'level', 0.3, { at: 13 });
+    assert.deepEqual(utility.paramOf('gain.gain').events.at(-1), ['set', 0.3, 13], 'by a timing: at its time');
+    assert.deepEqual(
+      [
+        devices.rebuilds('tap/air', 'q'),
+        devices.rebuilds('tap/air', 'cutoff'),
+        devices.rebuilds('tap/utility', 'level'),
+      ],
+      [true, false, false],
+      'a param with no port rebuilds its chain',
+    );
     const built = biquads().length;
     devices.set('tap/air', 'q', 2);
     assert.equal(biquads().length, built + 1, 'a resonance has no port: its chain rebuilt');

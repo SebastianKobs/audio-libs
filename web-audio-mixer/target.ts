@@ -1,12 +1,11 @@
-// ---------- libs/web-audio-mixer/target: where a parameter's key lands on a built strip, and a value set there ----------
-// A key (libs/desk-plan/'s ParamKey) lands on a stage and its port:
-//   a strip's volume: its volume stage (a channel's fader, an FX channel's level); its pan: its pan stage;
-//   a send: the send's stage, once it's built;
-//   a slot's param: the slot's chain, at the port its device declares for the param.
-// None for a mute or a solo, which silence a strip by the routing, nor where nothing's built at it yet.
-// A value lands there by a timing (libs/web-audio-fx/'s): now, at a time on the audio's clock, or gliding by a time constant.
-import { SEND, type ParamKey } from '../desk-plan/index.ts';
-import { DEVICES, type Settable, type Target } from '../web-audio-fx/index.ts';
+// ---------- libs/web-audio-mixer/target: a change set on a built strip by its key, on time ----------
+// A key (libs/desk-plan/'s ParamKey) lands on a built strip (setOn()):
+//   - its own volume or pan, or a send by its return: the strip's own controls (ChannelStrip.set());
+//   - a slot's param: the slot's chain, at the port its device declares for the param.
+// None for a mute or a solo, which silence a strip by the routing, nor where nothing's built.
+// A value lands there by a timing (libs/web-audio-fx/'s), when its change says (timingOf()).
+import { SEND, type Change, type ParamKey } from '../desk-plan/index.ts';
+import type { Settable, Timing } from '../web-audio-fx/index.ts';
 import type { Channel } from './channel.ts';
 import type { FxChannel } from './fx-channel.ts';
 
@@ -15,35 +14,43 @@ interface Slotted {
   chain: Settable;
   ports: Readonly<Record<string, string>>;
 }
+// the clock a change's time is on, and the audio's clock a time on it is played on
+interface Clocks {
+  now: number;
+  at: (t: number) => number;
+}
 
-// A key's target on a built strip; slotted: a slot's chain and its device's ports, by the slot's name.
-export function targetOf(
+// A change set on a built strip by its key, by a timing; slotted: a slot's chain and its
+// device's ports, by the slot's name. Returns whether the strip has it.
+export function setOn(
   strip: Channel | FxChannel,
   { slot, param }: ParamKey,
+  value: number,
+  timing: Timing,
   slotted: (slot: string) => Slotted | undefined,
-): Target | null {
-  if (slot === undefined) {
-    return ownTarget(strip, param);
-  }
-  if (slot === SEND) {
-    const stage = strip.sendStages[param];
-    return stage ? { stage, port: DEVICES.gain.ports.level } : null;
+): boolean {
+  if (slot === undefined || slot === SEND) {
+    return strip.set(param, value, timing); // its own, or a send by its return
   }
   const device = slotted(slot);
   const port = device?.ports[param];
   if (!device || !port) {
-    return null;
+    return false;
   }
-  return { stage: device.chain, port };
+  device.chain.set(port, value, timing);
+  return true;
 }
-
-// a strip's own param's target: its volume or its pan; none for a mute or a solo
-function ownTarget(strip: Channel | FxChannel, param: string): Target | null {
-  if (param === 'volume') {
-    return { stage: strip.volumeStage, port: DEVICES.gain.ports.level };
+// When a change lands on the audio:
+//   1. gliding by its time constant: from its time, where that's to come, else from now;
+//   2. at once, at its time on the audio's clock, where that's to come;
+//   3. else now.
+export function timingOf({ t, glide }: Pick<Change, 't' | 'glide'>, { now, at }: Clocks): Timing {
+  const toCome = t > now;
+  if (glide !== undefined) {
+    return toCome ? { glide, from: at(t) } : { glide };
   }
-  if (param === 'pan' && strip.panStage) {
-    return { stage: strip.panStage, port: DEVICES.pan.ports.pan };
+  if (toCome) {
+    return { at: at(t) };
   }
-  return null;
+  return 'now';
 }

@@ -48,3 +48,16 @@ test('a change set at once once its time has come; one for later kept until a ti
   clock.tick(13);
   assert.equal(set.length, 4, 'each set once');
 });
+
+test('a change with a lead: set at once once its time is that close, else kept until a tick brings it that close', () => {
+  const clock = clockAt(10);
+  const set = [];
+  const changes = new HeldChanges({ clock, lead: 0.1, set: (change) => set.push(change.value) });
+  changes.change({ key: { strip: 'you', param: 'volume' }, value: 0.5, t: 10.05 });
+  changes.change({ key: { strip: 'you', param: 'volume' }, value: 0.6, t: 10.5 });
+  assert.deepEqual(set, [0.5], 'within its lead: at once');
+  clock.tick(10.3);
+  assert.deepEqual(set, [0.5], 'kept');
+  clock.tick(10.4);
+  assert.deepEqual(set, [0.5, 0.6], 'as a tick brings it within its lead');
+});

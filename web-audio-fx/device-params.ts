@@ -2,16 +2,16 @@
 // As FxModules has the modules: each device by its name, its params a live copy of its
 // start, changed only through set(), handed out as copies.
 // A param is set on the chain that plays the device, once it's built:
-//   - at the port its module declares for it, gliding there;
+//   - at the port its module declares for it, by a timing, gliding there unless it says;
 //   - where it has none, the chain rebuilt, reading the params as they are now,
-//     the old one ringing out.
+//     the old one ringing out (rebuilds()).
 // A param declared in beats is played as the note length it matches,
 // or seconds at the beat where none does.
 import { delayTimeOf, type Params } from '../synth/index.ts';
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { LiveCopies } from '../util/index.ts';
 import type { Rebuilds } from './modules.ts';
-import type { Settable } from './timing.ts';
+import { MOVED, type Settable, type Timing } from './timing.ts';
 
 // a chain that plays a device: set at a port, or rebuilt
 type Playing = Settable & Rebuilds;
@@ -63,7 +63,11 @@ export class DeviceParams {
   start(device: string): Params | undefined {
     return this.#params.start(device);
   }
-  set(device: string, param: string, value: number): void {
+  // whether a param set rebuilds its device's chain: one with no port
+  rebuilds(device: string, param: string): boolean {
+    return !this.#devices.get(device)!.ports[param]; // a device added
+  }
+  set(device: string, param: string, value: number, timing: Timing = MOVED): void {
     const played = this.#devices.get(device)!; // a device added
     this.#params.set(device, { ...this.#params.of(device), [param]: this.#playedAs(played.specs[param], value) });
     if (!played.chain) {
@@ -74,7 +78,7 @@ export class DeviceParams {
       played.chain.rebuild();
       return;
     }
-    played.chain.set(port, value);
+    played.chain.set(port, value, timing);
   }
   // A value as its param plays it: in beats, a note length; any other as it comes.
   #playedAs(spec: ParamSpec | ParamSpecs | undefined, value: number): number | string {

@@ -3,11 +3,15 @@
 //   - a strip's own: its volume and pan, its mute and solo; the master's volume, mute and solo;
 //   - a send: to a return on the desk, from any strip but the master;
 //   - a slot's param: on a device among the device params (libs/web-audio-fx/'s DeviceParams).
-// Then held until its time (libs/desk-plan/'s HeldChanges), and set by the key's shape:
+// Then set by the key's shape:
 //   1. a strip's own volume or pan, and a send by its return: on the live mix;
 //   2. a mute or a solo: the live mix's switches, on above 0;
 //   3. a slot's param: on its device, among the device params.
-import type { DeviceParams } from '../web-audio-fx/index.ts';
+// When, each held (libs/desk-plan/'s HeldChanges), its state changing then:
+//   - one that can glide: until its lead ahead of its time, then set on the audio at its time
+//     (target.ts's timingOf()), as a clock hands its 16ths out ahead;
+//   - a switch, and a param that rebuilds its device: until its time.
+import type { DeviceParams, Timing } from '../web-audio-fx/index.ts';
 import {
   HeldChanges,
   SEND,
@@ -19,12 +23,13 @@ import {
   type Ticking,
 } from '../desk-plan/index.ts';
 import { MASTER } from '../mixer/index.ts';
+import { timingOf } from './target.ts';
 
 // The live mix, its owner's: a strip's own volume and pan and its sends, kept as its owner
 // keeps them, and its switches.
 export interface LiveMix {
-  // a strip's volume or pan, or a send by its return's name
-  set(strip: string, control: string, value: number): void;
+  // a strip's volume or pan, or a send by its return's name, by a timing
+  set(key: ParamKey, value: number, timing: Timing): void;
   setMute(strip: string, on: boolean): void;
   setSolo(strip: string, on: boolean): void;
 }
@@ -37,29 +42,54 @@ export class DeskChanges {
   readonly #mix: LiveMix;
   readonly #params: DeviceParams;
   readonly #returns: ReadonlySet<string>; // the desk's returns, a send is named by
-  readonly #held: HeldChanges;
+  readonly #clock: Ticking;
+  readonly #at: (t: number) => number;
+  readonly #ahead: HeldChanges; // those that can glide, set their lead ahead
+  readonly #due: HeldChanges; // switches and rebuilds, set at their time
 
-  // desk: its strips as data, which names its returns; clock: its time now and its ticks
+  // desk: its strips as data, which names its returns; clock: its time now and its ticks;
+  // at(): a time on it on the audio's clock; lead: how far ahead one that can glide is set
   constructor({
     desk,
     mix,
     params,
     clock,
+    at,
+    lead,
   }: {
     desk: readonly DeskEntry[];
     mix: LiveMix;
     params: DeviceParams;
     clock: Ticking;
+    at: (t: number) => number;
+    lead: number;
   }) {
     this.#mix = mix;
     this.#params = params;
     this.#returns = new Set(desk.flatMap((entry) => (entry.fx ? [entry.fx] : [])));
-    this.#held = new HeldChanges({ clock, set: (change) => this.#set(change) });
+    this.#clock = clock;
+    this.#at = at;
+    this.#ahead = new HeldChanges({ clock, lead, set: (change) => this.#set(change) });
+    this.#due = new HeldChanges({ clock, set: (change) => this.#set(change) });
   }
-  // A change, checked as it comes, set at its time.
+  // A change, checked as it comes, held until it's set on time.
   change(change: Change): void {
     this.#check(change.key);
-    this.#held.change(change);
+    if (this.#heldUntilDue(change.key)) {
+      this.#due.change(change);
+      return;
+    }
+    this.#ahead.change(change);
+  }
+  // a switch, and a param that rebuilds its device: neither can be set ahead of its time
+  #heldUntilDue({ strip, slot, param }: ParamKey): boolean {
+    if (slot === undefined) {
+      return param === 'mute' || param === 'solo';
+    }
+    if (slot === SEND) {
+      return false;
+    }
+    return this.#params.rebuilds(deviceAt(strip, slot), param);
   }
   // throws for a key the desk's strip can't have
   #check(key: ParamKey): void {
@@ -76,27 +106,29 @@ export class DeskChanges {
     }
     return this.#params.has(deviceAt(strip, slot));
   }
-  // a change set by its key's shape
-  #set({ key: { strip, slot, param }, value }: Change): void {
-    if (slot === undefined) {
-      this.#setOwn(strip, param, value);
+  // a change set by its key's shape, by the timing it says
+  #set(change: Change): void {
+    const { key, value } = change;
+    const timing = timingOf(change, { now: this.#clock.now(), at: this.#at });
+    if (key.slot === undefined) {
+      this.#setOwn(key, value, timing);
       return;
     }
-    if (slot === SEND) {
-      this.#mix.set(strip, param, value);
+    if (key.slot === SEND) {
+      this.#mix.set(key, value, timing);
       return;
     }
-    this.#params.set(deviceAt(strip, slot), param, value);
+    this.#params.set(deviceAt(key.strip, key.slot), key.param, value, timing);
   }
-  #setOwn(strip: string, param: string, value: number): void {
-    if (param === 'mute') {
-      this.#mix.setMute(strip, value > 0);
+  #setOwn(key: ParamKey, value: number, timing: Timing): void {
+    if (key.param === 'mute') {
+      this.#mix.setMute(key.strip, value > 0);
       return;
     }
-    if (param === 'solo') {
-      this.#mix.setSolo(strip, value > 0);
+    if (key.param === 'solo') {
+      this.#mix.setSolo(key.strip, value > 0);
       return;
     }
-    this.#mix.set(strip, param, value);
+    this.#mix.set(key, value, timing);
   }
 }

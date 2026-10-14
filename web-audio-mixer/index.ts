@@ -33,7 +33,7 @@
 //   - a whole desk, its master's insert slots among it (desk.ts);
 //   - a track's strip, made from its template as it's first played (track-strips.ts);
 //   - the desk's live devices (live-devices.ts);
-//   - where a parameter's key lands on a built strip (target.ts), and a change set by its key (desk-changes.ts).
+//   - a change set on a built strip by its key, when it says (target.ts), and on a desk (desk-changes.ts).
 export { Mixer } from './mixer.ts';
 export type { MasterInsert, Strip } from './mixer.ts';
 export { Channel } from './channel.ts';
@@ -45,6 +45,6 @@ export { Desk } from './desk.ts';
 export { DeskChanges } from './desk-changes.ts';
 export { addLiveDevices } from './live-devices.ts';
 export type { LiveMix } from './desk-changes.ts';
-export { targetOf } from './target.ts';
+export { setOn, timingOf } from './target.ts';
 export type { Insert, Send, StripOptions } from './strip.ts';
 export { FxChannel } from './fx-channel.ts';
