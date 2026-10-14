@@ -77,3 +77,25 @@ test('a time within a nanosecond of the start written as the start, a float’s 
     ['set', 0.25, 0.001],
   ]);
 });
+
+// A failing strict assertion prints both of its values in full, even under a message of its own.
+// A node linked back to its context printed the whole graph, every way through it, again and again:
+// a send on the desk ran to 13 GB and took the machine down (2026-10-13).
+test("a failing assertion on a node prints the node alone, not the graph it's in; on a param, the param alone", () => {
+  const { reverb } = desk();
+  const node = failureOf(() => assert.equal(reverb, undefined, 'no reverb here'));
+  assert.equal(node.includes('edges'), false, 'the graph left out');
+  assert.equal(node.includes("kind: 'gain'"), true, 'the node shown');
+  const param = failureOf(() => assert.equal(reverb.gain, undefined, 'no level here'));
+  assert.equal(param.includes('kind:'), false, 'its node left out');
+  assert.equal(param.includes("name: 'gain'"), true, 'the param shown');
+});
+// the message a failing assertion prints
+function failureOf(assertion) {
+  try {
+    assertion();
+  } catch (error) {
+    return error.message;
+  }
+  return '';
+}

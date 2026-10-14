@@ -27,12 +27,19 @@ const PROPS = {
   convolver: { buffer: null, normalize: true },
 };
 
+// The links back, a param's node and a node's context, are private, read by a getter.
+// A failing assertion prints its values in full, but not those, so it prints a param or a node alone:
+// with them, it printed the whole graph, every way through it, and ran out of memory (2026-10-13).
 class StandInParam {
+  #node;
   constructor(node, name, value) {
-    this.node = node;
+    this.#node = node;
     this.name = name;
     this.v = value;
     this.events = [];
+  }
+  get node() {
+    return this.#node;
   }
   get value() {
     return this.v;
@@ -77,8 +84,9 @@ class StandInBuffer {
   }
 }
 class StandInNode {
+  #ctx;
   constructor(ctx, type, extra = {}) {
-    this.ctx = ctx;
+    this.#ctx = ctx;
     this.kind = type;
     this.id = ctx.rec.nodes.length;
     this.starts = [];
@@ -97,6 +105,9 @@ class StandInNode {
         },
       });
     }
+  }
+  get ctx() {
+    return this.#ctx;
   }
   // how it mixes its inputs' channels: recorded once set, so a node left as Web Audio makes it records nothing
   get channelCountMode() {
