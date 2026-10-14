@@ -62,6 +62,43 @@ export interface SentNote {
   glides: [at: Seconds, pitch: number][];
 }
 
+// a note to send: its pitch, velocity and time, the part of its clip's element that sounds it; its length, where it's known as it
+// starts; its per-note controllers' values as it starts, one with none left out; its glides, each [when, pitch]
+export interface NoteToSend {
+  pitch: number;
+  velocity: number;
+  t: Seconds;
+  part?: number | undefined;
+  duration?: Seconds | undefined;
+  controllers?: Partial<Record<PerNoteControllerName, number | undefined>> | undefined;
+  glides?: readonly (readonly [at: Seconds, pitch: number])[] | undefined;
+}
+
+// A note's messages, as notesIn() reads them back:
+//   1. its note on;
+//   2. its values as it starts, each a per-note controller, sent at valuesAt (its time, unless asked);
+//   3. its glides, each #3 Pitch 7.25 at its time;
+//   4. its note off, where its length is known.
+export function noteMessages(
+  { pitch, velocity, t, part, duration, controllers = {}, glides = [] }: NoteToSend,
+  index: number,
+  valuesAt = t,
+): Message[] {
+  const noteOn: NoteOn = { type: 'note on', index, pitch, velocity, t, ...(part === undefined ? {} : { part }) };
+  const values = (Object.entries(controllers) as [PerNoteControllerName, number | undefined][]).flatMap(
+    ([controller, value]): PerNoteController[] =>
+      value === undefined ? [] : [{ type: 'per-note controller', index, controller, value, t: valuesAt }],
+  );
+  const glided = glides.map(([at, to]): PerNoteController => ({
+    type: 'per-note controller',
+    index,
+    controller: 'pitch',
+    value: to,
+    t: at,
+  }));
+  const noteOff: NoteOff[] = duration === undefined ? [] : [{ type: 'note off', index, t: t + duration }];
+  return [noteOn, ...values, ...glided, ...noteOff];
+}
 // the notes among the messages, each with its length where its note off is among them too, and its per-note controllers among them
 export function notesIn(messages: readonly Message[]): SentNote[] {
   const noteOffs = messages.filter((message) => message.type === 'note off');

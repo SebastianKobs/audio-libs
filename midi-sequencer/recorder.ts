@@ -15,7 +15,7 @@ import type { Seconds } from '../clock/index.ts';
 import { endOf, LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { NoteOff, PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
-import type { NoteGlide, Play, PlayedNote } from './stream.ts';
+import type { Play, PlayedNote } from './stream.ts';
 import { entryOf, timedValue } from '../util/index.ts';
 
 // what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of; the track's
@@ -78,7 +78,7 @@ export class Recorder {
     if (play.unrecorded) {
       return;
     }
-    this.#told(play.owner, play.ends ?? [], play.glides ?? []);
+    this.#told(play.owner, play.ends ?? []);
     this.#changed(play.owner, play.changes ?? []);
     this.#controlled(play);
     if (!play.notes.length) {
@@ -110,19 +110,13 @@ export class Recorder {
       thinNote(note, now - LATEST); // a note's change that changes nothing, thinned once nothing comes that late
     }
   }
-  // a held note's end and glides, as they come, on its element's note of that index still held (G2a); one let go before it sounded, its
-  // note off for a time before its note on's, as a trace winding into a tower ends a phrase's note still to come, no length, never less
-  #told(owner: unknown, ends: readonly NoteOff[], glides: readonly NoteGlide[]): void {
+  // a held note's end, as it comes, on its element's note of that index still held (G2a); one let go before it sounded, its note off for
+  // a time before its note on's, as a trace winding into a tower ends a phrase's note still to come, no length, never less
+  #told(owner: unknown, ends: readonly NoteOff[]): void {
     for (const end of ends) {
       const note = this.#noteOf(owner, end.index, { held: true });
       if (note) {
         this.#timeline.endAt(note, end.t);
-      }
-    }
-    for (const glide of glides) {
-      const note = this.#noteOf(owner, glide.index, { held: true });
-      if (note) {
-        note.pitchGlides = [...(note.pitchGlides ?? []), [glide.t, glide.pitch]];
       }
     }
   }
@@ -202,11 +196,14 @@ export class Recorder {
 }
 
 // a note as the recorder keeps it, its own copy: held where it came with no length
-function recorded(note: PlayedNote): RecordedNote {
+// a note as it's kept: the glides sent with it its pitch's lane, as those sent after it are
+function recorded({ glides, ...note }: PlayedNote): RecordedNote {
+  const kept: RecordedNote =
+    glides?.length ? { ...note, lanes: { pitch: glides.map(([t, value]) => ({ value, t })) } } : { ...note };
   if (note.duration === undefined) {
-    return { ...note, held: true };
+    kept.held = true;
   }
-  return { ...note };
+  return kept;
 }
 // a kept region as it's handed out: its first play's, its notes, from its first to the end of its last
 function regionOf(kept: Kept): Region {
@@ -238,10 +235,11 @@ function heldThrough(before: Kept, begins: Seconds): RecordedNote[] {
 // a held note carried into its element's next region: from there, its values as they are then, its glides and changes before staying with
 // the old (G3b)
 function carried(note: RecordedNote, begins: Seconds): RecordedNote {
-  const { duration: _ended, pitchGlides: _before, lanes: _changed, ...held } = note;
+  const { duration: _ended, lanes: _changed, ...held } = note;
   const copy: RecordedNote = { ...held, t: begins };
-  if (note.lanes) {
-    copy.controllers = valuesAt(note, begins);
+  if (Object.keys(note.lanes ?? {}).some((controller) => controller !== 'pitch')) {
+    const { pitch: _glided, ...values } = valuesAt(note, begins); // its pitch its own, as it began
+    copy.controllers = values;
   }
   return copy;
 }

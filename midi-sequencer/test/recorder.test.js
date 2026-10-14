@@ -77,15 +77,23 @@ test("a loop, a play a note: one region while it loops, launched again another; 
   ]);
 });
 
-test("a held note (G2a): its region open until its note off comes as a play of its own, by the note's index, ended there; its glides added to it", () => {
+test("a held note (G2a): its region open until its note off comes as a play of its own, by the note's index, ended there; its glides, its pitch's changes, its pitch's lane (DRY7)", () => {
   const recorder = new Recorder();
   recorder.heard(play(bloom, 1, [{ t: 2, pitch: 48, index: 7 }], { live: true }));
   assert.deepEqual(spans(recorder.regions(10)), [[bloom, 2, Infinity, 1]], 'open while held');
-  recorder.heard(play(bloom, 1, [], { live: true, glides: [{ index: 7, t: 11, pitch: 50 }] }));
+  const glide = { type: 'per-note controller', index: 7, controller: 'pitch', value: 50, t: 11 };
+  recorder.heard(play(bloom, 1, [], { live: true, changes: [glide] }));
   recorder.heard(play(bloom, 1, [], { live: true, ends: [{ index: 7, t: 12 }] }));
   const [region] = recorder.regions(13);
   assert.deepEqual([region.from, region.to], [2, 12]);
-  assert.deepEqual(region.notes[0], { t: 2, pitch: 48, index: 7, duration: 10, pitchGlides: [[11, 50]], held: true });
+  assert.deepEqual(region.notes[0], {
+    t: 2,
+    pitch: 48,
+    index: 7,
+    duration: 10,
+    held: true,
+    lanes: { pitch: [{ value: 50, t: 11 }] },
+  });
 });
 
 // a note sent with its length sounds that long whatever holds come, a held one until its note off came: told apart, so a hold in the
@@ -316,4 +324,11 @@ test('a held note let go before it sounded, its note off for a time before its n
   const [region] = recorder.regions(6);
   assert.equal(region.notes[0].duration, 0);
   assert.deepEqual([region.from, region.to], [5, 5]);
+});
+
+test("a note's glides sent with it kept as its pitch's lane, a value at each time, as its changes after it are (DRY7)", () => {
+  const recorder = new Recorder();
+  recorder.heard(play(flower, 1, [{ t: 2, pitch: 60, duration: 2, index: 3, glides: [[2.5, 62]] }]));
+  const [note] = recorder.regions(5)[0].notes;
+  assert.deepEqual([note.glides, note.lanes], [undefined, { pitch: [{ value: 62, t: 2.5 }] }]);
 });

@@ -158,7 +158,7 @@ test("the input: a replay's play into the stream with what the stream carries of
   );
 });
 
-test("the input: a vine's replayed note in the stream with its bend, its vibrato and its glides, as before G0", () => {
+test("the input: a vine's replayed note in the stream with its bend and vibrato depth among its per-note controllers, by MIDI's names, and its glides, as sent (DRY7)", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -176,9 +176,8 @@ test("the input: a vine's replayed note in the stream with its bend, its vibrato
       pitch: 64,
       velocity: 1,
       duration: 1,
-      pitchBend: -1,
-      vibrato: 8,
-      pitchGlides: [[3.5, 66]],
+      controllers: { bend: -1, 'vibrato depth': 8 },
+      glides: [[3.5, 66]],
       part: 4,
       index: 2,
     },
@@ -188,9 +187,8 @@ test("the input: a vine's replayed note in the stream with its bend, its vibrato
     'pitch',
     'velocity',
     'duration',
-    'pitchBend',
-    'vibrato',
-    'pitchGlides',
+    'controllers',
+    'glides',
     'part',
     'index',
   ]);
@@ -237,7 +235,7 @@ test('the way back: messages with no note on hand nothing back; a listener stopp
   assert.deepEqual(back, []);
 });
 
-test("a held note's glide and note off sent later (G2a): each a play of its own, no notes, by the note's index; every note with its index", () => {
+test("a held note's glide and note off sent later (G2a): each a play of its own, no notes, by the note's index, its glide a change of its pitch (DRY7); every note with its index", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -247,11 +245,16 @@ test("a held note's glide and note off sent later (G2a): each a play of its own,
   sequencer.send(to, [noteOff(5, 2)]);
   stop();
   assert.deepEqual(
-    plays.map(({ notes, ends, glides, region }) => ({ notes, ends, glides, region })),
+    plays.map(({ notes, ends, changes, region }) => ({ notes, ends, changes, region })),
     [
-      { notes: [{ t: 1, pitch: 64, velocity: 1, index: 5 }], ends: undefined, glides: undefined, region: 3 },
-      { notes: [], ends: undefined, glides: [{ index: 5, t: 1.5, pitch: 67 }], region: 3 },
-      { notes: [], ends: [{ type: 'note off', index: 5, t: 2 }], glides: undefined, region: 3 },
+      { notes: [{ t: 1, pitch: 64, velocity: 1, index: 5 }], ends: undefined, changes: undefined, region: 3 },
+      {
+        notes: [],
+        ends: undefined,
+        changes: [{ type: 'per-note controller', index: 5, controller: 'pitch', value: 67, t: 1.5 }],
+        region: 3,
+      },
+      { notes: [], ends: [{ type: 'note off', index: 5, t: 2 }], changes: undefined, region: 3 },
     ],
   );
 });
@@ -297,7 +300,7 @@ test('every note in the stream with its velocity, 0 to 1, as its note on had it 
   );
 });
 
-test("a note's per-note controllers sent with it in the stream as its controllers, its values as it starts: how it's heard from its own place, its rise; those it carries already, its bend, vibrato and glides, not twice (G3a)", () => {
+test("a note's per-note controllers sent with it in the stream as its controllers, by MIDI's names, its values as it starts: how it's heard from its own place, its rise, its bend and vibrato depth; its #3 Pitch changes its glides (G3a, DRY7)", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'hold', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -315,26 +318,28 @@ test("a note's per-note controllers sent with it in the stream as its controller
   ]);
   stop();
   const [note] = plays[0].notes;
-  assert.deepEqual(note.controllers, { brightness: 3000, volume: 0.5, pan: -0.2, 'effects 1 depth': 0.1, rise: 0.4 });
-  assert.equal(note.pitchBend, -1);
-  assert.equal(note.vibrato, 8);
-  assert.deepEqual(note.pitchGlides, [[10.5, 62]]);
+  assert.deepEqual(note.controllers, {
+    brightness: 3000,
+    volume: 0.5,
+    pan: -0.2,
+    'effects 1 depth': 0.1,
+    rise: 0.4,
+    bend: -1,
+    'vibrato depth': 8,
+  });
+  assert.deepEqual(note.glides, [[10.5, 62]]);
 });
 
-test('a note with no per-note controllers but those it carries already has none in the stream (G3a)', () => {
+test('a note with no per-note controllers has none in the stream, nor glides with none (G3a)', () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
-  sequencer.send({ track: 'replay vine 1', clip: { kind: 'vine' } }, [
-    noteOn(2, 3),
-    perNote(2, 'bend', 1, 3),
-    noteOff(2, 4),
-  ]);
+  sequencer.send({ track: 'replay vine 1', clip: { kind: 'vine' } }, [noteOn(2, 3), noteOff(2, 4)]);
   stop();
-  assert.equal('controllers' in plays[0].notes[0], false);
+  assert.deepEqual(['controllers' in plays[0].notes[0], 'glides' in plays[0].notes[0]], [false, false]);
 });
 
-test("a per-note controller sent after its note, but #3 Pitch, its glide: a play of its own by the note's index, a change, jumping there or gliding by its time constant (G3a)", () => {
+test("a per-note controller sent after its note, #3 Pitch, its glide, among them: a play of its own by the note's index, a change, jumping there or gliding by its time constant (G3a, DRY7)", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -344,23 +349,24 @@ test("a per-note controller sent after its note, but #3 Pitch, its glide: a play
   sequencer.send(to, [perNote(5, 'pan', 0.3, 1.6), perNote(5, 'pitch', 64, 1.6)]);
   stop();
   assert.deepEqual(
-    plays.map(({ owner, notes, changes, glides, region }) => ({ owner, notes: notes.length, changes, glides, region })),
+    plays.map(({ owner, notes, changes, region }) => ({ owner, notes: notes.length, changes, region })),
     [
-      { owner: to.clip, notes: 1, changes: undefined, glides: undefined, region: 2 },
+      { owner: to.clip, notes: 1, changes: undefined, region: 2 },
       {
         owner: to.clip,
         notes: 0,
         changes: [
           { type: 'per-note controller', index: 5, controller: 'brightness', value: 3000, t: 1.5, glide: 0.08 },
         ],
-        glides: undefined,
         region: 2,
       },
       {
         owner: to.clip,
         notes: 0,
-        changes: [{ type: 'per-note controller', index: 5, controller: 'pan', value: 0.3, t: 1.6 }],
-        glides: [{ index: 5, t: 1.6, pitch: 64 }],
+        changes: [
+          { type: 'per-note controller', index: 5, controller: 'pan', value: 0.3, t: 1.6 },
+          { type: 'per-note controller', index: 5, controller: 'pitch', value: 64, t: 1.6 },
+        ],
         region: 2,
       },
     ],

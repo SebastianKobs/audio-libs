@@ -7,7 +7,7 @@ import type { Seconds } from '../clock/index.ts';
 import type { Address, Input } from './input.ts';
 import { ClipLauncher, type ClipGrid } from '../sequencer/index.ts';
 import type { NotePattern, PatternNote } from './pattern-note.ts';
-import { NoteRotation } from '../midi/index.ts';
+import { NoteRotation, noteMessages } from '../midi/index.ts';
 
 // a clip as launched: where its notes go, its pattern, its notes in pitches; straight under the grid's swing, or on it; its notes'
 // velocity as it plays, read as each comes due, as a velocity device sets it, full if it has none, none leaving the note out
@@ -58,9 +58,7 @@ export class ClipPlayer<Track extends string> {
     }
     const index = this.#rotation.noteOn();
     this.#rotation.noteOff(index);
-    this.#input.send(clip.to, [
-      { type: 'note on', index, pitch: note.pitch!, velocity, t: at }, // a clip's notes in pitches
-      { type: 'note off', index, t: at + this.#grid.secondsOf(note.duration!) }, // its length on the straight grid
-    ]);
+    const duration = this.#grid.secondsOf(note.duration!); // its length on the straight grid
+    this.#input.send(clip.to, noteMessages({ pitch: note.pitch!, velocity, t: at, duration }, index)); // a clip's notes in pitches
   }
 }

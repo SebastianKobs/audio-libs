@@ -13,17 +13,16 @@
 import type { Seconds, TimeMap } from '../clock/index.ts';
 import { Player, type PlayedFrom } from '../timeline/index.ts';
 import type { Address, Input } from './input.ts';
-import { valueAt, type LanePoint } from './lanes.ts';
-import { NoteRotation, type Message, type PerNoteControllerName } from '../midi/index.ts';
+import { lastValueAt, valueAt, type LanePoint } from './lanes.ts';
+import { NoteRotation, noteMessages, type Message, type PerNoteControllerName } from '../midi/index.ts';
 import type { Lane, RecordedNote, Region } from './recorder.ts';
 import { timedValue } from '../util/index.ts';
 import type { TimedValue } from '../util/index.ts';
 import { valuesAt } from './recorder.ts';
 
-// a note's point after its start: a glide to a pitch, or a change to one of its per-note controllers, gliding there where it came with
-// a time constant
-type NotePoint =
-  { what: 'glide'; t: Seconds; pitch: number } | ({ what: 'change'; controller: PerNoteControllerName } & TimedValue);
+// a note's point after its start: a change to one of its per-note controllers, its pitch's a glide, gliding there where it came with a
+// time constant
+type NotePoint = { controller: PerNoteControllerName } & TimedValue;
 // a lane as it plays: the lane, and the track it's on
 interface PlayedLane<Track extends string> {
   lane: Lane;
@@ -142,34 +141,16 @@ export class RecordingPlayer<Track extends string> {
     const index = this.#rotation.noteOn();
     const chased = at > note.t;
     this.#indices.set(note, index);
-    const values: [PerNoteControllerName, number | undefined][] = [
-      ...(Object.entries(valuesAt(note, at)) as [PerNoteControllerName, number][]), // as it was by then
-      ['bend', chased ? undefined : note.pitchBend],
-      ['vibrato depth', note.vibrato],
-    ];
-    const noteOn: Message = {
-      type: 'note on',
-      index,
-      pitch: pitchAt(note, at),
-      velocity: note.velocity ?? 1,
-      t,
-      part: note.part,
-    };
-    this.#sendNote(note, [
-      noteOn,
-      ...values.flatMap(([controller, value]): Message[] =>
-        value === undefined ? [] : [{ type: 'per-note controller', index, controller, value, t }],
-      ),
-    ]);
-  }
-  // a glide or a change after a note's start, a per-note controller by its index
-  #moved(note: RecordedNote, point: NotePoint, t: Seconds): void {
-    const index = this.#indices.get(note)!; // a note's points come while it sounds
-    if (point.what === 'glide') {
-      this.#sendNote(note, [{ type: 'per-note controller', index, controller: 'pitch', value: point.pitch, t }]);
-      return;
+    const { pitch: _glided, ...controllers } = valuesAt(note, at); // as it was by then, its pitch its note on's
+    if (chased) {
+      delete controllers.bend; // past its slide in
     }
-    const { controller, value, glide } = point;
+    const played = { pitch: pitchAt(note, at), velocity: note.velocity ?? 1, t, part: note.part, controllers };
+    this.#sendNote(note, noteMessages(played, index));
+  }
+  // a change after a note's start, a per-note controller by its index, a glide its pitch's
+  #moved(note: RecordedNote, { controller, value, glide }: NotePoint, t: Seconds): void {
+    const index = this.#indices.get(note)!; // a note's points come while it sounds
     this.#sendNote(note, [{ type: 'per-note controller', index, controller, ...timedValue(value, t, glide) }]);
   }
   // a note's end, or what sounds let go as playback stops or ends: its note off, its index free again
@@ -221,14 +202,11 @@ export class RecordingPlayer<Track extends string> {
   }
 }
 
-// a note's points after its start, in its own time: its glides, then its per-note controllers' changes, a lane at a time
+// a note's points after its start, in its own time: its per-note controllers' changes, its pitch's glides among them, a lane at a time
 function pointsOf(note: RecordedNote): NotePoint[] {
-  const glides = (note.pitchGlides ?? []).map(([t, pitch]): NotePoint => ({ what: 'glide', t, pitch }));
-  const changes = (Object.entries(note.lanes ?? {}) as [PerNoteControllerName, LanePoint[]][]).flatMap(
-    ([controller, points]) =>
-      points.map(({ t, value, glide }): NotePoint => ({ what: 'change', t, controller, value, glide })),
+  return (Object.entries(note.lanes ?? {}) as [PerNoteControllerName, LanePoint[]][]).flatMap(([controller, points]) =>
+    points.map((point): NotePoint => ({ controller, ...point })),
   );
-  return [...glides, ...changes];
 }
 // where a note ends, in song time: one sent with its length that long from where it started, whatever holds came as it sounded, as it
 // rang on through them; a held one where its note off came; none for one still held (P3c1). Never before it starts: one let go before it
@@ -245,5 +223,5 @@ function songEndOf(note: RecordedNote, songTime: (t: Seconds) => Seconds): Secon
 }
 // a note's pitch at a time of the recording's: the last it had glided to by then, or its own
 function pitchAt(note: RecordedNote, t: Seconds): number {
-  return (note.pitchGlides ?? []).filter(([at]) => at <= t).at(-1)?.[1] ?? note.pitch!; // a note with a pitch, as play() keeps
+  return lastValueAt(note.lanes?.pitch ?? [], t) ?? note.pitch!; // a note with a pitch, as play() keeps
 }

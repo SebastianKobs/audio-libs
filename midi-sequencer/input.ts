@@ -13,7 +13,7 @@ import {
   type Receiver,
   type SentNote,
 } from '../midi/index.ts';
-import type { NoteGlide, Play, PlayedNote, PlayListener } from './stream.ts';
+import type { Play, PlayedNote, PlayListener } from './stream.ts';
 import { entryOf, Events } from '../util/index.ts';
 
 // where messages go: the track they play on, the clip they're of (its element, by its kind), as notes are, whether they're played as you
@@ -39,7 +39,6 @@ export type NoteOffListener = (to: Address<string>, end: NoteOff) => void;
 // what's sent after its note, a held note's: its note off, its glides, its other per-note controllers' changes (G2a, G3a)
 interface AfterTheirNotes {
   ends: NoteOff[];
-  glides: NoteGlide[];
   changes: PerNoteController[];
 }
 // what a control surface plays into: its tracks' messages, each at its clock time; and the way back, each note as it's passed on, until
@@ -130,7 +129,7 @@ function playOf(
   to: Address<string>,
   role: string,
   notes: readonly SentNote[],
-  { ends, glides, changes }: AfterTheirNotes,
+  { ends, changes }: AfterTheirNotes,
   controls: Controller[],
 ): Play {
   return {
@@ -140,7 +139,6 @@ function playOf(
     live: to.live ?? false,
     notes: notes.map((note) => playedNote(note)),
     ...(ends.length ? { ends } : {}),
-    ...(glides.length ? { glides } : {}),
     ...(changes.length ? { changes } : {}),
     ...(controls.length ? { controls } : {}),
     ...to.play,
@@ -155,18 +153,11 @@ function playedNote({ noteOn, duration, controllers, glides }: SentNote): Played
   if (duration !== undefined) {
     note.duration = duration;
   }
-  const { bend, 'vibrato depth': vibrato, ...others } = controllers;
-  if (bend !== undefined) {
-    note.pitchBend = bend;
-  }
-  if (vibrato !== undefined) {
-    note.vibrato = vibrato;
+  if (Object.keys(controllers).length) {
+    note.controllers = controllers;
   }
   if (glides.length) {
-    note.pitchGlides = glides;
-  }
-  if (Object.keys(others).length) {
-    note.controllers = others;
+    note.glides = glides;
   }
   if (noteOn.part !== undefined) {
     note.part = noteOn.part;
@@ -174,31 +165,23 @@ function playedNote({ noteOn, duration, controllers, glides }: SentNote): Played
   note.index = noteOn.index;
   return note;
 }
-// what's sent after its note, a held note's, whose note on isn't among the messages: each note off, each #3 Pitch 7.25, a glide (G2a),
-// and each other per-note controller, a change (G3a)
+// what's sent after its note, a held note's, whose note on isn't among the messages: each note off (G2a), and each per-note controller, a
+// change, #3 Pitch 7.25 a glide among them (G2a, G3a)
 function afterTheirNotes(messages: readonly Message[]): AfterTheirNotes {
   const started = new Set(messages.filter((message) => message.type === 'note on').map((noteOn) => noteOn.index));
-  const after: AfterTheirNotes = { ends: [], glides: [], changes: [] };
+  const after: AfterTheirNotes = { ends: [], changes: [] };
   for (const message of messages.filter((later) => !('index' in later) || !started.has(later.index))) {
     if (message.type === 'note off') {
       after.ends.push(message);
     } else if (message.type === 'per-note controller') {
-      perNoteAfter(after, message);
+      after.changes.push(message); // its pitch among them, #3 Pitch 7.25, as a lane like the others
     }
   }
   return after;
 }
-// a per-note controller sent after its note: its glide where it's #3 Pitch 7.25, else a change, gliding where it came with a time constant
-function perNoteAfter(after: AfterTheirNotes, change: PerNoteController): void {
-  if (change.controller === 'pitch') {
-    after.glides.push({ index: change.index, t: change.t, pitch: change.value });
-    return;
-  }
-  after.changes.push(change);
-}
 // whether anything heard was sent after its note
-function heardAfter({ ends, glides, changes }: AfterTheirNotes): boolean {
-  return ends.length > 0 || glides.length > 0 || changes.length > 0;
+function heardAfter({ ends, changes }: AfterTheirNotes): boolean {
+  return ends.length > 0 || changes.length > 0;
 }
 // a track's controllers among the messages, its parameters by name, each a value at a time, gliding where it came with a time constant
 function controlsIn(messages: readonly Message[]): Controller[] {

@@ -3,7 +3,7 @@
 // rotation. The sequencer's input, which passes them on, is tested in libs/midi-sequencer/test/input.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { NoteRotation, notesIn } from '../index.ts';
+import { NoteRotation, noteMessages, notesIn } from '../index.ts';
 
 const noteOn = (index, t, more = {}) => ({ type: 'note on', index, pitch: 60, velocity: 1, t, ...more });
 const noteOff = (index, t) => ({ type: 'note off', index, t });
@@ -80,4 +80,34 @@ test("a note's #3 Pitch changes sent with it are its glides, each at its time, a
     [10.4, 62],
     [10.8, 64],
   ]);
+});
+
+test("a note's messages, as notesIn() reads them back: its note on, its values as it starts, its glides at their times, its note off where its length is known (DRY7)", () => {
+  const note = {
+    pitch: 60,
+    velocity: 0.5,
+    t: 2,
+    part: 3,
+    duration: 1,
+    controllers: { bend: -1, 'vibrato depth': 8 },
+    glides: [[2.5, 62]],
+  };
+  const messages = noteMessages(note, 4);
+  assert.deepEqual(messages, [
+    { type: 'note on', index: 4, pitch: 60, velocity: 0.5, t: 2, part: 3 },
+    { type: 'per-note controller', index: 4, controller: 'bend', value: -1, t: 2 },
+    { type: 'per-note controller', index: 4, controller: 'vibrato depth', value: 8, t: 2 },
+    { type: 'per-note controller', index: 4, controller: 'pitch', value: 62, t: 2.5 },
+    { type: 'note off', index: 4, t: 3 },
+  ]);
+  const [read] = notesIn(messages);
+  assert.deepEqual([read.duration, read.controllers, read.glides], [1, note.controllers, note.glides], 'and back');
+  assert.deepEqual(
+    noteMessages({ pitch: 60, velocity: 1, t: 2, controllers: { rise: 0.5, bend: undefined } }, 1, 1.5),
+    [
+      { type: 'note on', index: 1, pitch: 60, velocity: 1, t: 2 },
+      { type: 'per-note controller', index: 1, controller: 'rise', value: 0.5, t: 1.5 },
+    ],
+    'held, no note off; its values sent when asked; a value it has none of left out',
+  );
 });

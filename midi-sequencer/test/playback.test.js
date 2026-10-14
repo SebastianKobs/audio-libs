@@ -62,7 +62,7 @@ test('from a time, each note as it was heard, offset to now, sent once it comes 
   );
 });
 
-test("a note's per-note controllers with its note on, its bend and vibrato among them; its glides and its changes after it, each at its time (P3a)", () => {
+test("a note's per-note controllers with its note on, its bend and vibrato depth among them; its changes after it, its pitch's glides among them, each at its time (P3a, DRY7)", () => {
   const { sent, player } = playerWith();
   player.play(
     [
@@ -72,11 +72,8 @@ test("a note's per-note controllers with its note on, its bend and vibrato among
           pitch: 60,
           velocity: 1,
           duration: 2,
-          controllers: { pan: -0.5 },
-          pitchBend: -1,
-          vibrato: 10,
-          pitchGlides: [[3, 62]],
-          lanes: { volume: [{ t: 2.5, value: 0.4, glide: 0.08 }] },
+          controllers: { pan: -0.5, bend: -1, 'vibrato depth': 10 },
+          lanes: { volume: [{ t: 2.5, value: 0.4, glide: 0.08 }], pitch: [{ value: 62, t: 3 }] },
         },
       ]),
     ],
@@ -125,11 +122,8 @@ test('a note chased as it was where playback starts: at the pitch it had glided 
           pitch: 60,
           velocity: 1,
           duration: 2,
-          controllers: { pan: -0.5 },
-          pitchBend: -1,
-          vibrato: 10,
-          pitchGlides: [[3, 62]],
-          lanes: { volume: [{ t: 2.5, value: 0.4, glide: 0.08 }] },
+          controllers: { pan: -0.5, bend: -1, 'vibrato depth': 10 },
+          lanes: { volume: [{ t: 2.5, value: 0.4, glide: 0.08 }], pitch: [{ value: 62, t: 3 }] },
         },
       ]),
     ],
@@ -145,8 +139,8 @@ test('a note chased as it was where playback starts: at the pitch it had glided 
     messagesOf(sent, 'per-note controller').map(({ controller, value, t }) => [controller, value, t]),
     [
       ['pan', -0.5, 50],
-      ['volume', 0.4, 50],
       ['vibrato depth', 10, 50],
+      ['volume', 0.4, 50],
     ],
     'no glide nor change of before sent after it',
   );

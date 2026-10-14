@@ -23,7 +23,6 @@ export interface Play {
   seed?: number;
   region?: number;
   ends?: NoteOff[];
-  glides?: NoteGlide[];
   changes?: PerNoteController[];
   controls?: Controller[];
   playback?: boolean; // played back from the recording (P3a)
@@ -31,26 +30,20 @@ export interface Play {
   unrecorded?: boolean; // left out of the recording, as its sender says: a launched clip, what plays back, a hush (P3a, P3b)
   [more: string]: unknown;
 }
-// a held note's glide, sent after it (G2a): the note's index, when, and the pitch it goes to, a MIDI note number.
-// Its end, the changes to its other per-note controllers and a track's own controllers are carried as sent, MIDI's messages.
-export interface NoteGlide {
-  index: number;
-  t: Seconds;
-  pitch: number;
-}
-// a note as the stream carries it: when it sounds, a clock time, and how long, in seconds, where that came with it; its pitch, a MIDI note
-// number, a drum's its pad (the brushes', G0f), and its velocity, 0 to 1 (G3a); what else it was played with (its vibrato, pitch bend and
-// glides, its other per-note controllers as it starts, how it's heard from its own place and its own values (G3a), which part of its
-// plant); and its index, as its source handed it out, which a later end, glide or change names it by (G2a)
+// A note as the stream carries it, as MIDI's messages sent it (notesIn()):
+//   - when it sounds, a clock time, and how long, in seconds, where that came with it;
+//   - its pitch, a MIDI note number, a drum's its pad (the brushes', G0f), and its velocity, 0 to 1 (G3a);
+//   - its per-note controllers as it starts, by MIDI's names: its bend, its vibrato depth, how it's heard from its own place, its own
+//     values (G3a); its glides sent with it, each [when, pitch];
+//   - which part of its plant; its index, as its source handed it out, which a later end or change names it by (G2a).
+// A held note's end, the changes to its per-note controllers, its pitch among them, and a track's own controllers come as sent.
 export interface PlayedNote {
   t: Seconds;
   duration?: Seconds | undefined;
   pitch?: number | undefined;
   velocity?: number | undefined;
-  vibrato?: number | undefined;
-  pitchBend?: number | undefined;
-  pitchGlides?: [at: Seconds, pitch: number][] | undefined;
   controllers?: PerNoteValues | undefined;
+  glides?: [at: Seconds, pitch: number][] | undefined;
   part?: number | undefined;
   index?: number | undefined;
   [value: string]: unknown;
