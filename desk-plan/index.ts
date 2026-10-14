@@ -6,4 +6,4 @@
 export { nameOf, returnOf, routingOf, slotStart } from './strip-data.ts';
 export type { DeskEntry, Names, SendEntry, SlotEntry, StripEntry } from './strip-data.ts';
 export { SEND_PARAM, STRIP_PARAMS } from './params.ts';
-export { SEND, keyOf, keyText, specOf, type ParamKey } from './keys.ts';
+export { SEND, controllerOf, keyOf, keyOn, keyText, specOf, type ParamKey } from './keys.ts';

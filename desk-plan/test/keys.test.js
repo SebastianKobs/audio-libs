@@ -2,7 +2,7 @@
 // a send by its return's name or a slot's param; and its spec, as its strip or its slot's device declares it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SEND, SEND_PARAM, STRIP_PARAMS, keyOf, keyText, specOf } from '../index.ts';
+import { SEND, SEND_PARAM, STRIP_PARAMS, controllerOf, keyOf, keyOn, keyText, specOf } from '../index.ts';
 
 test("a parameter's key: a strip's own, a send by its return's name, a slot's param; as text its parts joined by slashes, and back", () => {
   const keys = [
@@ -12,6 +12,19 @@ test("a parameter's key: a strip's own, a send by its return's name, a slot's pa
   ];
   assert.deepEqual(keys.map(keyText), ['my tap 1/volume', 'you/send/far reverb', 'tap/utility/level']);
   assert.deepEqual(keys.map(keyText).map(keyOf), keys);
+});
+
+test("a key as a controller on its strip's track: its slot and param, the strip its track's; and back, on a track", () => {
+  const keys = [
+    { strip: 'my tap 1', param: 'volume' },
+    { strip: 'you', slot: SEND, param: 'far reverb' },
+    { strip: 'delay 1', slot: 'delay', param: 'time' },
+  ];
+  assert.deepEqual(keys.map(controllerOf), ['volume', 'send/far reverb', 'delay/time']);
+  assert.deepEqual(
+    keys.map((key) => keyOn(key.strip, controllerOf(key))),
+    keys,
+  );
 });
 
 test("a key's spec, as declared: a strip's own and a send's the strip's, a slot's its device's; none where nothing declares it", () => {

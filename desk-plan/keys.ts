@@ -5,6 +5,8 @@
 //   a send: its strip, the slot SEND and the return's name, `you/send/reverb`;
 //   a slot's: its strip, the insert slot and the param of the device on it, `tap/utility/level`.
 // Strip, slot and param names hold no slash.
+// A controller sent to a strip's track names the key without its strip, the track's:
+// `volume`, `send/reverb`, `utility/level`.
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from './params.ts';
 
@@ -32,6 +34,17 @@ export function keyOf(text: string): ParamKey {
     return { strip, param: second };
   }
   return { strip, slot: second, param: third };
+}
+// A key as a controller on its strip's track: its slot and param, joined by a slash.
+export function controllerOf({ slot, param }: ParamKey): string {
+  if (slot === undefined) {
+    return param;
+  }
+  return `${slot}/${param}`;
+}
+// A controller's key, on the strip of the track it's sent to.
+export function keyOn(strip: string, controller: string): ParamKey {
+  return keyOf(`${strip}/${controller}`);
 }
 // A key's spec, as declared: a strip's own and a send's the strip's (params.ts); a slot's, its device's, asked of slotSpecs;
 // none where nothing declares it.
