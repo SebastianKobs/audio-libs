@@ -10,8 +10,8 @@ export const MOVE_GLIDE = 0.05; // s: the time constant a port moved with none o
 
 // a module built on its own, at its params, into where its sound goes (into), as the mixer's stages are (F5); with none, its caller wires
 // its way out (an FX channel's input, before its chain). Its way in (input) and out (output), each a node of the engine's; a port glided
-// there through its plan's controls (set()), set at a time (setAt()) or now (setNow()), as an FX chain's, so it's a stage an emitter sets
-// (sound/space/emitter.ts, F6b), a port it hasn't left alone; or given events of its own (automate()); times the context's. Its value
+// there through its plan's controls (set()), set at a time (setAt()) or now (setNow()), as an FX chain's, so it's a stage set from
+// outside (a track's controllers), a port it hasn't left alone; or given events of its own (automate()); times the context's. Its value
 // now read back (value())
 export class BuiltModule {
   readonly input: AudioNode;

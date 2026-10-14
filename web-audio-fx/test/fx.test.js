@@ -104,8 +104,8 @@ test('a module built on its own into where its sound goes: its way in and out, a
   ]);
 });
 
-// a module built on its own as a stage an emitter sets (F6b, sound/space/emitter.ts): now, at a time, or gliding, as an FX chain is; a port
-// it hasn't left alone; its value read back
+// a module built on its own as a stage set from outside (F6b): now, at a time, or gliding, as an FX chain is; a port it hasn't left
+// alone; its value read back
 test('a module built on its own is a stage: a port set now, at a time or gliding, one it lacks left alone, its value read back', async () => {
   const { BuiltModule, FILTER, GAIN } = await import('../index.ts');
   time = 10;

@@ -103,7 +103,7 @@ export class FxChain {
   setAt(port: string, value: number, at: number): void {
     this.#run((plan) => (plan.ports[port] ? plan.controls.set(port, value, at, 0) : null));
   }
-  // a port set now, at once, as a param's value is set: as an emitter sets its track's as it's made
+  // a port set now, at once, as a param's value is set: as a track's controllers set it as it's made
   setNow(port: string, value: number): void {
     this.#run(
       (plan) =>

@@ -13,8 +13,8 @@ interface Stage {
 // the per-note controllers a note's stages answer, each with a stage of its own: #74 Brightness, #7 Volume, #10 Pan, #91 Effects 1 Depth
 export type StageController = 'brightness' | 'volume' | 'pan' | 'effects 1 depth';
 
-// the per-note controllers a note is heard by, and the port of the space's emitters each stands for (emitter.ts): its air's cutoff, its
-// level, its side; and its room's level. The garden sends what its emitter sets as these (Z1)
+// the per-note controllers a note is heard by, and the port of its stage's module each sets: its air's cutoff, its level, its side;
+// and its room's level
 export const HEARD_PER_NOTE = Object.freeze({
   brightness: 'filter.frequency',
   volume: 'gain.gain',

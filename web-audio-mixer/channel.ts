@@ -47,7 +47,7 @@ export interface StripOptions {
 // are built as it's made; the others once first turned up, after the fader and the pan.
 // Stages: input, fader and sends are Gain modules, the pan a Pan module, built by the engine.
 // The fader and the sends are handed out as stages (faderStage, sendStages), for what sets
-// them from outside, at their port 'gain.gain': a replay track's notes, its emitter.
+// them from outside, at their port 'gain.gain': a track's controllers.
 export class Channel {
   readonly input: GainNode; // where the sound comes in, its mute, at 1 (muted())
   readonly inserts: Insert[];
