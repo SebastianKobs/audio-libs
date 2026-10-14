@@ -8,7 +8,8 @@
 // setNow(port, value) now, as a param's value is set; time() is the first delay line's time now, in
 // seconds, and feedback() its feedback. rebuild() plans and builds the chain again, from its patches as they are now (an editor changed one): the new chain is built
 // beside the old, where it starts moves over to it, and the old one rings out (RING_OUT) before it's let go, so its repeats aren't
-// cut off. plans() for an editor's flow. Times start at the context's now
+// cut off. plans() for an editor's flow; points() and readings() what its modules offer to read. Times start at the context's now.
+// As they play: the FX modules (modules.ts, FxModules), and a device's params (device-params.ts, DeviceParams).
 import {
   plan as planPatch,
   type Patch,

@@ -3,8 +3,8 @@
 // master each a Gain module the engine builds (libs/web-audio-fx/'s BuiltModule, F5b); a channel's and a bus's input, fader, sends and room each a
 // Gain module, its pan a Pan module (F5c); an FX channel's input, level, output and sends each a Gain module, its pan a Pan module
 // (F5d): the mixer makes no node of its own. The insert is
-// built by the caller (master: a MasterInsert), the desk's a chain of libs/web-audio-fx/'s Limiter module, as Ableton's: its gain into it, and its
-// ceiling in dBFS. The master starts at 0 and fades in to its volume: never at full volume. On the desk, as on a mixing desk:
+// built by the caller (master: a MasterInsert); a whole desk's (desk.ts) its master's insert slots from its data, a limiter as Ableton's
+// today. The master starts at 0 and fades in to its volume: never at full volume. On the desk, as on a mixing desk:
 // - channel(name, { volume, pan, sends, room, out, inserts }): a fader, sent after the fader to the FX channels it names, at 1, or by
 //   amount; with a pan, after the fader, its sends and its way out after it; with room, a second input that goes only to that FX channel,
 //   the extra reverb far sounds get: a send of its own, at its amount (roomAmount, 1 if none is given) times the fader's level, set by
@@ -25,8 +25,14 @@
 // if it hadn't stopped yet. Its settings are passed in
 // Its parts: the desk (mixer.ts), a channel or bus (channel.ts), an FX channel (fx-channel.ts), a strip's mute's time constant (gains.ts).
 // Where each strip goes, and mute and solo, its routing's (libs/mixer/, since X3b; out of mixer.ts and mute-solo.ts in X3a). A meter itself
-// the engine's; a strip's controls' names the sound's (sound/controls.ts), their order and their scales the views' (mixer-surface/controls.ts),
-// since X1; the fader's law a param's taper (libs/synth/taper.ts) since U2c4a
+// the engine's; a strip's controls' names the sound's (sound/controls.ts), their order the views' (mixer-surface/controls.ts), since X1;
+// a param's range and taper its declaration's (libs/params/, libs/desk-plan/), the fader's law among them.
+// Built from data, on a desk as data (libs/desk-plan/):
+//   - a strip from its data (build.ts);
+//   - a whole desk, its master's insert slots among it (desk.ts);
+//   - a track's strip, made from its template as it's first played (track-strips.ts);
+//   - the desk's live devices (live-devices.ts);
+//   - where a parameter's key lands on a built strip (target.ts), and a change set by its key (desk-changes.ts).
 export { Mixer } from './mixer.ts';
 export type { MasterInsert, Strip } from './mixer.ts';
 export { Channel } from './channel.ts';
