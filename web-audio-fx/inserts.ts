@@ -28,7 +28,13 @@ export const GAIN: Patch = Object.freeze({
   params: Object.freeze({ level: 1 }),
 });
 const GAIN_PARAMS: InsertParams = Object.freeze({
-  level: Object.freeze({ name: 'gain', unit: 'dB', range: Object.freeze([-60, 6, 0.1] as const), dB: true as const }),
+  level: Object.freeze({
+    name: 'gain',
+    unit: 'dB',
+    range: Object.freeze([-60, 6, 0.1] as const),
+    dB: true as const,
+    taper: 'fader' as const,
+  }),
 });
 // a Pan: the pan block, a mono sound up-mixed to stereo first, as the mixer's pans are, centred unless its params say otherwise; its param
 // pan, its port 'pan.pan'. A strip's pan (F5)
@@ -57,7 +63,12 @@ export const FILTER: Patch = Object.freeze({
   params: Object.freeze({ q: 0.707, cutoff: 24000 }),
 });
 const FILTER_PARAMS: InsertParams = Object.freeze({
-  cutoff: Object.freeze({ name: 'cutoff', unit: 'Hz', range: Object.freeze([20, 24000, 1] as const) }),
+  cutoff: Object.freeze({
+    name: 'cutoff',
+    unit: 'Hz',
+    range: Object.freeze([20, 24000, 1] as const),
+    taper: 'octaves' as const,
+  }),
   q: Object.freeze({ name: 'resonance', range: Object.freeze([0, 30, 0.001] as const) }),
 });
 // Its gain 16 dB brings the garden at its busiest just under a ceiling of -0.3 dBFS; a much fuller one is held there. The master volume

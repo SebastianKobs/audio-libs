@@ -34,6 +34,7 @@ import { MOVE_GLIDE } from './module.ts';
 export { FILTER, GAIN, INSERTS, LIMITER, LIMITER_SETTINGS, PAN, PAN_PARAMS, PAN_POT, UTILITY } from './inserts.ts';
 export { BuiltModule, MOVE_GLIDE } from './module.ts';
 export { FxModules } from './modules.ts';
+export { TEMPO_TIME } from './tempo.ts';
 export type { InsertModule, InsertParamSpec, LimiterSettings } from './inserts.ts';
 
 // a module in a chain: its name, its patch, and its params, read each time the chain is built

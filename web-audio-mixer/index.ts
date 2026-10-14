@@ -24,8 +24,8 @@
 // if it hadn't stopped yet. Its settings are passed in
 // Its parts: the desk (mixer.ts), a channel or bus (channel.ts), an FX channel (fx-channel.ts), a strip's mute's time constant (gains.ts).
 // Where each strip goes, and mute and solo, its routing's (libs/mixer/, since X3b; out of mixer.ts and mute-solo.ts in X3a). A meter itself
-// the engine's; a strip's controls' names the sound's (sound/controls.ts), their order, their scales and the fader's law the views'
-// (mixer-surface/controls.ts, fader.ts), since X1
+// the engine's; a strip's controls' names the sound's (sound/controls.ts), their order and their scales the views' (mixer-surface/controls.ts),
+// since X1; the fader's law a param's taper (libs/synth/taper.ts) since U2c4a
 export { Mixer } from './mixer.ts';
 export type { MasterInsert, Strip } from './mixer.ts';
 export { Channel } from './channel.ts';
@@ -34,6 +34,7 @@ export { buildChannel, buildFxChannel } from './build.ts';
 export type { StripValues } from './build.ts';
 export { nameOf, returnOf, routingOf, slotStart } from './strip-data.ts';
 export type { DeskEntry, Names, SendEntry, SlotEntry, StripEntry } from './strip-data.ts';
+export { SEND_PARAM, STRIP_PARAMS } from './params.ts';
 export type { Insert, Send, StripOptions } from './channel.ts';
 export { FxChannel } from './fx-channel.ts';
 export type { FxOptions } from './fx-channel.ts';

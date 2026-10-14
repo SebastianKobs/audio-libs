@@ -1,12 +1,15 @@
 // ---------- libs/synth/params: a module's params as a plugin describes its own, apart from any view ----------
 // Every module declares its params so (I1a, mockup/architecture/done.md): a block its values (each block's paramSpecs), an FX module the
 // params its patch names. Each one's name; its unit; its range and step in that unit; its choices, where it picks among words; its default,
-// where a block falls back to one, so the block reads it from here; and, for a gain, whether it's a share shown in dB, its range in dB.
+// where a block falls back to one, so the block reads it from here; for a gain, whether it's a share shown in dB, its range in dB; and its
+// taper, where a value lies on a control, a lane or a CC (taper.ts), its own as VST3 and AU declare theirs (U2c4a).
 // Every value reaches the notes that sound as it's set (G0.2b, edit.ts), so none is marked live, as I1f marked the VCA's and out's.
 // A value written either as itself or by its parts (a cutoff, or { key, max }) has both. A surface only decides how to draw one: a slider
-// or a knob, and its taper. What's structure has no spec: a condition, where a sound goes, what a modulator moves, the chain, a switch.
+// or a knob; a param's taper is its own, the synth editor drawing its blocks' values as it always has. What's structure has no spec: a condition, where a sound goes, what a modulator moves, the chain, a switch.
 // Here too what several blocks share: an envelope's values, a filter's, and the patch's own, its handle's
 
+// a param's taper, how a position on a control, a lane or a CC maps to its value (taper.ts)
+export type Taper = 'fader' | 'octaves' | 'line';
 // a param, as a plugin describes its own
 export interface ParamSpec {
   readonly name: string;
@@ -15,6 +18,7 @@ export interface ParamSpec {
   readonly choices?: readonly string[];
   readonly default?: number | string;
   readonly dB?: true;
+  readonly taper?: Taper;
   readonly parts?: ParamSpecs;
 }
 // a module's params, or a part's, by their keys, a nested part's under its own

@@ -5,8 +5,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { FxChain } from '../index.ts';
-import { plan } from '../../synth/index.ts';
+import { FxChain, INSERTS, TEMPO_TIME } from '../index.ts';
+import { delayBeats, plan, positionOf } from '../../synth/index.ts';
 
 let time = 0;
 class Context extends StandInContext {
@@ -146,4 +146,22 @@ test('a module built on its own glides from a time to come where it is given one
     ['target', 0, 10.5, 0.25],
     ['target', 1, 10, 0.25],
   ]);
+});
+
+// each param a module may be automated by, declared with its taper (U2c4a), as a plugin declares its own
+test("the params declared with their tapers: a Utility's level by the fader law, its pan in a line; a Filter's cutoff by octaves; the limiter's in lines; a delay's time in beats by octaves, a 16th triplet to a dotted half, following the tempo", () => {
+  const { utility, filter, limiter } = INSERTS;
+  assert.deepEqual(
+    [utility.params.level.taper, utility.params.pan.taper, filter.params.cutoff.taper, limiter.params.gain.taper],
+    ['fader', undefined, 'octaves', undefined],
+    'a line where none is named',
+  );
+  assert.deepEqual(
+    [TEMPO_TIME.name, TEMPO_TIME.unit, TEMPO_TIME.taper, TEMPO_TIME.range.slice(0, 2)],
+    ['time', 'beats', 'octaves', [delayBeats('1/16t', 1), delayBeats('1/2.', 1)]],
+  );
+  assert.ok(
+    Math.abs(positionOf(TEMPO_TIME, delayBeats('1/8', 1)) - 0.4) < 0.1,
+    "an 8th, a little under halfway, as an octave's share",
+  );
 });
