@@ -14,9 +14,9 @@
 import type { Seconds } from '../clock/index.ts';
 import { LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
-import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
-import type { NoteChange, NoteEnd, NoteGlide, Play, PlayedNote } from './stream.ts';
-import { entryOf } from '../util/index.ts';
+import type { NoteOff, PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
+import type { NoteGlide, Play, PlayedNote } from './stream.ts';
+import { entryOf, timedValue } from '../util/index.ts';
 
 // what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of
 interface LaneOf {
@@ -110,7 +110,7 @@ export class Recorder {
   }
   // a held note's end and glides, as they come, on its element's note of that index still held (G2a); one let go before it sounded, its
   // note off for a time before its note on's, as a trace winding into a tower ends a phrase's note still to come, no length, never less
-  #told(owner: unknown, ends: readonly NoteEnd[], glides: readonly NoteGlide[]): void {
+  #told(owner: unknown, ends: readonly NoteOff[], glides: readonly NoteGlide[]): void {
     for (const end of ends) {
       const note = this.#heldNote(owner, end.index);
       if (note) {
@@ -125,14 +125,14 @@ export class Recorder {
     }
   }
   // a note's changes after it, as they come, on its element's latest note of that index, its own lanes (G3b)
-  #changed(owner: unknown, changes: readonly NoteChange[]): void {
+  #changed(owner: unknown, changes: readonly PerNoteController[]): void {
     for (const { index, controller, value, t, glide } of changes) {
       const note = this.#latestNote(owner, index);
       if (!note) {
         continue;
       }
       const lanes = (note.lanes ??= {});
-      placed((lanes[controller] ??= []), pointOf(value, t, glide));
+      placed((lanes[controller] ??= []), timedValue(value, t, glide));
     }
   }
   // a track's controllers, as they come, each into its lane, a point holding until the next of its lane (G3b)
@@ -141,7 +141,7 @@ export class Recorder {
       const of: LaneOf = { kind: play.kind, track: play.track ?? null, controller };
       const key = JSON.stringify([of.kind, of.track, of.controller]);
       entryOf(this.#lanes, key, () => ({ ...of, points: [] }));
-      this.#timeline.hold(key, pointOf(value, t, glide));
+      this.#timeline.hold(key, timedValue(value, t, glide));
     }
   }
   // an element's latest note of an index, held or not: from the latest region back, as a change comes for a note still sounding
@@ -257,10 +257,6 @@ function valuesAt(note: RecordedNote, t: Seconds): PerNoteValues {
     }
   }
   return values;
-}
-// a change as a lane's point: gliding where it came with a time constant
-function pointOf(value: number, t: Seconds, glide: Seconds | undefined): LanePoint {
-  return glide === undefined ? { t, value } : { t, value, glide };
 }
 // a note's lanes thinned, each one's first against its value as it starts, a jump
 function thinNote(note: RecordedNote, settled: Seconds): void {

@@ -19,10 +19,10 @@ onTick((t) => space.update(t));                            // the emitter follow
 | | |
 |---|---|
 | `new Space({ settings, listener })` | the space (`space.ts`). `listener`: `distance(position)`, `side(position)`. `settings`, read live: `range`, `hearing`, `falloff`, `dull`, `room`, `limit` (the model, below), and `width`, how far a sound is panned at most |
-| `hearing(d)`, `hearMax()` | how a sound is heard at distance `d`, `{ g, fc, room }` (`Heard`), and where nothing is heard any more |
+| `hearing(d)`, `hearMax()` | how a sound is heard at distance `d`, `{ level, cutoff, room }` (`Heard`), and where nothing is heard any more |
 | `side(position)` | how far a sound from a place is panned: the listener's side of it times `width` |
 | `emitter(position, { hears, until, keep, onLetGo })` | an `Emitter` (`emitter.ts`), its place a `Place<Heard>`, the space's to follow; `position`, `until`, `heard`, `close(at)`. Kept (`keep`), it's never let go; else let go once past `until`, doing what `onLetGo` asks |
-| `hears(name, value, when)` | what an emitter hears, handed on: `'cutoff'` (Hz), `'level'`, `'side'` (−1 to 1, times `width`) and `'room'`; `when` `{}` for now, your now, `{ at }` from a time of yours, or `{ glide }` gliding there from now by a time constant. Now as it's made; at a note's time (`moveTo(position, at, side)`, `side` a position to pan from, where it's going unless you say); gliding as you move, its side left where its note put it |
+| `hears(name, value, when)` | what an emitter hears, handed on: `'cutoff'` (Hz), `'level'`, `'side'` (−1 to 1, times `width`) and `'room'`; `when` (`libs/util/`'s `When`, DRY4) `{}` for now, your now, `{ at }` from a time of yours, or `{ glide }` gliding there from now by a time constant; `timedAt()` makes it a value at a time. In one order: its cutoff, its level, its side where it's given, its room, then its followers. Now as it's made; at a note's time (`moveTo(position, at, side)`, `side` a position to pan from, where it's going unless you say); gliding as you move, its side left where its note put it |
 | `follow(follower, law, at)` | a value of yours set from what an emitter hears by its law, handed to the follower with the same `when`s, from `at` (now, with none); with no law, let go: handed on as 0, then left |
 | `emitters` | the live list, the same array for as long as it runs |
 | `update(t)` | on every tick: lets go of the emitters past their time, and glides the rest to where they're heard now (0.08 s), when the change is big enough to hear |

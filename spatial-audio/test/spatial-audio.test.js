@@ -16,8 +16,8 @@ const heardAs = (c, f) =>
   c.d.forEach((d, i) => {
     const h = f(d);
     assert.deepEqual(
-      [r10(h.g), r10(h.fc), r10(h.room)],
-      [c.g[i], c.fc[i], c.room[i]],
+      [r10(h.level), r10(h.cutoff), r10(h.room)],
+      [c.level[i], c.cutoff[i], c.room[i]],
       `${JSON.stringify(c.settings)}, at ${d}`,
     );
   });
@@ -32,18 +32,18 @@ test('the model: level, cutoff and room at every distance as the vectors have th
 });
 
 test('a change is worth sending once the level or room is 0.002 off, or the cutoff 1%: not before', () => {
-  const was = { g: 0.5, room: 0.2, fc: 1000 };
+  const was = { level: 0.5, room: 0.2, cutoff: 1000 };
   const by = (d) => ({ ...was, ...d });
   for (const [d, want] of [
-    [{ g: 0.5019 }, false],
-    [{ g: 0.5021 }, true],
-    [{ g: 0.4979 }, true],
+    [{ level: 0.5019 }, false],
+    [{ level: 0.5021 }, true],
+    [{ level: 0.4979 }, true],
     [{ room: 0.2019 }, false],
     [{ room: 0.2021 }, true],
-    [{ fc: 1009.9 }, false],
-    [{ fc: 1010.1 }, true],
-    [{ fc: 990.1 }, false],
-    [{ fc: 989.9 }, true],
+    [{ cutoff: 1009.9 }, false],
+    [{ cutoff: 1010.1 }, true],
+    [{ cutoff: 990.1 }, false],
+    [{ cutoff: 989.9 }, true],
   ]) {
     assert.equal(moved(by(d), was), want, JSON.stringify(d));
   }
@@ -79,9 +79,9 @@ test('the model, with its settings read live', () => {
   const { space, hearingSettings } = setup();
   assert.equal(space.hearMax(), 40);
   assert.deepEqual(space.hearing(20), hearing(20, hearingSettings));
-  assert.equal(space.hearing(20).g, 0.4, '6 dB down at 16 units, a doubling of the range');
+  assert.equal(space.hearing(20).level, 0.4, '6 dB down at 16 units, a doubling of the range');
   hearingSettings.range = 16;
-  assert.equal(space.hearing(16).g, 1, 'read live');
+  assert.equal(space.hearing(16).level, 1, 'read live');
 });
 
 // what an emitter hears, handed on as values: a track's strip maps them to its controllers
@@ -93,8 +93,8 @@ test("an emitter hands on what it hears as it's made, now: its cutoff, level and
   assert.deepEqual(
     seen.calls,
     [
-      ['cutoff', at20.fc, {}],
-      ['level', at20.g, {}],
+      ['cutoff', at20.cutoff, {}],
+      ['level', at20.level, {}],
       ['side', 0.6, {}],
       ['room', at20.room, {}],
     ],
@@ -105,10 +105,10 @@ test("an emitter hands on what it hears as it's made, now: its cutoff, level and
   assert.deepEqual(
     seen.calls.slice(4),
     [
-      ['cutoff', h.fc, { at: 12 }],
-      ['level', h.g, { at: 12 }],
-      ['room', h.room, { at: 12 }],
+      ['cutoff', h.cutoff, { at: 12 }],
+      ['level', h.level, { at: 12 }],
       ['side', 0, { at: 12 }],
+      ['room', h.room, { at: 12 }],
     ],
     "a note's place, from its time, the caller's",
   );
@@ -118,7 +118,7 @@ test("an emitter hands on what it hears as it's made, now: its cutoff, level and
 test('an emitter hands on each value it follows, by its law: on a note at its time, gliding as you move; let go, 0 and left', () => {
   const { at, space } = setup();
   const delay = followerSeen();
-  const law = (heard) => 0.5 * heard.g;
+  const law = (heard) => 0.5 * heard.level;
   const e = space.emitter(onFloor(0, 4), { hears: nothing, keep: true });
   e.follow(delay.follower, law, 10);
   assert.deepEqual(delay.calls, [[0.5, { at: 10 }]], "from its time on, as it's heard now");
@@ -161,10 +161,10 @@ test("a kept emitter, a track's: moved to each note's place at its time; followi
   assert.deepEqual(
     seen.calls.slice(4),
     [
-      ['cutoff', h.fc, { at: 12 }],
-      ['level', h.g, { at: 12 }],
-      ['room', h.room, { at: 12 }],
+      ['cutoff', h.cutoff, { at: 12 }],
+      ['level', h.level, { at: 12 }],
       ['side', -0.3, { at: 12 }],
+      ['room', h.room, { at: 12 }],
     ],
     'its new place heard from its note on',
   );
@@ -179,8 +179,8 @@ test("a kept emitter, a track's: moved to each note's place at its time; followi
   assert.deepEqual(
     seen.calls.slice(8),
     [
-      ['cutoff', far.fc, { glide: 0.08 }],
-      ['level', far.g, { glide: 0.08 }],
+      ['cutoff', far.cutoff, { glide: 0.08 }],
+      ['level', far.level, { glide: 0.08 }],
       ['room', far.room, { glide: 0.08 }],
     ],
     'and follows you as you move, its side where its note put it',

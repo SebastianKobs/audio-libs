@@ -1,6 +1,6 @@
 // ---------- midi-sequencer/stream: every play, the garden's and yours as you play it, to whoever listens ----------
 import type { Seconds } from '../clock/index.ts';
-import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
+import type { Controller, NoteOff, PerNoteController, PerNoteValues } from '../midi/index.ts';
 
 // a play, as the stream carries it: whose it is, its kind and role, whether it's played as you play it, its notes at clock times; the
 // replay track it's on and until when, the clip it's of, the sends it drew, and the seed its draws came from (G0g); the region it's of, a
@@ -21,40 +21,20 @@ export interface Play {
   sends?: unknown;
   seed?: number;
   region?: number;
-  ends?: NoteEnd[];
+  ends?: NoteOff[];
   glides?: NoteGlide[];
-  changes?: NoteChange[];
-  controls?: ControlChange[];
+  changes?: PerNoteController[];
+  controls?: Controller[];
   playback?: boolean; // played back from the recording, left out of it as a launched clip is (P3a)
   hushed?: boolean; // the live garden's held notes hushed and brought back as the arrangement plays back, left out of it too (P3b)
   [more: string]: unknown;
 }
-// a held note's end, or its glide, sent after it (G2a): the note's index, when, and the pitch a glide goes to, a MIDI note number
-export interface NoteEnd {
-  index: number;
-  t: Seconds;
-}
+// a held note's glide, sent after it (G2a): the note's index, when, and the pitch it goes to, a MIDI note number.
+// Its end, the changes to its other per-note controllers and a track's own controllers are carried as sent, MIDI's messages.
 export interface NoteGlide {
   index: number;
   t: Seconds;
   pitch: number;
-}
-// a note's per-note controller changed after it, but its pitch, its glide (G3a): the note's index, the controller, its value, when, and
-// the time constant it glides there by, where it came with one, as an automation point's curve
-export interface NoteChange {
-  index: number;
-  controller: PerNoteControllerName;
-  value: number;
-  t: Seconds;
-  glide?: Seconds;
-}
-// a track's controller changed (G3a): its parameter by name, in its units, its value, when, and the time constant it glides there by,
-// where it came with one
-export interface ControlChange {
-  controller: string;
-  value: number;
-  t: Seconds;
-  glide?: Seconds;
 }
 // a note as the stream carries it: when it sounds, a clock time, and how long, in seconds, where that came with it; its pitch, a MIDI note
 // number, a drum's its pad (the brushes', G0f), and its velocity, 0 to 1 (G3a); what else it was played with (its vibrato, pitch bend and

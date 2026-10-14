@@ -111,8 +111,8 @@ test("the input: a controller, a track's parameter by name, a value at a time, j
       live: false,
       notes: [],
       controls: [
-        { controller: 'air', value: 3000, t: 4 },
-        { controller: 'level', value: 0.5, t: 4.2, glide: 0.08 },
+        { type: 'controller', controller: 'air', value: 3000, t: 4 },
+        { type: 'controller', controller: 'level', value: 0.5, t: 4.2, glide: 0.08 },
       ],
       track: 0,
     },
@@ -248,7 +248,7 @@ test("a held note's glide and note off sent later (G2a): each a play of its own,
     [
       { notes: [{ t: 1, pitch: 64, velocity: 1, index: 5 }], ends: undefined, glides: undefined, region: 3 },
       { notes: [], ends: undefined, glides: [{ index: 5, t: 1.5, pitch: 67 }], region: 3 },
-      { notes: [], ends: [{ index: 5, t: 2 }], glides: undefined, region: 3 },
+      { notes: [], ends: [{ type: 'note off', index: 5, t: 2 }], glides: undefined, region: 3 },
     ],
   );
 });
@@ -261,7 +261,7 @@ test("a send with new notes and others' note offs, as a held part's key changes 
   stop();
   assert.deepEqual(
     plays.map(({ notes, ends }) => ({ notes, ends })),
-    [{ notes: [{ t: 4, pitch: 43, velocity: 1, index: 2 }], ends: [{ index: 1, t: 4 }] }],
+    [{ notes: [{ t: 4, pitch: 43, velocity: 1, index: 2 }], ends: [{ type: 'note off', index: 1, t: 4 }] }],
   );
 });
 
@@ -275,7 +275,7 @@ test("the way back hands on each note off sent after its note, a held note's, wi
   sequencer.send(to, [noteOff(4, 3)]);
   stop();
   sequencer.send(to, [noteOff(4, 4)]);
-  assert.deepEqual(ends, [{ track: 'hold', index: 4, t: 3 }]);
+  assert.deepEqual(ends, [{ track: 'hold', type: 'note off', index: 4, t: 3 }]);
 });
 
 test('every note in the stream with its velocity, 0 to 1, as its note on had it (G3a)', () => {
@@ -347,14 +347,16 @@ test("a per-note controller sent after its note, but #3 Pitch, its glide: a play
       {
         owner: to.clip,
         notes: 0,
-        changes: [{ index: 5, controller: 'brightness', value: 3000, t: 1.5, glide: 0.08 }],
+        changes: [
+          { type: 'per-note controller', index: 5, controller: 'brightness', value: 3000, t: 1.5, glide: 0.08 },
+        ],
         glides: undefined,
         region: 2,
       },
       {
         owner: to.clip,
         notes: 0,
-        changes: [{ index: 5, controller: 'pan', value: 0.3, t: 1.6 }],
+        changes: [{ type: 'per-note controller', index: 5, controller: 'pan', value: 0.3, t: 1.6 }],
         glides: [{ index: 5, t: 1.6, pitch: 64 }],
         region: 2,
       },

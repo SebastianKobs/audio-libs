@@ -6,21 +6,14 @@
 import {
   NoteRotation,
   notesIn,
+  type Controller,
   type Message,
+  type NoteOff,
   type PerNoteController,
   type Receiver,
   type SentNote,
 } from '../midi/index.ts';
-import {
-  Stream,
-  type ControlChange,
-  type NoteChange,
-  type NoteEnd,
-  type NoteGlide,
-  type Play,
-  type PlayedNote,
-  type PlayListener,
-} from './stream.ts';
+import { Stream, type NoteGlide, type Play, type PlayedNote, type PlayListener } from './stream.ts';
 import { entryOf } from '../util/index.ts';
 
 // where messages go: the track they play on, the clip they're of (its element, by its kind), as notes are, whether they're played as you
@@ -42,12 +35,12 @@ export interface Track extends Receiver {
 // a note passed on, handed back where it went: its track, any of the sequencer's, its clip, whether it's played as you play it
 export type NoteListener = (to: Address<string>, note: SentNote) => void;
 // a note off sent after its note, a held note's, handed back where it went (G2b)
-export type NoteOffListener = (to: Address<string>, end: NoteEnd) => void;
+export type NoteOffListener = (to: Address<string>, end: NoteOff) => void;
 // what's sent after its note, a held note's: its note off, its glides, its other per-note controllers' changes (G2a, G3a)
 interface AfterTheirNotes {
-  ends: NoteEnd[];
+  ends: NoteOff[];
   glides: NoteGlide[];
-  changes: NoteChange[];
+  changes: PerNoteController[];
 }
 // what a control surface plays into: its tracks' messages, each at its clock time; and the way back, each note as it's passed on, until
 // stopped (onNote() returns how): every surface's, on every track, as one sequencer has them all, a surface lighting its own (G0f)
@@ -142,7 +135,7 @@ function playOf(
   role: string,
   notes: readonly SentNote[],
   { ends, glides, changes }: AfterTheirNotes,
-  controls: ControlChange[],
+  controls: Controller[],
 ): Play {
   return {
     owner: to.clip ?? null,
@@ -191,7 +184,7 @@ function afterTheirNotes(messages: readonly Message[]): AfterTheirNotes {
   const after: AfterTheirNotes = { ends: [], glides: [], changes: [] };
   for (const message of messages.filter((later) => !('index' in later) || !started.has(later.index))) {
     if (message.type === 'note off') {
-      after.ends.push({ index: message.index, t: message.t });
+      after.ends.push(message);
     } else if (message.type === 'per-note controller') {
       perNoteAfter(after, message);
     }
@@ -199,22 +192,18 @@ function afterTheirNotes(messages: readonly Message[]): AfterTheirNotes {
   return after;
 }
 // a per-note controller sent after its note: its glide where it's #3 Pitch 7.25, else a change, gliding where it came with a time constant
-function perNoteAfter(after: AfterTheirNotes, { index, controller, value, t, glide }: PerNoteController): void {
-  if (controller === 'pitch') {
-    after.glides.push({ index, t, pitch: value });
+function perNoteAfter(after: AfterTheirNotes, change: PerNoteController): void {
+  if (change.controller === 'pitch') {
+    after.glides.push({ index: change.index, t: change.t, pitch: change.value });
     return;
   }
-  after.changes.push(glide === undefined ? { index, controller, value, t } : { index, controller, value, t, glide });
+  after.changes.push(change);
 }
 // whether anything heard was sent after its note
 function heardAfter({ ends, glides, changes }: AfterTheirNotes): boolean {
   return ends.length > 0 || glides.length > 0 || changes.length > 0;
 }
 // a track's controllers among the messages, its parameters by name, each a value at a time, gliding where it came with a time constant
-function controlsIn(messages: readonly Message[]): ControlChange[] {
-  return messages
-    .filter((message) => message.type === 'controller')
-    .map(({ controller, value, t, glide }) =>
-      glide === undefined ? { controller, value, t } : { controller, value, t, glide },
-    );
+function controlsIn(messages: readonly Message[]): Controller[] {
+  return messages.filter((message) => message.type === 'controller');
 }

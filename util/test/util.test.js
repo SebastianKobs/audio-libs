@@ -14,6 +14,8 @@ import {
   seeded,
   SETTLED,
   smoothstep,
+  timedAt,
+  timedValue,
   toggleIn,
   updateInPlace,
 } from '../index.ts';
@@ -231,4 +233,16 @@ test("a number near another: within a float's rounding, or as asked", () => {
   assert.ok(isNear(1, 1.001, 0.01), 'as asked');
   near(0.1 + 0.2, 0.3, 'passes');
   assert.throws(() => near(1, 2, 'a step'), /a step: 1, not within 1e-9 of 2/);
+});
+
+test('a value at a time: jumping there, or gliding there by a time constant; no glide where it has none', () => {
+  assert.deepEqual(timedValue(0.5, 2), { value: 0.5, t: 2 });
+  assert.deepEqual(timedValue(0.5, 2, 0.08), { value: 0.5, t: 2, glide: 0.08 });
+  assert.deepEqual(timedValue(0.5, 2, undefined), { value: 0.5, t: 2 }, 'none given, none kept');
+});
+
+test("a value handed on now, from a time or gliding, as a value at a time: now the caller's", () => {
+  assert.deepEqual(timedAt(1, {}, 10), { value: 1, t: 10 }, 'now');
+  assert.deepEqual(timedAt(1, { at: 12 }, 10), { value: 1, t: 12 }, 'from a time');
+  assert.deepEqual(timedAt(1, { glide: 0.08 }, 10), { value: 1, t: 10, glide: 0.08 }, 'gliding there from now');
 });

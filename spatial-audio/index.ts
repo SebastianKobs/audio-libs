@@ -18,5 +18,5 @@
 export { Space } from './space.ts';
 export type { Listener } from './space.ts';
 export { Emitter } from './emitter.ts';
-export type { Law, EmitterOptions, Follower, Hears, HeardValue, When } from './emitter.ts';
+export type { Law, EmitterOptions, Follower, Hears, HeardValue } from './emitter.ts';
 export type { Heard, SpaceSettings } from './model.ts';

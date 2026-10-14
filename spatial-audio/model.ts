@@ -22,8 +22,8 @@ export interface SpaceSettings {
 }
 // how a sound is heard: its level, its lowpass's cutoff in Hz, its room's level
 export interface Heard {
-  g: number;
-  fc: number;
+  level: number;
+  cutoff: number;
   room: number;
 }
 
@@ -31,15 +31,15 @@ export interface Heard {
 export function hearMax(settings: SpaceSettings): number {
   return clamp(settings.hearing, 1.5 * Math.max(0.5, settings.range), settings.limit ?? Infinity);
 }
-// at a distance: the level g, the lowpass's cutoff fc, and the room's level
+// at a distance: the level, the lowpass's cutoff, and the room's level
 export function hearing(distance: number, settings: SpaceSettings): Heard {
   const range = Math.max(0.5, settings.range);
   const farthest = hearMax(settings);
   const out = Math.max(0, distance - range);
   const level = smoothstep(farthest, farthest * 0.8, distance) / (1 + (settings.falloff * out) / range);
   return {
-    g: level,
-    fc: Math.max(120, 18000 * Math.pow(2, (-out * settings.dull) / 6)),
+    level,
+    cutoff: Math.max(120, 18000 * Math.pow(2, (-out * settings.dull) / 6)),
     room: (Math.sqrt(level) - level) * settings.room,
   };
 }
@@ -47,8 +47,8 @@ export function hearing(distance: number, settings: SpaceSettings): Heard {
 // whether new values are worth sending: a level or room 0.002 off, or a cutoff 1% off
 export function moved(previous: Heard, next: Heard): boolean {
   return (
-    Math.abs(previous.g - next.g) >= 0.002
+    Math.abs(previous.level - next.level) >= 0.002
     || Math.abs(previous.room - next.room) >= 0.002
-    || Math.abs(previous.fc / next.fc - 1) >= 0.01
+    || Math.abs(previous.cutoff / next.cutoff - 1) >= 0.01
   );
 }

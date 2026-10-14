@@ -16,12 +16,13 @@ import type { Address, Input } from './input.ts';
 import { lastValueAt, valueAt, type LanePoint } from './lanes.ts';
 import { NoteRotation, type Message, type PerNoteControllerName } from '../midi/index.ts';
 import type { Lane, RecordedNote, Region } from './recorder.ts';
+import { timedValue } from '../util/index.ts';
+import type { TimedValue } from '../util/index.ts';
 
 // a note's point after its start: a glide to a pitch, or a change to one of its per-note controllers, gliding there where it came with
 // a time constant
 type NotePoint =
-  | { what: 'glide'; t: Seconds; pitch: number }
-  | { what: 'change'; t: Seconds; controller: PerNoteControllerName; value: number; glide?: Seconds | undefined };
+  { what: 'glide'; t: Seconds; pitch: number } | ({ what: 'change'; controller: PerNoteControllerName } & TimedValue);
 // a lane as it plays: the lane, and the track it's on
 interface PlayedLane<Track extends string> {
   lane: Lane;
@@ -176,9 +177,7 @@ export class RecordingPlayer<Track extends string> {
       return;
     }
     const { controller, value, glide } = point;
-    this.#sendNote(note, [
-      { type: 'per-note controller', index, controller, value, t, ...(glide === undefined ? {} : { glide }) },
-    ]);
+    this.#sendNote(note, [{ type: 'per-note controller', index, controller, ...timedValue(value, t, glide) }]);
   }
   // a note's end, or what sounds let go as playback stops or ends: its note off, its index free again
   #ended(note: RecordedNote, t: Seconds): void {
@@ -221,8 +220,7 @@ export class RecordingPlayer<Track extends string> {
       return;
     }
     const to: Address<Track> = { track, source: SENDER, play: { playback: true, kind: lane.kind, track: lane.track } };
-    const change = glide === undefined ? { value, t } : { value, t, glide };
-    this.#input.send(to, [{ type: 'controller', controller: lane.controller, ...change }]);
+    this.#input.send(to, [{ type: 'controller', controller: lane.controller, ...timedValue(value, t, glide) }]);
   }
 }
 

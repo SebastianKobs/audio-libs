@@ -29,7 +29,6 @@ interface Made<TrackStrip> {
   chains: Chains;
 }
 // a change that lands at its time, or glides from it by a time constant
-type TimedChange = Change & { glide?: number };
 
 export class TrackStrips<TrackStrip> {
   readonly #on: () => BuildOn;
@@ -75,7 +74,7 @@ export class TrackStrips<TrackStrip> {
   // A change on a track's strip, where its notes set it; its strip made as it comes.
   // Returns false for one it doesn't set: not its notes', a param the strip lacks, a track
   // with no template.
-  control(track: string, change: TimedChange): boolean {
+  control(track: string, change: Change): boolean {
     const made = this.#madeOn(track);
     if (!made || !this.#setByNotes(change.key)) {
       return false;
@@ -116,7 +115,7 @@ export class TrackStrips<TrackStrip> {
   }
   // When a change lands: gliding by its time constant, at its time on the audio's clock, or
   // now once its time has passed.
-  #timingOf({ t, glide }: TimedChange): Timing {
+  #timingOf({ t, glide }: Change): Timing {
     if (glide !== undefined) {
       return { glide };
     }

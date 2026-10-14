@@ -6,6 +6,7 @@
 // a per-note one's too, carries how it moves there, as an automation point's curve: jumping at its time, or gliding from it by a time
 // constant (glide), so what's recorded plays back as it was heard
 import type { Seconds } from '../clock/index.ts';
+import type { TimedValue } from '../util/index.ts';
 
 // a note that starts: its index, pitch and velocity; which part of its clip's element sounds it (a bulb, a leaf, a crystal)
 export interface NoteOn {
@@ -32,22 +33,16 @@ export type PerNoteControllerName =
 // a note's per-note controllers' values, by name
 export type PerNoteValues = Partial<Record<PerNoteControllerName, number>>;
 // one of a note's per-note controllers: sent with its note on, its value as it starts; sent later, a change
-export interface PerNoteController {
+export interface PerNoteController extends TimedValue {
   type: 'per-note controller';
   index: number;
   controller: PerNoteControllerName;
-  value: number;
-  t: Seconds;
-  glide?: Seconds | undefined;
 }
 // one of a track's controllers: a parameter of the track's by its name, as a controller's knob is mapped to one in Ableton, in its units
 // (G0d), as the track's instrument maps it
-export interface Controller {
+export interface Controller extends TimedValue {
   type: 'controller';
   controller: string;
-  value: number;
-  t: Seconds;
-  glide?: Seconds | undefined;
 }
 // per-note management, its detach flag set: the note's per-note controllers detached from it, sent once it has rung out, so its index
 // can be handed out again (MIDI 2.0's reset flag comes when a step needs it)

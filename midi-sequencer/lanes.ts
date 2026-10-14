@@ -2,14 +2,10 @@
 // A point a value at a time, jumping there, or gliding there by a time constant, as Web Audio's setTargetAtTime goes: the music's, on the
 // timeline as an event that holds until the next of its lane (libs/timeline/); the timeline's until L1c2
 import type { Seconds } from '../clock/index.ts';
-import { approach, lastAtOrBefore } from '../util/index.ts';
+import { approach, lastAtOrBefore, type TimedValue } from '../util/index.ts';
 
 // a lane's point: a value at a time, jumping there, or gliding there by a time constant (glide), as an automation point's curve
-export interface LanePoint {
-  t: Seconds;
-  value: number;
-  glide?: Seconds;
-}
+export type LanePoint = TimedValue;
 
 // whether a point sets its lane to what the one before it set, the same way: a jump to the same value after a jump, a glide to the same
 // value by the same time constant after a glide; one that does changes nothing

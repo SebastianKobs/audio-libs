@@ -6,7 +6,7 @@
 // the timeline's events (recorder.ts, lanes.ts, a lane's value by Web Audio's curve), and played back from a time (playback.ts)
 export type { NotePattern, PatternNote } from './pattern-note.ts';
 export { Stream } from './stream.ts';
-export type { NoteEnd, NoteGlide, Play, PlayedNote, PlayListener } from './stream.ts';
+export type { NoteGlide, Play, PlayedNote, PlayListener } from './stream.ts';
 export { Sequencer } from './input.ts';
 export { ClipPlayer } from './clips.ts';
 export type { Clip } from './clips.ts';

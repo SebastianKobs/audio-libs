@@ -10,19 +10,12 @@
 // It builds nothing and knows no clock: its times are the caller's.
 import type { Heard } from './model.ts';
 import type { Place, Placed, Position } from '../spatial/index.ts';
+import type { When } from '../util/index.ts';
 
 // a value set from what an emitter hears
 export type Law = (heard: Heard) => number;
 // what an emitter hears, each value by its name
 export type HeardValue = 'cutoff' | 'level' | 'side' | 'room';
-// When a value is handed on:
-//   - neither: now, the caller's now;
-//   - at: from a time of the caller's, at once;
-//   - glide: gliding there from now, by this time constant.
-export interface When {
-  at?: number;
-  glide?: number;
-}
 // what an emitter hears, handed on to its caller
 export type Hears = (name: HeardValue, value: number, when: When) => void;
 // a follower's value, handed on as it changes
@@ -63,8 +56,7 @@ export class Emitter implements Placed<Heard> {
     this.#side = side;
     this.#hears = hears;
     this.#onLetGo = onLetGo;
-    const heard = this.heard;
-    this.#handOn({ cutoff: heard.fc, level: heard.g, side: side(place.position), room: heard.room }, {});
+    this.#handOn(this.heard, {}, side(place.position));
   }
   get position(): Position {
     return this.place.position;
@@ -91,17 +83,10 @@ export class Emitter implements Placed<Heard> {
     if (law) {
       value = law(this.heard);
     }
-    if (at === undefined) {
-      follower(value, {});
-    } else {
-      follower(value, { at });
-    }
+    follower(value, { at });
   }
   moveTo(position: Position, at: number, side = position): void {
-    const heard = this.place.moveTo(position, at);
-    this.#handOn({ cutoff: heard.fc, level: heard.g, room: heard.room }, { at });
-    this.#followersHear(heard, { at });
-    this.#handOn({ side: this.#side(side) }, { at });
+    this.#handOn(this.place.moveTo(position, at), { at }, this.#side(side));
   }
   // once it's done: what its caller asked
   letGo(): void {
@@ -110,15 +95,16 @@ export class Emitter implements Placed<Heard> {
   // Heard differently enough to hear, the listener having moved (its place's update(), on a tick):
   // gliding there; its notes' places set ahead as they were heard then.
   perceivedAs(heard: Heard): void {
-    this.#handOn({ cutoff: heard.fc, level: heard.g, room: heard.room }, { glide: GLIDE });
-    this.#followersHear(heard, { glide: GLIDE });
+    this.#handOn(heard, { glide: GLIDE });
   }
-  #handOn(values: Partial<Record<HeardValue, number>>, when: When): void {
-    for (const [name, value] of Object.entries(values) as [HeardValue, number][]) {
-      this.#hears(name, value, when);
+  // what it hears handed on, in one order: its cutoff, its level, its side where it's given, its room; then its followers
+  #handOn(heard: Heard, when: When, side?: number): void {
+    this.#hears('cutoff', heard.cutoff, when);
+    this.#hears('level', heard.level, when);
+    if (side !== undefined) {
+      this.#hears('side', side, when);
     }
-  }
-  #followersHear(heard: Heard, when: When): void {
+    this.#hears('room', heard.room, when);
     for (const [follower, law] of this.#followers) {
       follower(law(heard), when);
     }
