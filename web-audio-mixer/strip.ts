@@ -1,6 +1,6 @@
 // ---------- libs/web-audio-mixer/strip: what a channel and an FX channel share ----------
 import type { Desk, MixerEngine } from './mixer.ts';
-import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
+import { BuiltModule, DEVICES, GAIN } from '../web-audio-fx/index.ts';
 import { MUTE } from './gains.ts';
 
 // An insert on a strip: modules the caller built in the context, in at input, out at output.
@@ -23,6 +23,8 @@ export interface StripOptions {
   out?: string | undefined;
   inserts?: Insert[] | undefined;
 }
+
+const LEVEL = DEVICES.gain.ports.level; // where a Gain's level is set: a volume's, a mute's, a send's
 
 // A channel strip, as a console has one: a channel's or an FX channel's:
 //   - its inserts, in order, and its sends, each to a return, a stage of its own (sendStages);
@@ -54,18 +56,18 @@ export abstract class ChannelStrip {
   protected abstract get muteStage(): BuiltModule;
 
   volume(volume: number): void {
-    this.volumeStage.set('gain.gain', volume);
+    this.volumeStage.set(LEVEL, volume);
   }
   panTo(position: number): void {
-    this.panStage?.set('pan.pan', position);
+    this.panStage?.set(DEVICES.pan.ports.pan, position);
   }
   muted(muting: boolean): void {
-    this.muteStage.set('gain.gain', muting ? 0 : 1, MUTE);
+    this.muteStage.set(LEVEL, muting ? 0 : 1, MUTE);
   }
   // A send turned up or down, gliding there; one to a return its setup doesn't give built as it's first turned up.
   sendTo(to: string, amount: number): void {
     const sendStage = this.sendStages[to] ?? this.#turnedUp(to, amount);
-    sendStage?.set('gain.gain', amount);
+    sendStage?.set(LEVEL, amount);
   }
   // A control by its name, as a desk's remote control has them: its volume, its pan, or a send by its return's name.
   set(control: string, value: number): void {

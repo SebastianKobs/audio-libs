@@ -4,7 +4,7 @@ import { sentTo, type StripOptions } from './strip.ts';
 import { Routing, type StripKind, MASTER } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
-import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
+import { BuiltModule, DEVICES, GAIN } from '../web-audio-fx/index.ts';
 import { restartAt } from '../audio-plan/index.ts';
 // what the mixer and its strips need of the engine: the context, its time, a meter on a node, a plan built and set, and whether it can pan
 export type MixerEngine = Pick<Engine, 'audioContext' | 'now' | 'meter' | 'build' | 'apply' | 'canPan'>;
@@ -34,6 +34,7 @@ export interface MasterInsert {
 
 const FADE_IN = 0.25; // s, a time constant
 const FADE_OUT = 0.08; // s, a time constant
+const LEVEL = DEVICES.gain.ports.level; // where the master's Gain sets its volume
 
 export class Mixer {
   readonly sum: GainNode;
@@ -66,7 +67,7 @@ export class Mixer {
     this.master = this.#master.input as GainNode; // a Gain module's one gain
     this.#insert = master;
     this.#volume = volume;
-    this.#master.set('gain.gain', volume, { glide: FADE_IN }); // never start at full volume
+    this.#master.set(LEVEL, volume, { glide: FADE_IN }); // never start at full volume
     this.sum = new BuiltModule(engine, { patch: GAIN, into: master?.input ?? this.master }).input as GainNode; // as the master
     master?.output.connect(this.master);
     this.#points = { master: this.master, ...master?.points };
@@ -103,22 +104,22 @@ export class Mixer {
   }
   volume(value: number): void {
     this.#volume = value;
-    this.#master.set('gain.gain', value);
+    this.#master.set(LEVEL, value);
   }
   // The master faded out, quickly. Switching the audio off once it's quiet is the
   // desk's owner's: a desk has no power switch of its own.
   fadeOut(): void {
-    this.#master.set('gain.gain', 0, { glide: FADE_OUT });
+    this.#master.set(LEVEL, 0, { glide: FADE_OUT });
   }
   // The master faded in again, never at full volume.
   // fromSilence: the audio was off, so from 0; otherwise from where the fade got to.
   fadeIn({ fromSilence = false }: { fromSilence?: boolean } = {}): void {
     if (!fromSilence) {
-      this.#master.set('gain.gain', this.#volume, { glide: FADE_IN });
+      this.#master.set(LEVEL, this.#volume, { glide: FADE_IN });
       return;
     }
     const at = this.#engine.now();
-    this.#master.automate('gain.gain', [...restartAt(0, at), ['target', this.#volume, at, FADE_IN]]);
+    this.#master.automate(LEVEL, [...restartAt(0, at), ['target', this.#volume, at, FADE_IN]]);
   }
   // which strips are muted and which soloed, as Ableton's mute and solo, by name: each strip silenced as the routing says (silenced()),
   // now, and one made later as it's made; a name not built yet waiting for it (Z4)

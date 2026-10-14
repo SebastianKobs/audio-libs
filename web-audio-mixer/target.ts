@@ -6,7 +6,7 @@
 // None for a mute or a solo, which silence a strip by the routing, nor where nothing's built at it yet.
 // A value lands there by a timing (libs/web-audio-fx/'s): now, at a time on the audio's clock, or gliding by a time constant.
 import { SEND, type ParamKey } from '../desk-plan/index.ts';
-import type { Settable, Target } from '../web-audio-fx/index.ts';
+import { DEVICES, type Settable, type Target } from '../web-audio-fx/index.ts';
 import type { Channel } from './channel.ts';
 import type { FxChannel } from './fx-channel.ts';
 
@@ -27,7 +27,7 @@ export function targetOf(
   }
   if (slot === SEND) {
     const stage = strip.sendStages[param];
-    return stage ? { stage, port: 'gain.gain' } : null;
+    return stage ? { stage, port: DEVICES.gain.ports.level } : null;
   }
   const device = slotted(slot);
   const port = device?.ports[param];
@@ -40,10 +40,10 @@ export function targetOf(
 // a strip's own param's target: its volume or its pan; none for a mute or a solo
 function ownTarget(strip: Channel | FxChannel, param: string): Target | null {
   if (param === 'volume') {
-    return { stage: strip.volumeStage, port: 'gain.gain' };
+    return { stage: strip.volumeStage, port: DEVICES.gain.ports.level };
   }
   if (param === 'pan' && strip.panStage) {
-    return { stage: strip.panStage, port: 'pan.pan' };
+    return { stage: strip.panStage, port: DEVICES.pan.ports.pan };
   }
   return null;
 }

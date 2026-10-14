@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { FILTER, UTILITY } from '../../web-audio-fx/index.ts';
+import { DEVICES } from '../../web-audio-fx/index.ts';
 import { Mixer, buildChannel, buildFxChannel } from '../index.ts';
 import { routingOf } from '../../desk-plan/index.ts';
 
@@ -15,7 +15,6 @@ class Context extends StandInContext {
     super(() => time);
   }
 }
-const DEVICES = { filter: FILTER, utility: UTILITY };
 // a desk as data: a reverb, a delay sending to it into a bus, the bus into the master
 const DESK = [
   { fx: 'reverb', chain: [{ effect: 'room' }], inserts: [{ slot: 'level', device: 'utility', start: { level: 0.6 } }] },

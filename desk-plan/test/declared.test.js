@@ -22,7 +22,7 @@ test("a param's declaration in a desk's data, by its key: the strip's own, a sen
     ],
     master: { inserts: [{ slot: 'limiter', device: 'limiter' }] },
     templateOf: (strip) => (strip === 'replay 1' ? { inserts: [{ slot: 'air', device: 'filter' }] } : null),
-    devices: { utility: { level }, filter: { cutoff }, limiter: { gain } },
+    devices: { utility: { params: { level } }, filter: { params: { cutoff } }, limiter: { params: { gain } } },
     effects: (effect) => (effect === 'echo' ? { time } : undefined),
   });
   assert.equal(declared({ strip: 'sings', param: 'volume' }), STRIP_PARAMS.volume, "a strip's own");

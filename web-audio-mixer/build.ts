@@ -7,8 +7,8 @@
 //   2. The strip on the mixer: an FX channel, a bus or a channel, with those inserts, its
 //      sends at the amounts its owner hands over (0 where none), its volume, pan and way out.
 // Returns the strip and each slot's chain, to set it through.
-import type { FxChain } from '../web-audio-fx/index.ts';
-import type { Params, Patch } from '../synth/index.ts';
+import type { Device, FxChain } from '../web-audio-fx/index.ts';
+import type { Params } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import type { Channel } from './channel.ts';
 import type { Insert, Send, StripOptions } from './strip.ts';
@@ -18,12 +18,12 @@ import { deviceInsert } from './device-insert.ts';
 import { returnOf, type StripEntry } from '../desk-plan/index.ts';
 
 // What a strip is built on: the desk's mixer and its engine, a beat's length for a device's
-// params in note values, and the devices a slot may hold, each an FX module, by name.
+// params in note values, and the devices a slot may hold, by name.
 export interface BuildOn {
   mixer: Mixer;
   engine: Engine;
   beat: number;
-  devices: Readonly<Record<string, Patch>>;
+  devices: Readonly<Record<string, Device>>;
 }
 // The values a strip is built at, its owner's. None given: the strip's own defaults.
 //   params: a slot's params as they play, by slot, over its start.
@@ -85,7 +85,7 @@ export function slotsOf(
     const owned = params?.[slot];
     const built = deviceInsert(on.engine, {
       name: slot,
-      patch: on.devices[device]!, // a device the registry has
+      patch: on.devices[device]!.patch, // a device the registry has
       params: () => ({ ...start, ...owned?.() }),
       beat: on.beat,
     });

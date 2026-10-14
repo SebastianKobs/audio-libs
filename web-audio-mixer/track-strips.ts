@@ -32,7 +32,6 @@ interface Made<TrackStrip> {
 
 export class TrackStrips<TrackStrip> {
   readonly #on: () => BuildOn;
-  readonly #ports: Readonly<Record<string, Readonly<Record<string, string>>>>;
   readonly #now: () => number;
   readonly #templateOf: (track: string) => Template | null;
   readonly #made: (strip: Channel, chains: Chains, track: string) => TrackStrip;
@@ -40,24 +39,21 @@ export class TrackStrips<TrackStrip> {
   readonly #strips = new Map<string, Made<TrackStrip>>();
 
   // on: what a strip is built on now, the desk's mixer and engine, the beat, the devices;
-  // ports: each device's ports, by its params' names; now: the clock's time now
+  // now: the clock's time now
   constructor({
     on,
-    ports,
     now,
     templateOf,
     made,
     setByNotes,
   }: {
     on: () => BuildOn;
-    ports: Readonly<Record<string, Readonly<Record<string, string>>>>;
     now: () => number;
     templateOf: (track: string) => Template | null;
     made: (strip: Channel, chains: Chains, track: string) => TrackStrip;
     setByNotes: (key: ParamKey) => boolean;
   }) {
     this.#on = on;
-    this.#ports = ports;
     this.#now = now;
     this.#templateOf = templateOf;
     this.#made = made;
@@ -111,7 +107,7 @@ export class TrackStrips<TrackStrip> {
     if (device === undefined || !chain) {
       return undefined;
     }
-    return { chain, ports: this.#ports[device] ?? {} };
+    return { chain, ports: this.#on().devices[device]?.ports ?? {} };
   }
   // When a change lands: gliding by its time constant, at its time on the audio's clock, or
   // now once its time has passed.

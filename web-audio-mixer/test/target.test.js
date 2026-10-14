@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { UTILITY } from '../../web-audio-fx/index.ts';
+import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
 import { Mixer, buildChannel, buildFxChannel, targetOf } from '../index.ts';
 
@@ -14,11 +14,11 @@ class Context extends StandInContext {
     super(() => time);
   }
 }
-const UTILITY_PORTS = { level: 'gain.gain', pan: 'pan.pan' };
 
 test("a key's target on a built strip: its volume and its pan, a send built, a slot's chain at its device's port; none for a mute, a send not built, a port its device lacks", () => {
   const { track, reverb } = desk();
-  const slots = (slot) => (slot === 'utility' ? { chain: track.chains.utility, ports: UTILITY_PORTS } : undefined);
+  const slots = (slot) =>
+    slot === 'utility' ? { chain: track.chains.utility, ports: DEVICES.utility.ports } : undefined;
   const on = (key) => targetOf(track.strip, { strip: 'track', ...key }, slots);
   assert.deepEqual(
     on({ param: 'volume' }),
@@ -64,7 +64,7 @@ function desk() {
   const data = [{ fx: 'reverb' }, { bus: 'sings' }];
   const engine = new Engine({ AudioContext: Context });
   const mixer = new Mixer(engine, { routing: routingOf(data) });
-  const on = { mixer, engine, beat: 60 / 72, devices: { utility: UTILITY } };
+  const on = { mixer, engine, beat: 60 / 72, devices: DEVICES };
   const reverb = buildFxChannel(on, 'reverb', data[0]);
   buildChannel(on, 'sings', data[1], {}, 'bus');
   const entry = { inserts: [{ slot: 'utility', device: 'utility' }], sends: ['reverb'], out: 'sings' };

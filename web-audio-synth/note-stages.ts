@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-synth/note-stages: a note's own stages, set by its per-note controllers (G0b; the space's until V3) ----------
-import { BuiltModule, FILTER, GAIN, PAN_POT, type ModuleEngine, type Target } from '../web-audio-fx/index.ts';
+import { BuiltModule, DEVICES, FILTER, GAIN, PAN_POT, type ModuleEngine, type Target } from '../web-audio-fx/index.ts';
 import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 
 // the per-note controllers a note's stages answer, each with a stage of its own: #74 Brightness, #7 Volume, #10 Pan, #91 Effects 1 Depth
@@ -8,11 +8,11 @@ export type StageController = 'brightness' | 'volume' | 'pan' | 'effects 1 depth
 // the per-note controllers a note is heard by, and the port of its stage's module each sets: its air's cutoff, its level, its side;
 // and its room's level
 export const HEARD_PER_NOTE = Object.freeze({
-  brightness: 'filter.frequency',
-  volume: 'gain.gain',
-  pan: 'pan.pan',
+  brightness: DEVICES.filter.ports.cutoff,
+  volume: DEVICES.gain.ports.level,
+  pan: DEVICES.pan.ports.pan,
 } satisfies Partial<Record<PerNoteControllerName, string>>);
-export const ROOM_PER_NOTE = Object.freeze({ 'effects 1 depth': 'gain.gain' } satisfies Partial<
+export const ROOM_PER_NOTE = Object.freeze({ 'effects 1 depth': DEVICES.gain.ports.level } satisfies Partial<
   Record<PerNoteControllerName, string>
 >);
 

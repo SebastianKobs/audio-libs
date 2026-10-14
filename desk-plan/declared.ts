@@ -13,7 +13,7 @@ import { MASTER } from '../mixer/index.ts';
 
 // A desk's declarations, by key.
 //   desk, master: its strips' data and the master's; templateOf(): a track's strip's template;
-//   devices: each device's params, declared, by the device's name;
+//   devices: each device, its params declared, by the device's name;
 //   effects(): the params an effect declares of its own, an FX channel's chain's module's.
 export function declaredIn<Named extends Names>({
   desk,
@@ -25,7 +25,7 @@ export function declaredIn<Named extends Names>({
   desk: readonly DeskEntry<Named>[];
   master?: StripEntry<Named>;
   templateOf?: (strip: string) => StripEntry<Named> | null | undefined;
-  devices: Readonly<Record<string, ParamSpecs>>;
+  devices: Readonly<Record<string, { readonly params: ParamSpecs }>>;
   effects: (effect: Named['effect']) => ParamSpecs | undefined;
 }): (key: ParamKey) => ParamSpec | undefined {
   // a strip's data, by its name: the master's, a desk strip's, or a track's template's
@@ -45,7 +45,7 @@ export function declaredIn<Named extends Names>({
     if (device === undefined) {
       return undefined;
     }
-    return devices[device];
+    return devices[device]?.params;
   };
   return (key) => specOf(key, slotSpecs);
 }

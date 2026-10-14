@@ -12,9 +12,9 @@
 //      params where it has them.
 // Each strip's slots' chains are kept (slots) and handed back to its owner (built()). Its FX channels' chains
 // follow the tempo (tempo()). A device is named by its strip and its slot (deviceAt()).
-import { FxChain, type DeviceParams, type FxModules } from '../web-audio-fx/index.ts';
+import { FxChain, type Device, type DeviceParams, type FxModules } from '../web-audio-fx/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
-import type { Patch, Params } from '../synth/index.ts';
+import type { Params } from '../synth/index.ts';
 import { deviceAt, nameOf, routingOf, type DeskEntry, type Names, type StripEntry } from '../desk-plan/index.ts';
 import type { Routing } from '../mixer/index.ts';
 import { Mixer, type MasterInsert } from './mixer.ts';
@@ -32,7 +32,7 @@ export class Desk<Named extends Names = Names> {
   readonly slots: Record<string, Chains> = {}; // each strip's slots' chains, the master's too, once built
   readonly #desk: readonly DeskEntry<Named>[];
   readonly #masterEntry: StripEntry<Named>;
-  readonly #devices: Readonly<Record<string, Patch>>;
+  readonly #devices: Readonly<Record<string, Device>>;
   readonly #modules: FxModules;
   readonly #moduleOf: (effect: Named['effect']) => string;
   readonly #params: DeviceParams;
@@ -65,7 +65,7 @@ export class Desk<Named extends Names = Names> {
   }: {
     desk: readonly DeskEntry<Named>[];
     master?: StripEntry<Named>;
-    devices: Readonly<Record<string, Patch>>;
+    devices: Readonly<Record<string, Device>>;
     modules: FxModules;
     moduleOf: (effect: Named['effect']) => string;
     params: DeviceParams;

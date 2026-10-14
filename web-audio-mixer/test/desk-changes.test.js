@@ -3,7 +3,7 @@
 // to its switches, a slot's param to its device among the device params. On a live mix and a clock of the test's own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DeviceParams, INSERTS } from '../../web-audio-fx/index.ts';
+import { DeviceParams, DEVICES } from '../../web-audio-fx/index.ts';
 import { DeskChanges } from '../index.ts';
 
 const DESK = [{ fx: 'reverb' }, { bus: 'you', sends: ['reverb'] }];
@@ -17,7 +17,7 @@ function changesOf() {
     setSolo: (strip, on) => told.push(['solo', strip, on]),
   };
   const params = new DeviceParams({ beat: () => 0.5 });
-  params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: INSERTS.utility.ports });
+  params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: DEVICES.utility.ports });
   const ticks = [];
   const clock = { time: 10, now: () => clock.time, onTick: (listener) => ticks.push(listener) };
   const tick = (t) => {

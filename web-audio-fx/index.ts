@@ -13,13 +13,13 @@ import { plan as planPatch, portValue, type Context, type Params, type Patch, ty
 import { paramOf, type Automatable, type BuiltNode } from '../web-audio-engine/index.ts';
 import { BuiltModule, type ModuleEngine } from './module.ts';
 import { MOVED, type Settable, type Timing } from './timing.ts';
-export { FILTER, GAIN, INSERTS, LIMITER, LIMITER_SETTINGS, PAN, PAN_PARAMS, PAN_POT, UTILITY } from './inserts.ts';
+export { DEVICES, FILTER, GAIN, LIMITER, LIMITER_SETTINGS, PAN, PAN_POT, UTILITY } from './inserts.ts';
 export { BuiltModule, type ModuleEngine } from './module.ts';
 export { MOVED, type Settable, type Target, type Timing } from './timing.ts';
 export { FxModules } from './modules.ts';
 export { DeviceParams } from './device-params.ts';
 export { TEMPO_TIME } from './tempo.ts';
-export type { InsertModule, LimiterSettings } from './inserts.ts';
+export type { Device, DeviceName, LimiterSettings } from './inserts.ts';
 
 // a module in a chain: its name, its patch, and its params, read each time the chain is built
 export interface Module {

@@ -3,15 +3,7 @@
 // its ports its device's; every FX channel's chain's module with params of its own one too, its params' specs its effect's
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  DeviceParams,
-  FILTER,
-  INSERTS,
-  LIMITER,
-  LIMITER_SETTINGS,
-  TEMPO_TIME,
-  UTILITY,
-} from '../../web-audio-fx/index.ts';
+import { DEVICES, DeviceParams, LIMITER_SETTINGS, TEMPO_TIME } from '../../web-audio-fx/index.ts';
 import { addLiveDevices } from '../index.ts';
 
 const DESK = [
@@ -36,8 +28,7 @@ test("every slot a live device, its start its module's params with the slot's ow
   addLiveDevices(params, {
     desk: DESK,
     master: { inserts: [{ slot: 'limiter', device: 'limiter' }] },
-    devices: { utility: UTILITY, filter: FILTER, limiter: LIMITER },
-    ports: { utility: INSERTS.utility.ports, filter: INSERTS.filter.ports, limiter: INSERTS.limiter.ports },
+    devices: DEVICES,
     ruled: (strip) => (strip === 'circle' ? ['dull', 'far'] : []),
     effects: (effect) => (effect === 'echo' ? { time: TEMPO_TIME } : undefined),
   });

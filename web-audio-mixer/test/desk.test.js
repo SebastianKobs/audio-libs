@@ -6,16 +6,7 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import {
-  DeviceParams,
-  FILTER,
-  FxModules,
-  GAIN,
-  INSERTS,
-  LIMITER,
-  LIMITER_SETTINGS,
-  UTILITY,
-} from '../../web-audio-fx/index.ts';
+import { DeviceParams, FILTER, FxModules, GAIN, DEVICES, LIMITER_SETTINGS } from '../../web-audio-fx/index.ts';
 import { nameOf } from '../../desk-plan/index.ts';
 import { Desk } from '../index.ts';
 
@@ -172,14 +163,14 @@ function deskOf() {
   const engine = new Engine({ AudioContext: Context });
   const modules = new FxModules({ modules: { gain: GAIN, filter: FILTER } });
   const params = new DeviceParams({ beat: () => beat });
-  params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: INSERTS.utility.ports });
+  params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: DEVICES.utility.ports });
   params.add('delay/echo', { start: { cutoff: 500 } });
-  params.add('master/limiter', { start: { ...LIMITER_SETTINGS }, ports: INSERTS.limiter.ports });
+  params.add('master/limiter', { start: { ...LIMITER_SETTINGS }, ports: DEVICES.limiter.ports });
   const built = [];
   const desk = new Desk({
     desk: DESK,
     master: MASTER,
-    devices: { utility: UTILITY, filter: FILTER, limiter: LIMITER },
+    devices: DEVICES,
     modules,
     moduleOf: (effect) => MODULE_OF[effect],
     params,

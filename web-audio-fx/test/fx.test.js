@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { FxChain, INSERTS, TEMPO_TIME } from '../index.ts';
+import { DEVICES, FxChain, GAIN, PAN_POT, TEMPO_TIME, UTILITY } from '../index.ts';
 import { delayBeats, plan } from '../../synth/index.ts';
 import { positionOf } from '../../params/index.ts';
 
@@ -151,7 +151,7 @@ test('a module built on its own glides from a time to come where it is given one
 
 // each param a module may be automated by, declared with its taper (U2c4a), as a plugin declares its own
 test("the params declared with their tapers: a Utility's level by the fader law, its pan in a line; a Filter's cutoff by octaves; the limiter's in lines; a delay's time in beats by octaves, a 16th triplet to a dotted half, following the tempo", () => {
-  const { utility, filter, limiter } = INSERTS;
+  const { utility, filter, limiter } = DEVICES;
   assert.deepEqual(
     [utility.params.level.taper, utility.params.pan.taper, filter.params.cutoff.taper, limiter.params.gain.taper],
     ['fader', undefined, 'octaves', undefined],
@@ -167,13 +167,25 @@ test("the params declared with their tapers: a Utility's level by the fader law,
   );
 });
 
-// each insert's ports, by its params' names, declared beside its specs (U2c4b1a): where a param's value is set on its chain, so none is
-// named by hand
-test("each insert's ports declared beside its params: a Utility's level and pan, a Filter's cutoff, the limiter's three; a param set only as it's built, none", () => {
-  const { utility, filter, limiter } = INSERTS;
+// each device, by the name a strip's data gives it (U2c4b1a, DRY9a): its name as its device shows it, its module, its params declared
+// and its ports by its params' names, where a param's value is set on its chain, so none is named by hand
+test("each device: its name, its module, its params and its ports; a Gain's level, a Pan's pan, a Utility's both, the pan pot Utility a Gain then a pan pot, a Filter's cutoff, the limiter's three; a param set only as it's built, none", () => {
+  const { gain, pan, utility, filter, limiter } = DEVICES;
+  assert.deepEqual([gain.ports, pan.ports], [{ level: 'gain.gain' }, { pan: 'pan.pan' }]);
   assert.deepEqual(utility.ports, { level: 'gain.gain', pan: 'pan.pan' });
   assert.deepEqual(filter.ports, { cutoff: 'filter.frequency' }, 'its resonance fixed as it was built');
   assert.deepEqual(limiter.ports, { gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' });
+  assert.deepEqual(
+    [utility, filter, limiter].map((device) => device.name),
+    ['Utility', 'LP filter', 'Limiter'],
+    'as its device shows it',
+  );
+  assert.equal(utility.patch, UTILITY);
+  const panPot = DEVICES['pan pot utility'];
+  assert.deepEqual([panPot.name, panPot.params, panPot.ports], [utility.name, utility.params, utility.ports]);
+  assert.deepEqual(panPot.patch.chain, ['gain', 'pan'], 'a Gain, then a Pan');
+  assert.deepEqual([panPot.patch.gain, panPot.patch.pan], [GAIN.gain, PAN_POT.pan], 'its pan a pan pot');
+  assert.deepEqual(panPot.patch.params, UTILITY.params);
 });
 
 // what a chain's modules' nodes offer to read, as built, a limiter's (U2c5c): the points a meter reads inside it, by name, its in after its

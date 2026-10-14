@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { FILTER, INSERTS, UTILITY } from '../../web-audio-fx/index.ts';
+import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
 import { Mixer, TrackStrips, buildChannel, buildFxChannel } from '../index.ts';
 
@@ -16,8 +16,6 @@ class Context extends StandInContext {
     super(() => time);
   }
 }
-const DEVICES = { filter: FILTER, utility: UTILITY };
-const PORTS = { filter: INSERTS.filter.ports, utility: INSERTS.utility.ports };
 // a track's template: the air and a Utility, a send to the reverb, into garden sings
 const TEMPLATE = {
   inserts: [
@@ -89,7 +87,6 @@ function trackStrips() {
   const made = [];
   const strips = new TrackStrips({
     on: () => on,
-    ports: PORTS,
     now: () => time,
     templateOf: (track) => (track.startsWith('replay ') ? { entry: TEMPLATE, values: { volume: 0.5 } } : null),
     made: (strip, chains, track) => {

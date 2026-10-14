@@ -6,15 +6,14 @@
 //   - its ports: its device's, by param.
 // Every FX channel's chain's module with params of its own is one too, its params' specs its
 // effect's (a delay's time in beats).
-import type { DeviceParams } from '../web-audio-fx/index.ts';
-import type { Patch } from '../synth/index.ts';
+import type { Device, DeviceParams } from '../web-audio-fx/index.ts';
 import type { ParamSpecs } from '../params/index.ts';
 import { deviceAt, nameOf, type DeskEntry, type Names, type StripEntry } from '../desk-plan/index.ts';
 import { MASTER } from '../mixer/index.ts';
 
 // Adds the desk's live devices to the device params.
 //   desk, master: its strips' data and the master's;
-//   devices, ports: each device's module and its ports, by the device's name;
+//   devices: each device, its module and its ports, by the device's name;
 //   ruled(): the slots of a strip its owner's rules set, which aren't live;
 //   effects(): the params an effect declares of its own.
 export function addLiveDevices<Named extends Names>(
@@ -23,14 +22,12 @@ export function addLiveDevices<Named extends Names>(
     desk,
     master = {},
     devices,
-    ports,
     ruled = () => [],
     effects,
   }: {
     desk: readonly DeskEntry<Named>[];
     master?: StripEntry<Named>;
-    devices: Readonly<Record<string, Patch>>;
-    ports: Readonly<Record<string, Readonly<Record<string, string>>>>;
+    devices: Readonly<Record<string, Device>>;
     ruled?: (strip: string) => readonly string[];
     effects: (effect: Named['effect']) => ParamSpecs | undefined;
   },
@@ -40,7 +37,7 @@ export function addLiveDevices<Named extends Names>(
     ...desk.map((entry): [string, DeskEntry<Named>] => [nameOf(entry), entry]),
   ];
   for (const [strip, entry] of strips) {
-    addSlots(params, strip, entry, { devices, ports, ruled: new Set(ruled(strip)) });
+    addSlots(params, strip, entry, { devices, ruled: new Set(ruled(strip)) });
   }
   for (const entry of desk.filter((fxEntry) => fxEntry.fx)) {
     addOwnParams(params, entry, effects);
@@ -52,21 +49,11 @@ function addSlots<Named extends Names>(
   params: DeviceParams,
   strip: string,
   entry: StripEntry<Named>,
-  {
-    devices,
-    ports,
-    ruled,
-  }: {
-    devices: Readonly<Record<string, Patch>>;
-    ports: Readonly<Record<string, Readonly<Record<string, string>>>>;
-    ruled: ReadonlySet<string>;
-  },
+  { devices, ruled }: { devices: Readonly<Record<string, Device>>; ruled: ReadonlySet<string> },
 ): void {
   for (const { slot, device, start } of (entry.inserts ?? []).filter((slotEntry) => !ruled.has(slotEntry.slot))) {
-    params.add(deviceAt(strip, slot), {
-      start: { ...devices[device]!.params, ...start }, // a device the registry has
-      ports: ports[device] ?? {},
-    });
+    const { patch, ports } = devices[device]!; // a device the registry has
+    params.add(deviceAt(strip, slot), { start: { ...patch.params, ...start }, ports });
   }
 }
 // An FX channel's chain's modules with params of their own as live devices, their params'

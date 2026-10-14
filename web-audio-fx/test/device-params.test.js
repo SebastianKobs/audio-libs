@@ -5,7 +5,7 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { DeviceParams, FILTER, FxChain, INSERTS, TEMPO_TIME, UTILITY } from '../index.ts';
+import { DEVICES, DeviceParams, FILTER, FxChain, TEMPO_TIME, UTILITY } from '../index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
 
 let time = 0;
@@ -18,7 +18,7 @@ const beat = 0.5;
 
 test("a device's params as they play: a copy of its start, handed out as copies, set by param; its start kept, for a reset", () => {
   const devices = new DeviceParams({ beat: () => beat });
-  devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: INSERTS.utility.ports });
+  devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: DEVICES.utility.ports });
   assert.deepEqual([devices.has('tap/utility'), devices.has('you/utility')], [true, false], 'a device added, one not');
   assert.deepEqual(devices.current('tap/utility'), { level: 0.5, pan: 0 }, 'at its start');
   devices.set('tap/utility', 'level', 0.25);
@@ -35,8 +35,8 @@ test('a param set on the chain that plays it: at the port its module declares, g
     const engine = new Engine({ AudioContext: Context });
     const biquads = () => engine.audioContext.rec.nodes.filter((node) => node.kind === 'biquad');
     const devices = new DeviceParams({ beat: () => beat });
-    devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: INSERTS.utility.ports });
-    devices.add('tap/air', { start: { q: 0.707, cutoff: 2000 }, ports: INSERTS.filter.ports });
+    devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: DEVICES.utility.ports });
+    devices.add('tap/air', { start: { q: 0.707, cutoff: 2000 }, ports: DEVICES.filter.ports });
     const utility = chainOf(engine, devices, 'tap/utility', UTILITY);
     const air = chainOf(engine, devices, 'tap/air', FILTER);
     assert.equal(utility.paramOf('gain.gain').value, 0.5, 'built at its params as they play');

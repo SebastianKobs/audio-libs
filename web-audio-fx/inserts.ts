@@ -1,9 +1,11 @@
-// ---------- libs/web-audio-fx/inserts: the inserts' modules, one of each kind: a Utility, a Filter, a Limiter ----------
+// ---------- libs/web-audio-fx/inserts: the devices an insert slot may hold, each an FX module ----------
 // An insert is an FX module as any other (mockup/architecture/mixer-and-fx.md, "Inserts as FX modules"), the same device on a strip or a
 // return, as Ableton's are: a patch with an input and an output, built by an FxChain between two points, its values params, read as the
-// chain is built (a module's params()) and set live (set()). No theme has its own: they're the desk's
+// chain is built (a module's params()) and set live (set()). No theme has its own: they're the desk's.
+// Each a device (DEVICES): its name, its module, its params declared and the port each is set at.
 import { LIMITER_SPECS, type Patch } from '../synth/index.ts';
 import { FADER_GAIN, PAN as PAN_SPEC, type RangedSpec } from '../params/index.ts';
+import { frozen } from '../util/index.ts';
 
 // the limiter, as Ableton's and FabFilter's Pro-L: its gain into it, in dB, and held at its ceiling, where it acts and the most that comes
 // out, in dBFS, by a compressor there as hard as Web Audio's goes. Each dB more gain, a dB louder, never past the ceiling. Release in s.
@@ -12,11 +14,24 @@ export interface LimiterSettings {
   ceiling: number;
   release: number;
 }
-// the inserts' modules, by kind
-export type InsertModule = 'utility' | 'filter' | 'limiter';
 // a module's params, by the names its patch gives them, each declared beside its patch, a slider each (F4c), with its range;
 // their defaults are its patch's params, as it starts
 type InsertParams = Readonly<Record<string, RangedSpec>>;
+// A device, an FX module as an insert slot holds it and its device shows it, as Ableton's
+// Utility, Auto Filter and Limiter show theirs:
+//   - name: as its slot and its device show it;
+//   - patch: its module;
+//   - params: its params, declared;
+//   - ports: the port each param is set at on its chain, by the param's name;
+//     none for one set only as it's built (a Filter's resonance).
+export interface Device {
+  readonly name: string;
+  readonly patch: Patch;
+  readonly params: InsertParams;
+  readonly ports: Readonly<Record<string, string>>;
+}
+// the devices, by the name a strip's data gives them
+export type DeviceName = 'gain' | 'pan' | 'utility' | 'pan pot utility' | 'filter' | 'limiter';
 
 // a Gain: the gain block, at 1 unless its params say otherwise; its param level, its port 'gain.gain'. A strip's input, fader, sends and
 // room, the mixer's sum and master (F5)
@@ -35,7 +50,7 @@ export const PAN: Patch = Object.freeze({
   pan: 'pan',
   params: Object.freeze({ pan: 0 }),
 });
-export const PAN_PARAMS = Object.freeze({ pan: PAN_SPEC }) satisfies InsertParams;
+const PAN_PARAMS: InsertParams = Object.freeze({ pan: PAN_SPEC });
 // a Pan whose pan is a pan pot: a mono sound panned as it comes, constant power, as a console's
 export const PAN_POT: Patch = Object.freeze({ ...PAN, pan: Object.freeze({ position: 'pan', mono: 'pan pot' }) });
 // a Utility: a Gain, then a Pan, the two combined, as data, so it can't drift from them; its params level and pan, its ports 'gain.gain'
@@ -71,28 +86,25 @@ export const LIMITER: Patch = Object.freeze({
   params: Object.freeze({ ...LIMITER_SETTINGS }),
 });
 const LIMITER_PARAMS: InsertParams = LIMITER_SPECS; // the limiter block's
-// each insert's module as its slot and its device show it: its name, and its params, each as its device shows it, as Ableton's Utility,
-// Auto Filter and Limiter show theirs; and the port each param is set at on its chain, by the param's name, none for one set
-// only as it's built (a Filter's resonance)
-export const INSERTS: Readonly<
-  Record<InsertModule, { name: string; params: InsertParams; ports: Readonly<Record<string, string>> }>
-> = Object.freeze({
-  utility: Object.freeze({
-    name: 'Utility',
-    params: UTILITY_PARAMS,
-    ports: Object.freeze({ level: 'gain.gain', pan: 'pan.pan' }),
-  }),
-  filter: Object.freeze({
-    name: 'LP filter',
-    params: FILTER_PARAMS,
-    ports: Object.freeze({ cutoff: 'filter.frequency' }),
-  }),
-  limiter: Object.freeze({
+// The devices a strip's or a module's data names. The Utility twice:
+//   - 'utility': its pan a stereo panner, as the mixer's pans are;
+//   - 'pan pot utility': its pan a pan pot, as a mono note was panned before.
+const GAIN_DEVICE = { name: 'Gain', patch: GAIN, params: GAIN_PARAMS, ports: { level: 'gain.gain' } } as const;
+const PAN_DEVICE = { name: 'Pan', patch: PAN, params: PAN_PARAMS, ports: { pan: 'pan.pan' } } as const;
+const UTILITY_PORTS = { ...GAIN_DEVICE.ports, ...PAN_DEVICE.ports } as const;
+export const DEVICES = frozen({
+  gain: GAIN_DEVICE,
+  pan: PAN_DEVICE,
+  utility: { name: 'Utility', patch: UTILITY, params: UTILITY_PARAMS, ports: UTILITY_PORTS },
+  'pan pot utility': { name: 'Utility', patch: combined(GAIN, PAN_POT), params: UTILITY_PARAMS, ports: UTILITY_PORTS },
+  filter: { name: 'LP filter', patch: FILTER, params: FILTER_PARAMS, ports: { cutoff: 'filter.frequency' } },
+  limiter: {
     name: 'Limiter',
+    patch: LIMITER,
     params: LIMITER_PARAMS,
-    ports: Object.freeze({ gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' }),
-  }),
-});
+    ports: { gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' },
+  },
+} as const satisfies Record<DeviceName, Device>);
 // modules combined into one, as data: their blocks in their order, their params joined; planned and built as one module
 function combined(...modules: Patch[]): Patch {
   const joined: Patch = {};
