@@ -34,6 +34,7 @@ import { MOVE_GLIDE } from './module.ts';
 export { FILTER, GAIN, INSERTS, LIMITER, LIMITER_SETTINGS, PAN, PAN_PARAMS, PAN_POT, UTILITY } from './inserts.ts';
 export { BuiltModule, MOVE_GLIDE } from './module.ts';
 export { FxModules } from './modules.ts';
+export { DeviceParams } from './device-params.ts';
 export { TEMPO_TIME } from './tempo.ts';
 export type { InsertModule, InsertParamSpec, LimiterSettings } from './inserts.ts';
 
