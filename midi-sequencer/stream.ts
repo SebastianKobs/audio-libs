@@ -1,4 +1,4 @@
-// ---------- midi-sequencer/stream: every play, the garden's and yours as you play it, to whoever listens ----------
+// ---------- midi-sequencer/stream: a play, the garden's and yours as you play it, as the sequencer hands it to whoever listens ----------
 import type { Seconds } from '../clock/index.ts';
 import type { Controller, NoteOff, PerNoteController, PerNoteValues } from '../midi/index.ts';
 
@@ -55,20 +55,3 @@ export interface PlayedNote {
 }
 // a play's listener: a recorder, a session view
 export type PlayListener = (play: Play) => void;
-
-// the stream: every play, { owner, kind, role, live, notes: [{ t, pitch, … }] }, to whoever listens; a sequencer's own (L1b), so two
-// sequencers are heard apart. onPlay(listener) returns how to stop
-export class Stream {
-  readonly #listeners = new Set<PlayListener>();
-
-  onPlay(listener: PlayListener): () => boolean {
-    this.#listeners.add(listener);
-    return () => this.#listeners.delete(listener);
-  }
-  played(play: Play): Play {
-    for (const listener of this.#listeners) {
-      listener(play);
-    }
-    return play;
-  }
-}

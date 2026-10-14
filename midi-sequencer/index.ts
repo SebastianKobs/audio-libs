@@ -5,7 +5,6 @@
 // own, on the generic sequencer's clip launcher (clips.ts). What's heard recorded on the timeline, as regions and lanes, its own views of
 // the timeline's events (recorder.ts, lanes.ts, a lane's value by Web Audio's curve), and played back from a time (playback.ts)
 export type { NotePattern, PatternNote } from './pattern-note.ts';
-export { Stream } from './stream.ts';
 export type { NoteGlide, Play, PlayedNote, PlayListener } from './stream.ts';
 export { Sequencer } from './input.ts';
 export { ClipPlayer } from './clips.ts';

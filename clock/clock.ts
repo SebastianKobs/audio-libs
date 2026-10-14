@@ -3,6 +3,7 @@ import { AudioClock, type AudioContextLike } from './audio-clock.ts';
 import { BeatGrid, type GridSettings } from './beat-grid.ts';
 import { snap, type SnapOptions } from './quantizer.ts';
 import { COMMON_TIME } from './ticks.ts';
+import { Events } from '../util/index.ts';
 
 // time as the sound counts it: a clock time, or a length
 export type Seconds = number;
@@ -11,11 +12,10 @@ export interface ClockSettings extends GridSettings {
   quantize: string;
 }
 // what each event hands its listeners
-interface ClockEvents {
+type ClockEvents = {
   tick: [t: number];
   step: [i: number, t: number];
-}
-type Listener<EventName extends keyof ClockEvents> = (...args: ClockEvents[EventName]) => void;
+};
 
 const TICK = 0.025; // s between ticks
 export const LOOKAHEAD = 0.12; // s: how far ahead the grid's 16ths are scheduled
@@ -26,8 +26,7 @@ export class Clock {
   readonly grid: BeatGrid;
   readonly audio: AudioClock;
   readonly #settings: ClockSettings;
-  // its listeners per event; a copy as it's sent, since a listener may stop listening as it's called
-  readonly #listeners: { [EventName in keyof ClockEvents]: Listener<EventName>[] } = { tick: [], step: [] };
+  readonly #events = new Events<ClockEvents>(); // its ticks and 16ths, to whoever listens
   #fake: number | null = null; // the time in fake mode, else null
   #ticking = false;
 
@@ -51,11 +50,11 @@ export class Clock {
   }
   // listener(t), every tick
   onTick(listener: (t: number) => void): () => void {
-    return this.#on('tick', listener);
+    return this.#events.on('tick', listener);
   }
   // listener(i, t), every 16th of the grid, ahead of time: i its number, t when it sounds, swung
   onStep(listener: (i: number, t: number) => void): () => void {
-    return this.#on('step', listener);
+    return this.#events.on('step', listener);
   }
   // the ticks come from a worker: browsers slow a hidden tab's own timers to once a second or less, but not a worker's
   start(): void {
@@ -110,7 +109,7 @@ export class Clock {
   }
   #tick(): void {
     this.audio.sync();
-    this.#emit('tick', this.now());
+    this.#events.emit('tick', this.now());
     this.#schedule();
   }
   // each tick: the 16ths due within the lookahead go to onStep's listeners. While the audio is suspended nothing is scheduled. If the
@@ -120,22 +119,6 @@ export class Clock {
       return;
     }
     const t0 = this.now();
-    this.grid.schedule(t0 - 0.2, t0 + LOOKAHEAD, (i, t) => this.#emit('step', i, t));
-  }
-  #on<EventName extends keyof ClockEvents>(type: EventName, listener: Listener<EventName>): () => void {
-    const listeners: Listener<EventName>[] = this.#listeners[type];
-    listeners.push(listener);
-    return () => {
-      const index = listeners.indexOf(listener);
-      if (index >= 0) {
-        listeners.splice(index, 1);
-      }
-    };
-  }
-  #emit<EventName extends keyof ClockEvents>(type: EventName, ...args: ClockEvents[EventName]): void {
-    const listeners: Listener<EventName>[] = this.#listeners[type];
-    for (const listener of listeners.slice()) {
-      listener(...args);
-    }
+    this.grid.schedule(t0 - 0.2, t0 + LOOKAHEAD, (i, t) => this.#events.emit('step', i, t));
   }
 }

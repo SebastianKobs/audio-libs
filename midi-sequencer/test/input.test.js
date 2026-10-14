@@ -4,7 +4,7 @@
 // recordings (replays.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Sequencer, Stream } from '../index.ts';
+import { Sequencer } from '../index.ts';
 
 const noteOn = (index, t, more = {}) => ({ type: 'note on', index, pitch: 60, velocity: 1, t, ...more });
 const noteOff = (index, t) => ({ type: 'note off', index, t });
@@ -409,11 +409,11 @@ test("a note ringing out after its note off still gets its sender's changes and 
 });
 
 test('the stream: every play to whoever listens, until they stop', () => {
-  const stream = new Stream();
+  const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const got = [];
-  const stop = stream.onPlay((p) => got.push(p.kind));
-  stream.played({ kind: 'tap', notes: [] });
+  const stop = sequencer.onPlay((p) => got.push(p.kind));
+  sequencer.send({ track: 'tap', clip: { kind: 'tap' } }, [noteOn(1, 1)]);
   stop();
-  stream.played({ kind: 'vine', notes: [] });
+  sequencer.send({ track: 'tap', clip: { kind: 'vine' } }, [noteOn(2, 2)]);
   assert.deepEqual(got, ['tap']);
 });

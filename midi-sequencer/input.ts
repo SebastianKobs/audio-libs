@@ -13,8 +13,8 @@ import {
   type Receiver,
   type SentNote,
 } from '../midi/index.ts';
-import { Stream, type NoteGlide, type Play, type PlayedNote, type PlayListener } from './stream.ts';
-import { entryOf } from '../util/index.ts';
+import type { NoteGlide, Play, PlayedNote, PlayListener } from './stream.ts';
+import { entryOf, Events } from '../util/index.ts';
 
 // where messages go: the track they play on, the clip they're of (its element, by its kind), as notes are, whether they're played as you
 // play; and what the stream carries of a replay beside its notes (play: its replay track's number, until when, its draws), until G1 to G3
@@ -50,12 +50,18 @@ export interface Input<Name extends string> {
   onNoteOff(listener: NoteOffListener): () => void;
 }
 
+// what the sequencer hands whoever listens: every play it passes on, its stream (L1b); the way back, each note and each note off
+// sent after its note (G2b)
+type SequencerEvents = {
+  play: [play: Play];
+  note: [to: Address<string>, note: SentNote];
+  'note off': [to: Address<string>, end: NoteOff];
+};
+
 // each track, looked up by its name, as a replay track's is made the first time it's played on (G0d)
 export class Sequencer<Name extends string> implements Input<Name> {
   readonly #tracks: (track: Name) => Track;
-  readonly #listeners = new Set<NoteListener>(); // the way back's
-  readonly #offListeners = new Set<NoteOffListener>(); // and its note offs' (G2b)
-  readonly #stream = new Stream(); // every play it passes on, to whoever listens, its own (L1b)
+  readonly #events = new Events<SequencerEvents>(); // its own, so two sequencers are heard apart
   readonly #apart = new Map<string, { rotation: NoteRotation; indices: Map<string, number> }>(); // each track's indices, by sender (P3a)
 
   constructor({ tracks }: { tracks: (track: Name) => Track }) {
@@ -68,28 +74,26 @@ export class Sequencer<Name extends string> implements Input<Name> {
     const after = afterTheirNotes(messages);
     const controls = controlsIn(messages);
     if (notes.length || heardAfter(after) || controls.length) {
-      this.#stream.played(playOf(to, track.role, notes, after, controls)); // a note's per-note management alone is its bookkeeping
+      this.#events.emit('play', playOf(to, track.role, notes, after, controls)); // a note's per-note management alone is its bookkeeping
     }
-    this.#handBack(to, notes);
+    for (const note of notes) {
+      this.#events.emit('note', to, note); // once its instrument and the stream have it
+    }
     for (const end of after.ends) {
-      for (const listener of this.#offListeners) {
-        listener(to, end);
-      }
+      this.#events.emit('note off', to, end);
     }
   }
   // every play it passes on, as it's heard, to a listener, until stopped: a recorder, a session view (L1b)
-  onPlay(listener: PlayListener): () => boolean {
-    return this.#stream.onPlay(listener);
+  onPlay(listener: PlayListener): () => void {
+    return this.#events.on('play', listener);
   }
   onNote(listener: NoteListener): () => void {
-    this.#listeners.add(listener);
-    return () => this.#listeners.delete(listener);
+    return this.#events.on('note', listener);
   }
   // each note off sent after its note, a held note's, to whoever listens, once its instrument and the stream have it: the way back of a
   // key let go, as a controller's pad goes dark (G2b)
   onNoteOff(listener: NoteOffListener): () => void {
-    this.#offListeners.add(listener);
-    return () => this.#offListeners.delete(listener);
+    return this.#events.on('note off', listener);
   }
   // the messages as the track's instrument hears them: each note an index of the track's own, by its sender, so two senders' notes of one
   // index don't meet there; the stream and the way back keep each sender's own (P3a, M's brought forward). A note off frees the track's
@@ -117,14 +121,6 @@ export class Sequencer<Name extends string> implements Input<Name> {
       }
       return { ...message, index };
     });
-  }
-  // each note, once its instrument and the stream have it, to whoever listens
-  #handBack(to: Address<Name>, notes: readonly SentNote[]): void {
-    for (const note of notes) {
-      for (const listener of this.#listeners) {
-        listener(to, note);
-      }
-    }
   }
 }
 
