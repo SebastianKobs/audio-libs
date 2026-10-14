@@ -23,7 +23,8 @@
 // plays, to the master or any bus that doesn't feed it, through an output or a send. volume(v) glides the master. pause() fades the
 // master out, and the context stops once it has faded; resume() fades it in again, from where the fade got to
 // if it hadn't stopped yet. Its settings are passed in
-// Its parts: the desk (mixer.ts), a channel or bus (channel.ts), an FX channel (fx-channel.ts), a strip's mute's time constant (gains.ts).
+// Its parts: the desk (mixer.ts), a channel strip, what a channel and an FX channel share (strip.ts), a channel or bus (channel.ts), an
+// FX channel (fx-channel.ts), a strip's mute's timing (gains.ts).
 // Where each strip goes, and mute and solo, its routing's (libs/mixer/, since X3b; out of mixer.ts and mute-solo.ts in X3a). A meter itself
 // the engine's; a strip's controls' names the sound's (sound/controls.ts), their order the views' (mixer-surface/controls.ts), since X1;
 // a param's range and taper its declaration's (libs/params/, libs/desk-plan/), the fader's law among them.
@@ -45,6 +46,5 @@ export { DeskChanges } from './desk-changes.ts';
 export { addLiveDevices } from './live-devices.ts';
 export type { LiveMix } from './desk-changes.ts';
 export { targetOf } from './target.ts';
-export type { Insert, Send, StripOptions } from './channel.ts';
+export type { Insert, Send, StripOptions } from './strip.ts';
 export { FxChannel } from './fx-channel.ts';
-export type { FxOptions } from './fx-channel.ts';

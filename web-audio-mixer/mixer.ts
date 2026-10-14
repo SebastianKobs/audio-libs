@@ -1,10 +1,9 @@
 // ---------- libs/web-audio-mixer/mixer: the desk, its strips by name, the sum, the master's insert, the master and their peaks ----------
-import { Channel, sentTo } from './channel.ts';
-import type { StripOptions } from './channel.ts';
+import { Channel } from './channel.ts';
+import { sentTo, type StripOptions } from './strip.ts';
 import { Routing, type StripKind, MASTER } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
-import type { FxOptions } from './fx-channel.ts';
 import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
 // what the mixer and its strips need of the engine: the context, its time, a meter on a node, a plan built and set, and whether it can pan
 export type MixerEngine = Pick<Engine, 'audioContext' | 'now' | 'meter' | 'build' | 'apply' | 'canPan'>;
@@ -79,22 +78,19 @@ export class Mixer {
   }
   // a channel (see Channel), on the desk by its name, where the routing says it may go
   channel(name: string, options: StripOptions = {}, kind: 'channel' | 'bus' = 'channel'): Channel {
-    const out = this.#placed(name, { kind, out: options.out, to: sentTo(options.sends ?? []) });
-    const channel = new Channel(this.#engine, this.#desk, name, { ...options, out });
-    this.strips[name] = channel;
-    this.#silence(); // muted or soloed as it's made
-    return channel;
+    return this.#made(name, kind, options, (out) => new Channel(this.#engine, this.#desk, name, { ...options, out }));
   }
   bus(name: string, options: StripOptions = {}): Channel {
     return this.channel(name, options, 'bus');
   }
   // an FX channel (see FxChannel), a return, as a channel is
-  fx(name: string, options: FxOptions = {}): FxChannel {
-    const out = this.#placed(name, { kind: 'return', out: options.out, to: Object.keys(options.sends ?? {}) });
-    const fxChannel = new FxChannel(this.#engine, this.#desk, name, { ...options, out });
-    this.strips[name] = fxChannel;
-    this.#silence();
-    return fxChannel;
+  fx(name: string, options: StripOptions = {}): FxChannel {
+    return this.#made(
+      name,
+      'return',
+      options,
+      (out) => new FxChannel(this.#engine, this.#desk, name, { ...options, out }),
+    );
   }
   // a strip's way out moved, as the routing allows, then wired: away from where it went, into where it goes now
   route(name: string, out: string): void {
@@ -151,6 +147,14 @@ export class Mixer {
   }
   // a strip's place on the routing, and so its way out: where the routing says, if it's on it, what's asked agreeing, a way out asked or
   // not; else put on it as asked
+  // a strip on the desk by its name, where the routing says it may go, muted or soloed as it's made
+  #made<Made extends Strip>(name: string, kind: StripKind, options: StripOptions, make: (out: string) => Made): Made {
+    const out = this.#placed(name, { kind, out: options.out, to: sentTo(options.sends ?? []) });
+    const strip = make(out);
+    this.strips[name] = strip;
+    this.#silence();
+    return strip;
+  }
   #placed(name: string, asked: { kind: StripKind; out: string | undefined; to: readonly string[] }): string {
     const { routing } = this;
     if (!routing.has(name)) {

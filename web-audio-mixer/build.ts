@@ -10,7 +10,8 @@
 import type { FxChain } from '../web-audio-fx/index.ts';
 import type { Params, Patch } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
-import type { Channel, Insert, Send, StripOptions } from './channel.ts';
+import type { Channel } from './channel.ts';
+import type { Insert, Send, StripOptions } from './strip.ts';
 import type { FxChannel } from './fx-channel.ts';
 import type { Mixer } from './mixer.ts';
 import { deviceInsert } from './device-insert.ts';
@@ -68,11 +69,8 @@ export function buildFxChannel(
   values: StripValues = {},
 ): Built<FxChannel> {
   const { inserts, chains } = slotsOf(on, entry, values);
-  const sends = Object.fromEntries(
-    (entry.sends ?? []).map(returnOf).map((to): [string, number] => [to, values.amounts?.[to] ?? 0]),
-  );
-  const strip = on.mixer.fx(name, { level: values.volume, inserts, pan: values.pan, sends, out: entry.out });
-  return { strip, chains };
+  const options = { volume: values.volume, inserts, pan: values.pan, sends: sendsOf(entry, values), out: entry.out };
+  return { strip: on.mixer.fx(name, options), chains };
 }
 
 // Each slot's device, built in order: an insert for the strip, and its chain. Needs no mixer,

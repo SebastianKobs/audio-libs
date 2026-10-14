@@ -19,7 +19,7 @@ import { deviceAt, nameOf, routingOf, type DeskEntry, type Names, type StripEntr
 import type { Routing } from '../mixer/index.ts';
 import { Mixer, type MasterInsert } from './mixer.ts';
 import { buildChannel, buildFxChannel, slotsOf, type BuildOn, type StripValues } from './build.ts';
-import type { Insert } from './channel.ts';
+import { chained } from './strip.ts';
 import { MASTER } from '../mixer/index.ts';
 
 // a strip's slots' chains as built, by slot
@@ -202,11 +202,6 @@ export class Desk<Named extends Names = Names> {
 }
 
 // inserts in order, each into the next
-function chained(inserts: readonly Insert[]): void {
-  for (let index = 1; index < inserts.length; index++) {
-    inserts[index - 1]!.output.connect(inserts[index]!.input);
-  }
-}
 // what a slot's chain offers, named by its slot: its 'in' on the slot 'limiter' 'limiter in'
 function named<Offered>(slot: string, offered: Readonly<Record<string, Offered>>): [string, Offered][] {
   return Object.entries(offered).map(([name, value]) => [`${slot} ${name}`, value]);

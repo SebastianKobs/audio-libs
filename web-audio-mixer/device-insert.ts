@@ -6,7 +6,7 @@
 import { BuiltModule, FxChain, GAIN } from '../web-audio-fx/index.ts';
 import type { Params, Patch } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
-import type { Insert } from './channel.ts';
+import type { Insert } from './strip.ts';
 
 // A device on an insert slot: its name, its FX module, its params, and a beat's length for
 // params in note values. Returns its chain, to set it through, and the insert a strip takes.

@@ -92,7 +92,7 @@ test("an FX channel's input, level, pan, output and sends, each built by the eng
   const ac = e.audioContext;
   const m = new Mixer(e);
   m.fx('reverb', {});
-  const d = m.fx('delay 1', { level: 0.8, pan: -0.45, sends: { reverb: 0.4 } });
+  const d = m.fx('delay 1', { volume: 0.8, pan: -0.45, sends: [{ to: 'reverb', amount: 0.4 }] });
   assert.deepEqual(
     [d.input.gain.events, d.level.gain.events, d.pan.pan.events, d.output.gain.events, d.sends.reverb.gain.events],
     [[['value', 1]], [['value', 0.8]], [['value', -0.45]], [['value', 1]], [['value', 0.4]]],
@@ -109,7 +109,7 @@ test("an FX channel's input, level, pan, output and sends, each built by the eng
 test("the desk's channels: a fader into the sum, or a bus, sent after it to an FX channel; a volume glides it", () => {
   const e = engine();
   const m = new Mixer(e);
-  const r = m.fx('reverb', { level: 0.4 });
+  const r = m.fx('reverb', { volume: 0.4 });
   const sings = m.bus('sings', { volume: 1 });
   const a = m.channel('tap', { volume: 0.7, sends: ['reverb'] });
   const b = m.channel('ambient', { volume: 0.5 });
@@ -140,9 +140,9 @@ test("the desk's channels: a fader into the sum, or a bus, sent after it to an F
 test('an FX channel: its input, then its level, its pan, and after the pan its sends and its output; the chain goes between input and level', () => {
   const e = engine();
   const m = new Mixer(e);
-  const r = m.fx('reverb', { level: 0.6 });
+  const r = m.fx('reverb', { volume: 0.6 });
   const sings = m.bus('sings');
-  const d = m.fx('delay 1', { level: 0.8, pan: -0.45, sends: { reverb: 0.4 }, out: 'sings' });
+  const d = m.fx('delay 1', { volume: 0.8, pan: -0.45, sends: [{ to: 'reverb', amount: 0.4 }], out: 'sings' });
   assert.deepEqual(r.level.gain.events, [['value', 0.6]]);
   assert.deepEqual(into(e.audioContext, r.output), [r.level], 'no pan: its mute after its level');
   assert.ok(into(e.audioContext, m.sum).includes(r.output), 'and out to the master');
@@ -265,7 +265,7 @@ test("a strip's own control by its name, as a desk's remote control has them: it
   const m = new Mixer(e);
   m.fx('reverb');
   const c = m.channel('tap', { volume: 0.7, pan: 0, sends: [{ to: 'reverb', amount: 0.3 }] });
-  const r = m.fx('delay', { level: 0.8, pan: 0, sends: { reverb: 0.2 } });
+  const r = m.fx('delay', { volume: 0.8, pan: 0, sends: [{ to: 'reverb', amount: 0.2 }] });
   time = 11;
   for (const strip of [c, r]) {
     strip.set('volume', 0.5);
@@ -298,7 +298,7 @@ test("every strip a send to every return on the desk, as Ableton's: those its se
   const e = engine();
   const m = new Mixer(e);
   const reverb = m.fx('reverb');
-  const delay = m.fx('delay', { sends: { reverb: 0.2 } });
+  const delay = m.fx('delay', { sends: [{ to: 'reverb', amount: 0.2 }] });
   const c = m.channel('tap', { pan: 0, sends: [{ to: 'reverb', amount: 0.3, from: 'pre' }] });
   assert.deepEqual(c.returns, ['reverb', 'delay'], 'every return on the desk');
   assert.deepEqual(Object.keys(c.sends), ['reverb'], 'built as it was made: the one its setup lists');
