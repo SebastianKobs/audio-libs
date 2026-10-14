@@ -4,7 +4,7 @@
 //   volume, and each send: by the fader law, unity two thirds up, +6 dB at the top, as Ableton's faders and sends;
 //   pan: left -1 to right 1, centred at 0, in a line;
 //   mute and solo: switches, off 0 or on 1.
-import type { ParamSpec } from '../synth/index.ts';
+import type { ParamSpec } from '../params/index.ts';
 
 // a strip's own parameters, by name
 export const STRIP_PARAMS = Object.freeze({

@@ -1,10 +1,10 @@
-// ---------- libs/synth/taper: where a param's value lies on a control, a lane or a CC, and back ----------
-// A param's taper is its own, declared with it (params.ts's ParamSpec), as VST3 and AU declare theirs, so a knob, a lane and a
+// ---------- libs/params/taper: where a param's value lies on a control, a lane or a CC, and back ----------
+// A param's taper is its own, declared with it (spec.ts's ParamSpec), as VST3 and AU declare theirs, so a knob, a lane and a
 // controller's CC turn a position into a value one way. A position runs 0 at the bottom to 1 at the top.
 //   fader: a gain, a share, by the fader law, as a console's and Ableton's: unity two thirds up, +6 dB at the top;
 //   octaves: a value on its range, each doubling as far up as the last, as a frequency;
 //   line: a value on its range in a straight line, the default; a switch, its step its whole range, lands on its ends.
-import type { ParamSpec } from './params.ts';
+import type { ParamSpec } from './spec.ts';
 
 // the fader law's power: gain = top × position^LAW, so a top of 2 puts unity two thirds of the way up
 const LAW = Math.log(2) / Math.log(1.5);

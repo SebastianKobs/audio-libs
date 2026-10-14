@@ -2,7 +2,7 @@
 // A convolver with an impulse response the engine makes: so many seconds of noise, darker as it decays (seconds, 3.5). Its port: 'reverb'
 import type { Block } from '../plan-builder.ts';
 import type { Reverb } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its value (params.ts): how long its tail is
 const REVERB_SPECS = {

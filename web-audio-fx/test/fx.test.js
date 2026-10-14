@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { FxChain, INSERTS, TEMPO_TIME } from '../index.ts';
-import { delayBeats, plan, positionOf } from '../../synth/index.ts';
+import { delayBeats, plan } from '../../synth/index.ts';
+import { positionOf } from '../../params/index.ts';
 
 let time = 0;
 class Context extends StandInContext {

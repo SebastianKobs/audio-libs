@@ -6,7 +6,7 @@
 import { time, val } from '../values.ts';
 import type { Block } from '../plan-builder.ts';
 import type { Delay } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // a delay line's time as a note length, shortest first: up to a dotted half, which fits its 4 s at 50 BPM
 const NOTE_LENGTHS = [

@@ -4,7 +4,7 @@
 // The Rhodes is FM at ratio 1
 import type { Block } from '../plan-builder.ts';
 import type { FrequencyModulation } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its values (params.ts): its ratio to the note, its index, its carrier osc and its stop
 const FM_SPECS = {

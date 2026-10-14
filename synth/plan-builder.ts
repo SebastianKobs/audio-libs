@@ -18,7 +18,7 @@ import {
   type PlanNode,
 } from '../audio-plan/index.ts';
 import type { Handles, Plan } from './plan.ts';
-import type { ParamSpec, ParamSpecs } from './params.ts';
+import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { NOTE_SPECS } from './blocks/note.ts';
 
 interface Port {

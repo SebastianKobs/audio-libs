@@ -5,7 +5,7 @@
 // envelope's, and 'vca.level'. A note's end is its envelopes' release (plan-builder.ts, release())
 import type { Block } from '../plan-builder.ts';
 import type { Vca } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 import { SILENCE } from '../shapes.ts';
 
 // its value (params.ts): its level, a share, 1 at 0 dB

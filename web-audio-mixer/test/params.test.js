@@ -2,7 +2,7 @@
 // and a taper, so a knob, a lane and a controller's CC each turn a position into a value the same way (libs/synth/taper.ts)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { positionOf } from '../../synth/index.ts';
+import { positionOf } from '../../params/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../index.ts';
 
 const near = (actual, expected, message) =>

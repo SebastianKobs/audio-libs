@@ -1,0 +1,54 @@
+// ---------- libs/params/spec: a param as a plugin describes its own, apart from any view ----------
+// Every module declares its params so (I1a, mockup/architecture/done.md): a synth block its values (libs/synth/'s paramSpecs), an FX module
+// the params its patch names, a desk's strip its own. Each one's name; its unit; its range and step in that unit; its choices, where it
+// picks among words; its default, where a block falls back to one, so the block reads it from here; for a gain, whether it's a share
+// shown in dB, its range in dB; and its taper, where a value lies on a control, a lane or a CC (taper.ts), its own as VST3 and AU declare
+// theirs (U2c4a). A value written either as itself or by its parts (a cutoff, or { key, max }) has both. A surface only decides how to
+// draw one: a slider or a knob. What's structure has no spec: a condition, where a sound goes, what a modulator moves, the chain, a switch.
+
+// a param's taper, how a position on a control, a lane or a CC maps to its value (taper.ts)
+export type Taper = 'fader' | 'octaves' | 'line';
+// a param, as a plugin describes its own
+export interface ParamSpec {
+  readonly name: string;
+  readonly unit?: string;
+  readonly range?: readonly [lo: number, hi: number, step: number];
+  readonly choices?: readonly string[];
+  readonly default?: number | string;
+  readonly dB?: true;
+  readonly taper?: Taper;
+  readonly parts?: ParamSpecs;
+}
+// a module's params, or a part's, by their keys, a nested part's under its own
+export interface ParamSpecs {
+  readonly [key: string]: ParamSpec | ParamSpecs;
+}
+
+// a value's spec by its path from where its specs start: a list's index and a condition's branches passed over; once at a value, a part
+// by its key, and a range's ends; anything else, or a path that ends at a part, has none
+export function specAt(
+  specs: ParamSpec | ParamSpecs | undefined,
+  path: readonly (string | number)[],
+): ParamSpec | undefined {
+  let at = specs;
+  for (const key of path) {
+    if (at === undefined) {
+      return undefined;
+    }
+    if (typeof key === 'number' || key === 'then' || key === 'else') {
+      continue;
+    }
+    at = isParamSpec(at) ? partOf(at, key) : at[key];
+  }
+  return at && isParamSpec(at) ? at : undefined;
+}
+function isParamSpec(specs: ParamSpec | ParamSpecs): specs is ParamSpec {
+  return typeof specs.name === 'string';
+}
+// within a value: a part by its key, itself for a range's end
+function partOf(spec: ParamSpec, key: string): ParamSpec | ParamSpecs | undefined {
+  if (key === 'between') {
+    return spec;
+  }
+  return spec.parts?.[key];
+}

@@ -4,7 +4,7 @@
 // its sidebands at half and five halves of the note. Its port: 'ring 1'
 import type { Block } from '../plan-builder.ts';
 import type { Ring } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its values (params.ts): its modulator's ratio to the note, and its stop
 const RING_SPECS = {

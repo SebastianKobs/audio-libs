@@ -1,4 +1,4 @@
-// A param's taper (mockup/src/libs/synth/taper.ts, U2c4a): where a value lies on a control, a lane or a CC, 0 at its bottom to 1 at its
+// A param's taper (mockup/src/libs/params/taper.ts, U2c4a; libs/synth/'s until U2c4a2): where a value lies on a control, a lane or a CC, 0 at its bottom to 1 at its
 // top, and back, declared with the param as VST3 and AU declare theirs, so every surface turns a position into a value one way
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

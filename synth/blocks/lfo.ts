@@ -6,7 +6,7 @@
 import { time, val } from '../values.ts';
 import type { Block } from '../plan-builder.ts';
 import type { Lfo } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its values (params.ts): its rate and depth, its fade-in after a delay, by a target or a line, and its stop; its depth in its target's
 // units

@@ -9,7 +9,7 @@ import { val } from '../values.ts';
 import type { Block, PlanBuilder } from '../plan-builder.ts';
 import type { Osc, Patch } from '../patch.ts';
 import type { PlanNode } from '../../audio-plan/index.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its values (params.ts): its wave; its frequency, by one of them; its detune, level and stop
 const OSC_SPECS = {

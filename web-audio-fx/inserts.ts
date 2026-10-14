@@ -2,7 +2,8 @@
 // An insert is an FX module as any other (mockup/architecture/mixer-and-fx.md, "Inserts as FX modules"), the same device on a strip or a
 // return, as Ableton's are: a patch with an input and an output, built by an FxChain between two points, its values params, read as the
 // chain is built (a module's params()) and set live (set()). No theme has its own: they're the desk's
-import type { Patch, ParamSpec } from '../synth/index.ts';
+import type { Patch } from '../synth/index.ts';
+import type { ParamSpec } from '../params/index.ts';
 
 // the limiter, as Ableton's and FabFilter's Pro-L: its gain into it, in dB, and held at its ceiling, where it acts and the most that comes
 // out, in dBFS, by a compressor there as hard as Web Audio's goes. Each dB more gain, a dB louder, never past the ceiling. Release in s.

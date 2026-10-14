@@ -5,7 +5,7 @@
 // 'out.volume'
 import type { Block } from '../plan-builder.ts';
 import type { Out } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its value (params.ts): its volume, a share, 1 at 0 dB
 const OUT_SPECS = {

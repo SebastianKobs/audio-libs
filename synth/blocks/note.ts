@@ -4,7 +4,7 @@
 // whether it runs on (continuous: a background, an FX module), starting at once, its velocity full. It builds nothing: the planner reads it
 import type { Block } from '../plan-builder.ts';
 import type { NoteIn } from '../patch.ts';
-import type { ParamSpecs } from '../params.ts';
+import type { ParamSpecs } from '../../params/index.ts';
 
 // its values (params.ts)
 export const NOTE_SPECS = {
