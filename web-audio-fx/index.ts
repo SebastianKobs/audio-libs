@@ -19,7 +19,7 @@ export { MOVED, type Settable, type Target, type Timing } from './timing.ts';
 export { FxModules } from './modules.ts';
 export { DeviceParams } from './device-params.ts';
 export { TEMPO_TIME } from './tempo.ts';
-export type { Device, DeviceName, LimiterSettings } from './inserts.ts';
+export type { Device, DeviceKind, DeviceName, LimiterSettings } from './inserts.ts';
 
 // a module in a chain: its name, its patch, and its params, read each time the chain is built
 export interface Module {
@@ -84,6 +84,17 @@ export class FxChain implements Settable {
       return undefined;
     }
     return portValue(planOf(part.module, this.#context), port);
+  }
+  // A param by its name as the chain plays it, one with a port or none (a Filter's resonance):
+  // its module's params now over its patch's. The first module's that has it, or none.
+  paramValue(name: string): unknown {
+    for (const { module } of this.#built.parts) {
+      const value = { ...module.patch.params, ...module.params?.() }[name];
+      if (value !== undefined) {
+        return value;
+      }
+    }
+    return undefined;
   }
   // a port's param as it was built, for what shows it or records it: the first module's that offers it, or none
   paramOf(port: string): Automatable | undefined {

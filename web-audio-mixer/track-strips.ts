@@ -63,6 +63,10 @@ export class TrackStrips<TrackStrip> {
   of(track: string): TrackStrip | undefined {
     return this.#strips.get(track)?.track;
   }
+  // A track's strip's slots' chains, once made.
+  chainsOf(track: string): Chains | undefined {
+    return this.#strips.get(track)?.chains;
+  }
   // A track's strip, made the first time it's asked for; none for a track with no template.
   stripOf(track: string): TrackStrip | null {
     return this.#madeOn(track)?.track ?? null;

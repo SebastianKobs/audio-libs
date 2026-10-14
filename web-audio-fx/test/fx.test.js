@@ -46,6 +46,11 @@ test("a chain set at a time, or now, and read: a port's param and node as they w
     'the node offering a port',
   );
   assert.equal(c.nodeOf('nowhere'), undefined, 'none offering it: none');
+  assert.deepEqual(
+    [c.paramValue('q'), c.paramValue('cutoff'), c.paramValue('nowhere')],
+    [0.5, 24000, undefined],
+    "a param by its name as the chain plays it, a port or none: its module's params now over its patch's; none where none has it",
+  );
 });
 
 test("the Limiter module, as Ableton's on the master: its gain, ceiling and release its params, 16 dB, -0.3 dBFS and 0.3 s as it starts", async () => {
@@ -181,6 +186,11 @@ test("each device: its name, its module, its params and its ports; a Gain's leve
     'as its device shows it',
   );
   assert.equal(utility.patch, UTILITY);
+  assert.deepEqual(
+    Object.values(DEVICES).map((device) => device.kind),
+    ['gain', 'pan', 'utility', 'utility', 'filter', 'limiter'],
+    'its kind: the two Utilities one, as their device shows them',
+  );
   const panPot = DEVICES['pan pot utility'];
   assert.deepEqual([panPot.name, panPot.params, panPot.ports], [utility.name, utility.params, utility.ports]);
   assert.deepEqual(panPot.patch.chain, ['gain', 'pan'], 'a Gain, then a Pan');

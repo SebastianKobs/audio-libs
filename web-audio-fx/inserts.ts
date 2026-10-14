@@ -20,18 +20,21 @@ type InsertParams = Readonly<Record<string, RangedSpec>>;
 // A device, an FX module as an insert slot holds it and its device shows it, as Ableton's
 // Utility, Auto Filter and Limiter show theirs:
 //   - name: as its slot and its device show it;
+//   - kind: its module's kind, the two Utilities one;
 //   - patch: its module;
 //   - params: its params, declared;
 //   - ports: the port each param is set at on its chain, by the param's name;
 //     none for one set only as it's built (a Filter's resonance).
 export interface Device {
   readonly name: string;
+  readonly kind: DeviceKind;
   readonly patch: Patch;
   readonly params: InsertParams;
   readonly ports: Readonly<Record<string, string>>;
 }
-// the devices, by the name a strip's data gives them
+// the devices, by the name a strip's data gives them, and by kind
 export type DeviceName = 'gain' | 'pan' | 'utility' | 'pan pot utility' | 'filter' | 'limiter';
+export type DeviceKind = Exclude<DeviceName, 'pan pot utility'>;
 
 // a Gain: the gain block, at 1 unless its params say otherwise; its param level, its port 'gain.gain'. A strip's input, fader, sends and
 // room, the mixer's sum and master (F5)
@@ -89,17 +92,36 @@ const LIMITER_PARAMS: InsertParams = LIMITER_SPECS; // the limiter block's
 // The devices a strip's or a module's data names. The Utility twice:
 //   - 'utility': its pan a stereo panner, as the mixer's pans are;
 //   - 'pan pot utility': its pan a pan pot, as a mono note was panned before.
-const GAIN_DEVICE = { name: 'Gain', patch: GAIN, params: GAIN_PARAMS, ports: { level: 'gain.gain' } } as const;
-const PAN_DEVICE = { name: 'Pan', patch: PAN, params: PAN_PARAMS, ports: { pan: 'pan.pan' } } as const;
+const GAIN_DEVICE = {
+  name: 'Gain',
+  kind: 'gain',
+  patch: GAIN,
+  params: GAIN_PARAMS,
+  ports: { level: 'gain.gain' },
+} as const;
+const PAN_DEVICE = { name: 'Pan', kind: 'pan', patch: PAN, params: PAN_PARAMS, ports: { pan: 'pan.pan' } } as const;
 const UTILITY_PORTS = { ...GAIN_DEVICE.ports, ...PAN_DEVICE.ports } as const;
 export const DEVICES = frozen({
   gain: GAIN_DEVICE,
   pan: PAN_DEVICE,
-  utility: { name: 'Utility', patch: UTILITY, params: UTILITY_PARAMS, ports: UTILITY_PORTS },
-  'pan pot utility': { name: 'Utility', patch: combined(GAIN, PAN_POT), params: UTILITY_PARAMS, ports: UTILITY_PORTS },
-  filter: { name: 'LP filter', patch: FILTER, params: FILTER_PARAMS, ports: { cutoff: 'filter.frequency' } },
+  utility: { name: 'Utility', kind: 'utility', patch: UTILITY, params: UTILITY_PARAMS, ports: UTILITY_PORTS },
+  'pan pot utility': {
+    name: 'Utility',
+    kind: 'utility',
+    patch: combined(GAIN, PAN_POT),
+    params: UTILITY_PARAMS,
+    ports: UTILITY_PORTS,
+  },
+  filter: {
+    name: 'LP filter',
+    kind: 'filter',
+    patch: FILTER,
+    params: FILTER_PARAMS,
+    ports: { cutoff: 'filter.frequency' },
+  },
   limiter: {
     name: 'Limiter',
+    kind: 'limiter',
     patch: LIMITER,
     params: LIMITER_PARAMS,
     ports: { gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' },

@@ -4,7 +4,7 @@
 // A desk's entry is either a return, an FX channel with its chain of effects, or a bus.
 // Names: a desk's returns, buses, slots, devices and effects are strings here; a user hands
 // in its own literal types for them (Names), so a misspelt one fails the type check there.
-import { Routing, type StripKind } from '../mixer/index.ts';
+import { MASTER, Routing, type StripKind } from '../mixer/index.ts';
 
 // The names a desk's data is written in, its user's own.
 export interface Names {
@@ -39,9 +39,27 @@ export interface DeskEntry<Named extends Names = Names> extends StripEntry<Named
   chain?: { effect: Named['effect']; params?: Record<string, unknown> }[];
 }
 
+// A desk's data, every strip's: its own strips', the master's, and its tracks' templates.
+export interface DeskData<Named extends Names = Names> {
+  desk: readonly DeskEntry<Named>[];
+  master?: StripEntry<Named>;
+  templateOf?: (strip: string) => StripEntry<Named> | null | undefined;
+}
+
 // An entry's strip name. An entry is either a return or a bus.
 export function nameOf<Named extends Names>(entry: DeskEntry<Named>): Named['return'] | Named['bus'] {
   return (entry.fx ?? entry.bus)!; // one of the two
+}
+// A strip's data by its name: the master's, a desk strip's, or a track's template's; none for
+// a strip it doesn't have. A master with no data has no slots.
+export function entryIn<Named extends Names>(
+  { desk, master = {}, templateOf = () => undefined }: DeskData<Named>,
+  strip: string,
+): DeskEntry<Named> | StripEntry<Named> | undefined {
+  if (strip === MASTER) {
+    return master;
+  }
+  return desk.find((entry) => nameOf(entry) === strip) ?? templateOf(strip) ?? undefined;
 }
 // A slot's start, by the slot's name; none for a strip without that slot.
 export function slotStart(entry: StripEntry, slot: string): Readonly<Record<string, number>> | undefined {
