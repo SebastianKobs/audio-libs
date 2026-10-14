@@ -4,17 +4,15 @@ import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
 import { MUTE } from './gains.ts';
 
 // An insert on a strip: modules the caller built in the context, in at input, out at output.
-// tap: where a send can be taken before the insert's level.
 export interface Insert {
   name: string;
   input: AudioNode;
   output: AudioNode;
-  tap?: AudioNode;
 }
 // A send, in a strip's setup:
 //   - by a return's name: at 1, from its tail, with no gain of its own;
 //   - with an amount: a gain of its own, taken from its tail, before its volume ('pre',
-//     after the inserts), or at an insert's tap (the insert's name).
+//     after the inserts), or at an insert's way in (the insert's name).
 export type Send = string | { to: string; amount?: number; from?: string };
 type SendWithAmount = Exclude<Send, string>;
 // An option given as undefined is one not given: the caller's settings may have none yet.
@@ -123,7 +121,7 @@ export function chained(inserts: readonly Insert[]): void {
 }
 // Where a send with an amount is taken:
 //   'pre': before its volume, after the inserts;
-//   an insert's name: its tap, or its input;
+//   an insert's name: its way in;
 //   none: its tail.
 function sendSource(
   send: SendWithAmount,
@@ -139,5 +137,5 @@ function sendSource(
   if (!insert) {
     throw new Error(`no insert ${send.from} on ${strip}`);
   }
-  return insert.tap ?? insert.input;
+  return insert.input;
 }

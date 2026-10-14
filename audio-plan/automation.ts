@@ -69,3 +69,22 @@ function ramp(
   }
   return value * Math.pow(to / value, share);
 }
+// When an event is:
+//   - a value: as the node is made, before anything;
+//   - a cancel, and the rest: at its time.
+export function eventTime(event: Automation): number {
+  if (event[0] === 'value') {
+    return -Infinity;
+  }
+  if (event[0] === 'cancel') {
+    return event[1];
+  }
+  return event[2];
+}
+// a param restarted at a time: what was planned from then cancelled, set there to a level
+export function restartAt(level: number, at: number): Automation[] {
+  return [
+    ['cancel', at],
+    ['set', level, at],
+  ];
+}

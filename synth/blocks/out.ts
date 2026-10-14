@@ -18,8 +18,13 @@ export default {
   paramSpecs: OUT_SPECS,
   plan(out, builder) {
     const gain = builder.node('gain', 'out');
-    builder.value(gain, 'gain', out.volume ?? OUT_SPECS.volume.default);
+    builder.value(gain, 'gain', volumeOf(out));
     builder.offer('out', gain);
     builder.offer('out.volume', gain, 'gain');
   },
 } satisfies Block<Out>;
+
+// its volume, a share: 1, at 0 dB, unless it says
+export function volumeOf(out: Out | undefined): number {
+  return out?.volume ?? OUT_SPECS.volume.default;
+}

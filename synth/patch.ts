@@ -50,7 +50,7 @@ export interface Noise {
   buffer?: 'noise' | 'breath'; // 2 s of noise, or a 0.2 s breath (blocks/noise.ts)
   loop?: boolean;
   offset?: number;
-  filter: { type: string; freq: Freq; q?: number };
+  filter: Biquad;
   level?: Valued<number>;
   into?: string;
   stop?: Time;
@@ -68,10 +68,13 @@ export interface Lfo {
   stop?: Time;
   when?: Condition;
 }
-export interface Filter {
+// a biquad's settings: the chain's filter's, a noise's own
+export interface Biquad {
   type: string;
   q?: Valued<number>; // a number, or a param's (the Filter module's)
   freq?: Freq;
+}
+export interface Filter extends Biquad {
   when?: Condition;
 }
 export interface Delay {

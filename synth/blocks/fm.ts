@@ -24,10 +24,11 @@ export default {
     const depth = builder.node('gain', `fm ${index}`);
     const depthIndex = fm.index ?? FM_SPECS.index.default;
     builder.value(modulator, 'frequency', builder.frequency * fm.ratio);
-    if (!builder.moves(`fm ${index}.gain`)) {
-      builder.value(depth, 'gain', depthIndex * builder.frequency);
-    }
-    builder.offer(`fm ${index}.gain`, depth, 'gain', { base: builder.frequency, rest: depthIndex });
+    builder.movable(depth, 'gain', {
+      port: `fm ${index}.gain`,
+      value: depthIndex * builder.frequency,
+      scale: { base: builder.frequency, rest: depthIndex },
+    });
     builder.link(modulator, depth);
     builder.into(depth, `osc ${fm.carrier}.frequency`);
     builder.start(modulator);

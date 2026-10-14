@@ -32,6 +32,7 @@ import noise from './blocks/noise.ts';
 import lfo from './blocks/lfo.ts';
 import envelope from './blocks/envelope.ts';
 import out from './blocks/out.ts';
+export { volumeOf } from './blocks/out.ts';
 import delay from './blocks/delay.ts';
 export { delayBeats, delayTimeOf } from './blocks/delay.ts';
 import reverb from './blocks/reverb.ts';
@@ -57,7 +58,6 @@ export {
 } from './values.ts';
 export { adsr, perc, stage, swell } from './blocks/envelope.ts';
 
-export { mtof } from '../music-theory/index.ts';
 export { mappingOf, termOf, type Mapping } from './mappings.ts';
 export { fadeIn, fadeOut } from './fades.ts';
 export const BLOCKS: Block[] = [

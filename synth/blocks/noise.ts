@@ -3,9 +3,8 @@
 // envelope cabled to it (blocks/envelope.ts), into the chain or where it says. Looped, it runs on (wind, a brush's bed). It starts at an
 // offset into its buffer, a share of the note's rand(), so each brush hit is noise from somewhere else in it. Its ports: 'noise 1.gain'
 // (its level), 'noise 1.frequency' (its filter)
-import { freq, val } from '../values.ts';
-import type { PlanNode } from '../../audio-plan/index.ts';
-import type { Block, PlanBuilder } from '../plan-builder.ts';
+import type { Block } from '../plan-builder.ts';
+import { biquadOf } from './filter.ts';
 import type { Noise } from '../patch.ts';
 import { FILTER_SPECS, LEVEL_SPEC, STOP_SPEC } from '../params.ts';
 import type { ParamSpecs } from '../../params/index.ts';
@@ -33,29 +32,13 @@ export default {
       buffer: { noise: NOISE_SECONDS[noise.buffer ?? NOISE_SPECS.buffer.default] },
       loop: !!noise.loop,
     });
-    const fl = builder.node('biquad', `noise ${index}`, { type: noise.filter.type });
-    const gain = builder.node('gain', `noise ${index}`);
-    const cutoff = freq(noise.filter.freq, builder.frequency, builder.values);
-    builder.value(fl, 'frequency', cutoff);
-    if (noise.filter.q !== undefined) {
-      builder.value(fl, 'Q', noise.filter.q);
-    }
-    levelOf(noise, builder, index, gain);
+    const fl = biquadOf(noise.filter, builder, `noise ${index}`);
+    const gain = builder.levelGain(`noise ${index}`, noise.level);
     builder.link(source, fl);
     builder.link(fl, gain);
     builder.into(gain, noise.into);
     builder.start(source, noise.offset === undefined ? undefined : builder.values.random() * noise.offset);
     builder.stop(source, noise.stop);
-    builder.offer(`noise ${index}.frequency`, fl, 'frequency', { base: cutoff });
     builder.sources.push(source);
   },
 } satisfies Block<Noise>;
-
-// its level's gain: at its level, or an envelope's full scale where one moves it; its port
-function levelOf(noise: Noise, builder: PlanBuilder, index: number, gain: PlanNode): void {
-  const level = noise.level === undefined ? undefined : val(noise.level, builder.values);
-  if (level !== undefined && !builder.moves(`noise ${index}.gain`)) {
-    builder.value(gain, 'gain', level);
-  }
-  builder.offer(`noise ${index}.gain`, gain, 'gain', { base: level ?? 1 });
-}

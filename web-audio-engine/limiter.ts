@@ -1,7 +1,7 @@
 // ---------- libs/web-audio-engine/limiter: how a limiter holds at its ceiling, as hard as Web Audio's compressor goes ----------
 // Its settings are the Limiter module's (libs/web-audio-fx/inserts.ts) and a limiter block's (libs/synth/blocks/limiter.ts); Web Audio's quirk, the
 // makeup gain its compressor adds, is taken back here, at the edge, where Web Audio is
-import { CompositeNode } from './composite.ts';
+import { BuiltNode } from './built-node.ts';
 import { ParamInUnits } from './param-in-units.ts';
 import { gainOf } from '../params/index.ts';
 
@@ -14,7 +14,7 @@ export function makeupOf(threshold: number, ratio: number): number {
 // a limiter as Web Audio holds it, as a limiter block plans it (libs/synth/blocks/limiter.ts): its gain (drive) into a compressor at its
 // ceiling, as hard as it goes, and the gain (back) that takes its makeup back; its params in the plan's units, its gain in dB, its ceiling
 // in dBFS, its release in s. Read as Ableton's: its in after its gain, its out, and how much it takes away now, in dB
-export function limiterNodes(audioContext: BaseAudioContext): CompositeNode {
+export function limiterNodes(audioContext: BaseAudioContext): BuiltNode {
   const drive = audioContext.createGain();
   const compressor = audioContext.createDynamicsCompressor();
   const back = audioContext.createGain();
@@ -22,7 +22,7 @@ export function limiterNodes(audioContext: BaseAudioContext): CompositeNode {
     compressor[setting].value = HOLD[setting];
   }
   drive.connect(compressor).connect(back);
-  return new CompositeNode({
+  return new BuiltNode({
     input: drive,
     output: back,
     params: {
@@ -35,6 +35,5 @@ export function limiterNodes(audioContext: BaseAudioContext): CompositeNode {
     },
     points: { in: drive, out: back },
     readings: { reduction: () => -compressor.reduction },
-    parts: [drive, compressor, back],
   });
 }

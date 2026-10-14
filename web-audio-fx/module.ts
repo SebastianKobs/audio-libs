@@ -1,7 +1,7 @@
 // ---------- libs/web-audio-fx/module: one module built into where its sound goes: a strip's gain or pan, an FX chain's part ----------
 import { NO_DRAWS, plan as planPatch, type Context, type Params, type Patch, type Plan } from '../synth/index.ts';
 import type { Automation, Operation } from '../audio-plan/index.ts';
-import { inputOf, outputOf, paramOf, sourceOf, type BuiltNode, type Engine } from '../web-audio-engine/index.ts';
+import { paramOf, type BuiltNode, type Engine } from '../web-audio-engine/index.ts';
 import { MOVED, portSet, type Settable, type Timing } from './timing.ts';
 
 // the engine a module is built by
@@ -41,8 +41,8 @@ export class BuiltModule implements Settable {
     if (input === undefined || input === null) {
       throw new Error('a module with no input');
     }
-    this.input = inputOf(this.#node(input)); // a node made of several, a limiter, comes in at its own input
-    this.output = outputOf(this.#node(this.plan.edges.find(([, to]) => to === 'out')![0])); // an effect's plan goes out
+    this.input = this.#node(input).input; // a node made of several, a limiter, comes in at its own input
+    this.output = this.#node(this.plan.edges.find(([, to]) => to === 'out')![0]).output; // an effect's plan goes out
   }
   // a port set by a timing, gliding from a time to come where it's given one, a context time (V3); one it lacks left alone
   set(port: string, value: number, timing: Timing = MOVED): void {
@@ -79,10 +79,10 @@ export class BuiltModule implements Settable {
     this.nodes.forEach((node, id) => {
       if (this.plan.nodes[id]?.starts.length) {
         try {
-          sourceOf(node).stop!();
+          node.stop();
         } catch {}
       }
-      outputOf(node).disconnect();
+      node.output.disconnect();
     });
   }
   // the params a port offers, a node's input left out

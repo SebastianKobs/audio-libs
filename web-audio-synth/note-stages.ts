@@ -15,15 +15,13 @@ export const HEARD_PER_NOTE = Object.freeze({
 export const ROOM_PER_NOTE = Object.freeze({ 'effects 1 depth': 'gain.gain' } satisfies Partial<
   Record<PerNoteControllerName, string>
 >);
-// every stage a note can have: an instrument answering them all, your playing's (V3)
-const EVERY_STAGE: readonly StageController[] = Object.freeze(['brightness', 'volume', 'pan', 'effects 1 depth']);
 
 // a note's own stages, what a spot was (G0c3) and its voice's pan, set by the note's per-note controllers, not by an emitter of their
 // own: the garden's emitter sends what it sets as them (mockup/architecture/done.md, G0). Built by the engine (F6c): its pan, the Pan
 // module, a pan pot, at #10 Pan as it starts, as a voice was panned until V5, none for a note sent with none, a sound with no
 // place; its air, the Filter module, its cutoff #74 Brightness; its dry gain, a Gain module, into `into`, its level #7 Volume; and its
 // room's, another, into `room`, taken after the air, its level #91 Effects 1 Depth. Each only where its instrument answers its controller
-// (answers, every one unless it says, V3): with none, its air, its sound goes into `into` as it is; the room only after the air. A voice
+// (answers, V3): with none, its air, its sound goes into `into` as it is; the room only after the air. A voice
 // plays into its input. A controller that comes later glides there, as a synth smooths one, by the time constant the space's emitters
 // glide by, from its time where that's to come. Let go once its note's controllers are detached, or its voice has stopped
 export class NoteStages {
@@ -40,8 +38,8 @@ export class NoteStages {
       into,
       room = null,
       heard,
-      answers = EVERY_STAGE,
-    }: { into: AudioNode; room?: AudioNode | null; heard: PerNoteValues; answers?: readonly StageController[] },
+      answers,
+    }: { into: AudioNode; room?: AudioNode | null; heard: PerNoteValues; answers: readonly StageController[] },
   ) {
     const air = (this.#air = answers.includes('brightness') ? new BuiltModule(engine, { patch: FILTER }) : null);
     const dry = (this.#dry = answers.includes('volume') ? new BuiltModule(engine, { patch: GAIN, into }) : null);

@@ -9,7 +9,7 @@
 // told stops them (a release); for good where a source never stops (a background, a note held open). Those stopped are let go of as a
 // note is added or a patch set
 import { fadeIn, fadeOut, plan, type Patch, type Plan, type Context, type Note, type Params } from '../synth/index.ts';
-import { followEdit, type Operation, type PlanNode } from '../audio-plan/index.ts';
+import { followEdit, lastStop, type Operation } from '../audio-plan/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import { entryOf } from '../util/index.ts';
 
@@ -181,8 +181,4 @@ function letGoOfStopped(notes: Set<Kept>, now: number): void {
 // whether a note's sources have all stopped by now, a context time
 function stoppedBy(kept: Kept, now: number): boolean {
   return now - kept.note.start > Math.max(...kept.stops.values());
-}
-// a source's last stop, from its note's start; none, it sounds for good
-function lastStop(node: PlanNode): number {
-  return node.stops.length ? Math.max(...node.stops.map(([at]) => at)) : Infinity;
 }

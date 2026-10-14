@@ -41,7 +41,7 @@ test("a chain set at a time, or now, and read: a port's param and node as they w
   assert.deepEqual(frequency.events.at(-1), ['value', 900], 'now, as a value is set');
   assert.equal(c.paramOf('nowhere.gain'), undefined, 'a port no module offers: none');
   assert.equal(
-    c.nodeOf('filter'),
+    c.nodeOf('filter').node,
     ac.rec.nodes.find((o) => o.kind === 'biquad'),
     'the node offering a port',
   );

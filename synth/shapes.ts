@@ -7,7 +7,7 @@
 // dB; a pitch or a cutoff in semitones from its own, every stage straight in them; anything else its amount added, straight
 import { val, type Valued, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
-import type { Automation } from '../audio-plan/index.ts';
+import { eventTime, type Automation } from '../audio-plan/index.ts';
 import { releaseOf, stagesOf, type Target } from './stages.ts';
 import { SILENCE } from '../params/index.ts';
 
@@ -47,7 +47,7 @@ export function events(envelope: Envelope, planning: Planning, scale: Scale = {}
   if (envelope.release === undefined || end === undefined) {
     return stages;
   }
-  const before = stages.filter((event) => event[0] === 'value' || (event[0] !== 'cancel' && event[2] <= end)); // by its time
+  const before = stages.filter((event) => eventTime(event) <= end);
   return [...before, ...releaseOf(envelope, note, { from: end, stages }).automation];
 }
 // its release from a note-off, at from, from where its stages have it then, and when it has faded

@@ -37,11 +37,6 @@ interface Built {
   parts: Part[];
   first: AudioNode;
 }
-// a built node that offers points a meter reads inside it, and readings of itself
-type Offering = BuiltNode & {
-  readonly points: Readonly<Record<string, AudioNode>>;
-  readonly readings: Readonly<Record<string, () => number>>;
-};
 // the two points a chain is built between: where it starts, and its way out (an FX channel is one)
 interface ChainEnds {
   readonly input: AudioNode;
@@ -105,12 +100,12 @@ export class FxChain implements Settable {
   // The points a meter reads inside its modules, by name, as built: a limiter's in, after its
   // gain, and its out. None where no module's node offers one.
   points(): Readonly<Record<string, AudioNode>> {
-    return Object.assign({}, ...this.#offered().map((node) => node.points)) as Record<string, AudioNode>;
+    return Object.assign({}, ...this.#nodes().map((node) => node.points)) as Record<string, AudioNode>;
   }
   // What its modules say of themselves, by name, each read as the chain is built now: what a
   // limiter takes away. None where no module's node offers one.
   readings(): Readonly<Record<string, () => number>> {
-    const names = this.#offered().flatMap((node) => Object.keys(node.readings));
+    const names = this.#nodes().flatMap((node) => Object.keys(node.readings));
     return Object.fromEntries(names.map((name) => [name, () => this.#reading(name)]));
   }
   rebuild(): void {
@@ -149,19 +144,15 @@ export class FxChain implements Settable {
     }
     return undefined;
   }
-  // the nodes its modules built that offer points or readings, a module made of several's
-  #offered(): Offering[] {
-    return this.#built.parts.flatMap(({ built }) => built.nodes.filter(isOffering));
+  // the nodes its modules built, as built now
+  #nodes(): BuiltNode[] {
+    return this.#built.parts.flatMap(({ built }) => built.nodes);
   }
   // a reading by name, from the chain as built now; 0 where none offers it any more
   #reading(name: string): number {
-    const node = this.#offered().find((offering) => name in offering.readings);
+    const node = this.#nodes().find((offering) => name in offering.readings);
     return node?.readings[name]!() ?? 0; // offered, as found
   }
-}
-// whether a built node offers points and readings, as a module made of several does
-function isOffering(node: BuiltNode): node is Offering {
-  return 'points' in node && 'readings' in node;
 }
 // a module planned in a context, at its params now
 function planOf(module: Module, context: Context): Plan {

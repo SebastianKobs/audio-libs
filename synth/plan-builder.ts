@@ -6,11 +6,12 @@
 // (an osc's glides). An instrument's out (blocks/out.ts) is the last thing before its output: 'out' goes through it.
 // A stage can go out from another node than it comes in at (exit): a delay line goes in at its delay and out from its loop's lowpass.
 import { mtof } from '../music-theory/index.ts';
-import { time, when, type Values } from './values.ts';
+import { time, val, when, type Valued, type Values } from './values.ts';
 import { events, kindOf, released, type Scale } from './shapes.ts';
 import type { Envelope, Patch } from './patch.ts';
 import {
   SMOOTHING,
+  lastStop,
   type Automation,
   type Edge,
   type NodeKind,
@@ -95,6 +96,26 @@ export class PlanBuilder {
       param,
       scale: param ? { kind: kindOf(param), ...scale } : scale,
     });
+  }
+  // A param an envelope may move (blocks/envelope.ts), offered at its port by its scale.
+  // It's set to its value only where no envelope moves the port, and a value is given.
+  movable(
+    node: PlanNode,
+    param: string,
+    { port, value, scale }: { port: string; value: number | undefined; scale: Scale },
+  ): void {
+    if (value !== undefined && !this.moves(port)) {
+      this.value(node, param, value);
+    }
+    this.offer(port, node, param, scale);
+  }
+  // A level's gain (an osc's, a noise's), its port '<block>.gain'.
+  // At its level, or at an envelope's full scale where one moves it.
+  levelGain(block: string, level: Valued<number> | undefined): PlanNode {
+    const gain = this.node('gain', block);
+    const value = level === undefined ? undefined : val(level, this.values);
+    this.movable(gain, 'gain', { port: `${block}.gain`, value, scale: { base: value ?? 1 } });
+    return gain;
   }
   // where a stage goes out, when that isn't where it comes in
   exit(name: string, node: PlanNode): void {
@@ -333,10 +354,6 @@ function silentFrom(
   const latest = Math.max(...(onward.get(id) ?? []).map((to) => (to === 'out' ? Infinity : silentFrom(to, graph))));
   visiting.delete(id);
   return Math.min(closed.get(id) ?? Infinity, latest);
-}
-// a source's last stop, from its note's start, as its plan has it
-function lastStop(source: PlanNode): number {
-  return Math.max(...source.stops.map(([at]) => at));
 }
 // a value a control moves to: gliding by its time constant, or, with none, at once, at its time, as Web Audio's setValueAtTime
 function glideTo(value: number, at: number, timeConstant: number): Automation {

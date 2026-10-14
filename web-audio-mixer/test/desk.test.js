@@ -110,7 +110,7 @@ test("the master's insert slots, from its data, a chain in their order between t
   const ac = engine.audioContext;
   const { mixer } = desk;
   const [, chains] = built.find(([strip]) => strip === 'master');
-  const trim = chains.trim.nodeOf('gain.gain');
+  const trim = chains.trim.nodeOf('gain.gain').node;
   const drive = chains.limiter.points().in;
   assert.ok(reaches(ac, mixer.sum, trim), 'the sum into the first');
   assert.ok(reaches(ac, trim, drive) && !reaches(ac, drive, trim), 'the trim, then the limiter');

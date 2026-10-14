@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-engine/param-in-units: a param in a plan's units, moving Web Audio's ----------
-// A node the engine builds from several of Web Audio's (a limiter, composite.ts) has params in the plan's units, a gain in dB, a ceiling
+// A node the engine builds from several of Web Audio's (a limiter, limiter.ts) has params in the plan's units, a gain in dB, a ceiling
 // in dBFS: each change to one moves the Web Audio params behind it, each by how a value in the plan's units becomes its own
 
 // what a plan's automation moves (automate(), index.ts): a Web Audio param, or a param in a plan's units

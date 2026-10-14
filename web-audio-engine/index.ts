@@ -7,20 +7,24 @@
 // response. meter(node) a meter on a node, reading its peak (meters.ts); canPan() whether the context has a stereo
 // panner. It makes every Web Audio node of the sound, from a plan (F6c), but a meter's, which only listens. Everything it needs is
 // passed in, so it reads no globals: the AudioContext class, and random() for its buffers' noise.
-// Its parts (F6d): the kinds of node a plan names, made in the context (nodes.ts); a plan's nodes made, started, wired and automated
-// (build.ts), inputOf() and outputOf() saying where a built node's sound comes in and goes out; how a limiter holds at its ceiling, Web
-// Audio's makeup taken back (limiter.ts), a node built from several (composite.ts), its params in the plan's units (param-in-units.ts);
-// a buffer's samples (buffers.ts); a meter (meters.ts)
+// Its parts:
+//   - nodes.ts: the kinds of node a plan names, made in the context;
+//   - built-node.ts: a node built, one of Web Audio's or one made of several, in one shape: its way in
+//     and out, its params, where a meter reads it and what it says of itself;
+//   - build.ts: a plan's nodes made, started, wired and automated;
+//   - limiter.ts: how a limiter holds at its ceiling, Web Audio's makeup taken back, made of several,
+//     its params in the plan's units (param-in-units.ts);
+//   - buffers.ts: a buffer's samples; meters.ts: a meter.
 
 import { impulse, noise } from './buffers.ts';
-import { automate, buildNode, connectEdge, nodeOf, paramOf, sourceOf, type BuiltNode, type Building } from './build.ts';
+import { automate, buildNode, connectEdge, nodeOf, paramOf, type Building } from './build.ts';
+import type { BuiltNode } from './built-node.ts';
 import { meterOn, type PeakMeter } from './meters.ts';
 import { nodeMakers } from './nodes.ts';
 import type { AudioPlan, BufferSpec, Operation } from '../audio-plan/index.ts';
-export { inputOf, outputOf, paramOf, sourceOf } from './build.ts';
+export { paramOf } from './build.ts';
 export { makeupOf } from './limiter.ts';
-export type { BuiltNode } from './build.ts';
-export type { CompositeNode } from './composite.ts';
+export type { BuiltNode } from './built-node.ts';
 export type { Automatable } from './param-in-units.ts';
 export type { PeakMeter };
 
@@ -93,7 +97,7 @@ export class Engine {
     for (const operation of operations) {
       const node = nodeOf(nodes, operation.id);
       if (operation.stop !== undefined) {
-        sourceOf(node).stop!(t + operation.stop); // an operation stops only a source
+        node.stop(t + operation.stop); // an operation stops only a source
       } else {
         automate(paramOf(node, operation.param!), operation.events!, t);
       }

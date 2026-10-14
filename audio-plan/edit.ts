@@ -7,8 +7,8 @@
 // of structure, a node, an edge, a node's kind, its props (an osc's wave, a buffer) or its starts, comes back as none: a rebuild's, the
 // old graph faded out through one of its gains (fadeOutThrough()) as a new one, its plan faded in through its own (fadeInThrough()),
 // comes in (G0.2b); a synth's voice's through its out (libs/synth/fades.ts)
-import { levelAt } from './automation.ts';
-import type { AudioPlan, Automation, Operation, PlanNode } from './plan.ts';
+import { eventTime, levelAt, restartAt } from './automation.ts';
+import { lastStop, type AudioPlan, type Automation, type Operation, type PlanNode } from './plan.ts';
 import type { Seconds } from '../clock/index.ts';
 
 // s: the time constant a held value glides to a new one by, as a plugin smooths a knob against zipper noise: an edit's, a control's set
@@ -55,11 +55,7 @@ export function fadeOutThrough(
   const fade: Operation = {
     id: gain.id,
     param: 'gain',
-    events: [
-      ['cancel', at],
-      ['set', level, at],
-      ['linear', 0, at + over],
-    ],
+    events: [...restartAt(level, at), ['linear', 0, at + over]],
   };
   return [fade, ...plan.nodes.flatMap((node) => stopOnceFaded(node, at, at + over, applied))];
 }
@@ -73,7 +69,7 @@ export function fadeInThrough<Planned extends AudioPlan>(
 ): Planned {
   const automation = gain.params.gain!; // a gain node's gain, planned
   const faded: Automation[] = [
-    ...automation.filter((event) => timeOf(event) <= at),
+    ...automation.filter((event) => eventTime(event) <= at),
     ['set', 0, at],
     ['linear', levelAt(automation, at + over), at + over],
     ...later(automation, at + over),
@@ -122,9 +118,9 @@ function played(automation: Automation[], told: readonly Operation[]): Automatio
   let events = [...automation];
   for (const event of told.flatMap((op) => op.events ?? [])) {
     if (event[0] === 'cancel') {
-      events = events.filter((kept) => timeOf(kept) < event[1]);
+      events = events.filter((kept) => eventTime(kept) < event[1]);
     } else {
-      events = [...events, event].sort((one, other) => timeOf(one) - timeOf(other) || 0); // stable: one told later, after
+      events = [...events, event].sort((one, other) => eventTime(one) - eventTime(other) || 0); // stable: one told later, after
     }
   }
   return events;
@@ -141,7 +137,7 @@ function sameFrom(playing: Automation[], wanted: Automation[], at: Seconds): boo
 // to where the wanted one is, and the wanted events after it
 function continued(playing: Automation[], wanted: Automation[], at: Seconds, smoothing: Seconds): Automation[] {
   const coming = later(wanted, at);
-  return [['cancel', at], ['set', levelAt(playing, at), at], ...onTheWay(wanted, at, coming, smoothing), ...coming];
+  return [...restartAt(levelAt(playing, at), at), ...onTheWay(wanted, at, coming, smoothing), ...coming];
 }
 // how it goes on from where it is: a ramp coming takes it on to its end by itself; a target the wanted automation approaches,
 // approached from there; else the value it holds, glided to by the smoothing
@@ -158,22 +154,12 @@ function onTheWay(wanted: Automation[], at: Seconds, coming: Automation[], smoot
 }
 // the target an automation approaches at a time: its last event by then, if that's a target
 function approachAt(automation: Automation[], at: Seconds): { value: number; tc: number } | null {
-  const last = automation.filter((event) => timeOf(event) <= at).at(-1);
+  const last = automation.filter((event) => eventTime(event) <= at).at(-1);
   return last?.[0] === 'target' ? { value: last[1], tc: last[3] } : null;
 }
 // its events after a time
 function later(automation: Automation[], at: Seconds): Automation[] {
-  return automation.filter((event) => timeOf(event) > at);
-}
-// when an event is: a value as the node is made, before anything; a cancel at its time; the rest at theirs
-function timeOf(event: Automation): number {
-  if (event[0] === 'value') {
-    return -Infinity;
-  }
-  if (event[0] === 'cancel') {
-    return event[1];
-  }
-  return event[2];
+  return automation.filter((event) => eventTime(event) > at);
 }
 // a source's stop moved where the edited plan has it, the last told it since kept on both; none for a node that's no source, one that
 // has stopped by at, or one that stops as it did; and none at all where it would never stop now, a stop not taken back: a rebuild's
@@ -191,10 +177,6 @@ function stopOp(node: PlanNode, edited: PlanNode, at: Seconds, applied: readonly
     return null;
   }
   return [{ id: node.id, stop: Math.max(wanted, at) }];
-}
-// a source's last stop as its plan has it; none, it sounds for good
-function lastStop(node: PlanNode): number {
-  return node.stops.length ? Math.max(...node.stops.map(([stopAt]) => stopAt)) : Infinity;
 }
 // the last stop a source was told since, which holds, as Web Audio's; none
 function toldStop(node: PlanNode, applied: readonly Operation[]): number | undefined {

@@ -41,3 +41,11 @@ export interface AudioPlan {
   edges: Edge[];
   input?: number | null;
 }
+
+// a source's latest stop; none, it sounds for good
+export function lastStop(node: PlanNode): number {
+  if (!node.stops.length) {
+    return Infinity;
+  }
+  return Math.max(...node.stops.map(([at]) => at));
+}

@@ -5,7 +5,7 @@
 // says what a point of the shape is there, and how each stage gets there: straight in its target's scale
 import { time, val, type Time, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
-import { levelAt, type Automation } from '../audio-plan/index.ts';
+import { eventTime, levelAt, type Automation } from '../audio-plan/index.ts';
 import { ENVELOPE_SPECS } from './params.ts';
 
 // a stage of a shape
@@ -63,7 +63,7 @@ export function releaseOf(
 // Audio ramp running from the event before it, and dropped would leave the level where that event left it (I1i3); else set there
 function cutAt(stages: Automation[], from: number): Automation {
   const level = levelAt(stages, from);
-  const running = stages.find((event) => event[0] !== 'value' && event[0] !== 'cancel' && event[2] > from);
+  const running = stages.find((event) => eventTime(event) > from);
   if (running?.[0] === 'linear' || running?.[0] === 'exp') {
     return [running[0], level, from];
   }

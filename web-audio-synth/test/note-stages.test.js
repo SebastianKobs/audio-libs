@@ -13,6 +13,8 @@ class Context extends StandInContext {
     super(() => time);
   }
 }
+// every stage a note can have: an instrument answering them all, your playing's (V3)
+const EVERY_STAGE = ['brightness', 'volume', 'pan', 'effects 1 depth'];
 const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 // an engine on the stand-in, its time 10
 function setup() {
@@ -28,7 +30,7 @@ test("a note's own stages: its pan pot at #10 Pan, then a lowpass at #74 Brightn
   const out = ac.createGain();
   const room = ac.createGain();
   const heard = { pan: 0.3, brightness: 5000, volume: 0.5, 'effects 1 depth': 0.2 };
-  const n = new NoteStages(engine, { into: out, room, heard });
+  const n = new NoteStages(engine, { into: out, room, heard, answers: EVERY_STAGE });
   assert.equal(n.input.kind, 'panner');
   assert.deepEqual(n.input.pan.events, [['value', 0.3]], 'its pan as it starts, as a voice was panned (place())');
   const [air] = ac.rec.edges.filter((e) => e.from === n.input).map((e) => e.to);
@@ -59,6 +61,7 @@ test("a note's own stages glide to each per-note controller that comes later, as
     into: out,
     room,
     heard: { pan: 0, brightness: 5000, volume: 0.5, 'effects 1 depth': 0.2 },
+    answers: EVERY_STAGE,
   });
   const [air] = ac.rec.edges.filter((e) => e.from === n.input).map((e) => e.to);
   const [dry] = into(ac, out);
@@ -77,7 +80,7 @@ test("a note's own stages glide to each per-note controller that comes later, as
 test("a note sent with no #10 Pan has no place: it isn't panned, it plays into its air, as a sound with no place plays unpanned", () => {
   const { ac, engine } = setup();
   const out = ac.createGain();
-  const n = new NoteStages(engine, { into: out, heard: { brightness: 5000, volume: 0.5 } });
+  const n = new NoteStages(engine, { into: out, heard: { brightness: 5000, volume: 0.5 }, answers: EVERY_STAGE });
   assert.deepEqual([n.input.kind, n.input.type], ['biquad', 'lowpass']);
   assert.ok(!ac.rec.nodes.some((node) => node.kind === 'panner'), 'no pan pot built');
 });

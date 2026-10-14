@@ -9,7 +9,6 @@ import {
   delayTimeOf,
   envelopeEvents,
   mappingOf,
-  mtof,
   plan,
   termOf,
   adsr,
@@ -19,6 +18,7 @@ import {
   time,
   val,
 } from '../index.ts';
+import { mtof } from '../../music-theory/index.ts';
 import { near } from '../../util/test/near.js';
 
 // a note and its context, as plan() takes them: the note's own values, and the tempo and the random source beside it. A value given as

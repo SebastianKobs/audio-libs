@@ -5,6 +5,7 @@ import { Routing, type StripKind, MASTER } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
 import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
+import { restartAt } from '../audio-plan/index.ts';
 // what the mixer and its strips need of the engine: the context, its time, a meter on a node, a plan built and set, and whether it can pan
 export type MixerEngine = Pick<Engine, 'audioContext' | 'now' | 'meter' | 'build' | 'apply' | 'canPan'>;
 // The desk as a strip sees it as it's made, the routing having said where it may go:
@@ -117,11 +118,7 @@ export class Mixer {
       return;
     }
     const at = this.#engine.now();
-    this.#master.automate('gain.gain', [
-      ['cancel', at],
-      ['set', 0, at],
-      ['target', this.#volume, at, FADE_IN],
-    ]);
+    this.#master.automate('gain.gain', [...restartAt(0, at), ['target', this.#volume, at, FADE_IN]]);
   }
   // which strips are muted and which soloed, as Ableton's mute and solo, by name: each strip silenced as the routing says (silenced()),
   // now, and one made later as it's made; a name not built yet waiting for it (Z4)

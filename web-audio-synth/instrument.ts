@@ -10,7 +10,7 @@
 // the next note starts, so a sender that never detaches leaves none behind. #7 Volume with no stage for it sets the voice's own out, times
 // its patch's own volume, as a background's held note is hushed (P3b). A track's controllers aren't its: whoever plays it maps them
 import { notesIn, type Message, type PerNoteController, type Receiver, type SentNote } from '../midi/index.ts';
-import type { Params } from '../synth/index.ts';
+import { volumeOf, type Params } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import { NoteStages, type StageController } from './note-stages.ts';
 import type { Patches } from './patches.ts';
@@ -128,7 +128,7 @@ export class Instrument implements Receiver {
       return;
     }
     if (controller === 'volume' && !this.#answers.includes('volume')) {
-      const own = this.#patches.of(this.#patch)!.out?.volume ?? 1; // one the bank has; 1 at 0 dB
+      const own = volumeOf(this.#patches.of(this.#patch)!.out); // one the bank has
       voice.controls.set('out.volume', own * value, t, glide);
       return;
     }

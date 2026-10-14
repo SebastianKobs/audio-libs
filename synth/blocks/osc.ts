@@ -5,7 +5,6 @@
 // glides, after its envelopes; the handle glides it on (a vine's phrase note).
 // Its ports: 'osc 1.gain' (its level), 'osc 1.frequency', 'osc 1.detune', and every osc's, 'oscs.frequency', 'oscs.detune'
 import { mtof } from '../../music-theory/index.ts';
-import { val } from '../values.ts';
 import type { Block, PlanBuilder } from '../plan-builder.ts';
 import type { Osc, Patch } from '../patch.ts';
 import type { PlanNode } from '../../audio-plan/index.ts';
@@ -54,14 +53,9 @@ function baseFrequency(osc: Osc, builder: PlanBuilder): number {
   }
   return builder.frequency * (osc.ratio ?? OSC_SPECS.ratio.default);
 }
-// its level's gain: at its level, or an envelope's full scale where one moves it; into where it goes
+// its level's gain, into where it goes
 function levelGain(osc: Osc, builder: PlanBuilder, index: number): PlanNode {
-  const gain = builder.node('gain', `osc ${index}`);
-  const level = osc.level === undefined ? 1 : val(osc.level, builder.values);
-  if (!builder.moves(`osc ${index}.gain`)) {
-    builder.value(gain, 'gain', level);
-  }
-  builder.offer(`osc ${index}.gain`, gain, 'gain', { base: level });
+  const gain = builder.levelGain(`osc ${index}`, osc.level);
   builder.into(gain, osc.into);
   return gain;
 }

@@ -73,7 +73,8 @@ test("the engine builds a plan at a time, into where it goes, and runs a handle'
       [1, 'out'],
     ],
   };
-  const [o, g] = e.build(p, 12, dest);
+  const built = e.build(p, 12, dest);
+  const [o, g] = built.map(({ node }) => node);
   assert.equal(o.type, 'triangle');
   assert.deepEqual(o.frequency.events, [['value', 220]]);
   assert.deepEqual(o.starts, [[12]]);
@@ -85,7 +86,7 @@ test("the engine builds a plan at a time, into where it goes, and runs a handle'
   assert.deepEqual(into(e.audioContext, g), [o]);
   assert.deepEqual(into(e.audioContext, dest), [g]);
   e.apply(
-    [o, g],
+    built,
     [
       {
         id: 1,
@@ -117,7 +118,7 @@ test("the engine's buffers are made once, when first asked for, by their spec: s
     edges: [[0, 'out']],
   };
   assert.equal(
-    e.build(p, 10, e.audioContext.destination)[0].buffer,
+    e.build(p, 10, e.audioContext.destination)[0].node.buffer,
     e.buffer({ noise: 0.2 }),
     'a plan names its buffer',
   );
@@ -138,12 +139,16 @@ test("Web Audio's own makeup, for a hard knee: 0.6 times how far its curve bring
 test('a pan, built: a stereo panner, the sound made stereo before it, so a mono sound is as loud in the middle; or a pan pot; with no stereo panner, passed through', () => {
   const e = engine();
   const dest = e.audioContext.createGain();
-  const [pan] = e.build({ nodes: [unplayed('panner', { pan: [['value', -0.5]] })], edges: [[0, 'out']] }, 12, dest);
+  const [{ node: pan }] = e.build(
+    { nodes: [unplayed('panner', { pan: [['value', -0.5]] })], edges: [[0, 'out']] },
+    12,
+    dest,
+  );
   assert.equal(pan.channelCountMode, 'explicit');
   assert.equal(pan.channelCount, 2);
   assert.deepEqual(pan.pan.events, [['value', -0.5]]);
   assert.deepEqual(into(e.audioContext, dest), [pan]);
-  const [pot] = e.build(
+  const [{ node: pot }] = e.build(
     { nodes: [{ ...unplayed('panner', { pan: [['value', -0.5]] }), props: { mono: 'pan pot' } }], edges: [[0, 'out']] },
     12,
     dest,
@@ -151,7 +156,11 @@ test('a pan, built: a stereo panner, the sound made stereo before it, so a mono 
   assert.notEqual(pot.channelCountMode, 'explicit', "a pan pot: a mono sound panned as it comes, Web Audio's own way");
   assert.equal(pot.mono, undefined, 'made so, not told');
   e.audioContext.createStereoPanner = undefined;
-  const [through] = e.build({ nodes: [unplayed('panner', { pan: [['value', -0.5]] })], edges: [[0, 'out']] }, 12, dest);
+  const [{ node: through }] = e.build(
+    { nodes: [unplayed('panner', { pan: [['value', -0.5]] })], edges: [[0, 'out']] },
+    12,
+    dest,
+  );
   assert.deepEqual([through.kind, through.gain.value], ['gain', 1], 'no stereo panner: it passes through, unpanned');
 });
 
@@ -176,7 +185,7 @@ test("a limiter, built: its gain into a compressor held at its ceiling as hard a
   const [back] = into(ac, dest);
   const [compressor] = into(ac, back);
   const [drive] = into(ac, compressor);
-  assert.deepEqual(into(ac, drive), [source], 'the sound comes in at its gain');
+  assert.deepEqual(into(ac, drive), [source.node], 'the sound comes in at its gain');
   near(dB(drive.gain.value), 16, 'its gain, before it');
   assert.deepEqual(
     ['threshold', 'ratio', 'knee', 'attack', 'release'].map((k) => compressor[k].value),
@@ -240,7 +249,7 @@ test("a limiter's params moved as a plan's automation moves any: set, ramped eit
     12,
   );
   near(dB(drive.gain.value), 6, 'its gain, in dB');
-  assert.equal(limiter.params.gain.value, 6, 'read back in dB');
+  assert.equal(limiter.param('gain').value, 6, 'read back in dB');
   assert.deepEqual(
     compressor.threshold.events.slice(-4),
     [

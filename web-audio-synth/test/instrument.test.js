@@ -140,7 +140,7 @@ test("an instrument with no stage for #7 Volume: a note's volume on its voice's 
   time = 10;
   const engine = new Engine({ AudioContext: Context });
   const ac = engine.audioContext;
-  const patches = new Patches({ patches: { loud: { ...VOICE, out: { volume: 0.8 } } }, now: () => time });
+  const patches = new Patches({ patches: { loud: { ...VOICE, out: { volume: 0.8 } }, plain: VOICE }, now: () => time });
   const out = ac.createGain();
   const instrument = new Instrument({ engine, patches, patch: 'loud', beat: () => 0.8, into: out });
   instrument.receive([noteOn(0, 57, 10)]);
@@ -151,6 +151,16 @@ test("an instrument with no stage for #7 Volume: a note's volume on its voice's 
     ['target', 0, 10.8, 0.25],
     ['target', 0.8, 12, 0.25],
   ]);
+  const plainOut = ac.createGain();
+  const plain = new Instrument({ engine, patches, patch: 'plain', beat: () => 0.8, into: plainOut });
+  plain.receive([noteOn(0, 57, 10)]);
+  const [plainVoiceOut] = into(ac, plainOut);
+  plain.receive([perNote(0, 'volume', 0.5, 12, 0.25)]);
+  assert.deepEqual(
+    plainVoiceOut.gain.events.at(-1),
+    ['target', 0.5, 12, 0.25],
+    "a patch's own volume 1 unless it says",
+  );
 });
 
 test("an instrument's knobs, its tempo and its draws handed in, read as each note starts; its patch the bank's as it plays, by name (V3)", () => {

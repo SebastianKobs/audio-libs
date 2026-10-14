@@ -153,25 +153,6 @@ export interface Tracking {
   emit<Type extends EventType>(type: Type, pointer: Pointer, more?: Extra<Type>): void;
 }
 
-export const EVENTS: EventType[] = [
-  'press',
-  'hold',
-  'dragstart',
-  'dragmove',
-  'turn',
-  'shape',
-  'pitch',
-  'rest',
-  'move',
-  'loop',
-  'tap',
-  'release',
-  'cancel',
-  'panstart',
-  'panmove',
-  'panend',
-  'takeback',
-];
 export function radians(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }

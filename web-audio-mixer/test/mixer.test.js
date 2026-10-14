@@ -372,20 +372,20 @@ test("route(): a strip's output moved while it plays, to the master or a bus, an
   assert.throws(() => m.route('x', 'w'), /a loop: w feeds x/, 'through a send too');
 });
 
-test("a channel with inserts: its input through each insert in order, then its fader; a send taken from an insert's tap, before its level", () => {
+test("a channel with inserts: its input through each insert in order, then its fader; a send taken at an insert's way in", () => {
   const e = engine();
   const m = new Mixer(e);
   const r = m.fx('reverb');
   const d = m.fx('delay');
   const lp = e.audioContext.createGain();
   const lvl = e.audioContext.createGain();
-  const dull = e.audioContext.createGain(); // stand-ins for an insert's nodes: in, a tap before its level, out
+  const dull = e.audioContext.createGain(); // stand-ins for an insert's nodes: in, its level, out
   lp.connect(lvl);
   const t = m.channel('track', {
     volume: 0.8,
     inserts: [
       { name: 'dull', input: dull, output: dull },
-      { name: 'distance', input: lp, output: lvl, tap: lp },
+      { name: 'distance', input: lp, output: lvl },
     ],
     sends: [
       { to: 'reverb', amount: 0.5 },
@@ -402,7 +402,7 @@ test("a channel with inserts: its input through each insert in order, then its f
   );
   assert.deepEqual(t.fader.gain.events, [['value', 0.8]]);
   assert.deepEqual(into(e.audioContext, t.sends.reverb), [t.fader], 'a send after the fader');
-  assert.deepEqual(into(e.audioContext, t.sends.delay), [lp], "a send from the insert's tap, before its level");
+  assert.deepEqual(into(e.audioContext, t.sends.delay), [lp], "a send from the insert's way in");
   assert.deepEqual([t.sends.reverb.gain.events, t.sends.delay.gain.events], [[['value', 0.5]], [['value', 0.3]]]);
   assert.deepEqual([into(e.audioContext, r.input), into(e.audioContext, d.input)], [[t.sends.reverb], [t.sends.delay]]);
   time = 11;

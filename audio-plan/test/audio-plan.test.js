@@ -3,7 +3,16 @@
 // moved, a change of structure a rebuild's; a plan faded out and in through one of its gains
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SMOOTHING, fadeInThrough, fadeOutThrough, followEdit, levelAt } from '../index.ts';
+import {
+  SMOOTHING,
+  eventTime,
+  fadeInThrough,
+  fadeOutThrough,
+  followEdit,
+  lastStop,
+  levelAt,
+  restartAt,
+} from '../index.ts';
 import { near } from '../../util/test/near.js';
 
 // a sound: an oscillator from 0, stopped at 4, into a gain at 0.5, out
@@ -54,6 +63,19 @@ test("a param's level as Web Audio plays its automation: a value held, a ramp st
   near(levelAt(target, 1.5), Math.exp(-1), 'one time constant on, 1/e of the way left');
 });
 
+test("an event's time, a source's last stop, and a param restarted from a level", () => {
+  assert.equal(eventTime(['value', 0.5]), -Infinity, 'a value holds from before anything');
+  assert.equal(eventTime(['cancel', 2]), 2);
+  assert.equal(eventTime(['target', 1, 3, 0.1]), 3, "a target's start");
+  assert.equal(eventTime(['linear', 1, 4]), 4, "a ramp's end");
+  assert.equal(lastStop(SOUND.nodes[0]), 4);
+  assert.equal(lastStop(withStops([[4], [6], [2]]).nodes[0]), 6, 'the latest of its stops');
+  assert.equal(lastStop(SOUND.nodes[1]), Infinity, 'none: it sounds for good');
+  assert.deepEqual(restartAt(0.3, 2), [
+    ['cancel', 2],
+    ['set', 0.3, 2],
+  ]);
+});
 test('an unchanged plan: nothing to do', () => {
   assert.deepEqual(followEdit(SOUND, withGain([['value', 0.5]]), 2), []);
 });
