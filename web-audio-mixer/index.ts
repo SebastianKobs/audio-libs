@@ -32,6 +32,8 @@ export { Channel } from './channel.ts';
 export { deviceInsert } from './device-insert.ts';
 export { buildChannel, buildFxChannel } from './build.ts';
 export type { StripValues } from './build.ts';
+export { setTarget, targetOf } from './target.ts';
+export type { Target, Timing } from './target.ts';
 export type { Insert, Send, StripOptions } from './channel.ts';
 export { FxChannel } from './fx-channel.ts';
 export type { FxOptions } from './fx-channel.ts';

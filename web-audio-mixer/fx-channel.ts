@@ -107,6 +107,13 @@ export class FxChannel {
     this.sends[to] = sendStage.input as GainNode; // a Gain module's one gain
     return sendStage;
   }
+  // Its volume, its level, and its pan as stages, for a parameter's target (target.ts); no pan where it has none.
+  get volumeStage(): BuiltModule {
+    return this.#stages.level;
+  }
+  get panStage(): BuiltModule | null {
+    return this.#stages.pan;
+  }
   volume(value: number): void {
     this.#stages.level.set('gain.gain', value);
   }

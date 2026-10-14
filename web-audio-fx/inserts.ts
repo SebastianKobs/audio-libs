@@ -89,11 +89,26 @@ const LIMITER_PARAMS: InsertParams = Object.freeze({
   release: Object.freeze({ name: 'release', unit: 's', range: Object.freeze([0.01, 1, 0.01] as const) }),
 });
 // each insert's module as its slot and its device show it: its name, and its params, each as its device shows it, as Ableton's Utility,
-// Auto Filter and Limiter show theirs
-export const INSERTS: Readonly<Record<InsertModule, { name: string; params: InsertParams }>> = Object.freeze({
-  utility: Object.freeze({ name: 'Utility', params: UTILITY_PARAMS }),
-  filter: Object.freeze({ name: 'LP filter', params: FILTER_PARAMS }),
-  limiter: Object.freeze({ name: 'Limiter', params: LIMITER_PARAMS }),
+// Auto Filter and Limiter show theirs; and the port each param is set at on its chain, by the param's name, none for one set
+// only as it's built (a Filter's resonance)
+export const INSERTS: Readonly<
+  Record<InsertModule, { name: string; params: InsertParams; ports: Readonly<Record<string, string>> }>
+> = Object.freeze({
+  utility: Object.freeze({
+    name: 'Utility',
+    params: UTILITY_PARAMS,
+    ports: Object.freeze({ level: 'gain.gain', pan: 'pan.pan' }),
+  }),
+  filter: Object.freeze({
+    name: 'LP filter',
+    params: FILTER_PARAMS,
+    ports: Object.freeze({ cutoff: 'filter.frequency' }),
+  }),
+  limiter: Object.freeze({
+    name: 'Limiter',
+    params: LIMITER_PARAMS,
+    ports: Object.freeze({ gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' }),
+  }),
 });
 // modules combined into one, as data: their blocks in their order, their params joined; planned and built as one module
 function combined(...modules: Patch[]): Patch {

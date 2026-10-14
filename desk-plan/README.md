@@ -15,5 +15,6 @@ const routing = routingOf(desk);   // each strip a return or a bus, where it goe
 |---|---|
 | [`strip-data.ts`](strip-data.ts) | A strip as data: its insert slots, each a device with its start, its sends and its way out; a desk's entry a return with its chain or a bus; its names one type parameter (`Names`), a user's own literal types; the routing from it (`routingOf()`) |
 | [`params.ts`](params.ts) | A strip's own parameters, declared as a plugin declares its own (`libs/params/`): its volume and each send by the fader law, its pan, its mute and solo |
+| [`keys.ts`](keys.ts) | A parameter's key, where on a desk it is, declared and readable, not a random id: a strip's own (`my tap 1/volume`), a send by its return (`you/send/reverb`) or a slot's param (`tap/utility/level`); its text form (`keyText()`, `keyOf()`) and its spec, looked up from the declarations (`specOf()`) |
 
 Its tests, in `test/`, run in node, with no stand-in.

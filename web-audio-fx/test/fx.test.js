@@ -166,3 +166,12 @@ test("the params declared with their tapers: a Utility's level by the fader law,
     "an 8th, a little under halfway, as an octave's share",
   );
 });
+
+// each insert's ports, by its params' names, declared beside its specs (U2c4b1a): where a param's value is set on its chain, so none is
+// named by hand
+test("each insert's ports declared beside its params: a Utility's level and pan, a Filter's cutoff, the limiter's three; a param set only as it's built, none", () => {
+  const { utility, filter, limiter } = INSERTS;
+  assert.deepEqual(utility.ports, { level: 'gain.gain', pan: 'pan.pan' });
+  assert.deepEqual(filter.ports, { cutoff: 'filter.frequency' }, 'its resonance fixed as it was built');
+  assert.deepEqual(limiter.ports, { gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' });
+});
