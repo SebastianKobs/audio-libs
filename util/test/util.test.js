@@ -1,7 +1,7 @@
 // small shared helpers, their unit tests (mockup/src/libs/util/index.ts)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Events, seeded, toggleIn, updateInPlace } from '../index.ts';
+import { Events, seeded, smoothstep, toggleIn, updateInPlace } from '../index.ts';
 
 const MULBERRY32_SEED_1 = [0.6270739405881613, 0.002735721180215478, 0.5274470399599522]; // from an implementation of the reference C of its own
 
@@ -105,4 +105,17 @@ test('a seeded generator: the same seed draws the same numbers, each in [0, 1); 
     'each in [0, 1)',
   );
   assert.deepEqual(draw(1, 3), MULBERRY32_SEED_1, "mulberry32's first three for seed 1");
+});
+
+test('smoothstep, as GLSL has it: 0 up to the low edge, 1 from the high one, eased between; edges the other way round, falling', () => {
+  assert.deepEqual(
+    [smoothstep(2, 4, 1), smoothstep(2, 4, 2), smoothstep(2, 4, 3), smoothstep(2, 4, 4), smoothstep(2, 4, 5)],
+    [0, 0, 0.5, 1, 1],
+  );
+  assert.equal(smoothstep(0, 1, 0.25), 0.15625, 'eased: 3x² - 2x³');
+  assert.deepEqual(
+    [smoothstep(40, 32, 30), smoothstep(40, 32, 36), smoothstep(40, 32, 41)],
+    [1, 0.5, 0],
+    'falling from the low edge to the high',
+  );
 });

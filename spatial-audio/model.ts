@@ -9,6 +9,7 @@
 // No lag with distance: it would push far notes off the beat.
 // The settings are read when asked: range, hearing, falloff, dull, room, and limit,
 // the farthest hearing may reach (a world that wraps round: half of it).
+import { smoothstep } from '../util/index.ts';
 
 // the settings, read when asked: in world units, but falloff, dull and room, strengths
 export interface SpaceSettings {
@@ -43,11 +44,6 @@ export function hearing(distance: number, settings: SpaceSettings): Heard {
   };
 }
 
-// 0 up to the low edge, 1 from the high one, eased between, as GLSL's
-function smoothstep(low: number, high: number, value: number): number {
-  const position = Math.min(1, Math.max(0, (value - low) / (high - low)));
-  return position * position * (3 - 2 * position);
-}
 // whether new values are worth sending: a level or room 0.002 off, or a cutoff 1% off
 export function moved(previous: Heard, next: Heard): boolean {
   return (
