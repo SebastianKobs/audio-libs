@@ -1,6 +1,6 @@
 // The recorder (G1b, mockup/architecture/done.md), as Ableton records the session into its arrangement: every play the stream carries
-// into the region it's of (G1a), told apart by its element and its number, a play with none a region of its own; a launched clip's plays
-// left out; a region from its first note to the end of its last, one with a held note open until its element's next region begins; the
+// into the region it's of (G1a), told apart by its element and its number, a play with none a region of its own; a play its sender
+// leaves out (unrecorded), left out; a region from its first note to the end of its last, one with a held note open until its element's next region begins; the
 // last 30 minutes kept. And what moves as it's heard, as automation (G3b): a track's controllers as its lanes, a note's changes on the note,
 // every change kept but a point that changes nothing
 import { test } from 'node:test';
@@ -22,9 +22,11 @@ const play = (owner, region, notes, more = {}) => ({
 });
 const spans = (regions) => regions.map((region) => [region.owner, region.from, region.to, region.notes.length]);
 
-test('a replay, one play with all its notes: one region, from its first note to the end of its last, with its track, until, sends and seed', () => {
+test("a replay, one play with all its notes: one region, from its first note to the end of its last, with its track, its track's name, until, sends and seed", () => {
   const recorder = new Recorder();
-  recorder.heard(play(flower, 1, [1, 1.5, 2], { track: 0, until: 4, sends: { dry: 0.5 }, seed: 7 }));
+  recorder.heard(
+    play(flower, 1, [1, 1.5, 2], { track: 0, trackName: 'replay tap 1', until: 4, sends: { dry: 0.5 }, seed: 7 }),
+  );
   const [region] = recorder.regions(5);
   assert.deepEqual(
     { ...region, notes: region.notes.length },
@@ -35,6 +37,7 @@ test('a replay, one play with all its notes: one region, from its first note to 
       role: 'tap',
       live: false,
       track: 0,
+      trackName: 'replay tap 1',
       until: 4,
       sends: { dry: 0.5 },
       seed: 7,
@@ -63,7 +66,7 @@ test("a loop, a play a note: one region while it loops, launched again another; 
     recorder.heard(play(bass, 1, [t], { track: 3, until: Infinity }));
   }
   recorder.heard(play(bass, 2, [3], { track: 3, until: Infinity }));
-  recorder.heard(play(flower, 9, [3.5], { launched: true }));
+  recorder.heard(play(flower, 9, [3.5], { launched: true, unrecorded: true }));
   recorder.heard(play(flower, undefined, [4]));
   recorder.heard(play(flower, undefined, [4.5]));
   assert.deepEqual(spans(recorder.regions(5)), [
@@ -159,13 +162,14 @@ const controls = (kind, track, changes) => ({
   live: false,
   notes: [],
   track,
+  trackName: `replay ${kind} ${track + 1}`,
   controls: changes,
 });
 const point = (t, value, glide) => (glide === undefined ? { t, value } : { t, value, glide });
 const pointsOf = (lanes, kind, track, controller) =>
   lanes.find((lane) => lane.kind === kind && lane.track === track && lane.controller === controller)?.points;
 
-test("a track's controller changes kept as its lanes (G3b): a lane a controller, by the track's kind and number as its regions have them, each point a value at a time, jumping there or gliding by its time constant", () => {
+test("a track's controller changes kept as its lanes (G3b): a lane a controller, by the track's kind and number as its regions have them and its name as they were sent to it, each point a value at a time, jumping there or gliding by its time constant", () => {
   const recorder = new Recorder();
   recorder.heard(
     controls('tap', 0, [
@@ -176,9 +180,15 @@ test("a track's controller changes kept as its lanes (G3b): a lane a controller,
   recorder.heard(controls('tap', 0, [{ controller: 'air', value: 2000, t: 1.5, glide: 0.08 }]));
   recorder.heard(controls('vine', 1, [{ controller: 'air', value: 900, t: 1.2 }]));
   assert.deepEqual(recorder.lanes(1.6), [
-    { kind: 'tap', track: 0, controller: 'volume', points: [point(1, 0.8)] },
-    { kind: 'tap', track: 0, controller: 'air', points: [point(1, 3000), point(1.5, 2000, 0.08)] },
-    { kind: 'vine', track: 1, controller: 'air', points: [point(1.2, 900)] },
+    { kind: 'tap', track: 0, trackName: 'replay tap 1', controller: 'volume', points: [point(1, 0.8)] },
+    {
+      kind: 'tap',
+      track: 0,
+      trackName: 'replay tap 1',
+      controller: 'air',
+      points: [point(1, 3000), point(1.5, 2000, 0.08)],
+    },
+    { kind: 'vine', track: 1, trackName: 'replay vine 2', controller: 'air', points: [point(1.2, 900)] },
   ]);
   assert.deepEqual(recorder.regions(1.6), [], 'no region: no element, no notes');
 });
@@ -279,24 +289,20 @@ test("a held note carried into its element's next region carries its values as t
   assert.deepEqual(carried.lanes, { volume: [point(4, 0.2)] });
 });
 
-test("a play marked played back left out, as a launched clip's: what's played back isn't recorded again (P3a)", () => {
+test("a play its sender leaves out of the recording left out, whatever it carries: what's played back isn't recorded again (P3a), the live garden's held notes hushed and brought back as the arrangement plays back aren't what was played (P3b)", () => {
   const recorder = new Recorder();
-  recorder.heard(play(flower, 1, [1, 2], { playback: true }));
+  recorder.heard(play(flower, 1, [1, 2], { playback: true, unrecorded: true }));
   recorder.heard(play(flower, 2, [3]));
-  assert.deepEqual(spans(recorder.regions(10)), [[flower, 3, 3.2, 1]]);
-});
-
-test("a play marked hushed left out: the live garden's held notes hushed and brought back as the arrangement plays back aren't what was played (P3b)", () => {
-  const recorder = new Recorder();
-  recorder.heard(play(flower, 1, [{ t: 1, pitch: 60, index: 4 }]));
+  assert.deepEqual(spans(recorder.regions(10)), [[flower, 3, 3.2, 1]], 'its notes');
+  recorder.heard(play(flower, 3, [{ t: 4, pitch: 60, index: 4 }]));
   recorder.heard({
     owner: flower,
     kind: 'tap',
     notes: [],
-    changes: [{ index: 4, controller: 'volume', value: 0, t: 2 }],
-    hushed: true,
+    changes: [{ type: 'per-note controller', index: 4, controller: 'volume', value: 0, t: 5 }],
+    unrecorded: true,
   });
-  assert.equal(recorder.regions(10)[0].notes[0].lanes, undefined);
+  assert.equal(recorder.regions(10)[1].notes[0].lanes, undefined, 'its changes');
 });
 
 // a trace that winds into a tower ends its vine's held note at once, which may not have started yet, as John Supreme plays a phrase's note

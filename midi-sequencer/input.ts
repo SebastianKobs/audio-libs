@@ -144,6 +144,7 @@ function playOf(
     ...(changes.length ? { changes } : {}),
     ...(controls.length ? { controls } : {}),
     ...to.play,
+    trackName: to.track, // as sent, whatever its play carries
   };
 }
 // a note as the stream carries it: when, its pitch and velocity, its length if it has one, its bend, vibrato and glides where it was sent

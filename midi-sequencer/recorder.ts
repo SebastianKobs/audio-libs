@@ -12,16 +12,18 @@
 // timeline since L1c2 (libs/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import type { Seconds } from '../clock/index.ts';
-import { LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
+import { endOf, LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { NoteOff, PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { NoteGlide, Play, PlayedNote } from './stream.ts';
 import { entryOf, timedValue } from '../util/index.ts';
 
-// what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of
+// what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of; the track's
+// name, as its play was sent to it
 interface LaneOf {
   kind: string;
   track: number | null;
+  trackName: string | undefined;
   controller: string;
 }
 // a track's lane (G3b): its kind, number and controller, and its points in time order
@@ -43,6 +45,7 @@ export interface Region {
   role: string | undefined;
   live: boolean;
   track: number | null;
+  trackName: string | undefined;
   until: Seconds | undefined;
   sends: unknown;
   seed: number | undefined;
@@ -70,10 +73,9 @@ export class Recorder {
       onLetGo: (gone) => this.#forget(gone),
     });
   }
-  // a play the stream carries, into the region it's of; a launched clip's left out, what's played back from it (P3a), and the live
-  // garden's held notes hushed and brought back as it plays back (P3b)
+  // a play the stream carries, into the region it's of; one its sender leaves out of the recording, left out
   heard(play: Play): void {
-    if (play.launched || play.playback || play.hushed) {
+    if (play.unrecorded) {
       return;
     }
     this.#told(play.owner, play.ends ?? [], play.glides ?? []);
@@ -112,13 +114,13 @@ export class Recorder {
   // note off for a time before its note on's, as a trace winding into a tower ends a phrase's note still to come, no length, never less
   #told(owner: unknown, ends: readonly NoteOff[], glides: readonly NoteGlide[]): void {
     for (const end of ends) {
-      const note = this.#heldNote(owner, end.index);
+      const note = this.#noteOf(owner, end.index, { held: true });
       if (note) {
         this.#timeline.endAt(note, end.t);
       }
     }
     for (const glide of glides) {
-      const note = this.#heldNote(owner, glide.index);
+      const note = this.#noteOf(owner, glide.index, { held: true });
       if (note) {
         note.pitchGlides = [...(note.pitchGlides ?? []), [glide.t, glide.pitch]];
       }
@@ -127,7 +129,7 @@ export class Recorder {
   // a note's changes after it, as they come, on its element's latest note of that index, its own lanes (G3b)
   #changed(owner: unknown, changes: readonly PerNoteController[]): void {
     for (const { index, controller, value, t, glide } of changes) {
-      const note = this.#latestNote(owner, index);
+      const note = this.#noteOf(owner, index);
       if (!note) {
         continue;
       }
@@ -138,27 +140,22 @@ export class Recorder {
   // a track's controllers, as they come, each into its lane, a point holding until the next of its lane (G3b)
   #controlled(play: Play): void {
     for (const { controller, value, t, glide } of play.controls ?? []) {
-      const of: LaneOf = { kind: play.kind, track: play.track ?? null, controller };
+      const of: LaneOf = { kind: play.kind, track: play.track ?? null, trackName: play.trackName, controller };
       const key = JSON.stringify([of.kind, of.track, of.controller]);
       entryOf(this.#lanes, key, () => ({ ...of, points: [] }));
       this.#timeline.hold(key, timedValue(value, t, glide));
     }
   }
-  // an element's latest note of an index, held or not: from the latest region back, as a change comes for a note still sounding
-  #latestNote(owner: unknown, index: number): RecordedNote | undefined {
+  // An element's latest note of an index, from the latest region back:
+  //   - held or not, as a change comes for a note still sounding;
+  //   - held only (held), as its end or a glide comes.
+  #noteOf(owner: unknown, index: number, { held = false }: { held?: boolean } = {}): RecordedNote | undefined {
     for (let at = this.#kept.length - 1; at >= 0; at--) {
       const kept = this.#kept[at]!; // within the list
-      const note = kept.first.owner === owner ? kept.notes.findLast((latest) => latest.index === index) : undefined;
-      if (note) {
-        return note;
+      if (kept.first.owner !== owner) {
+        continue;
       }
-    }
-    return undefined;
-  }
-  // an element's note of an index still held, its latest
-  #heldNote(owner: unknown, index: number): RecordedNote | undefined {
-    for (const kept of [...this.#kept].reverse().filter((region) => region.first.owner === owner)) {
-      const note = kept.notes.find((held) => held.index === index && held.duration === undefined);
+      const note = kept.notes.findLast((latest) => latest.index === index && (!held || latest.duration === undefined));
       if (note) {
         return note;
       }
@@ -213,7 +210,7 @@ function recorded(note: PlayedNote): RecordedNote {
 }
 // a kept region as it's handed out: its first play's, its notes, from its first to the end of its last
 function regionOf(kept: Kept): Region {
-  const { owner, clip, kind, role, live, track, until, sends, seed } = kept.first;
+  const { owner, clip, kind, role, live, track, trackName, until, sends, seed } = kept.first;
   return {
     owner,
     clip: clip ?? owner,
@@ -221,6 +218,7 @@ function regionOf(kept: Kept): Region {
     role,
     live: live ?? false,
     track: track ?? null,
+    trackName,
     until,
     sends,
     seed,
@@ -248,7 +246,7 @@ function carried(note: RecordedNote, begins: Seconds): RecordedNote {
   return copy;
 }
 // a note's per-note controllers' values at a time: as it starts, each moved by its latest change by then
-function valuesAt(note: RecordedNote, t: Seconds): PerNoteValues {
+export function valuesAt(note: RecordedNote, t: Seconds): PerNoteValues {
   const values: PerNoteValues = { ...note.controllers };
   for (const [controller, points] of Object.entries(note.lanes ?? {}) as [PerNoteControllerName, LanePoint[]][]) {
     const latest = lastValueAt(points, t);
@@ -275,6 +273,3 @@ function thinNote(note: RecordedNote, settled: Seconds): void {
   }
 }
 // where a note ends: at its length, or, held, never yet
-function endOf(note: PlayedNote): Seconds {
-  return note.duration === undefined ? Infinity : note.t + note.duration;
-}

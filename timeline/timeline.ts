@@ -145,6 +145,6 @@ function inEffectFrom(held: readonly TimedEvent[], before: Seconds): number {
   return Math.max(0, first - 1);
 }
 // where an event ends: at its length, or, open, never yet
-function endOf(event: TimedEvent): Seconds {
+export function endOf(event: TimedEvent): Seconds {
   return event.duration === undefined ? Infinity : event.t + event.duration;
 }

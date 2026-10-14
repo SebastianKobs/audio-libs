@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { RecordingPlayer } from '../index.ts';
 
 const flower = { kind: 'tap' };
-// a region of a flower's on replay tap 1, its notes as the recorder keeps them
+// a region of a flower's on replay tap 1, its notes as the recorder keeps them, its track's name as its plays were sent
 const region = (notes, more = {}) => ({
   owner: flower,
   clip: flower,
@@ -13,19 +13,16 @@ const region = (notes, more = {}) => ({
   role: 'tap',
   live: false,
   track: 0,
+  trackName: 'replay tap 1',
   notes,
   from: notes[0].t,
   to: 99,
   ...more,
 });
-// a player, the tool naming a region's track as the studio names it, and what it sends
+// a player, and what it sends
 function playerWith() {
   const sent = [];
-  const player = new RecordingPlayer({
-    input: { send: (to, messages) => sent.push({ to, messages }) },
-    trackOf: (played) => (played.live ? played.role : `replay ${played.kind} ${played.track + 1}`),
-    trackOfLane: () => null,
-  });
+  const player = new RecordingPlayer({ input: { send: (to, messages) => sent.push({ to, messages }) } });
   return { sent, player };
 }
 const messagesOf = (sent, type) => sent.flatMap(({ messages }) => messages).filter((message) => message.type === type);
@@ -155,7 +152,7 @@ test('a note chased as it was where playback starts: at the pitch it had glided 
   );
 });
 
-test("stopped, what's sounding let go at once and nothing more sent; to the track the tool names, with its clip, as you played it or not, marked played back, its own sender (P3a)", () => {
+test("stopped, what's sounding let go at once and nothing more sent; to the track it was recorded on, with its clip, as you played it or not, marked played back, its own sender (P3a)", () => {
   const { sent, player } = playerWith();
   player.play(
     [
@@ -229,12 +226,12 @@ test('where it plays, a recording time, from where it started as time goes on; e
   assert.equal(player.position(103), 5);
   assert.equal(player.ended(105.9), false);
   assert.equal(player.ended(106), true, 'at the end of what was recorded before Play');
-  const noTrack = new RecordingPlayer({
-    input: { send: () => assert.fail('sent') },
-    trackOf: () => null,
-    trackOfLane: () => null,
+  const noTrack = new RecordingPlayer({ input: { send: () => assert.fail('sent') } });
+  noTrack.play([region([{ t: 2, pitch: 60, velocity: 1, duration: 1 }], { trackName: undefined })], [], {
+    from: 2,
+    at: 0,
+    end: 5,
   });
-  noTrack.play([region([{ t: 2, pitch: 60, velocity: 1, duration: 1 }])], [], { from: 2, at: 0, end: 5 });
   noTrack.due(10);
 });
 
@@ -251,8 +248,6 @@ test("played in song time, a hold in the recording taken out: a note after it co
   const sent = [];
   const player = new RecordingPlayer({
     input: { send: (to, messages) => sent.push(...messages) },
-    trackOf: () => 'replay tap 1',
-    trackOfLane: () => null,
     song: { toTimeline: songTime, fromTimeline: timeOfSong },
   });
   player.play(
@@ -297,8 +292,6 @@ test('played in song time, a note sent with its length rings that long across a 
   const sent = [];
   const player = new RecordingPlayer({
     input: { send: (to, messages) => sent.push({ to, messages }) },
-    trackOf: () => 'replay bloom 1',
-    trackOfLane: () => null,
     song: { toTimeline: songTime, fromTimeline: timeOfSong },
   });
   player.play(

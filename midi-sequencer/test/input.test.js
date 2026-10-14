@@ -59,8 +59,9 @@ test('the input: and into the stream as the play they make, its notes as the str
       role: 'tap',
       live: true,
       notes: [{ t: 2, pitch: 62, velocity: 1, duration: 0.125, part: 1, index: 5 }],
+      trackName: 'tap',
     },
-    'its index, which a later end names it by (G2a); its velocity (G3a)',
+    'its index, which a later end names it by (G2a); its velocity (G3a); the track it was sent to, by name',
   );
 });
 
@@ -115,6 +116,7 @@ test("the input: a controller, a track's parameter by name, a value at a time, j
         { type: 'controller', controller: 'level', value: 0.5, t: 4.2, glide: 0.08 },
       ],
       track: 0,
+      trackName: 'replay tap 1',
     },
   ]);
 });
@@ -149,6 +151,7 @@ test("the input: a replay's play into the stream with what the stream carries of
       live: false,
       notes: [{ t: 5, pitch: 60, velocity: 1, duration: 0.25, index: 0 }],
       track: 1,
+      trackName: 'replay tap 2',
       until: 9,
       sends,
     },

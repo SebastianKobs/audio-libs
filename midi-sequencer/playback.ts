@@ -1,7 +1,7 @@
 // ---------- midi-sequencer/playback: the recording played back from a time, its regions' notes as heard, its lanes with them (P3a, P4b) ----------
 // As Ableton plays its arrangement (mockup/architecture/done.md, P3, P4): each region's notes sent into the input as they come due, offset
-// from the recording's time to now, to the track the tool names for the region, with its clip, as you played it or not, marked played back
-// so the recorder leaves it out, its sender its own, so its notes don't meet another sender's on a track. A note's start, its glides, its
+// from the recording's time to now, to the track it was recorded on, by name, with its clip, as you played it or not, marked played back
+// and left out of the recording, its sender its own, so its notes don't meet another sender's on a track. A note's start, its glides, its
 // changes and its end each sent once it comes due, not all at once, so a stop can still let go what sounds; played to the end, what sounds
 // there rings out as it was recorded. And each lane's points, a controller on the lane's track, picked up where it starts at its value
 // then, as a sounding note is chased, a glide where it had got to; a lane moved by hand while it plays back passed over, the move
@@ -13,11 +13,12 @@
 import type { Seconds, TimeMap } from '../clock/index.ts';
 import { Player, type PlayedFrom } from '../timeline/index.ts';
 import type { Address, Input } from './input.ts';
-import { lastValueAt, valueAt, type LanePoint } from './lanes.ts';
+import { valueAt, type LanePoint } from './lanes.ts';
 import { NoteRotation, type Message, type PerNoteControllerName } from '../midi/index.ts';
 import type { Lane, RecordedNote, Region } from './recorder.ts';
 import { timedValue } from '../util/index.ts';
 import type { TimedValue } from '../util/index.ts';
+import { valuesAt } from './recorder.ts';
 
 // a note's point after its start: a glide to a pitch, or a change to one of its per-note controllers, gliding there where it came with
 // a time constant
@@ -39,8 +40,6 @@ const SENDER = 'playback'; // its sender at the input, kept apart from the live 
 // (leave()) or played to the end (finish()); where it plays (position()), when it plays to the end (endsAt()), and whether it has (ended())
 export class RecordingPlayer<Track extends string> {
   readonly #input: Pick<Input<Track>, 'send'>;
-  readonly #trackOf: (region: Region) => Track | null;
-  readonly #trackOfLane: (lane: Lane) => Track | null;
   readonly #skip: (track: Track, controller: string) => boolean;
   readonly #rotation = new NoteRotation();
   readonly #player: Player<RecordedNote, LanePoint, NotePoint>;
@@ -51,20 +50,14 @@ export class RecordingPlayer<Track extends string> {
 
   constructor({
     input,
-    trackOf,
-    trackOfLane,
     song,
     skip = () => false,
   }: {
     input: Pick<Input<Track>, 'send'>;
-    trackOf: (region: Region) => Track | null;
-    trackOfLane: (lane: Lane) => Track | null;
     song?: TimeMap;
     skip?: (track: Track, controller: string) => boolean;
   }) {
     this.#input = input;
-    this.#trackOf = trackOf;
-    this.#trackOfLane = trackOfLane;
     this.#skip = skip;
     this.#player = new Player<RecordedNote, LanePoint, NotePoint>({
       performer: {
@@ -84,13 +77,13 @@ export class RecordingPlayer<Track extends string> {
   play(regions: readonly Region[], lanes: readonly Lane[], from: PlayedFrom): void {
     this.#forgetPlayed();
     const notes = regions
-      .filter((region) => this.#trackOf(region) !== null)
+      .filter((region) => region.trackName !== undefined)
       .flatMap((region) =>
         region.notes.filter((note) => note.pitch !== undefined).map((note) => this.#played(note, region)),
       );
     const played = lanes.flatMap((lane): PlayedLane<Track>[] => {
-      const track = this.#trackOfLane(lane);
-      return track === null ? [] : [{ lane, track }];
+      const track = lane.trackName as Track | undefined; // the input's tracks, as it was sent to one
+      return track === undefined ? [] : [{ lane, track }];
     });
     this.#lanes = new Map(played.flatMap((one) => one.lane.points.map((point) => [point, one] as const)));
     this.#putBack = played.flatMap((one) => {
@@ -150,7 +143,7 @@ export class RecordingPlayer<Track extends string> {
     const chased = at > note.t;
     this.#indices.set(note, index);
     const values: [PerNoteControllerName, number | undefined][] = [
-      ...valuesAt(note, at),
+      ...(Object.entries(valuesAt(note, at)) as [PerNoteControllerName, number][]), // as it was by then
       ['bend', chased ? undefined : note.pitchBend],
       ['vibrato depth', note.vibrato],
     ];
@@ -189,11 +182,11 @@ export class RecordingPlayer<Track extends string> {
   #sendNote(note: RecordedNote, messages: Message[]): void {
     const region = this.#regions.get(note)!; // a note played has its region
     const to: Address<Track> = {
-      track: this.#trackOf(region)!, // on a track, as filtered
+      track: region.trackName as Track, // on a track, as filtered: the input's
       clip: region.clip as { kind: string },
       live: region.live,
       source: SENDER,
-      play: { playback: true, kind: region.kind, track: region.track },
+      play: { playback: true, unrecorded: true, kind: region.kind, track: region.track },
     };
     this.#input.send(to, messages);
   }
@@ -219,7 +212,11 @@ export class RecordingPlayer<Track extends string> {
     if (this.#skip(track, lane.controller)) {
       return;
     }
-    const to: Address<Track> = { track, source: SENDER, play: { playback: true, kind: lane.kind, track: lane.track } };
+    const to: Address<Track> = {
+      track,
+      source: SENDER,
+      play: { playback: true, unrecorded: true, kind: lane.kind, track: lane.track },
+    };
     this.#input.send(to, [{ type: 'controller', controller: lane.controller, ...timedValue(value, t, glide) }]);
   }
 }
@@ -249,15 +246,4 @@ function songEndOf(note: RecordedNote, songTime: (t: Seconds) => Seconds): Secon
 // a note's pitch at a time of the recording's: the last it had glided to by then, or its own
 function pitchAt(note: RecordedNote, t: Seconds): number {
   return (note.pitchGlides ?? []).filter(([at]) => at <= t).at(-1)?.[1] ?? note.pitch!; // a note with a pitch, as play() keeps
-}
-// its per-note controllers at a time of the recording's: as it started, each changed since to the last value it had by then
-function valuesAt(note: RecordedNote, t: Seconds): [PerNoteControllerName, number][] {
-  const values = { ...note.controllers };
-  for (const [controller, points] of Object.entries(note.lanes ?? {}) as [PerNoteControllerName, LanePoint[]][]) {
-    const last = lastValueAt(points, t);
-    if (last !== undefined) {
-      values[controller] = last;
-    }
-  }
-  return Object.entries(values) as [PerNoteControllerName, number][];
 }

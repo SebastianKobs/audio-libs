@@ -18,13 +18,14 @@ export function upcoming<Event extends PatternEvent>(
     return [];
   }
   const loopLength = lengthOf(pat, meter);
-  const next: Event[] = [];
   const from = pat.from!; // a record's pattern: where it was played
-  for (let lap = Math.floor((at - from) / loopLength); next.length < count; lap++) {
-    for (const event of pat.events) {
-      if (from + lap * loopLength + event.start >= at && next.length < count) {
-        next.push({ ...event, start: from + lap * loopLength + event.start });
-      }
+  const next: Event[] = [];
+  for (const { event, place } of lapped(pat, from, loopLength, 1, Math.floor((at - from) / loopLength))) {
+    if (place >= at) {
+      next.push({ ...event, start: place });
+    }
+    if (next.length === count) {
+      break;
     }
   }
   return next;
@@ -70,15 +71,32 @@ export function liveEvents<Event extends PatternEvent>(
   }
   const loopLength = lengthOf(pat, meter) / scale;
   const found: Event[] = [];
-  for (let lap = Math.max(0, Math.floor((from - start) / loopLength)); start + lap * loopLength < to; lap++) {
-    for (const event of pat.events) {
-      const at = start + lap * loopLength + event.start / scale;
-      if (at >= from && at < to) {
-        found.push({ ...event, start: at, ...(event.duration ? { duration: event.duration / scale } : {}) });
-      }
+  const firstLap = Math.max(0, Math.floor((from - start) / loopLength));
+  for (const { event, place, lapStart } of lapped(pat, start, loopLength, scale, firstLap)) {
+    if (lapStart >= to) {
+      break;
+    }
+    if (place >= from && place < to) {
+      found.push({ ...event, start: place, ...(event.duration ? { duration: event.duration / scale } : {}) });
     }
   }
   return found;
+}
+// A pattern's events round its loop, lap after lap from a first, for ever: each with its place, its lap's start plus its own start at
+// the speed asked, and its lap's start, so its caller stops where it will. The caller's pattern has events.
+function* lapped<Event extends PatternEvent>(
+  pat: Pattern<Event>,
+  start: number,
+  loopLength: number,
+  scale: number,
+  firstLap: number,
+): Generator<{ event: Event; place: number; lapStart: number }> {
+  for (let lap = firstLap; ; lap++) {
+    const lapStart = start + lap * loopLength;
+    for (const event of pat.events) {
+      yield { event, place: lapStart + event.start / scale, lapStart };
+    }
+  }
 }
 // the event of a rhythm played live under way at a place, as what's left of it from there, if that's a 16th or more: so one coming in
 // partway, as a soloist comes in mid-note, takes it up at once. One starting on the place isn't under way yet: it comes as the next

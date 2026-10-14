@@ -6,23 +6,22 @@ import assert from 'node:assert/strict';
 import { RecordingPlayer } from '../index.ts';
 import { isNear } from '../../util/test/near.js';
 
-// a player, the tool naming a lane's track as the studio names it: a replay track's by its kind and number, a strip's by its name; and
-// what it sends, each controller with where it went
+// a player, and what it sends, each controller with where it went
 function playerWith({ skip } = {}) {
   const sent = [];
   const player = new RecordingPlayer({
     input: { send: (to, messages) => sent.push(...messages.map((message) => ({ to, ...message }))) },
-    trackOf: () => null,
-    trackOfLane: (lane) => (lane.track === null ? lane.kind : `replay ${lane.kind} ${lane.track + 1}`),
     ...(skip ? { skip } : {}),
   });
   return { sent, player };
 }
-// a replay track's level, jumping, then gliding up, then jumping down; and the master's volume, set, then gliding down
+// a replay track's level, jumping, then gliding up, then jumping down; and the master's volume, set, then gliding down; each lane with
+// its track's name, as its controllers were sent to it
 const lanes = [
   {
     kind: 'tap',
     track: 0,
+    trackName: 'replay tap 1',
     controller: 'volume',
     points: [
       { t: 1, value: 0.5 },
@@ -33,6 +32,7 @@ const lanes = [
   {
     kind: 'master',
     track: null,
+    trackName: 'master',
     controller: 'volume',
     points: [
       { t: 2, value: 1 },

@@ -16,6 +16,7 @@ export interface Play {
   live?: boolean;
   notes: PlayedNote[];
   track?: number | null;
+  trackName?: string; // the track it was sent to, by name, as its sender named it
   until?: number;
   clip?: unknown;
   sends?: unknown;
@@ -25,8 +26,9 @@ export interface Play {
   glides?: NoteGlide[];
   changes?: PerNoteController[];
   controls?: Controller[];
-  playback?: boolean; // played back from the recording, left out of it as a launched clip is (P3a)
-  hushed?: boolean; // the live garden's held notes hushed and brought back as the arrangement plays back, left out of it too (P3b)
+  playback?: boolean; // played back from the recording (P3a)
+  launched?: boolean; // a clip launched from the session view, played in full
+  unrecorded?: boolean; // left out of the recording, as its sender says: a launched clip, what plays back, a hush (P3a, P3b)
   [more: string]: unknown;
 }
 // a held note's glide, sent after it (G2a): the note's index, when, and the pitch it goes to, a MIDI note number.
