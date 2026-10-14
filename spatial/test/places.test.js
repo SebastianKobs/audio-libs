@@ -39,11 +39,11 @@ test("a place perceived from where it is as it's made; a move perceived from its
   const place = new Place(listening(listener), at(3, 0, 4));
   assert.deepEqual([place.position, place.perceived, place.until, place.keep], [at(3, 0, 4), 5, Infinity, false]);
   assert.equal(place.moveTo(at(0, 0, 8), 12), 8, "perceived where it's going");
-  assert.deepEqual(place.next, [{ at: 12, position: at(0, 0, 8), perceived: 8 }]);
+  assert.deepEqual(place.next.items, [{ at: 12, position: at(0, 0, 8), perceived: 8 }]);
   assert.equal(place.update(11), null, 'before its time: where it was, unchanged');
   assert.deepEqual(place.position, at(3, 0, 4));
   assert.equal(place.update(12), null, 'from its time: there, as it was perceived then, nothing new to tell');
-  assert.deepEqual([place.position, place.perceived, place.next], [at(0, 0, 8), 8, []]);
+  assert.deepEqual([place.position, place.perceived, place.next.items], [at(0, 0, 8), 8, []]);
   listener.z = 0.5;
   assert.equal(place.update(13), null, 'the listener a little nearer: not enough to matter');
   listener.z = 4;
@@ -78,7 +78,7 @@ test('shift() moves every place, and its moves still to come, with the world', (
   first.place.moveTo(at(5, 0, 5), 20);
   places.shift(at(64, 0, -64));
   assert.deepEqual([first.place.position, second.place.position], [at(65, 0, -62), at(61, 0, -64)]);
-  assert.deepEqual(first.place.next[0].position, at(69, 0, -59), 'a place still to come with it');
+  assert.deepEqual(first.place.next.items[0].position, at(69, 0, -59), 'a place still to come with it');
 });
 
 test('a world that wraps round, as a torus does: the short way round, its distance, the whole worlds to the copy nearest a place', () => {

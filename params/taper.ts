@@ -5,6 +5,7 @@
 //   octaves: a value on its range, each doubling as far up as the last, as a frequency;
 //   line: a value on its range in a straight line, the default; a switch, its step its whole range, lands on its ends.
 import type { ParamSpec } from './spec.ts';
+import { clamp, clamp01 } from '../util/index.ts';
 
 // the fader law's power: gain = top × position^LAW, so a top of 2 puts unity two thirds of the way up
 const LAW = Math.log(2) / Math.log(1.5);
@@ -23,7 +24,7 @@ export function positionOf(spec: ParamSpec, value: number): number {
     return faderPosition(Math.max(0, value));
   }
   const [low, high] = spec.range!; // a param on a control has its range
-  const within = Math.min(high, Math.max(low, value));
+  const within = clamp(value, low, high);
   if (spec.taper === 'octaves') {
     return Math.log(within / low) / Math.log(high / low);
   }
@@ -31,7 +32,7 @@ export function positionOf(spec: ParamSpec, value: number): number {
 }
 // The value a position on its param's control stands for, by its taper; a switch's on one of its ends.
 export function valueAt(spec: ParamSpec, position: number): number {
-  const along = Math.min(1, Math.max(0, position));
+  const along = clamp01(position);
   if (spec.taper === 'fader') {
     return faderGain(along);
   }

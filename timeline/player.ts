@@ -6,8 +6,9 @@
 // until the next of its own told as it comes due, the one in effect where playback starts picked up from there, never ended. The
 // sequencer's recording player maps it onto notes and a track's controllers (libs/midi-sequencer/playback.ts)
 import type { Seconds } from '../clock/index.ts';
-import type { TimedEvent } from './timeline.ts';
+import { timeOf, type TimedEvent } from './timeline.ts';
 import { ALONG_THE_CLOCK, type PlayedFrom, type TimeMap } from './timeline-time.ts';
+import { lastAtOrBefore } from '../util/index.ts';
 
 // what playback tells as each moment comes due: an event's start, at the clock time it's heard, from its own time it starts at, later
 // than its start where it's chased; a point of its own; its end; an event that holds, as it comes due, or picked up where playback
@@ -185,7 +186,7 @@ export class Player<
   // a key's events that hold, from a time until the end: the one in effect then, picked up from there, and each after it
   #holdsOf(key: readonly Held[], { from, end }: PlayedFrom): Moment<Event, Held, Point>[] {
     const toTimeline = (t: Seconds): Seconds => this.#timeline.toTimeline(t);
-    const inEffect = key.findLast((held) => held.t <= from);
+    const inEffect = lastAtOrBefore(key, from, timeOf);
     const pickedUp: Moment<Event, Held, Point>[] =
       inEffect ? [{ what: 'hold', along: toTimeline(from), held: inEffect, from }] : [];
     const after = key

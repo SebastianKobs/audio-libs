@@ -5,6 +5,7 @@
 // perceived again from where it is, the listener having moved, and what it's perceived as now told once that has changed enough to matter
 import { shifted } from './position.ts';
 import type { Position } from './position.ts';
+import { DueQueue } from '../util/index.ts';
 
 // how a place is perceived from where the listener is now, and whether a change is worth telling
 export interface Perceiving<Perceived> {
@@ -25,7 +26,7 @@ export interface Lifetime {
 
 export class Place<Perceived> {
   readonly keep: boolean;
-  readonly next: Move<Perceived>[] = []; // the places moves take it to, each from its time
+  readonly next = new DueQueue<Move<Perceived>>((move) => move.at); // the places moves take it to, each from its time
   readonly #perceiving: Perceiving<Perceived>;
   #position: Position;
   #until: number;
@@ -61,18 +62,16 @@ export class Place<Perceived> {
   // a move to a position from a time on; returns how it's perceived there
   moveTo(position: Position, at: number): Perceived {
     const perceived = this.#perceiving.perceive(position);
-    this.next.push({ at, position, perceived });
+    this.next.add({ at, position, perceived });
     return perceived;
   }
   // on a tick: to the place a move took it to, once its time has come, perceived as it was then; then perceived from where it is now.
   // Returns what it's perceived as now if that has changed enough to matter, else null
   update(t: number): Perceived | null {
-    let move = this.next[0];
-    while (move && move.at <= t) {
-      this.next.shift();
-      this.#position = move.position;
-      this.#perceived = move.perceived;
-      move = this.next[0];
+    const arrived = this.next.takeDue(t).at(-1); // the last of those due, where it is now
+    if (arrived) {
+      this.#position = arrived.position;
+      this.#perceived = arrived.perceived;
     }
     const perceived = this.#perceiving.perceive(this.#position);
     if (!this.#perceiving.changed(this.#perceived, perceived)) {
@@ -84,7 +83,7 @@ export class Place<Perceived> {
   // when its user moves its world under the listener: it, and its moves still to come, with it
   shift(offset: Position): void {
     this.#position = shifted(this.#position, offset);
-    for (const move of this.next) {
+    for (const move of this.next.items) {
       move.position = shifted(move.position, offset);
     }
   }

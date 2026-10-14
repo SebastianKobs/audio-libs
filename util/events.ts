@@ -1,4 +1,5 @@
 // ---------- util/events: events by name to whoever listens ----------
+import { entryOf } from './objects.ts';
 
 // a small event emitter, the same for every module that sends events (the gesture tracker, the session view's clips): on(type, listener)
 // returns a function that stops listening, and emit(type, ...args) calls each listener in the order they came. Arguments: each event's
@@ -11,10 +12,7 @@ export class Events<Arguments extends Record<string, unknown[]>> {
     type: Type,
     listener: (...args: Arguments[Type]) => void,
   ): (() => void) => {
-    if (!this.#listeners.has(type)) {
-      this.#listeners.set(type, []);
-    }
-    this.#listeners.get(type)!.push(listener);
+    entryOf(this.#listeners, type, () => []).push(listener);
     return () => {
       const listeners = this.#listeners.get(type)!;
       const index = listeners.indexOf(listener);

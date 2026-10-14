@@ -3,6 +3,7 @@
 // short way round from one place to another, and its distance; the whole worlds to move a place by to its copy nearest another: a plant's
 // nearest where you look, or where you look back home, a floating origin, so no number grows large
 import type { Position } from './position.ts';
+import { wrapToTile } from '../util/index.ts';
 
 export class WrapAround {
   readonly #sizes: () => Position;
@@ -38,7 +39,7 @@ function shortWay(way: number, size: number): number {
   if (size === Infinity) {
     return way;
   }
-  return way - size * Math.round(way / size);
+  return wrapToTile(way, size);
 }
 // the whole worlds that bring a way along an axis within half a world of nothing
 function wholeWorlds(way: number, size: number): number {

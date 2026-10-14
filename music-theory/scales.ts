@@ -2,6 +2,7 @@
 // A scale is its steps in semitones from its root, in one octave; a key is { root, scale }, the root a MIDI note. A degree counts
 // the scale's steps from an octave below the root, so degree 0 is the root an octave down, one scale's length on is the root itself, and
 // a negative degree goes on down
+import { modulo } from '../util/index.ts';
 
 // a key: its root a MIDI note, its scale its steps in semitones from it
 export interface Key {
@@ -21,7 +22,7 @@ export const SCALES = {
 export function degreeNote(degree: number, { root, scale }: Key): number {
   const steps = scale.length;
   const octave = Math.floor(degree / steps);
-  const i = ((degree % steps) + steps) % steps;
+  const i = modulo(degree, steps);
   const step = scale[i];
   if (step === undefined) {
     throw new Error('a scale with no steps');

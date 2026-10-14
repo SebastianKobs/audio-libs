@@ -3,6 +3,7 @@
 import { MASTER, PPQ, STEP, lengthOf } from './pattern.ts';
 import type { Pattern, PatternEvent } from './pattern.ts';
 import type { Meter } from '../clock/index.ts';
+import { modulo } from '../util/index.ts';
 
 // the grid a pattern is placed on: where a clock time lies on it, in 16ths, and the clock time a place on it falls at (the clock's)
 // functions, not methods: they're handed on alone ({ stepAt, timeAt })
@@ -41,7 +42,7 @@ export function whole<Event extends PatternEvent>(pat: Pattern<Event>, at: numbe
   }
   const beat = (PPQ * 4) / meter[1];
   const first = firstEvent.start;
-  const shift = at + (((first % beat) + beat) % beat) - first;
+  const shift = at + modulo(first, beat) - first;
   return pat.events.map((event) => ({ ...event, start: event.start + shift }));
 }
 // what a repeating pattern plays in the grid's 16th i: its events whose place comes round within it, every length from the grid's
@@ -50,9 +51,9 @@ export function due<Event extends PatternEvent>(pat: Pattern<Event>, i: number, 
   const loopLength = lengthOf(pat, meter);
   const t0 = i * STEP;
   return pat.events.flatMap((event) => {
-    const offset = (((event.start - t0) % loopLength) + loopLength) % loopLength;
+    const offset = modulo(event.start - t0, loopLength);
     return offset < STEP ? [{ ...event, offset }] : [];
-  }); // + loopLength: % keeps the sign, so an event already gone would count as due
+  });
 }
 // a rhythm played live, as a tower's while you circle: looping from where it started (start, in ticks from the grid's start), at a time
 // scale (2: double time, 0.5: half), its events whose places fall from a place up to another, each where it falls, as long as it lasts then
@@ -120,6 +121,6 @@ export function placeOn(
   meter: Meter = MASTER,
 ): (at: number) => number {
   const beat = (PPQ * 4) / meter[1];
-  const s0 = Math.round(stepAt(start)) + (from === 'phrase' ? (((base % beat) + beat) % beat) / STEP : 0);
+  const s0 = Math.round(stepAt(start)) + (from === 'phrase' ? modulo(base, beat) / STEP : 0);
   return (at: number) => s0 + (at - base) / STEP;
 }

@@ -4,6 +4,7 @@
 // its time constant. Where an envelope's release starts from at a note-off (libs/synth/shapes.ts), and what a surface draws
 // (synth-surface/curve.ts); what another engine's automation would have to match
 import type { Automation } from './plan.ts';
+import { approach } from '../util/index.ts';
 
 // where the level is after an event: its time and level there, and the target it approaches from then, if any
 interface State {
@@ -46,11 +47,11 @@ function during(state: State, event: Automation, t: number): number {
   return held(state, t);
 }
 // as it was left: held there, or approaching its target
-function held({ at, value, approach }: State, t: number): number {
-  if (!approach) {
+function held({ at, value, approach: target }: State, t: number): number {
+  if (!target) {
     return value;
   }
-  return approach.value + (value - approach.value) * Math.exp(-(t - at) / approach.tc);
+  return approach(value, target.value, t - at, target.tc);
 }
 // a ramp's level: a straight line, or an exponential one, which holds where it starts from or goes to nothing
 function ramp(

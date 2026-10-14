@@ -16,6 +16,7 @@ import { Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { NoteChange, NoteEnd, NoteGlide, Play, PlayedNote } from './stream.ts';
+import { entryOf } from '../util/index.ts';
 
 // what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of
 interface LaneOf {
@@ -141,9 +142,7 @@ export class Recorder {
     for (const { controller, value, t, glide } of play.controls ?? []) {
       const of: LaneOf = { kind: play.kind, track: play.track ?? null, controller };
       const key = JSON.stringify([of.kind, of.track, of.controller]);
-      if (!this.#lanes.has(key)) {
-        this.#lanes.set(key, { ...of, points: [] });
-      }
+      entryOf(this.#lanes, key, () => ({ ...of, points: [] }));
       this.#timeline.hold(key, pointOf(value, t, glide));
     }
   }
@@ -174,8 +173,7 @@ export class Recorder {
     if (play.region === undefined) {
       return { kept: this.#begin(play), carried: [] };
     }
-    const numbered = this.#numbered.get(play.owner) ?? new Map<number, Kept>();
-    this.#numbered.set(play.owner, numbered);
+    const numbered = entryOf(this.#numbered, play.owner, () => new Map<number, Kept>());
     const known = numbered.get(play.region);
     if (known) {
       return { kept: known, carried: [] };

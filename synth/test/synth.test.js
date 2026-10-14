@@ -19,8 +19,7 @@ import {
   time,
   val,
 } from '../index.ts';
-
-const near = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, `${msg ?? ''} ${a} is not ${b}`);
+import { near } from '../../util/test/near.js';
 
 // a note and its context, as plan() takes them: the note's own values, and the tempo and the random source beside it. A value given as
 // undefined stays so (a note value with no beat)

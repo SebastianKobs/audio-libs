@@ -1,4 +1,4 @@
-// ---------- util/random: a seeded generator, a run of numbers in [0, 1) the same seed repeats ----------
+// ---------- util/random: a seeded generator, the same run of draws for a seed; a pick from a list ----------
 // mulberry32 (Tommy Ettinger's): a 32-bit state, stepped and scrambled at each draw; small and fast, enough for the garden's choices, not
 // for anything secret (G0g, mockup/architecture/done.md)
 
@@ -11,4 +11,8 @@ export function seeded(seed: number): () => number {
     mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
     return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
   };
+}
+// an item from a list, each as likely, by the random given; none from an empty list
+export function pickFrom<Item>(list: readonly Item[], random: () => number = Math.random): Item | undefined {
+  return list[Math.floor(random() * list.length)];
 }

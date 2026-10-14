@@ -1,7 +1,23 @@
 // small shared helpers, their unit tests (mockup/src/libs/util/index.ts)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Events, seeded, smoothstep, toggleIn, updateInPlace } from '../index.ts';
+import {
+  approach,
+  clamp,
+  DueQueue,
+  entryOf,
+  Events,
+  firstAfter,
+  lastAtOrBefore,
+  modulo,
+  pickFrom,
+  seeded,
+  SETTLED,
+  smoothstep,
+  toggleIn,
+  updateInPlace,
+} from '../index.ts';
+import { isNear, near } from './near.js';
 
 const MULBERRY32_SEED_1 = [0.6270739405881613, 0.002735721180215478, 0.5274470399599522]; // from an implementation of the reference C of its own
 
@@ -118,4 +134,101 @@ test('smoothstep, as GLSL has it: 0 up to the low edge, 1 from the high one, eas
     [1, 0.5, 0],
     'falling from the low edge to the high',
   );
+});
+
+test('a value clamped between a low and a high: itself between them, else the edge it passed', () => {
+  assert.deepEqual([clamp(-2, -1, 1), clamp(0.5, -1, 1), clamp(3, -1, 1)], [-1, 0.5, 1]);
+  assert.deepEqual([clamp(5, 0, Infinity), clamp(-5, -Infinity, 0)], [5, -5], 'an open edge holds nothing back');
+});
+
+test('a value modulo a size, never below 0, as a wheel of that many steps counts: -1 the last step', () => {
+  assert.deepEqual([modulo(7, 5), modulo(-1, 5), modulo(-6, 5), modulo(0, 5)], [2, 4, 4, 0]);
+  assert.equal(modulo(-0.25, 1), 0.75, 'a fraction too');
+});
+
+test("a value approaching its target by a time constant, as Web Audio's setTargetAtTime: each moment the same fraction of the way left", () => {
+  assert.equal(approach(1, 0, 0, 0.1), 1, 'where it started from, at first');
+  near(approach(1, 0, 0.1, 0.1), Math.exp(-1), 'a time constant on: 1/e of the way left');
+  near(approach(0, 2, 0.2, 0.1), 2 - 2 * Math.exp(-2), 'rising the same way');
+  assert.ok(
+    isNear(approach(1, 0, SETTLED * 0.1, 0.1), 0, 0.01),
+    'settled after SETTLED time constants: within 1 % of the way',
+  );
+});
+
+test('the first of a list rising by its key later than a time, by halves; the last at or before it', () => {
+  const times = [{ t: 1 }, { t: 2 }, { t: 2 }, { t: 4 }];
+  const tOf = (item) => item.t;
+  assert.deepEqual(
+    [0, 1, 2, 3, 4, 5].map((t) => firstAfter(times, t, tOf)),
+    [0, 1, 3, 3, 4, 4],
+    'its index; past them all, their length',
+  );
+  assert.deepEqual(
+    [0, 1, 2, 3, 5].map((t) => lastAtOrBefore(times, t, tOf)),
+    [undefined, times[0], times[2], times[2], times[3]],
+    'the last of those at a time; none before the first',
+  );
+});
+
+test("a map's entry for a key, made the first time it's asked for, the same one after", () => {
+  const lists = new Map();
+  const made = [];
+  const make = () => {
+    made.push('made');
+    return [];
+  };
+  entryOf(lists, 'tap', make).push(1);
+  entryOf(lists, 'tap', make).push(2);
+  assert.deepEqual([lists.get('tap'), made], [[1, 2], ['made']]);
+  const owner = {};
+  assert.equal(
+    entryOf(new WeakMap([[owner, 7]]), owner, () => 0),
+    7,
+    'a weak map too',
+  );
+});
+
+test('an item picked from a list, each as likely, by a random of its own or Math.random; none from an empty one', () => {
+  const list = ['a', 'b', 'c', 'd'];
+  assert.deepEqual(
+    [0, 0.24, 0.25, 0.99].map((drawn) => pickFrom(list, () => drawn)),
+    ['a', 'a', 'b', 'd'],
+  );
+  assert.ok(list.includes(pickFrom(list)), "Math.random's");
+  assert.equal(
+    pickFrom([], () => 0.5),
+    undefined,
+  );
+});
+
+test('things due at a time: kept in their time order, after those at the same time; those whose time has come taken in it', () => {
+  const due = new DueQueue((item) => item.t);
+  due.add({ t: 3, name: 'third' });
+  due.add({ t: 1, name: 'first' });
+  due.add({ t: 3, name: 'fourth' });
+  due.add({ t: 2, name: 'second' });
+  assert.deepEqual(
+    due.items.map((item) => item.name),
+    ['first', 'second', 'third', 'fourth'],
+  );
+  assert.deepEqual(due.takeDue(0.5), [], 'none yet');
+  assert.deepEqual(
+    due.takeDue(2).map((item) => item.name),
+    ['first', 'second'],
+    'at or before its time',
+  );
+  assert.deepEqual(
+    due.items.map((item) => item.name),
+    ['third', 'fourth'],
+    'the rest kept',
+  );
+});
+
+test("a number near another: within a float's rounding, or as asked", () => {
+  assert.ok(isNear(0.1 + 0.2, 0.3));
+  assert.ok(!isNear(1, 1.001));
+  assert.ok(isNear(1, 1.001, 0.01), 'as asked');
+  near(0.1 + 0.2, 0.3, 'passes');
+  assert.throws(() => near(1, 2, 'a step'), /a step: 1, not within 1e-9 of 2/);
 });

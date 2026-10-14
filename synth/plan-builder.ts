@@ -20,6 +20,7 @@ import {
 import type { Handles, Plan } from './plan.ts';
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { NOTE_SPECS } from './blocks/note.ts';
+import { entryOf } from '../util/index.ts';
 
 interface Port {
   node: PlanNode;
@@ -88,10 +89,11 @@ export class PlanBuilder {
   // scale: what an envelope of it makes of its amount (shapes.ts): its kind, by its param; its own value, an osc's frequency, a cutoff or a
   // gain's level; where a gain rests (FM's index); and its silence where a level comes after it
   offer(name: string, node: PlanNode, param?: string, scale: Scale = {}): void {
-    if (!this.#ports.has(name)) {
-      this.#ports.set(name, []);
-    }
-    this.#ports.get(name)!.push({ node, param, scale: param ? { kind: kindOf(param), ...scale } : scale });
+    entryOf(this.#ports, name, () => []).push({
+      node,
+      param,
+      scale: param ? { kind: kindOf(param), ...scale } : scale,
+    });
   }
   // where a stage goes out, when that isn't where it comes in
   exit(name: string, node: PlanNode): void {

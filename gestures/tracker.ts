@@ -1,7 +1,7 @@
 // ---------- gestures/tracker: the gesture tracker: a pointer's events from press to release, its input in: down, move, up and cancel ----------
 // Each input takes a pointer on through its states (shared.ts): a second pointer goes to pair.ts, and a drag's every move to stroke.ts.
 // A press becomes a hold, and a still drag rests, on the clock's tick
-import { Events } from '../util/index.ts';
+import { Events, approach } from '../util/index.ts';
 import type { Clock } from '../clock/index.ts';
 import type {
   EventType,
@@ -209,8 +209,6 @@ export class GestureTracker implements Tracking {
     }
     const moveSpeed = Math.hypot(screenX - pointer.x, screenY - pointer.y) / this.handedIn.height / dt;
     pointer.speed =
-      pointer.speed == null ?
-        moveSpeed
-      : pointer.speed + (moveSpeed - pointer.speed) * (1 - Math.exp(-dt / this.settings.handSmooth));
+      pointer.speed == null ? moveSpeed : approach(pointer.speed, moveSpeed, dt, this.settings.handSmooth);
   }
 }

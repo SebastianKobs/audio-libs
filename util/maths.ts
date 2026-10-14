@@ -1,4 +1,7 @@
-// ---------- util/maths: a value clamped, eased, stepped smoothly, an angle or a place wrapped ----------
+// ---------- util/maths: a value clamped, eased, approaching a target; an angle or a place wrapped ----------
+
+// time constants after which an approach counts as settled: e^-5, within 1 % of the way
+export const SETTLED = 5;
 
 export function clamp01(value: number): number {
   if (value < 0) {
@@ -8,6 +11,19 @@ export function clamp01(value: number): number {
     return 1;
   }
   return value;
+}
+// between low and high, else the edge it passed; high wins where they cross
+export function clamp(value: number, low: number, high: number): number {
+  return Math.min(high, Math.max(low, value));
+}
+// a value modulo a size, never below 0: -1 the last of size steps
+export function modulo(value: number, size: number): number {
+  return ((value % size) + size) % size;
+}
+// a value approaching its target by a time constant, as Web Audio's setTargetAtTime:
+// each moment the same fraction of the way left
+export function approach(from: number, target: number, elapsed: number, timeConstant: number): number {
+  return target + (from - target) * Math.exp(-elapsed / timeConstant);
 }
 export function wrapAngle(a: number): number {
   return Math.atan2(Math.sin(a), Math.cos(a)); // angle difference into -pi..pi

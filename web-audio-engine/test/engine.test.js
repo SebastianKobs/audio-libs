@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { StandInContext } from './audio-stand-in.js';
 import { Engine, makeupOf } from '../index.ts';
 import { noise } from '../buffers.ts';
+import { near } from '../../util/test/near.js';
 
 let time = 0;
 class Context extends StandInContext {
@@ -30,7 +31,6 @@ const draws = () => {
 };
 const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 const dB = (g) => 20 * Math.log10(g);
-const near = (a, b, what) => assert.ok(Math.abs(a - b) < 1e-9, `${what}: ${a} is not ${b}`);
 // the inserts' blocks, built (F1b, mockup/architecture/mixer-and-fx.md, "Inserts as FX modules"): how Web Audio does what a plan asks, at
 // the edge, where Web Audio's own ways are
 const unplayed = (node, params = {}) => ({ node, props: {}, params, starts: [], stops: [] });

@@ -8,6 +8,7 @@ import * as tracker from './gesture-tracker.ts';
 import { clock, settings } from './gesture-tracker.ts';
 import { at, run, stroke } from './run-gestures.js';
 import { circle, rub, scribble, shake } from './strokes.js';
+import { near } from '../../util/test/near.js';
 
 const vectors = (file) =>
   JSON.parse(
@@ -215,7 +216,6 @@ test('a rest too short for a tick to see still comes, just before the move that 
 
 // ---------- loops: the circle fix ----------
 const loops = (evs) => evs.filter((e) => e.type === 'loop');
-const near = (a, b, eps, msg) => assert.ok(Math.abs(a - b) <= eps, `${msg ?? ''} ${a} is not within ${eps} of ${b}`);
 // today's circle check, before the fix: play.js's checkCircle, on the vine's points 0.12 units apart on the floor (vineAdd), from where it
 // was pressed. Their winding added up, and the vine's box at most circleSize. Kept here only to show the jitter cases are the bug it had
 function oldCircle(input) {
@@ -258,9 +258,9 @@ test('a circle becomes a loop, once, centred on it, and then only drags on', () 
   const [l] = loops(evs);
   const after = evs.slice(evs.indexOf(l) + 1);
   assert.equal(loops(evs).length, 1);
-  near(l.centre.x, 640 / 50, 0.15, 'centre x:');
-  near(l.centre.z, 0, 0.15, 'centre z:'); // the circle is at (640, 450): 12.8, 0 on the vectors' floor
-  near(l.size, 120 / 50, 0.2, 'size:');
+  near(l.centre.x, 640 / 50, 'centre x:', 0.15);
+  near(l.centre.z, 0, 'centre z:', 0.15); // the circle is at (640, 450): 12.8, 0 on the vectors' floor
+  near(l.size, 120 / 50, 'size:', 0.2);
   assert.ok(
     after.every((e) => e.type === 'dragmove' || e.type === 'release'),
     "no more shape events once it's a loop",
@@ -336,8 +336,8 @@ test('an oval is round enough, and so is a circle the other way round after a st
   assert.equal(loops(events('oval')).length, 1);
   const [l] = loops(events('circle the other way, after a straight start'));
   assert.ok(l, 'a loop');
-  near(l.centre.x, 580 / 50, 0.2, 'at the circle, not the start: x');
-  near(l.centre.z, (400 - 450) / 50, 0.2, 'z');
+  near(l.centre.x, 580 / 50, 'at the circle, not the start: x', 0.2);
+  near(l.centre.z, (400 - 450) / 50, 'z', 0.2);
 });
 
 test('a loop too small or too big stays a vine, and so does a long vine that ends in a loop', () => {

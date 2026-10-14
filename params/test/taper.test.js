@@ -3,9 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { faderGain, faderPosition, positionOf, valueAt } from '../index.ts';
-
-const near = (actual, expected, message) =>
-  assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: ${actual}, not ${expected}`);
+import { near } from '../../util/test/near.js';
 
 // the fader law, as a console's and Ableton's: a fader's position to its gain by dB, not in a straight line, so unity sits two thirds of
 // the way up and the bottom of its travel is the long drop to silence (mixer-surface/fader.ts's until U2c4a)

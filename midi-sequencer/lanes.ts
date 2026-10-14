@@ -2,6 +2,7 @@
 // A point a value at a time, jumping there, or gliding there by a time constant, as Web Audio's setTargetAtTime goes: the music's, on the
 // timeline as an event that holds until the next of its lane (libs/timeline/); the timeline's until L1c2
 import type { Seconds } from '../clock/index.ts';
+import { approach, lastAtOrBefore } from '../util/index.ts';
 
 // a lane's point: a value at a time, jumping there, or gliding there by a time constant (glide), as an automation point's curve
 export interface LanePoint {
@@ -38,9 +39,9 @@ export function valueAt(points: readonly LanePoint[], t: Seconds): number | unde
 }
 // where a glide had got to by a time
 function glidedTo({ point, from }: { point: LanePoint; from: number }, t: Seconds): number {
-  return point.value + (from - point.value) * Math.exp(-(t - point.t) / point.glide!); // a glide has its time constant
+  return approach(from, point.value, t - point.t, point.glide!); // a glide has its time constant
 }
 // a lane's last point's value by a time, what it was set to, a glide's curve not followed; none before its first point
 export function lastValueAt(points: readonly LanePoint[], t: Seconds): number | undefined {
-  return points.findLast((point) => point.t <= t)?.value;
+  return lastAtOrBefore(points, t, (point) => point.t)?.value;
 }

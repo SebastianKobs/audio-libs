@@ -4,9 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SMOOTHING, fadeInThrough, fadeOutThrough, followEdit, levelAt } from '../index.ts';
-
-const near = (actual, expected, message) =>
-  assert.ok(Math.abs(actual - expected) < 1e-9, `${message ?? ''} ${actual} is not ${expected}`);
+import { near } from '../../util/test/near.js';
 
 // a sound: an oscillator from 0, stopped at 4, into a gain at 0.5, out
 const SOUND = {

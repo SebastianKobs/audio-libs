@@ -4,6 +4,7 @@
 // those kept set in their time's order.
 // The clock is the user's, as this interface has it: its time now, and its ticks.
 import type { ParamKey } from './keys.ts';
+import { DueQueue } from '../util/index.ts';
 
 // a change to a param: its key, its value, and when it lands
 export interface Change {
@@ -20,7 +21,7 @@ export interface Ticking {
 export class HeldChanges {
   readonly #clock: Ticking;
   readonly #set: (change: Change) => void;
-  #later: Change[] = []; // the changes for later, in their time's order
+  readonly #later = new DueQueue<Change>((change) => change.t); // the changes for later, in their time's order
 
   // set: where a change lands once its time has come
   constructor({ clock, set }: { clock: Ticking; set: (change: Change) => void }) {
@@ -33,13 +34,12 @@ export class HeldChanges {
       this.#set(change);
       return;
     }
-    this.#later.push(change);
-    this.#later.sort((first, second) => first.t - second.t);
+    this.#later.add(change);
   }
   // each tick: those kept whose time has come, set in their order
   #due(now: number): void {
-    while (this.#later.length && this.#later[0]!.t <= now) {
-      this.#set(this.#later.shift()!); // one at least, as found
+    for (const change of this.#later.takeDue(now)) {
+      this.#set(change);
     }
   }
 }

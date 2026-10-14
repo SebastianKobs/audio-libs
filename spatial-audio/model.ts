@@ -9,7 +9,7 @@
 // No lag with distance: it would push far notes off the beat.
 // The settings are read when asked: range, hearing, falloff, dull, room, and limit,
 // the farthest hearing may reach (a world that wraps round: half of it).
-import { smoothstep } from '../util/index.ts';
+import { smoothstep, clamp } from '../util/index.ts';
 
 // the settings, read when asked: in world units, but falloff, dull and room, strengths
 export interface SpaceSettings {
@@ -29,7 +29,7 @@ export interface Heard {
 
 // where nothing is heard any more: never inside the range, never past the limit
 export function hearMax(settings: SpaceSettings): number {
-  return Math.min(Math.max(settings.hearing, 1.5 * Math.max(0.5, settings.range)), settings.limit ?? Infinity);
+  return clamp(settings.hearing, 1.5 * Math.max(0.5, settings.range), settings.limit ?? Infinity);
 }
 // at a distance: the level g, the lowpass's cutoff fc, and the room's level
 export function hearing(distance: number, settings: SpaceSettings): Heard {

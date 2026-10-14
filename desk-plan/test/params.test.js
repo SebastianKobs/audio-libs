@@ -4,9 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { positionOf } from '../../params/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../index.ts';
-
-const near = (actual, expected, message) =>
-  assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: ${actual}, not ${expected}`);
+import { near } from '../../util/test/near.js';
 
 test("a strip's own parameters declared: its volume and each send gains by the fader law, unity two thirds up; its pan centred, in a line; its mute and its solo switches", () => {
   const { volume, pan, mute, solo } = STRIP_PARAMS;

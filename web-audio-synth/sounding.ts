@@ -11,6 +11,7 @@
 import { fadeIn, fadeOut, plan, type Patch, type Plan, type Context, type Note, type Params } from '../synth/index.ts';
 import { followEdit, type Operation, type PlanNode } from '../audio-plan/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
+import { entryOf } from '../util/index.ts';
 
 // a note as it sounds, as its instrument hands it over: its plan, its start (a context time), its operations applied to what was built of
 // it; its plan again from an edited patch; and a voice of its own built from a plan, as if it had started with the note, into where it
@@ -69,10 +70,7 @@ export class Sounding {
     }
   }
   #notesOf(patch: Patch): Set<Kept> {
-    if (!this.#notes.has(patch)) {
-      this.#notes.set(patch, new Set());
-    }
-    return this.#notes.get(patch)!; // set just above, if it wasn't
+    return entryOf(this.#notes, patch, () => new Set());
   }
 }
 

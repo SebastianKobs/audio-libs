@@ -7,6 +7,7 @@
 // the audio starts, its time can run out of step with the clock for a moment (headless Firefox renders about 0.7 s ahead); the largest
 // offset takes that up within a quarter of a second. While the audio doesn't run, a suspend's or as it starts, its time stands still
 // while the clock's runs on: a clock time maps to where it stands, so what's sent then sounds as it runs again, not as late as it stood
+import { clamp } from '../util/index.ts';
 
 // what it needs of an audio context: a browser's, or the tests' stand-in
 export interface AudioContextLike {
@@ -71,7 +72,7 @@ export class AudioClock {
     this.#offset =
       t - this.#anchoredAt < 1 ?
         best
-      : this.#offset + Math.max(-0.001 * this.#tick, Math.min(0.001 * this.#tick, best - this.#offset));
+      : this.#offset + clamp(best - this.#offset, -0.001 * this.#tick, 0.001 * this.#tick);
   }
   // its offset found: after the audio's first second
   settled(): boolean {

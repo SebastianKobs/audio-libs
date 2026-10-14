@@ -2,6 +2,7 @@
 // I1i (mockup/architecture/done.md): a time or a value written as a term ('0.35 decay', 'decay + 0.05', '1.5 rise in 0.15..', 'vibrato')
 // is one source by name, a macro or a note's value, times its factor, held within its range, plus its offset, as values.ts reads it; as
 // Ableton's macro mapping list gives a mapping its range. Read from a term (mappingOf()) and written back as one (termOf())
+import { clamp } from '../util/index.ts';
 
 // a source by name, times its factor, held at least its low and at most its high where it has them, plus its offset
 export interface Mapping {
@@ -53,7 +54,7 @@ export function mappedValue(
   if (typeof value !== 'number') {
     return undefined;
   }
-  return Math.max(low, Math.min(factor * value, high)) + offset;
+  return clamp(factor * value, low, high) + offset;
 }
 
 // a named term's source, factor and range, its offset added by its caller

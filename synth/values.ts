@@ -9,6 +9,7 @@
 // - a frequency is hertz, or a multiple of the note's, at most so much: { key: 8, max: 9000 }
 import { mappedValue, mappingOf } from './mappings.ts';
 import type { Seconds } from '../clock/index.ts';
+import { clamp } from '../util/index.ts';
 
 export type { Seconds };
 // a voice's note, after MIDI 2.0's per-note model: its note number and velocity, as a note-on carries them; its length to its note-off;
@@ -148,7 +149,7 @@ function heldTime([, named = '', low = '', high = '']: RegExpMatchArray, written
   if (value === undefined) {
     throw new Error(`a time it can't read: ${written}`);
   }
-  return Math.max(+low, Math.min(value, high === '' ? Infinity : +high));
+  return clamp(value, +low, high === '' ? Infinity : +high);
 }
 // a note value at the beat: '1/4' a beat, dotted '1/8.', a triplet '1/8t'
 function noteValueTime(

@@ -21,6 +21,7 @@ import {
   type PlayedNote,
   type PlayListener,
 } from './stream.ts';
+import { entryOf } from '../util/index.ts';
 
 // where messages go: the track they play on, the clip they're of (its element, by its kind), as notes are, whether they're played as you
 // play; and what the stream carries of a replay beside its notes (play: its replay track's number, until when, its draws), until G1 to G3
@@ -102,12 +103,10 @@ export class Sequencer<Name extends string> implements Input<Name> {
   // index for a new note, last in turn; what the sender sends for its note after, as it rings out, still goes to it, until the sender
   // detaches it or starts another note on its index
   #keptApart(to: Address<Name>, messages: readonly Message[]): Message[] {
-    let track = this.#apart.get(to.track);
-    if (!track) {
-      track = { rotation: new NoteRotation(), indices: new Map<string, number>() };
-      this.#apart.set(to.track, track);
-    }
-    const { rotation, indices } = track;
+    const { rotation, indices } = entryOf(this.#apart, to.track, () => ({
+      rotation: new NoteRotation(),
+      indices: new Map<string, number>(),
+    }));
     return messages.map((message) => {
       if (!('index' in message)) {
         return message;

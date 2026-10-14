@@ -4,6 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RecordingPlayer } from '../index.ts';
+import { isNear } from '../../util/test/near.js';
 
 // a player, the tool naming a lane's track as the studio names it: a replay track's by its kind and number, a strip's by its name; and
 // what it sends, each controller with where it went
@@ -17,7 +18,6 @@ function playerWith({ skip } = {}) {
   });
   return { sent, player };
 }
-const near = (got, want) => Math.abs(got - want) < 1e-9;
 // a replay track's level, jumping, then gliding up, then jumping down; and the master's volume, set, then gliding down
 const lanes = [
   {
@@ -48,18 +48,18 @@ test("a track's lanes played back from a time: picked up there at their values t
   const [tapAt, masterAt, tapLater] = sent;
   assert.equal(tapAt.to.track, 'replay tap 1');
   assert.ok(
-    near(tapAt.value, 0.8 + (0.5 - 0.8) * Math.exp(-0.05 / 0.1)) && tapAt.t === 100,
+    isNear(tapAt.value, 0.8 + (0.5 - 0.8) * Math.exp(-0.05 / 0.1)) && tapAt.t === 100,
     'gliding up, where it had got to',
   );
   assert.equal(tapAt.glide, undefined, 'set there at once');
   assert.equal(masterAt.to.track, 'master', "a strip's by its name");
-  assert.ok(near(masterAt.value, 0.5 + 0.5 * Math.exp(-0.55)), 'gliding down, where it had got to');
+  assert.ok(isNear(masterAt.value, 0.5 + 0.5 * Math.exp(-0.55)), 'gliding down, where it had got to');
   assert.deepEqual(
     [tapLater.to.track, tapLater.value, tapLater.controller],
     ['replay tap 1', 0.2, 'volume'],
     'its point after, at its time',
   );
-  assert.ok(near(tapLater.t, 101.95));
+  assert.ok(isNear(tapLater.t, 101.95));
   assert.equal(sent.length, 3);
   assert.deepEqual(
     [tapAt.to.source, tapAt.to.play.playback, tapAt.type],
