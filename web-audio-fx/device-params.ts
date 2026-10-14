@@ -9,12 +9,12 @@
 // or seconds at the beat where none does.
 import { delayTimeOf, type Params } from '../synth/index.ts';
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
+import { LiveCopies } from '../util/index.ts';
+import type { Rebuilds } from './modules.ts';
+import type { Settable } from './timing.ts';
 
 // a chain that plays a device: set at a port, or rebuilt
-interface Playing {
-  set(port: string, value: number): void;
-  rebuild(): void;
-}
+type Playing = Settable & Rebuilds;
 // A device as it's added:
 //   start: its params as it starts, which a reset brings back;
 //   ports: the port its module declares for each param, by the param's name;
@@ -25,14 +25,16 @@ interface Declared {
   ports?: Readonly<Record<string, string>>;
   specs?: ParamSpecs;
 }
-// a device as it plays: its declaration, its params now, the chain that plays it once built
-interface Device extends Required<Declared> {
-  current: Params;
+// a device as it plays: its ports and specs, the chain that plays it once built
+interface Device {
+  ports: Readonly<Record<string, string>>;
+  specs: ParamSpecs;
   chain: Playing | null;
 }
 
 export class DeviceParams {
   readonly #beat: () => number;
+  readonly #params = new LiveCopies<Params>(); // each device's, its start and its live copy
   readonly #devices = new Map<string, Device>();
 
   // beat: a beat's length now, for a param in beats
@@ -40,34 +42,30 @@ export class DeviceParams {
     this.#beat = beat;
   }
   add(device: string, { start, ports = {}, specs = {} }: Declared): void {
-    this.#devices.set(device, {
-      start: structuredClone(start),
-      ports,
-      specs,
-      current: structuredClone(start),
-      chain: null,
-    });
+    this.#params.add(device, start);
+    this.#devices.set(device, { ports, specs, chain: null });
   }
   has(device: string): boolean {
-    return this.#devices.has(device);
+    return this.#params.has(device);
   }
   // A device's params as they play, read each time the chain that plays it is built.
   paramsOf(device: string): () => Params {
-    return () => ({ ...this.#devices.get(device)!.current }); // a device added
+    return () => ({ ...this.#params.of(device) }); // a device added
   }
   // The chain that plays a device, set as its params are.
   playedBy(device: string, chain: Playing): void {
     this.#devices.get(device)!.chain = chain; // a device added
   }
-  current(device: string): Params {
-    return structuredClone(this.#devices.get(device)!.current); // a device added
+  // a device's params now, and as it started, as copies; none for a device not added
+  current(device: string): Params | undefined {
+    return this.#params.current(device);
   }
-  start(device: string): Params {
-    return structuredClone(this.#devices.get(device)!.start); // a device added
+  start(device: string): Params | undefined {
+    return this.#params.start(device);
   }
   set(device: string, param: string, value: number): void {
     const played = this.#devices.get(device)!; // a device added
-    played.current[param] = this.#playedAs(played.specs[param], value);
+    this.#params.set(device, { ...this.#params.of(device), [param]: this.#playedAs(played.specs[param], value) });
     if (!played.chain) {
       return;
     }
