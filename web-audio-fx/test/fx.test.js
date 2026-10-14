@@ -3,19 +3,17 @@
 // theme's modules, or built into the mixer's FX channels, in mockup/test/unit/fx.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES, FxChain, GAIN, PAN_POT, TEMPO_TIME, UTILITY } from '../index.ts';
 import { delayBeats, plan } from '../../synth/index.ts';
 import { positionOf } from '../../params/index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 const beat = 60 / 72; // a beat at 72 BPM
 
 test("a chain set at a time, or now, and read: a port's param and node as they were built, a tower's cutoff set at a phrase's first note", () => {
   time = 10;
-  const e = new Engine({ AudioContext: Context });
+  const e = engineOn(() => time);
   const ac = e.audioContext;
   const filter = {
     effect: true,
@@ -85,7 +83,7 @@ test('the Gain and Pan modules, a block each; the Utility the two combined, as d
 test('a module built on its own into where its sound goes: its way in and out, a port glided, or given events of its own', async () => {
   const { BuiltModule, GAIN } = await import('../index.ts');
   time = 10;
-  const e = new Engine({ AudioContext: Context });
+  const e = engineOn(() => time);
   const ac = e.audioContext;
   const dest = ac.createGain();
   const m = new BuiltModule(e, { patch: GAIN, params: { level: 0 }, into: dest });
@@ -109,7 +107,7 @@ test('a module built on its own into where its sound goes: its way in and out, a
 test('a module built on its own is a stage: a port set now, at a time or gliding, by one timing (DRY8a), one it lacks left alone, its value read back', async () => {
   const { BuiltModule, FILTER, GAIN } = await import('../index.ts');
   time = 10;
-  const e = new Engine({ AudioContext: Context });
+  const e = engineOn(() => time);
   const m = new BuiltModule(e, { patch: GAIN });
   m.set('gain.gain', 0.4, 'now');
   m.set('gain.gain', 0.2, { at: 12 });
@@ -138,7 +136,7 @@ test('a module built on its own is a stage: a port set now, at a time or gliding
 test('a module built on its own glides from a time to come where it is given one, from now where it is not', async () => {
   const { BuiltModule, GAIN } = await import('../index.ts');
   time = 10;
-  const e = new Engine({ AudioContext: Context });
+  const e = engineOn(() => time);
   const m = new BuiltModule(e, { patch: GAIN });
   m.set('gain.gain', 0, { glide: 0.25, from: 10.5 });
   m.set('gain.gain', 1, { glide: 0.25 });
@@ -198,7 +196,7 @@ test("each device: its name, its module, its params and its ports; a Gain's leve
 test("what a chain's modules offer to read: the points a meter reads inside them and their readings, by name, as built; none where none offers one", async () => {
   const { LIMITER } = await import('../index.ts');
   time = 10;
-  const e = new Engine({ AudioContext: Context });
+  const e = engineOn(() => time);
   const ac = e.audioContext;
   const chain = new FxChain(e, {
     between: { input: ac.createGain(), chainOut: ac.createGain() },

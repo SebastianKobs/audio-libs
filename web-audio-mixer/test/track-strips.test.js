@@ -4,14 +4,12 @@
 // its stand-in for Web Audio, as build.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
 import { Mixer, TrackStrips, buildChannel, buildFxChannel } from '../index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 // a track's template: the air and a Utility, a send to the reverb, into garden sings
 const TEMPLATE = {
   inserts: [
@@ -75,7 +73,7 @@ test("a change set by its key through its target, now, at a time or gliding, whe
 function trackStrips() {
   time = 10;
   const data = [{ fx: 'reverb' }, { bus: 'sings' }];
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const mixer = new Mixer(engine, { routing: routingOf(data) });
   const on = { mixer, engine, beat: 60 / 72, devices: DEVICES };
   buildFxChannel(on, 'reverb', data[0]);

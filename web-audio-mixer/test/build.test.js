@@ -3,14 +3,12 @@
 // and the desk's routing made from the same data. On the engine and its stand-in for Web Audio, as mixer.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { Mixer, buildChannel, buildFxChannel } from '../index.ts';
 import { routingOf } from '../../desk-plan/index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 // a desk as data: a reverb, a delay sending to it into a bus, the bus into the master
 const DESK = [
   { fx: 'reverb', chain: [{ effect: 'room' }], inserts: [{ slot: 'level', device: 'utility', start: { level: 0.6 } }] },
@@ -80,7 +78,7 @@ test('an FX channel from its data: its slots after its chain, its sends by name 
 // the desk built from its data on a mixer of its own: what a strip is built on, and each desk strip as built
 function desk() {
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const mixer = new Mixer(engine, { routing: routingOf(DESK) });
   const on = { mixer, engine, beat: 60 / 72, devices: DEVICES, built: {} };
   for (const entry of DESK) {

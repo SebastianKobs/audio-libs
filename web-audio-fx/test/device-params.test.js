@@ -3,13 +3,11 @@
 // gliding, or the chain rebuilt where it has none; a param in beats played as the note length it matches. On the engine's stand-in
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES, DeviceParams, FILTER, FxChain, TEMPO_TIME, UTILITY } from '../index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 const beat = 0.5;
 
 test("a device's params as they play: a copy of its start, handed out as copies, set by param; its start kept, for a reset", () => {
@@ -28,7 +26,7 @@ test('a param set on the chain that plays it: at the port its module declares, g
   mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go
   try {
     time = 10;
-    const engine = new Engine({ AudioContext: Context });
+    const engine = engineOn(() => time);
     const biquads = () => engine.audioContext.rec.nodes.filter((node) => node.kind === 'biquad');
     const devices = new DeviceParams({ beat: () => beat });
     devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: DEVICES.utility.ports });

@@ -2,14 +2,12 @@
 // value set there now, at a time or gliding; when a change lands. On the engine and its stand-in for Web Audio, as build.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
 import { Mixer, buildChannel, buildFxChannel, setOn, timingOf } from '../index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 
 test("a change set on a built strip by its key, by a timing: its volume and its pan, a send, a slot's param at its device's port; none for a mute, a send to no return, a port its device lacks", () => {
   const { track, reverb } = desk();
@@ -57,7 +55,7 @@ test("when a change lands: gliding by its time constant, from its time where tha
 function desk() {
   time = 10;
   const data = [{ fx: 'reverb' }, { bus: 'sings' }];
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const mixer = new Mixer(engine, { routing: routingOf(data) });
   const on = { mixer, engine, beat: 60 / 72, devices: DEVICES };
   const reverb = buildFxChannel(on, 'reverb', data[0]);

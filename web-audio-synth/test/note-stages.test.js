@@ -3,18 +3,16 @@
 // its room's, each set by a per-note controller as it starts and glided to by one that comes later; let go
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn, into, outOf } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn, into, outOf } from '../../web-audio-engine/test/audio-stand-in.js';
 import { NoteStages } from '../index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 // every stage a note can have: an instrument answering them all, your playing's (V3)
 const EVERY_STAGE = ['brightness', 'volume', 'pan', 'effects 1 depth'];
 // an engine on the stand-in, its time 10
 function setup() {
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   return { engine, ac: engine.audioContext };
 }
 

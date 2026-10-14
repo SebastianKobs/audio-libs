@@ -4,14 +4,12 @@
 // chains handed back; the chains following the tempo. On the engine and its stand-in for Web Audio, as build.test.js
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DeviceParams, FILTER, FxModules, GAIN, DEVICES, LIMITER_SETTINGS } from '../../web-audio-fx/index.ts';
 import { nameOf } from '../../desk-plan/index.ts';
 import { Desk } from '../index.ts';
 
 let time = 0;
-const Context = contextOn(() => time);
 const beat = 60 / 72;
 // a desk as data: a reverb with its Utility, garden sings, a delay into it whose chain has params of its own
 const DESK = [
@@ -156,7 +154,7 @@ test("an FX channel's chain of modules as they play, by the effect its data name
 // master's limiter), the values its owner hands over, what's handed back as it's built
 function deskOf() {
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const modules = new FxModules({ modules: { gain: GAIN, filter: FILTER } });
   const params = new DeviceParams({ beat: () => beat });
   params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: DEVICES.utility.ports });

@@ -5,13 +5,11 @@
 // or once its voice has stopped; its knobs, the tempo and its draws handed in, read as each note starts; its patch from a bank, by name
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { adsr } from '../../synth/index.ts';
 import { Instrument, Patches } from '../index.ts';
 
 let time = 10;
-const Context = contextOn(() => time);
 // a small voice: a triangle into a lowpass, its VCA moved by an envelope, let go over its release, a knob, a quarter unless it's turned;
 // a held note gliding to a pitch by 0.05 s
 const VOICE = {
@@ -37,7 +35,7 @@ const perNote = (index, controller, value, t, glide) => ({
 // into a desk's two gains, a channel's and a room's (V4)
 function setup(more = {}) {
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const ac = engine.audioContext;
   const patches = new Patches({ patches: { voice: VOICE }, now: () => time });
   const out = ac.createGain();
@@ -133,7 +131,7 @@ test("an instrument answering #7 Volume alone: a gain after the voice, a later c
 
 test("an instrument with no stage for #7 Volume: a note's volume on its voice's out, times its patch's own, gliding from its time, as a background's held note is hushed on a beat and brought back (P3b, V4)", () => {
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const ac = engine.audioContext;
   const patches = new Patches({ patches: { loud: { ...VOICE, out: { volume: 0.8 } }, plain: VOICE }, now: () => time });
   const out = ac.createGain();
@@ -186,7 +184,7 @@ test("an instrument's knobs, its tempo and its draws handed in, read as each not
 test("an instrument's draws its own, handed in, else Math.random's; a patch the bank hasn't, refused as it's made (V3)", () => {
   const drawn = { ...VOICE, oscs: [{ wave: 'triangle', ratio: 1, level: { between: [0.2, 0.6] } }] };
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const patches = new Patches({ patches: { drawn }, now: () => time });
   const instrument = new Instrument({
     engine,

@@ -3,11 +3,8 @@
 // bringing back the one it started from. On the engine's stand-in for Web Audio
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { FILTER, FxChain, FxModules, GAIN } from '../index.ts';
-
-const Context = contextOn(() => 10);
 
 test('FX modules as they play: copies of those handed in, by name; an edit plays on every chain that plays it, rebuilt, a chain playing another left be; a reset brings back the one it started from', () => {
   mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go
@@ -15,7 +12,7 @@ test('FX modules as they play: copies of those handed in, by name; an edit plays
     const modules = new FxModules({ modules: { dull: FILTER, level: GAIN } });
     assert.notEqual(modules.of('dull'), FILTER, 'a copy');
     assert.deepEqual(modules.of('dull'), FILTER, 'of the one handed in');
-    const engine = new Engine({ AudioContext: Context });
+    const engine = engineOn(() => 10);
     const nodes = (kind) => engine.audioContext.rec.nodes.filter((node) => node.kind === kind).length;
     const dull = chainOf(engine, modules, 'dull');
     chainOf(engine, modules, 'level');

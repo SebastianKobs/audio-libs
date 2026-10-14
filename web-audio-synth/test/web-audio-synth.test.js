@@ -5,13 +5,11 @@
 // studio, are tested in mockup/test/unit/ (follow-edits.test.js, sound-owner.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { Engine } from '../../web-audio-engine/index.ts';
+import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { adsr } from '../../synth/index.ts';
 import { Patches, playNote } from '../index.ts';
 
 let time = 10;
-const Context = contextOn(() => time);
 // a small voice: a triangle into a lowpass, its VCA moved by an envelope, let go over 0.3 s
 const VOICE = {
   vca: { level: 0.2 },
@@ -24,7 +22,7 @@ const CONTEXT = { beat: 0.8, random: () => 0.5 };
 // an engine on the stand-in, its time 10, and the voice's patches as they play, an edit taking over at the context's time
 const played = () => {
   time = 10;
-  const engine = new Engine({ AudioContext: Context });
+  const engine = engineOn(() => time);
   const patches = new Patches({ patches: { voice: VOICE }, now: () => time });
   const nodes = () => engine.audioContext.rec.nodes;
   const play = (note) =>
