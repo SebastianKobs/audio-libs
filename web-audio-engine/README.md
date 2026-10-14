@@ -11,7 +11,7 @@ engine.apply(made, plan.controls.release(0.5), engine.at(when));
 
 | | |
 |---|---|
-| `new Engine({ AudioContext, toContext, latencyHint, random })` | makes the context, for low latency (`'interactive'`). iOS's audio session, whether the silent switch is heeded, is the app's to set, before it makes the engine (`tool/audio/engine.ts`, W3a) |
+| `new Engine({ AudioContext, toContext, latencyHint, random })` | makes the context, for low latency (`'interactive'`). iOS's audio session, whether the silent switch is heeded, is the app's to set, before it makes the engine (`tool/audio/studio/engine.ts`, W3a) |
 | `audioContext`, `now()` | the context, and its time |
 | `at(t)` | a time of the caller's in the context's, with `toContext`, never in its past: a sound due now starts with the next chunk the audio renders |
 | `build(plan, t, destination)` | makes a plan's nodes at `t`, the context's time, into `destination`, and returns them; with no `destination`, its way out is the caller's to wire (an FX channel's input, before its chain) |

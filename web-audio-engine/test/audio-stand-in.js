@@ -212,7 +212,7 @@ export class StandInContext {
     return a;
   }
 }
-// puts the stand-in where tool/audio/engine.ts looks for a browser's. node's own navigator does: it has no audio session and doesn't vibrate
+// puts the stand-in where tool/audio/studio/engine.ts looks for a browser's. node's own navigator does: it has no audio session and doesn't vibrate
 export function install(now) {
   globalThis.window = {
     AudioContext: class extends StandInContext {
