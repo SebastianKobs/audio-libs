@@ -24,4 +24,9 @@ test("a strip's own parameters declared: its volume and each send gains by the f
     ],
     'off or on',
   );
+  assert.deepEqual(
+    [volume.default, pan.default, mute.default, solo.default, SEND_PARAM.default],
+    [1, 0, 0, 0, 0],
+    'as a strip starts: at unity, centred, on, unsoloed, its sends at 0 until turned up',
+  );
 });

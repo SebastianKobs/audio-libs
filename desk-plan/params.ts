@@ -4,14 +4,16 @@
 //   volume, and each send: by the fader law, unity two thirds up, +6 dB at the top, as Ableton's faders and sends;
 //   pan: left -1 to right 1, centred at 0, in a line;
 //   mute and solo: switches, off 0 or on 1.
+// Each with its default, as a strip starts: at unity, centred, unmuted, unsoloed, its sends at
+// 0 until turned up.
 import { FADER_GAIN, PAN, SWITCH, type ParamSpec } from '../params/index.ts';
 
 // a strip's own parameters, by name
 export const STRIP_PARAMS = Object.freeze({
-  volume: Object.freeze({ ...FADER_GAIN, name: 'volume' }),
-  pan: PAN,
-  mute: Object.freeze({ ...SWITCH, name: 'mute' }),
-  solo: Object.freeze({ ...SWITCH, name: 'solo' }),
+  volume: Object.freeze({ ...FADER_GAIN, name: 'volume', default: 1 }),
+  pan: Object.freeze({ ...PAN, default: 0 }),
+  mute: Object.freeze({ ...SWITCH, name: 'mute', default: 0 }),
+  solo: Object.freeze({ ...SWITCH, name: 'solo', default: 0 }),
 }) satisfies Readonly<Record<string, ParamSpec>>;
 // a send to a return, each by the return's name
-export const SEND_PARAM: ParamSpec = Object.freeze({ ...FADER_GAIN, name: 'send' });
+export const SEND_PARAM = Object.freeze({ ...FADER_GAIN, name: 'send', default: 0 }) satisfies ParamSpec;
