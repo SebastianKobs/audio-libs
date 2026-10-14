@@ -1,5 +1,6 @@
 // Strokes for the tests: lists of screen points [x, y], one move each. Shared by the end-to-end tests (e2e/garden.js), the gesture
-// tracker's unit tests and make-gesture-vectors.js. The noisy ones are seeded, so they're the same on every run
+// tracker's unit tests and make-gesture-vectors.js. The noisy ones are seeded (seeded()), so they're the same on every run
+import { seeded } from '../../util/index.ts';
 export const line = (x0, y0, x1, y1, n) =>
   Array.from({ length: n + 1 }, (_, k) => [x0 + ((x1 - x0) * k) / n, y0 + ((y1 - y0) * k) / n]);
 export function zigzag(x0, y0, corners, w, h, steps) {
@@ -27,21 +28,10 @@ export const circle = (cx, cy, r, turns, n, { from = 0, squash = 1 } = {}) =>
     return [cx + r * Math.cos(a), cy + r * squash * Math.sin(a)];
   });
 
-// seeded noise, 0..1
-export function rng(seed) {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 // jitter, as the circle fix sees it. Today's circle check turned almost all of these into towers:
 // - rubbing: to and fro along a line that drifts a little, amp px each way, `per` moves for each stroke across
 export function rub(cx, cy, amp, n, per, seed) {
-  const rnd = rng(seed);
+  const rnd = seeded(seed);
   const p = [];
   let a = rnd() * 2 * Math.PI;
   for (let k = 0; k <= n; k++) {
@@ -54,7 +44,7 @@ export function rub(cx, cy, amp, n, per, seed) {
 }
 // - shaking: each move a random step of up to `step` px, pulled back towards the spot, so it stays within about amp px of it
 export function shake(cx, cy, amp, n, step, seed) {
-  const rnd = rng(seed);
+  const rnd = seeded(seed);
   const p = [[cx, cy]];
   let x = cx;
   let y = cy;
@@ -69,7 +59,7 @@ export function shake(cx, cy, amp, n, step, seed) {
 }
 // - scribbling: wandering in a patch w px across, steering a little and now and then turning back, up to `step` px a move
 export function scribble(cx, cy, w, n, step, seed) {
-  const rnd = rng(seed);
+  const rnd = seeded(seed);
   const p = [[cx, cy]];
   let x = cx;
   let y = cy;

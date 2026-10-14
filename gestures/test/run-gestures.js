@@ -21,7 +21,7 @@ export function stroke(id, pts, { t0 = 0, ms = 16, button = 0, end = 'up' } = {}
   return input;
 }
 // what the vectors keep of an event: its type, pointer, time and state, where the pointer was, and what the event says
-export function brief(type, e) {
+function brief(type, e) {
   const o = { type, id: e.id, t: r9(e.t), state: e.state, x: e.x, y: e.y };
   for (const k of ['kind', 'shape', 'deg', 'prev']) {
     if (e[k] !== undefined) {
