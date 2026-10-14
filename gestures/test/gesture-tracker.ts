@@ -3,25 +3,10 @@
 // makes one (garden.ts), from its package's entry, on a clock and settings of its own, so its tests go wherever it goes (R14); the
 // replays' recorder drives the garden's own
 import { Clock } from '../../clock/index.ts';
-import { GestureTracker, type GestureEvents, type TrackerSettings } from '../index.ts';
+import { GestureTracker, TRACKER_DEFAULTS, type GestureEvents, type TrackerSettings } from '../index.ts';
 
-// its settings, as the tool starts them (2026-10-12), each vector's case setting its own as it runs (run-gestures.js)
-export const settings: TrackerSettings = {
-  moveThreshold: 8,
-  holdDelay: 0.4,
-  handSmooth: 0.25,
-  twoFinger: 0.3,
-  shapeSpan: 0.13,
-  cornerAngle: 70,
-  bendAngle: 90,
-  curveAngle: 35,
-  circleTurn: 0.8,
-  circleReversal: 120,
-  circleOneWay: 0.9,
-  circleMin: 40,
-  circleRound: 0.4,
-  circleSize: 4,
-};
+// its settings, as a tracker starts them, each vector's case setting its own as it runs (run-gestures.js)
+export const settings: TrackerSettings = { ...TRACKER_DEFAULTS };
 // its clock, the tests' own: the tracker asks it only its time and its ticks, never its grid
 export const clock = new Clock({ settings: { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16' } });
 

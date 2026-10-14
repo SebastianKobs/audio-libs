@@ -11,4 +11,5 @@ export {
   type GestureEvents,
   type PointerInput,
   type TrackerSettings,
+  TRACKER_DEFAULTS,
 } from './shared.ts';
