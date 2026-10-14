@@ -39,6 +39,13 @@ export interface DeskEntry<Named extends Names = Names> extends StripEntry<Named
   chain?: { effect: Named['effect']; params?: Record<string, unknown> }[];
 }
 
+// A strip's mix, as a desk's live controls set it: its fader's volume and pan, and its sends'
+// amounts, by return.
+export interface StripMix {
+  volume: number;
+  pan: number;
+  sends?: Record<string, number>;
+}
 // A desk's data, every strip's: its own strips', the master's, and its tracks' templates.
 export interface DeskData<Named extends Names = Names> {
   desk: readonly DeskEntry<Named>[];

@@ -5,7 +5,7 @@
 // time (changes.ts).
 // libs/web-audio-mixer/ builds a desk from it
 export { entryIn, entryNamed, nameOf, returnOf, returnsIn, routingOf, slotStart } from './strip-data.ts';
-export type { DeskData, DeskEntry, Names, SendEntry, SlotEntry, StripEntry } from './strip-data.ts';
+export type { DeskData, DeskEntry, Names, SendEntry, SlotEntry, StripEntry, StripMix } from './strip-data.ts';
 export { SEND_PARAM, STRIP_PARAMS } from './params.ts';
 export { SEND, controllerOf, deviceAt, keyOf, keyOn, keyText, specOf, type ParamKey } from './keys.ts';
 export { declaredIn } from './declared.ts';
