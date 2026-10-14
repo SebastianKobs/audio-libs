@@ -66,6 +66,15 @@ export class Routing {
   sentTo(name: string): readonly string[] {
     return this.#on(name).to;
   }
+  // The returns a strip can reach, as a desk's send knobs: those put on the desk before it,
+  // in their order, none that feeds it.
+  returnsFor(name: string): string[] {
+    this.#on(name);
+    const before = [...this.#strips.keys()];
+    return before
+      .slice(0, before.indexOf(name))
+      .filter((strip) => this.#on(strip).kind === 'return' && !this.#feeds(strip, name));
+  }
   // everything the strips named feed, they among it: each through its way out, and the sends sendsUp lets through (all, unless it says),
   // on to the master, which isn't one of them; a name not on the desk kept, not followed
   reached(names: Iterable<string>, sendsUp: (from: string, to: string) => boolean = () => true): Set<string> {

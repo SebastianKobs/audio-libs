@@ -137,3 +137,23 @@ test('send(): a send added later, only to a return on the desk, never into what 
   assert.throws(() => routing.send('reverb', 'delay'), /a loop: delay feeds reverb/, 'a return into one that feeds it');
   assert.deepEqual(routing.sentTo('reverb'), [], 'a send refused is not added');
 });
+
+test('returnsFor(): the returns a strip can reach, as its send knobs: those on the desk before it, in their order, none that feeds it (U2b)', () => {
+  const routing = new Routing();
+  routing.add('reverb', { kind: 'return' });
+  routing.add('far reverb', { kind: 'return', to: ['reverb'] });
+  routing.add('sings', { kind: 'bus' });
+  routing.add('delay', { kind: 'return', out: 'sings', to: ['reverb'] });
+  routing.add('you', { kind: 'bus' });
+  assert.deepEqual(
+    routing.returnsFor('you'),
+    ['reverb', 'far reverb', 'delay'],
+    'every return before it, in their order',
+  );
+  assert.deepEqual(routing.returnsFor('sings'), ['reverb', 'far reverb'], 'the delay after it, and feeding it');
+  assert.deepEqual(routing.returnsFor('delay'), ['reverb', 'far reverb'], 'a return: those before it');
+  assert.deepEqual(routing.returnsFor('reverb'), [], 'the first return: none');
+  routing.route('far reverb', 'sings');
+  assert.deepEqual(routing.returnsFor('sings'), ['reverb'], 'one routed into it since: none that feeds it');
+  assert.throws(() => routing.returnsFor('nobody'), /not on the desk: nobody/);
+});
