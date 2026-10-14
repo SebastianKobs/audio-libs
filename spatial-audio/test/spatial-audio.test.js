@@ -1,5 +1,5 @@
 // The hearing's unit tests (libs/spatial-audio/):
-//   - the model against the test vectors kept for the Flutter app (shared/test-vectors/space/hearing.json);
+//   - the model against its test vectors (shared/test-vectors/space/hearing.json);
 //   - the space and its emitters, with a listener of the test's own: what each hears, handed on as values.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
