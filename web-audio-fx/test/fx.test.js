@@ -175,3 +175,33 @@ test("each insert's ports declared beside its params: a Utility's level and pan,
   assert.deepEqual(filter.ports, { cutoff: 'filter.frequency' }, 'its resonance fixed as it was built');
   assert.deepEqual(limiter.ports, { gain: 'limiter.gain', ceiling: 'limiter.ceiling', release: 'limiter.release' });
 });
+
+// what a chain's modules' nodes offer to read, as built, a limiter's (U2c5c): the points a meter reads inside it, by name, its in after its
+// gain and its out; its readings by name, what it takes away now; none where no node offers one
+test("what a chain's modules offer to read: the points a meter reads inside them and their readings, by name, as built; none where none offers one", async () => {
+  const { LIMITER } = await import('../index.ts');
+  time = 10;
+  const e = new Engine({ AudioContext: Context });
+  const ac = e.audioContext;
+  const chain = new FxChain(e, {
+    between: { input: ac.createGain(), chainOut: ac.createGain() },
+    modules: [{ name: 'limiter', patch: LIMITER }],
+    context: { beat, random: () => 0.5 },
+  });
+  const points = chain.points();
+  assert.deepEqual(Object.keys(points), ['in', 'out']);
+  assert.deepEqual(
+    [points.in.kind, points.out.kind],
+    ['gain', 'gain'],
+    'its in, after its gain, and its out: nodes a meter can read',
+  );
+  const readings = chain.readings();
+  assert.deepEqual(Object.keys(readings), ['reduction']);
+  assert.equal(typeof readings.reduction(), 'number', 'what it takes away now');
+  const plain = new FxChain(e, {
+    between: { input: ac.createGain(), chainOut: ac.createGain() },
+    modules: [{ name: 'level', patch: (await import('../index.ts')).GAIN }],
+    context: { beat, random: () => 0.5 },
+  });
+  assert.deepEqual([plain.points(), plain.readings()], [{}, {}], 'none where none offers one');
+});

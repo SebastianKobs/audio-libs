@@ -2,7 +2,7 @@
 // a send by its return's name or a slot's param; and its spec, as its strip or its slot's device declares it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SEND, SEND_PARAM, STRIP_PARAMS, controllerOf, keyOf, keyOn, keyText, specOf } from '../index.ts';
+import { SEND, SEND_PARAM, STRIP_PARAMS, controllerOf, deviceAt, keyOf, keyOn, keyText, specOf } from '../index.ts';
 
 test("a parameter's key: a strip's own, a send by its return's name, a slot's param; as text its parts joined by slashes, and back", () => {
   const keys = [
@@ -25,6 +25,11 @@ test("a key as a controller on its strip's track: its slot and param, the strip 
     keys.map((key) => keyOn(key.strip, controllerOf(key))),
     keys,
   );
+});
+
+test("the device on a strip's slot, by its name among a desk's device params: its strip and its slot (U2c5c)", () => {
+  assert.equal(deviceAt('delay 1', 'delay'), 'delay 1/delay');
+  assert.equal(deviceAt('master', 'limiter'), 'master/limiter');
 });
 
 test("a key's spec, as declared: a strip's own and a send's the strip's, a slot's its device's; none where nothing declares it", () => {

@@ -46,6 +46,11 @@ export function controllerOf({ slot, param }: ParamKey): string {
 export function keyOn(strip: string, controller: string): ParamKey {
   return keyOf(`${strip}/${controller}`);
 }
+// The device on a strip's slot, by its name among a desk's device params (web-audio-fx's
+// DeviceParams): its strip and its slot, `delay 1/delay`.
+export function deviceAt(strip: string, slot: string): string {
+  return `${strip}/${slot}`;
+}
 // A key's spec, as declared: a strip's own and a send's the strip's (params.ts); a slot's, its device's, asked of slotSpecs;
 // none where nothing declares it.
 export function specOf(

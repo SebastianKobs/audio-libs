@@ -30,6 +30,7 @@ chain.rebuild();                               // after its patch was changed: t
 | `set(port, value, timeConstant)` | glides a port of every module that has it (0.05 s) |
 | `setAt(port, value, at)` | sets a port of every module that has it at a time, at once: a tower's cutoff at a phrase's first note |
 | `setNow(port, value)` | sets it now, as a param's value is set: a replay track's air and Utility, as its emitter is made |
+| `points()`, `readings()` | what its modules' nodes offer to read, as built: the points a meter reads inside them, by name (a limiter's `in`, after its gain, and `out`), and what they say of themselves, by name, each read as the chain is built now (a limiter's `reduction`); none where no node offers one |
 | `paramOf(port)`, `nodeOf(port)` | the param and the node offering a port, as they were built, the first module's that has it, or none: for what shows it, records it or reads it (the master's limiter's points and reduction) |
 | `time()`, `feedback()` | the first delay line's time now, in seconds, and its feedback |
 | `rebuild()` | plans and builds the chain again, from its patches as they are now: the new one beside the old, the input moved over to it, and the old one let go once it has rung out (`RING_OUT`, 8 s), its LFOs stopped |

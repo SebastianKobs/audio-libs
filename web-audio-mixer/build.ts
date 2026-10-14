@@ -75,9 +75,10 @@ export function buildFxChannel(
   return { strip, chains };
 }
 
-// Each slot's device, built in order: an insert for the strip, and its chain.
-function slotsOf(
-  on: BuildOn,
+// Each slot's device, built in order: an insert for the strip, and its chain. Needs no mixer,
+// so a master's slots are built before it.
+export function slotsOf(
+  on: Pick<BuildOn, 'engine' | 'beat' | 'devices'>,
   entry: StripEntry,
   { params }: StripValues,
 ): { inserts: Insert[]; chains: Partial<Record<string, FxChain>> } {

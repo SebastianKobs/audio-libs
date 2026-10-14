@@ -14,7 +14,8 @@
 //   With sends, a group, as Ableton's: its tracks into it, through its fader, sent after it
 // - peak(name): a strip's peak, for a meter, after its fader and pan; the master's after its insert, and the points its insert names (the
 //   limiter's in, after its gain, and out)
-//   (meterFall(): how a meter falls back; meterPosition(): where a level shows on it). reduction(): what the insert takes away, in dB
+//   (meterFall(): how a meter falls back; meterPosition(): where a level shows on it). reading(name): what the insert says of itself, by
+//   name, what its limiter takes away in dB ('limiter reduction')
 // - fx(name, { level, pan, sends, out, inserts }): an FX channel, stereo. An input, where sends arrive; a chain of FX modules (libs/web-audio-fx/),
 //   built between its input and chainOut: its inserts, as a channel's but after the chain, in order, into its level, or else its level; its level; a pan, if it has one; sends to other FX channels, taken after the pan, so they keep
 //   its panning ({ reverb: 0.4 }); and its output, to the master or a bus. volume(v), panTo(v) and sendTo(name, v) glide them
@@ -33,6 +34,7 @@ export { deviceInsert } from './device-insert.ts';
 export { buildChannel, buildFxChannel } from './build.ts';
 export type { BuildOn, StripValues } from './build.ts';
 export { TrackStrips } from './track-strips.ts';
+export { Desk } from './desk.ts';
 export { setTarget, targetOf } from './target.ts';
 export type { Target, Timing } from './target.ts';
 export type { Insert, Send, StripOptions } from './channel.ts';

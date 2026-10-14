@@ -21,14 +21,15 @@ export interface Desk {
 }
 // a strip on the desk: a channel, a bus or an FX channel
 export type Strip = Channel | FxChannel;
-// what goes between the sum and the master volume, built by the caller (a limiter, as Ableton's on its master, a chain of libs/web-audio-fx/'s
-// Limiter module): its way in and out, where a meter reads inside it, by name ('limiter in', 'limiter out'), and how much it takes away
-// now, in dB
+// What goes between the sum and the master volume, built by the caller: the master's
+// inserts, a chain of libs/web-audio-fx/'s modules (desk.ts), today a limiter as Ableton's.
+// Its way in and out; where a meter reads inside it, by name ('limiter in', 'limiter out');
+// what it says of itself, by name ('limiter reduction', what the limiter takes away, in dB).
 export interface MasterInsert {
   readonly input: AudioNode;
   readonly output: AudioNode;
   readonly points?: Readonly<Record<string, AudioNode>>;
-  reduction?(): number;
+  readonly readings?: Readonly<Record<string, () => number>>;
 }
 
 const FADE_IN = 0.25; // s, a time constant
@@ -136,9 +137,10 @@ export class Mixer {
   get silent(): ReadonlySet<string> {
     return new Set(this.#silent);
   }
-  // how much the master's insert, the limiter, takes away now, in dB; nothing, with none
-  reduction(): number {
-    return this.#insert?.reduction?.() ?? 0;
+  // A reading the master's insert offers, by name, now: what its limiter takes away, in dB
+  // ('limiter reduction'); 0 with none, or one it doesn't offer.
+  reading(name: string): number {
+    return this.#insert?.readings?.[name]?.() ?? 0;
   }
   // a strip's peak, as a meter reads it: the loudest sample of the last window, left or right, after its fader and pan; the master's
   // after its insert and its volume; a point its insert names, inside it. Its meter the engine's, made at the first read, so a desk

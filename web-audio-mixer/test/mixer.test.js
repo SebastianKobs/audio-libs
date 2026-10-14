@@ -44,19 +44,20 @@ test('the mixer: the sum into the master and the master to the output, the maste
   );
 });
 
-test("the master's insert's readings: what it takes away, in dB, and its points, read as peaks; with none, nothing taken away", () => {
+test("the master's insert's readings by name, what its limiter takes away in dB, and its points, read as peaks; with none, or one it doesn't offer, 0 (U2c5c)", () => {
   const e = engine();
   const ac = e.audioContext;
-  assert.equal(new Mixer(e).reduction(), 0, 'no insert: nothing taken away');
+  assert.equal(new Mixer(e).reading('limiter reduction'), 0, 'no insert: nothing taken away');
   const [after, out] = [ac.createGain(), ac.createGain()];
   const insert = {
     input: ac.createGain(),
     output: out,
     points: { 'limiter in': after, 'limiter out': out },
-    reduction: () => 4.5,
+    readings: { 'limiter reduction': () => 4.5 },
   };
   const m = new Mixer(e, { master: insert });
-  assert.equal(m.reduction(), 4.5, 'what it takes away');
+  assert.equal(m.reading('limiter reduction'), 4.5, 'what its limiter takes away');
+  assert.equal(m.reading('limiter lookahead'), 0, "one it doesn't offer");
   m.peak('limiter in');
   m.peak('limiter out');
   assert.ok(
