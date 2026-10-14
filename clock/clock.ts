@@ -2,6 +2,7 @@
 import { AudioClock, type AudioContextLike } from './audio-clock.ts';
 import { BeatGrid, type GridSettings } from './beat-grid.ts';
 import { snap, type SnapOptions } from './quantizer.ts';
+import { COMMON_TIME } from './ticks.ts';
 
 // time as the sound counts it: a clock time, or a length
 export type Seconds = number;
@@ -31,7 +32,7 @@ export class Clock {
   #ticking = false;
 
   constructor({
-    settings = { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16', meter: [4, 4] },
+    settings = { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16', meter: COMMON_TIME },
   }: { settings?: ClockSettings } = {}) {
     this.#settings = settings;
     this.grid = new BeatGrid(settings);

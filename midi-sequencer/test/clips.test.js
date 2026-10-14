@@ -4,20 +4,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ClipPlayer } from '../clips.ts';
-import { STEP } from '../../sequencer/index.ts';
+import { STEP } from '../../clock/index.ts';
+import { SIXTEENTH, SWING, swungGrid } from '../../sequencer/test/swung-grid.js';
 
-const SIXTEENTH = 0.2;
-const SWING = 0.05; // every odd 16th this much late
-// a grid of 0.2 s 16ths from 0, its odd ones swung late, in 4/4
-const grid = {
-  meter: () => [4, 4],
-  stepDuration: () => SIXTEENTH,
-  swingAt: (i) => (i % 2 ? SWING : 0),
-  timeAt: (place) => {
-    const i = Math.floor(place);
-    return i * SIXTEENTH + (i % 2 ? SWING : 0) + (place - i) * SIXTEENTH;
-  },
-};
+const grid = swungGrid; // every odd 16th SWING late
 // an input that keeps what's sent
 function input() {
   const sent = [];

@@ -6,9 +6,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PPQ,
-  STEP,
-  barTicks,
   due,
   lengthOf,
   liveEvents,
@@ -17,22 +14,14 @@ import {
   placeOn,
   rescaled,
   underWayAt,
-  startsBar,
   upcoming,
   whole,
 } from '../index.ts';
+import { STEP } from '../../clock/index.ts';
 
 const grid = { stepAt: (t) => t * 8, timeAt: (s) => s / 8 }; // 16ths an 8th of a second apart, from 0, straight
 
-test('ticks: 96 to a quarter, so a 16th is 24, a 16th triplet 16 and an 8th triplet 32, all whole', () => {
-  assert.equal(PPQ, 96);
-  assert.equal(STEP, 24);
-  assert.deepEqual([PPQ / 6, PPQ / 3], [16, 32]);
-});
-
 test("a pattern's length: its bars, in its own time signature, or the master's", () => {
-  assert.equal(barTicks(), 384, 'a bar of 4/4');
-  assert.deepEqual([barTicks([3, 4]), barTicks([2, 4]), barTicks([9, 16]), barTicks([6, 8])], [288, 192, 216, 288]);
   assert.equal(lengthOf({ bars: 2 }), 768);
   assert.equal(lengthOf({ meter: [3, 4], bars: 1 }), 288);
   assert.equal(lengthOf({}, [3, 4]), 288, "a bar of the master's, when it has no meter or bars of its own");
@@ -289,16 +278,5 @@ test('a change of speed runs on where the rhythm had got to, with no jump', () =
   assert.deepEqual(
     liveEvents(r, rescaled(start, 1, 0.5, at), 0.5, at, 600).map((n) => n.start),
     [144, 336, 528],
-  );
-});
-
-test("a 16th that starts a bar, in its time signature: every 16th one in 4/4, the master's when none is given, every 12th in 3/4 (G0.1c)", () => {
-  assert.deepEqual(
-    [0, 1, 15, 16, 32].map((i) => startsBar(i)),
-    [true, false, false, true, true],
-  );
-  assert.deepEqual(
-    [0, 12, 16, 24].map((i) => startsBar(i, [3, 4])),
-    [true, true, false, true],
   );
 });

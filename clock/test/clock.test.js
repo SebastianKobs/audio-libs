@@ -4,7 +4,19 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { Clock, GRIDS, LOOKAHEAD } from '../index.ts';
+import {
+  barTicks,
+  beatTicks,
+  Clock,
+  COMMON_TIME,
+  GRIDS,
+  HISTORY,
+  LOOKAHEAD,
+  noteValueBeats,
+  PPQ,
+  startsBar,
+  STEP,
+} from '../index.ts';
 import { fakeAudioOn } from './fake-audio.js';
 import { near } from '../../util/test/near.js';
 
@@ -550,4 +562,85 @@ test('stopped between two 16ths, the song stands from the 16th it is held at, th
   assert.ok(Math.abs(grid.songTime(between) - between) < 1e-9, 'between the stop and its 16th: playing on');
   assert.ok(Math.abs(grid.songTime(stands + 1) - stands) < 1e-9, 'from its 16th: standing');
   assert.ok(Math.abs(grid.songTime(released + 0.5) - (stands + 0.5)) < 1e-9, 'released: going on from there');
+});
+
+test("a beat by the meter's unit: 16ths to a beat and its length, and to a bar; a quarter in 4/4, an 8th in 6/8", () => {
+  const grid = clock.grid;
+  assert.deepEqual(
+    [grid.stepsPerBeat(), grid.beatDuration(), grid.stepsPerBar()],
+    [4, 60 / 72, 16],
+    'common time, at 72',
+  );
+  settings.meter = [6, 8];
+  assert.deepEqual([grid.stepsPerBeat(), grid.beatDuration(), grid.stepsPerBar()], [2, 30 / 72, 12], 'six eights');
+  delete settings.meter;
+  assert.deepEqual(COMMON_TIME, [4, 4], 'with none, common time');
+});
+
+test('ticks: 96 to a quarter, so a 16th is 24, a 16th triplet 16 and an 8th triplet 32, all whole', () => {
+  assert.equal(PPQ, 96);
+  assert.equal(STEP, 24);
+  assert.deepEqual([PPQ / 6, PPQ / 3], [16, 32]);
+});
+
+test("a bar in ticks, in its time signature, or the master's; a beat, the meter's unit", () => {
+  assert.equal(barTicks(), 384, 'a bar of 4/4');
+  assert.deepEqual([barTicks([3, 4]), barTicks([2, 4]), barTicks([9, 16]), barTicks([6, 8])], [288, 192, 216, 288]);
+  assert.deepEqual([beatTicks(), beatTicks([6, 8])], [96, 48]);
+});
+
+test("a 16th that starts a bar, in its time signature: every 16th one in 4/4, the master's when none is given, every 12th in 3/4 (G0.1c)", () => {
+  assert.deepEqual(
+    [0, 1, 15, 16, 32].map((i) => startsBar(i)),
+    [true, false, false, true, true],
+  );
+  assert.deepEqual(
+    [0, 12, 16, 24].map((i) => startsBar(i, [3, 4])),
+    [true, true, false, true],
+  );
+});
+
+test('ticks to seconds at the tempo, and back; a time as ticks on the grid, swung or straight, and back', () => {
+  const grid = clock.grid;
+  assert.equal(grid.secondsOf(STEP), grid.stepDuration(), 'a 16th');
+  near(grid.ticksIn(grid.beatDuration()), PPQ, 'a beat');
+  clock.useAudio(fakeAudio());
+  settings.swing = 1;
+  const offBeat = grid.timeAt(1); // the second 16th, late by the swing
+  assert.equal(grid.ticksAt(offBeat), STEP, 'swung: where it sounds');
+  assert.notEqual(grid.ticksAt(offBeat, { straight: true }), STEP, 'straight: where it would without the swing');
+  assert.equal(grid.timeOfTicks(STEP), offBeat, 'and back, swung');
+  assert.equal(grid.timeOfTicks(STEP, { straight: true }), grid.straightTime(1), 'and straight');
+});
+
+test('the next line of so many 16ths at or after a time: the next beat, the next bar', () => {
+  const grid = clock.grid;
+  clock.useAudio(fakeAudio());
+  clock.advance(1);
+  const t = clock.now();
+  const beat = grid.nextLine(t, grid.stepsPerBeat());
+  const onLine = (place, steps) => near(place, Math.round(place / steps) * steps, `on a line of ${steps}`);
+  onLine(grid.stepAt(beat), 4);
+  assert.ok(beat >= t && beat - t < grid.beatDuration(), 'the next one');
+  assert.equal(grid.nextLine(beat, 4), beat, 'one on it: itself');
+  onLine(grid.stepAt(grid.nextLine(t, 16)), 16);
+});
+
+test("song time as a time map: the grid's song time and back; a time never reached, never, held or not", () => {
+  const grid = clock.grid;
+  clock.useAudio(fakeAudio());
+  clock.advance(1);
+  assert.equal(grid.song.toTimeline(5), grid.songTime(5));
+  assert.equal(grid.song.fromTimeline(5), grid.timeOfSong(5));
+  assert.equal(grid.songTime(Infinity), Infinity, 'running');
+  grid.hold(clock.now());
+  assert.equal(grid.songTime(Infinity), Infinity, 'held');
+  grid.release(clock.now());
+});
+
+test('a note value in beats, as written: a quarter one, dotted half as long again, a triplet two thirds; none where it is not one', () => {
+  assert.deepEqual(['1/4', '1/8', '1/8.', '1/2', '1/16t'].map(noteValueBeats), [1, 0.5, 0.75, 2, 1 / 6]);
+  assert.deepEqual(['0.5', 'beat', '1/4x'].map(noteValueBeats), [undefined, undefined, undefined]);
+  assert.deepEqual(GRIDS['1/8t'], { g: 4 / 3, triplet: true }, "the tap grids' steps from them");
+  assert.equal(HISTORY, 30 * 60, 'the history kept: half an hour');
 });

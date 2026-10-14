@@ -12,7 +12,7 @@
 // timeline since L1c2 (libs/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import type { Seconds } from '../clock/index.ts';
-import { Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
+import { LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { NoteChange, NoteEnd, NoteGlide, Play, PlayedNote } from './stream.ts';
@@ -56,8 +56,6 @@ interface Kept {
   first: Play;
   notes: RecordedNote[];
 }
-
-const SETTLED: Seconds = 1; // a note's change a second past: nothing comes that late, so one that changes nothing is thinned from then
 
 export class Recorder {
   readonly #timeline: Timeline<RecordedNote, LanePoint>; // each note, and each lane's points, the events that hold until the next
@@ -107,7 +105,7 @@ export class Recorder {
   #settle(now: Seconds): void {
     this.#timeline.settle(now);
     for (const note of this.#kept.flatMap((kept) => kept.notes)) {
-      thinNote(note, now - SETTLED);
+      thinNote(note, now - LATEST); // a note's change that changes nothing, thinned once nothing comes that late
     }
   }
   // a held note's end and glides, as they come, on its element's note of that index still held (G2a); one let go before it sounded, its

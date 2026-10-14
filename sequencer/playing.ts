@@ -1,22 +1,18 @@
 // ---------- libs/sequencer/playing: a pattern played: its events due on the grid, upcoming round its loop, whole, live at a speed, ----------
 // under way, placed
-import { MASTER, PPQ, STEP, lengthOf } from './pattern.ts';
+import { lengthOf } from './pattern.ts';
 import type { Pattern, PatternEvent } from './pattern.ts';
-import type { Meter } from '../clock/index.ts';
+import { beatTicks, COMMON_TIME, STEP, type BeatGrid, type Meter } from '../clock/index.ts';
 import { modulo } from '../util/index.ts';
 
-// the grid a pattern is placed on: where a clock time lies on it, in 16ths, and the clock time a place on it falls at (the clock's)
-// functions, not methods: they're handed on alone ({ stepAt, timeAt })
-export interface Grid {
-  stepAt: (t: number) => number;
-  timeAt: (place: number) => number;
-}
+// the grid a pattern is placed on, the clock's: where a clock time lies on it, in 16ths, and the clock time a place on it falls at
+export type Grid = Pick<BeatGrid, 'stepAt' | 'timeAt'>;
 // a looping pattern's next count events from a place (ticks from the grid's start), round the loop, each where it falls from the grid's start
 export function upcoming<Event extends PatternEvent>(
   pat: Pattern<Event>,
   at: number,
   count: number,
-  meter: Meter = MASTER,
+  meter: Meter = COMMON_TIME,
 ): Event[] {
   if (!pat.events.length) {
     return [];
@@ -35,19 +31,23 @@ export function upcoming<Event extends PatternEvent>(
 }
 // a pattern played whole, as a launched clip: from its first event to its last, once, its first in the beat at a place (ticks from the
 // grid's start), each event in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats
-export function whole<Event extends PatternEvent>(pat: Pattern<Event>, at: number, meter: Meter = MASTER): Event[] {
+export function whole<Event extends PatternEvent>(
+  pat: Pattern<Event>,
+  at: number,
+  meter: Meter = COMMON_TIME,
+): Event[] {
   const [firstEvent] = pat.events;
   if (!firstEvent) {
     return [];
   }
-  const beat = (PPQ * 4) / meter[1];
+  const beat = beatTicks(meter);
   const first = firstEvent.start;
   const shift = at + modulo(first, beat) - first;
   return pat.events.map((event) => ({ ...event, start: event.start + shift }));
 }
 // what a repeating pattern plays in the grid's 16th i: its events whose place comes round within it, every length from the grid's
 // start, in the pattern's order, each with its offset, how many ticks into the 16th it starts
-export function due<Event extends PatternEvent>(pat: Pattern<Event>, i: number, meter: Meter = MASTER): Event[] {
+export function due<Event extends PatternEvent>(pat: Pattern<Event>, i: number, meter: Meter = COMMON_TIME): Event[] {
   const loopLength = lengthOf(pat, meter);
   const t0 = i * STEP;
   return pat.events.flatMap((event) => {
@@ -63,7 +63,7 @@ export function liveEvents<Event extends PatternEvent>(
   scale: number,
   from: number,
   to: number,
-  meter: Meter = MASTER,
+  meter: Meter = COMMON_TIME,
 ): Event[] {
   if (!pat.events.length) {
     return [];
@@ -87,7 +87,7 @@ export function underWayAt<Event extends PatternEvent>(
   start: number,
   scale: number,
   at: number,
-  meter: Meter = MASTER,
+  meter: Meter = COMMON_TIME,
 ): Event | undefined {
   const underWay = liveEvents(pat, start, scale, at - lengthOf(pat, meter) / scale, at, meter)
     .filter((event) => event.start + (event.duration || 0) - at >= STEP)
@@ -107,7 +107,7 @@ export function place(
   start: number,
   grid: Grid,
   from = 'beat',
-  meter: Meter = MASTER,
+  meter: Meter = COMMON_TIME,
 ): (at: number) => number {
   const placed = placeOn(base, start, grid, from, meter);
   return (at: number) => grid.timeAt(placed(at));
@@ -116,11 +116,11 @@ export function place(
 export function placeOn(
   base: number,
   start: number,
-  { stepAt }: Pick<Grid, 'stepAt'>,
+  grid: Pick<Grid, 'stepAt'>,
   from = 'beat',
-  meter: Meter = MASTER,
+  meter: Meter = COMMON_TIME,
 ): (at: number) => number {
-  const beat = (PPQ * 4) / meter[1];
-  const s0 = Math.round(stepAt(start)) + (from === 'phrase' ? modulo(base, beat) / STEP : 0);
+  const beat = beatTicks(meter);
+  const s0 = Math.round(grid.stepAt(start)) + (from === 'phrase' ? modulo(base, beat) / STEP : 0);
   return (at: number) => s0 + (at - base) / STEP;
 }

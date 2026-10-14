@@ -2,8 +2,9 @@
 // As Ableton's session view launches a clip: a pattern on a track, one a track, looping on the beat grid; each 16th (step()), every
 // clip's events due there handed on at the clock times they fall at, on the swing or straight under it, an event off its 16th where it
 // falls in it. Knows nothing of what its events are: whoever launched them plays them (play()). Each launch a number of its own
-import type { Meter, Seconds } from '../clock/index.ts';
-import { STEP, type Pattern, type PatternEvent } from './pattern.ts';
+import type { BeatGrid, Seconds } from '../clock/index.ts';
+import type { Pattern, PatternEvent } from './pattern.ts';
+import { STEP } from '../clock/index.ts';
 import { due } from './playing.ts';
 
 // a clip as launched: the track it plays on, its pattern, and whether it plays straight under the grid's swing or on it
@@ -12,13 +13,8 @@ export interface LaunchedClip<Track extends string, Event extends PatternEvent> 
   pattern: Pattern<Event>;
   straight?: boolean | undefined;
 }
-// the grid a clip plays on, the clock's: its time signature, a 16th's length and swing, the clock time a place on it falls at
-export interface ClipGrid {
-  meter(): Meter;
-  stepDuration(): Seconds;
-  swingAt(i: number): Seconds;
-  timeAt(place: number): Seconds;
-}
+// the grid a clip plays on, the clock's: its time signature, a 16th's swing, the clock time a place on it falls at, ticks in seconds
+export type ClipGrid = Pick<BeatGrid, 'meter' | 'swingAt' | 'timeAt' | 'secondsOf'>;
 // an event handed on: its track, the event, the clock time it falls at, and its clip's launch
 export type PlayEvent<Track extends string, Event extends PatternEvent> = (
   track: Track,
@@ -61,7 +57,7 @@ export class ClipLauncher<Track extends string, Event extends PatternEvent = Pat
     const grid = this.#grid;
     const offset = event.offset ?? 0;
     if (clip.straight) {
-      return t - grid.swingAt(i) + (offset / STEP) * grid.stepDuration();
+      return t - grid.swingAt(i) + grid.secondsOf(offset);
     }
     return offset ? grid.timeAt(i + offset / STEP) : t;
   }

@@ -4,8 +4,13 @@
 // by a third of an 8th at 1, and the 16ths in between follow. Phrases are kept straight, as places on the grid, and played with the swing as
 // it is now
 
-// a time signature: so many beats of a unit, [4, 4]
-export type Meter = [beats: number, unit: number];
+import { COMMON_TIME, STEP, type Meter, type Ticks } from './ticks.ts';
+
+// a clock time to a time along a timeline, its holds taken out, and back: the grid's song time is one
+export interface TimeMap {
+  toTimeline(t: number): number;
+  fromTimeline(along: number): number;
+}
 // what the grid reads live: the tempo, the swing and what it swings, the time signature
 export interface GridSettings {
   bpm: number;
@@ -14,8 +19,10 @@ export interface GridSettings {
   meter?: Meter;
 }
 
+// s: how far back the music's history is kept: the grid's holds, a timeline's events, an arrangement's view
+export const HISTORY = 30 * 60;
 const ROUNDING = 1e-9; // s: a 16th's time added up step by step and worked out at once may differ by as much (P3b)
-const KEEP_HOLDS = 31 * 60; // s: the holds kept for song time, the recording's 30 minutes and a minute more
+const KEEP_HOLDS = HISTORY + 60; // s: the holds kept for song time, the history and a minute more
 
 // the beat grid: 16ths at the settings' tempo, swung as they are now; it runs once the audio starts (start()), standing at its first 16th
 // until then, the next 16th to schedule its straight time on the clock (nextStepTime) and its number (nextStepNumber). Held, its place,
@@ -31,6 +38,11 @@ export class BeatGrid {
   #stoodAt = 0; // and the time of the 16th it's held at, where the music stands, the 16ths handed out before it playing on: song time's
   #holdFrom: number | null = null; // the time it's to be held from, the 16ths before it handed out first (P3b)
   readonly #holds: { from: number; to: number }[] = []; // each hold it went through, from when to when, in time order (P3b)
+  // song time as a time map, for what plays along a timeline
+  readonly song: TimeMap = {
+    toTimeline: (t) => this.songTime(t),
+    fromTimeline: (song) => this.timeOfSong(song),
+  };
 
   constructor(settings: GridSettings) {
     this.#settings = settings;
@@ -52,11 +64,46 @@ export class BeatGrid {
     return this.#held === null ? null : this.#heldAt;
   }
   meter(): Meter {
-    return this.#settings.meter ?? [4, 4]; // the master's time signature, [beats, unit]: a pattern's, unless it has its own
+    return this.#settings.meter ?? COMMON_TIME; // the master's time signature, [beats, unit]: a pattern's, unless it has its own
   }
   // one 16th
   stepDuration(): number {
     return 60 / this.#settings.bpm / 4;
+  }
+  // 16ths to a beat, the meter's unit: 4 in 4/4, 2 in 6/8
+  stepsPerBeat(): number {
+    return 16 / this.meter()[1];
+  }
+  beatDuration(): number {
+    return this.stepsPerBeat() * this.stepDuration();
+  }
+  // 16ths to a bar: 16 in 4/4, 12 in 6/8
+  stepsPerBar(): number {
+    return this.meter()[0] * this.stepsPerBeat();
+  }
+  // so many ticks at the tempo, in seconds, and back
+  secondsOf(ticks: Ticks): number {
+    return (ticks / STEP) * this.stepDuration();
+  }
+  ticksIn(seconds: number): Ticks {
+    return (seconds / this.stepDuration()) * STEP;
+  }
+  // where a time near now lies on the grid, in whole ticks: where it sounds swung, or straight as if nothing swung
+  ticksAt(t: number, { straight = false }: { straight?: boolean } = {}): Ticks {
+    const place = straight ? this.straightAt(t) : this.stepAt(t);
+    return Math.round(place * STEP);
+  }
+  // and back: when a place in ticks sounds, swung or straight
+  timeOfTicks(ticks: Ticks, { straight = false }: { straight?: boolean } = {}): number {
+    if (straight) {
+      return this.straightTime(ticks / STEP);
+    }
+    return this.timeAt(ticks / STEP);
+  }
+  // the next line of so many 16ths at or after a time, swung as it is now: the next beat, the next bar
+  nextLine(t: number, steps: number): number {
+    const lines = Math.ceil(this.stepAt(t) / steps - 1e-9); // a time on a line comes back a hair past it
+    return this.timeAt(lines * steps);
   }
   // how late a 16th of the grid sounds
   swingAt(i: number): number {
@@ -121,6 +168,9 @@ export class BeatGrid {
   // while the arrangement played back, as the arrangement shows them, standing; within one, where it stood, at the 16th it was held at,
   // those handed out before it played on; held now, all from it at it
   songTime(t: number): number {
+    if (t === Infinity) {
+      return t; // never, held or not
+    }
     let song = t;
     for (const { from, to } of this.#holdsSoFar()) {
       if (t > from) {

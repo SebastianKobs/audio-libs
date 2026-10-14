@@ -11,12 +11,11 @@
 // (ClipLauncher).
 // Track pools: overlapping plays shared out over tracks, as a polysynth shares its voices
 // (TrackPool); how long the plays on a track hold it (Holding).
-export { PPQ, STEP, MASTER, barTicks, startsBar, lengthOf, patternOf } from './pattern.ts';
-export type { Ticks, Pattern, PatternEvent } from './pattern.ts';
+export { lengthOf, patternOf } from './pattern.ts';
+export type { Pattern, PatternEvent } from './pattern.ts';
 export { upcoming, whole, due, liveEvents, underWayAt, rescaled, place, placeOn } from './playing.ts';
 export type { Grid } from './playing.ts';
 export { ClipLauncher } from './launcher.ts';
 export type { ClipGrid, LaunchedClip, PlayEvent } from './launcher.ts';
 export { TrackPool } from './track-pool.ts';
 export { Holding } from './holding.ts';
-export type { Meter } from '../clock/index.ts';

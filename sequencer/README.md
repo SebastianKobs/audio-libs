@@ -13,7 +13,7 @@ lights.step(i, t);                                                       // each
 
 | | |
 |---|---|
-| `PPQ`, `STEP`, `barTicks(meter)`, `startsBar(i, meter)`, `lengthOf(pat, meter)` | ticks to a quarter (96) and to a 16th (24); a bar's length, whether a 16th starts a bar, where a change waits for (G0.1c), a pattern's length |
+| `lengthOf(pat, meter)` | a pattern's length in ticks, `libs/clock/`'s (`PPQ`, `STEP`, `barTicks()`, `startsBar()`, the clock's since DRY2) |
 | `patternOf(record, cycle)` | a record as the pattern it is: from the one of its first bar, whole cycles long, looping where it was played (`from`) |
 | `upcoming(pat, at, n)` | a looping pattern's next events from a place, round the loop |
 | `whole(pat, at)` | a pattern played whole, as a launched clip: from its first event to its last, once, its first in the beat at `at`, each event in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats |

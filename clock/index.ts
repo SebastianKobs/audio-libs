@@ -11,8 +11,11 @@
 // It needs no browser: in fake mode (the unit tests) time moves only when told, and the ticks and steps of the time passed run in order
 
 // Its parts: the clock, its timeline, ticks and scheduler (clock.ts, Clock); the beat grid and its swing (beat-grid.ts, BeatGrid); the
-// edge to Web Audio (audio-clock.ts, AudioClock); the grids a time snaps to (quantizer.ts)
+// edge to Web Audio (audio-clock.ts, AudioClock); the grids a time snaps to (quantizer.ts); time in ticks, a meter's bars and beats
+// (ticks.ts); a note value in beats (note-values.ts)
 export { Clock, LOOKAHEAD, type ClockSettings, type Seconds } from './clock.ts';
-export { BeatGrid, type GridSettings, type Meter } from './beat-grid.ts';
+export { BeatGrid, HISTORY, type GridSettings, type TimeMap } from './beat-grid.ts';
+export { PPQ, STEP, COMMON_TIME, barTicks, beatTicks, startsBar, type Meter, type Ticks } from './ticks.ts';
+export { noteValueBeats } from './note-values.ts';
 export { AudioClock, type AudioContextLike } from './audio-clock.ts';
 export { GRIDS, type Grid, type SnapOptions } from './quantizer.ts';

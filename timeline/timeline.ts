@@ -5,7 +5,7 @@
 // starts, those who went told (onLetGo); an event that holds what the one before it of its key held, by the caller's equality, thinned
 // once it's settled. What's in effect at a time, and what starts in a range. The sequencer's recorder keeps what's heard on it, its
 // regions and lanes its own views of it (libs/midi-sequencer/recorder.ts)
-import type { Seconds } from '../clock/index.ts';
+import { HISTORY, type Seconds } from '../clock/index.ts';
 import { entryOf, firstAfter, lastAtOrBefore } from '../util/index.ts';
 
 // an event on the timeline: when, and how long, none while it's open or while it holds until the next of its key
@@ -20,9 +20,9 @@ export interface TimelineOptions<Held> {
   onLetGo?: ((events: readonly TimedEvent[]) => void) | undefined;
 }
 
-const KEEP: Seconds = 30 * 60; // the last 30 minutes, as an arrangement shows them
 const LET_GO_EVERY: Seconds = 1; // as events are added, what's past let go at most once a second of their time, not on every event
-const SETTLED: Seconds = 1; // an event a second past: nothing comes that late, so one that holds what's held already is thinned from then
+// s: the latest an event comes after its time; one a second past that holds what's held already is thinned
+export const LATEST: Seconds = 1;
 
 // events with their own length or open (add()), and events that hold until the next of their key (hold()), kept for a window
 export class Timeline<Event extends TimedEvent, Held extends TimedEvent = Event> {
@@ -33,7 +33,7 @@ export class Timeline<Event extends TimedEvent, Held extends TimedEvent = Event>
   readonly #held = new Map<string, Held[]>(); // each key's, in time order, the keys in the order they began
   #letGoBefore = -Infinity; // the last time what's past was let go as events came
 
-  constructor({ keep = KEEP, same = () => false, onLetGo = () => {} }: TimelineOptions<Held> = {}) {
+  constructor({ keep = HISTORY, same = () => false, onLetGo = () => {} }: TimelineOptions<Held> = {}) {
     this.#keep = keep;
     this.#same = same;
     this.#onLetGo = onLetGo;
@@ -64,7 +64,7 @@ export class Timeline<Event extends TimedEvent, Held extends TimedEvent = Event>
   settle(now: Seconds): void {
     this.#letGo(now - this.#keep);
     for (const [key, held] of this.#held) {
-      this.#held.set(key, thinned(held, now - SETTLED, this.#same));
+      this.#held.set(key, thinned(held, now - LATEST, this.#same));
     }
   }
   // the events with their own length or open, in the order they came

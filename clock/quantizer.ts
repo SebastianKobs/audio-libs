@@ -1,5 +1,6 @@
 // ---------- clock/quantizer: the grids a time can snap to, and where it lands on one ----------
 import type { BeatGrid } from './beat-grid.ts';
+import { noteValueBeats } from './note-values.ts';
 
 // the grids a time can snap to: note values on the beat grid, in 16ths. Triplets are always straight
 // a grid's step in 16ths, and whether it's a triplet; off, none
@@ -17,16 +18,19 @@ interface GridOf {
   time: (step: number) => number;
 }
 
-export const GRIDS: Record<string, Grid> = {
+export const GRIDS: Readonly<Record<string, Grid>> = {
   off: null,
-  '1/4': { g: 4 },
-  '1/4t': { g: 8 / 3, triplet: true },
-  '1/8': { g: 2 },
-  '1/8t': { g: 4 / 3, triplet: true },
-  '1/16': { g: 1 },
-  '1/16t': { g: 2 / 3, triplet: true },
+  ...Object.fromEntries(['1/4', '1/4t', '1/8', '1/8t', '1/16', '1/16t'].map((name) => [name, gridOfNoteValue(name)])),
 };
 
+// a tap grid's step in 16ths, from its note value; a triplet's marked
+function gridOfNoteValue(name: string): Grid {
+  const steps = noteValueBeats(name)! * 4; // the names above are note values
+  if (name.endsWith('t')) {
+    return { g: steps, triplet: true };
+  }
+  return { g: steps };
+}
 // where a tap at t lands on a grid (GRIDS, by its name): { at, on }, when it sounds and the time of the step it belongs to. soonest: the
 // audio's next chunk, which it never comes before (AudioClock's soonest()).
 // The grid runs on with the beat, a constant stream of time. A tap snaps to its next step at least 4 ms after t, and never before the

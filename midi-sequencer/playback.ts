@@ -10,8 +10,8 @@
 // on with its values then, its glides and changes per-note controllers, its end a note off, each note a fresh index, a region's address; a
 // lane's point a controller, its value where it's picked up by Web Audio's curve; the strips put back; in song time, the timeline time of
 // music, the clock's grid handed in as a TimeMap
-import type { Seconds } from '../clock/index.ts';
-import { Player, type PlayedFrom, type TimeMap } from '../timeline/index.ts';
+import type { Seconds, TimeMap } from '../clock/index.ts';
+import { Player, type PlayedFrom } from '../timeline/index.ts';
 import type { Address, Input } from './input.ts';
 import { lastValueAt, valueAt, type LanePoint } from './lanes.ts';
 import { NoteRotation, type Message, type PerNoteControllerName } from '../midi/index.ts';

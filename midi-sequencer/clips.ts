@@ -5,7 +5,7 @@
 // comes due the clip launcher's (launcher.ts): here only the notes as MIDI's messages
 import type { Seconds } from '../clock/index.ts';
 import type { Address, Input } from './input.ts';
-import { ClipLauncher, STEP, type ClipGrid } from '../sequencer/index.ts';
+import { ClipLauncher, type ClipGrid } from '../sequencer/index.ts';
 import type { NotePattern, PatternNote } from './pattern-note.ts';
 import { NoteRotation } from '../midi/index.ts';
 
@@ -60,7 +60,7 @@ export class ClipPlayer<Track extends string> {
     this.#rotation.noteOff(index);
     this.#input.send(clip.to, [
       { type: 'note on', index, pitch: note.pitch!, velocity, t: at }, // a clip's notes in pitches
-      { type: 'note off', index, t: at + (note.duration! / STEP) * this.#grid.stepDuration() }, // its length on the straight grid
+      { type: 'note off', index, t: at + this.#grid.secondsOf(note.duration!) }, // its length on the straight grid
     ]);
   }
 }
