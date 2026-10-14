@@ -17,6 +17,7 @@ import {
   SEND,
   controllerOf,
   deviceAt,
+  returnsIn,
   type Change,
   type DeskEntry,
   type ParamKey,
@@ -66,7 +67,7 @@ export class DeskChanges {
   }) {
     this.#mix = mix;
     this.#params = params;
-    this.#returns = new Set(desk.flatMap((entry) => (entry.fx ? [entry.fx] : [])));
+    this.#returns = new Set(returnsIn(desk));
     this.#clock = clock;
     this.#at = at;
     this.#ahead = new HeldChanges({ clock, lead, set: (change) => this.#set(change) });

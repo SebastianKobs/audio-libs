@@ -2,7 +2,7 @@
 // strips, before there's any sound. Building them is libs/web-audio-mixer/'s (its build.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { entryIn, routingOf } from '../index.ts';
+import { entryIn, entryNamed, returnsIn, routingOf } from '../index.ts';
 
 // a desk as data: a reverb, a delay sending to it into a bus, the bus into the master
 const DESK = [
@@ -33,4 +33,11 @@ test("a strip's data by its name: the master's, a desk strip's, a track's templa
     [master, sings, air, undefined],
   );
   assert.deepEqual(entryIn({ desk: [sings] }, 'master'), {}, 'a master with no data: no slots');
+});
+
+test("a desk's returns, in its order, and a desk strip's entry by its name; none for one it doesn't have", () => {
+  assert.deepEqual(returnsIn(DESK), ['reverb', 'delay']);
+  assert.equal(entryNamed(DESK, 'sings'), DESK[1]);
+  assert.equal(entryNamed(DESK, 'delay'), DESK[2]);
+  assert.equal(entryNamed(DESK, 'master'), undefined, "the master isn't a desk strip's");
 });

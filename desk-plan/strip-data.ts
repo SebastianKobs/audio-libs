@@ -47,7 +47,9 @@ export interface DeskData<Named extends Names = Names> {
 }
 
 // An entry's strip name. An entry is either a return or a bus.
-export function nameOf<Named extends Names>(entry: DeskEntry<Named>): Named['return'] | Named['bus'] {
+export function nameOf<Named extends Names>(
+  entry: Pick<DeskEntry<Named>, 'fx' | 'bus'>,
+): Named['return'] | Named['bus'] {
   return (entry.fx ?? entry.bus)!; // one of the two
 }
 // A strip's data by its name: the master's, a desk strip's, or a track's template's; none for
@@ -59,7 +61,18 @@ export function entryIn<Named extends Names>(
   if (strip === MASTER) {
     return master;
   }
-  return desk.find((entry) => nameOf(entry) === strip) ?? templateOf(strip) ?? undefined;
+  return entryNamed(desk, strip) ?? templateOf(strip) ?? undefined;
+}
+// A desk strip's entry by its name; none for one the desk doesn't have.
+export function entryNamed<Entry extends Pick<DeskEntry, 'fx' | 'bus'>>(
+  desk: readonly Entry[],
+  strip: string,
+): Entry | undefined {
+  return desk.find((entry) => nameOf(entry) === strip);
+}
+// A desk's returns, its FX channels, in its order.
+export function returnsIn<Named extends Names>(desk: readonly Pick<DeskEntry<Named>, 'fx'>[]): Named['return'][] {
+  return desk.flatMap((entry) => (entry.fx ? [entry.fx] : []));
 }
 // A slot's start, by the slot's name; none for a strip without that slot.
 export function slotStart(entry: StripEntry, slot: string): Readonly<Record<string, number>> | undefined {

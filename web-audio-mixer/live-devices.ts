@@ -8,7 +8,15 @@
 // effect's (a delay's time in beats).
 import type { Device, DeviceParams } from '../web-audio-fx/index.ts';
 import type { ParamSpecs } from '../params/index.ts';
-import { deviceAt, nameOf, type DeskEntry, type Names, type StripEntry } from '../desk-plan/index.ts';
+import {
+  deviceAt,
+  entryNamed,
+  nameOf,
+  returnsIn,
+  type DeskEntry,
+  type Names,
+  type StripEntry,
+} from '../desk-plan/index.ts';
 import { MASTER } from '../mixer/index.ts';
 
 // Adds the desk's live devices to the device params.
@@ -39,8 +47,8 @@ export function addLiveDevices<Named extends Names>(
   for (const [strip, entry] of strips) {
     addSlots(params, strip, entry, { devices, ruled: new Set(ruled(strip)) });
   }
-  for (const entry of desk.filter((fxEntry) => fxEntry.fx)) {
-    addOwnParams(params, entry, effects);
+  for (const fx of returnsIn(desk)) {
+    addOwnParams(params, entryNamed(desk, fx)!, effects); // a return's entry
   }
 }
 
