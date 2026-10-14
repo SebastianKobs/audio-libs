@@ -10,7 +10,7 @@
 //   3. Each FX channel's chain of modules, between its way in and its way out: each module as
 //      it plays (FxModules), by the effect its data names, its own params among the device
 //      params where it has them.
-// Each strip's slots' chains are handed back to its owner (built()). Its FX channels' chains
+// Each strip's slots' chains are kept (slots) and handed back to its owner (built()). Its FX channels' chains
 // follow the tempo (tempo()). A device is named by its strip and its slot (deviceAt()).
 import { FxChain, type DeviceParams, type FxModules } from '../web-audio-fx/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
@@ -36,6 +36,7 @@ export class Desk<Named extends Names = Names> {
   readonly routing: Routing; // where its strips go, from its data, before there's any sound
   readonly bus: Record<string, AudioNode> = {}; // each bus's way in, for what plays into it
   readonly chains: Record<string, FxChain> = {}; // each FX channel's chain, by name, once built
+  readonly slots: Record<string, Chains> = {}; // each strip's slots' chains, the master's too, once built
   readonly #desk: readonly DeskEntry<Named>[];
   readonly #masterEntry: StripEntry<Named>;
   readonly #devices: Readonly<Record<string, Patch>>;
@@ -166,6 +167,7 @@ export class Desk<Named extends Names = Names> {
         this.#params.playedBy(device, chain);
       }
     }
+    this.slots[strip] = chains;
     this.#built(strip, chains);
   }
   // An FX channel's chain of modules as they play, between its way in and its way out, each

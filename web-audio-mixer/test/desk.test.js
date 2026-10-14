@@ -85,6 +85,12 @@ test("a desk built from data: the mixer on its routing, its master's volume its 
     ],
     "each strip's chains handed back",
   );
+  assert.deepEqual(
+    Object.keys(desk.slots),
+    ['master', 'reverb', 'sings', 'delay'],
+    "and kept, each strip's slots' chains, for what reads them",
+  );
+  assert.equal(desk.slots.reverb.utility, built.find(([strip]) => strip === 'reverb')[1].utility);
 });
 
 test("a slot among the device params built at its params as they play and set through them; one that isn't at what its owner hands over", () => {
