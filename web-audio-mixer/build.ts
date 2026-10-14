@@ -18,7 +18,7 @@ import { returnOf, type StripEntry } from '../desk-plan/index.ts';
 
 // What a strip is built on: the desk's mixer and its engine, a beat's length for a device's
 // params in note values, and the devices a slot may hold, each an FX module, by name.
-interface BuildOn {
+export interface BuildOn {
   mixer: Mixer;
   engine: Engine;
   beat: number;
