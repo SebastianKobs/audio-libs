@@ -3,6 +3,7 @@
 // makeup gain its compressor adds, is taken back here, at the edge, where Web Audio is
 import { CompositeNode } from './composite.ts';
 import { ParamInUnits } from './param-in-units.ts';
+import { gainOf } from '../params/index.ts';
 
 const HOLD = { ratio: 20, knee: 0, attack: 0.003 }; // as hard as Web Audio's compressor goes
 // Web Audio's compressor adds a makeup gain of its own, which nothing turns off: for a hard knee, 0.6 times how far its curve brings full
@@ -36,7 +37,4 @@ export function limiterNodes(audioContext: BaseAudioContext): CompositeNode {
     readings: { reduction: () => -compressor.reduction },
     parts: [drive, compressor, back],
   });
-}
-function gainOf(dB: number): number {
-  return 10 ** (dB / 20);
 }

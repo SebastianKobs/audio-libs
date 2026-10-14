@@ -7,7 +7,7 @@
 // A stage can go out from another node than it comes in at (exit): a delay line goes in at its delay and out from its loop's lowpass.
 import { mtof } from '../music-theory/index.ts';
 import { time, when, type Values } from './values.ts';
-import { SILENCE, events, kindOf, released, type Scale } from './shapes.ts';
+import { events, kindOf, released, type Scale } from './shapes.ts';
 import type { Envelope, Patch } from './patch.ts';
 import {
   SMOOTHING,
@@ -21,6 +21,7 @@ import type { Handles, Plan } from './plan.ts';
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { NOTE_SPECS } from './blocks/note.ts';
 import { entryOf } from '../util/index.ts';
+import { SILENCE } from '../params/index.ts';
 
 interface Port {
   node: PlanNode;

@@ -5,11 +5,12 @@
 import type { Block } from '../plan-builder.ts';
 import type { Ring } from '../patch.ts';
 import type { ParamSpecs } from '../../params/index.ts';
+import { RATIO_SPEC, STOP_SPEC } from '../params.ts';
 
 // its values (params.ts): its modulator's ratio to the note, and its stop
 const RING_SPECS = {
-  ratio: { name: 'ratio', range: [0.25, 16, 0.01] },
-  stop: { name: 'stop', unit: 's', range: [0, 10, 0.01] },
+  ratio: RATIO_SPEC,
+  stop: STOP_SPEC,
 } as const satisfies ParamSpecs;
 
 export default {

@@ -324,6 +324,13 @@ test("a time held between two for any value, at least so much where it has no to
   assert.throws(() => time('0.5 nothing in 0.05..', values({})), /can't read/);
 });
 
+test('a time by a named value read as a value is, its mapping: a name with capitals too, as a macro or a note value has it (DRY3)', () => {
+  const values = { random: () => 0.5, pitchBend: 0.25, beat: 0.5 };
+  assert.equal(time('2 pitchBend', values), 0.5, 'its factor times it');
+  assert.equal(time('2 pitchBend in 0.6..', values), 0.6, 'held in its range');
+  assert.equal(time('1/8 + 2 pitchBend', values), 0.75, 'beside a note value, summed');
+});
+
 test('a term read as its mapping, as a macro is mapped to a knob: one source by name, its factor, its range, its offset; else none', () => {
   assert.deepEqual(mappingOf('decay'), { source: 'decay', factor: 1, offset: 0 }, 'a macro by its name');
   assert.deepEqual(mappingOf('0.35 decay'), { source: 'decay', factor: 0.35, offset: 0 }, 'a share of it');

@@ -1,8 +1,22 @@
 // ---------- libs/synth/params: the synth's own params, as a plugin describes its own (libs/params/) ----------
 // Every block declares its values so (I1a, mockup/architecture/done.md), each its paramSpecs, as libs/params/ has a param. Every value
 // reaches the notes that sound as it's set (G0.2b, edit.ts), so none is marked live, as I1f marked the VCA's and out's.
-// Here what several blocks share: an envelope's values, a filter's, and the patch's own, its handle's.
-import type { ParamSpecs } from '../params/index.ts';
+// Here what several blocks share: an envelope's values, a filter's, a level, a ratio, a stop, a limiter's, and the patch's own,
+// its handle's.
+import type { ParamSpec, ParamSpecs } from '../params/index.ts';
+
+// a level, a share, 1 at 0 dB
+export const LEVEL_SPEC = { name: 'level', range: [0, 2, 0.01] } as const satisfies ParamSpec;
+// a ratio to the note's frequency
+export const RATIO_SPEC = { name: 'ratio', range: [0.25, 16, 0.01] } as const satisfies ParamSpec;
+// when a source stops, s from the note's start
+export const STOP_SPEC = { name: 'stop', unit: 's', range: [0, 10, 0.01] } as const satisfies ParamSpec;
+// a limiter's (blocks/limiter.ts), the Limiter insert's too: its gain into it, in dB; its ceiling, in dBFS; its release
+export const LIMITER_SPECS = {
+  gain: { name: 'gain', unit: 'dB', range: [-12, 24, 0.1] },
+  ceiling: { name: 'ceiling', unit: 'dBFS', range: [-12, 0, 0.1] },
+  release: { name: 'release', unit: 's', range: [0.01, 1, 0.01] },
+} as const satisfies ParamSpecs;
 
 // an envelope's knobs (blocks/envelope.ts, stages.ts, I1h): its amount, in its target's units, so wide a range; its stages' times; its
 // sustain, a share of its amount; with no release, none: it rings on

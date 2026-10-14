@@ -6,11 +6,12 @@
 import type { Block } from '../plan-builder.ts';
 import type { Vca } from '../patch.ts';
 import type { ParamSpecs } from '../../params/index.ts';
-import { SILENCE } from '../shapes.ts';
+import { LEVEL_SPEC } from '../params.ts';
+import { SILENCE } from '../../params/index.ts';
 
 // its value (params.ts): its level, a share, 1 at 0 dB
 const VCA_SPECS = {
-  level: { name: 'level', range: [0, 2, 0.01], default: 1 },
+  level: { ...LEVEL_SPEC, default: 1 },
 } as const satisfies ParamSpecs;
 
 export default {

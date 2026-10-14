@@ -5,13 +5,14 @@
 import type { Block } from '../plan-builder.ts';
 import type { FrequencyModulation } from '../patch.ts';
 import type { ParamSpecs } from '../../params/index.ts';
+import { RATIO_SPEC, STOP_SPEC } from '../params.ts';
 
 // its values (params.ts): its ratio to the note, its index, its carrier osc and its stop
 const FM_SPECS = {
-  ratio: { name: 'ratio', range: [0.25, 16, 0.01] },
+  ratio: RATIO_SPEC,
   index: { name: 'index', range: [0, 20, 0.01], default: 0 },
   carrier: { name: 'carrier', range: [1, 8, 1] },
-  stop: { name: 'stop', unit: 's', range: [0, 10, 0.01] },
+  stop: STOP_SPEC,
 } as const satisfies ParamSpecs;
 
 export default {

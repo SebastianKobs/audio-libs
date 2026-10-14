@@ -19,6 +19,8 @@ export interface ParamSpec {
   readonly taper?: Taper;
   readonly parts?: ParamSpecs;
 }
+// a param on a control, a slider or a knob: one with its range
+export type RangedSpec = ParamSpec & { readonly range: NonNullable<ParamSpec['range']> };
 // a module's params, or a part's, by their keys, a nested part's under its own
 export interface ParamSpecs {
   readonly [key: string]: ParamSpec | ParamSpecs;

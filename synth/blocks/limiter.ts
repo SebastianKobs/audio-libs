@@ -5,14 +5,11 @@
 import type { Block } from '../plan-builder.ts';
 import { val } from '../values.ts';
 import type { Limiter } from '../patch.ts';
+import { LIMITER_SPECS } from '../params.ts';
 
 export default {
   key: 'limiter',
-  paramSpecs: {
-    gain: { name: 'gain', unit: 'dB', range: [-12, 24, 0.1] },
-    ceiling: { name: 'ceiling', unit: 'dBFS', range: [-12, 0, 0.1] },
-    release: { name: 'release', unit: 's', range: [0.01, 1, 0.01] },
-  },
+  paramSpecs: LIMITER_SPECS,
   plan(limiter, builder) {
     const node = builder.node('limiter', 'limiter');
     for (const param of ['gain', 'ceiling', 'release'] as const) {

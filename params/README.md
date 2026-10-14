@@ -1,6 +1,6 @@
 # params
 
-A param as a plugin describes its own, apart from any view, and where its value lies on a control. A package of its own since U2c4a2, out of `libs/synth/`; it imports nothing.
+A param as a plugin describes its own, apart from any view, and where its value lies on a control. A package of its own since U2c4a2, out of `libs/synth/`; it imports only `libs/util/`.
 
 ```ts
 import { positionOf, valueAt, type ParamSpec } from './index.ts';
@@ -13,5 +13,7 @@ valueAt(level, 1);      // 2: +6 dB at the top
 |---|---|
 | [`spec.ts`](spec.ts) | `ParamSpec`: a param's name, unit, range, choices, default, whether a gain shown in dB, its taper; `specAt()`, a value's spec by its path |
 | [`taper.ts`](taper.ts) | A position on a knob, a lane or a CC turned into a value and back, by the param's taper: the fader law, octaves or a line |
+| [`decibels.ts`](decibels.ts) | A gain in dB and back (`gainOf()`, `dBOf()`), and the floor of silence, -80 dB (`SILENCE`): what the engine's limiter, the synth's ramps and the views' meters and knobs share (DRY3) |
+| [`common.ts`](common.ts) | The specs modules share, each spreading its own copy under its own name: a fader's gain (`FADER_GAIN`), a pan (`PAN`), a switch (`SWITCH`); a desk's strip, the FX modules and the synth's pan (DRY3) |
 
 Its tests, in `test/`, run in node.

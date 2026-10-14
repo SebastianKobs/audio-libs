@@ -9,6 +9,7 @@ import { val, type Valued, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
 import type { Automation } from '../audio-plan/index.ts';
 import { releaseOf, stagesOf, type Target } from './stages.ts';
+import { SILENCE } from '../params/index.ts';
 
 // what an envelope needs of the note being planned (plan-builder.ts's builder): its values, its velocity, whether it runs on
 interface Planning {
@@ -26,9 +27,6 @@ export interface Scale {
   rest?: number | undefined;
   silence?: number | undefined;
 }
-
-// silence, as near as an exponential ramp goes: the floor of what comes out
-export const SILENCE = 0.0001;
 
 // a port's kind, by the param it moves
 export function kindOf(param: string): Kind {

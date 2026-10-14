@@ -7,6 +7,7 @@ import { time, val } from '../values.ts';
 import type { Block } from '../plan-builder.ts';
 import type { Lfo } from '../patch.ts';
 import type { ParamSpecs } from '../../params/index.ts';
+import { STOP_SPEC } from '../params.ts';
 
 // its values (params.ts): its rate and depth, its fade-in after a delay, by a target or a line, and its stop; its depth in its target's
 // units
@@ -16,7 +17,7 @@ const LFO_SPECS = {
   delay: { name: 'delay', unit: 's', range: [0, 5, 0.01], default: 0 },
   fade: { name: 'fade', unit: 's', range: [0, 5, 0.01] },
   curve: { name: 'curve', choices: ['target', 'linear'], default: 'target' },
-  stop: { name: 'stop', unit: 's', range: [0, 10, 0.01] },
+  stop: STOP_SPEC,
 } as const satisfies ParamSpecs;
 
 export default {

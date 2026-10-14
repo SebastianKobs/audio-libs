@@ -9,7 +9,6 @@
 // - a frequency is hertz, or a multiple of the note's, at most so much: { key: 8, max: 9000 }
 import { mappedValue, mappingOf } from './mappings.ts';
 import { noteValueBeats, type Seconds } from '../clock/index.ts';
-import { clamp } from '../util/index.ts';
 
 export type { Seconds };
 // a voice's note, after MIDI 2.0's per-note model: its note number and velocity, as a note-on carries them; its length to its note-off;
@@ -119,33 +118,22 @@ export function time(spec: Time, values: Values): number {
   const written = resolved; // as the patch writes it, such as '1.1 duration'
   return written.split('+').reduce((sum, term) => sum + termTime(term.trim(), written, values), 0);
 }
-// one term of a time: a value held between two ('duration in 0.2..0.6', at least so much with no top, '0.5 rise in 0.05..'), a note
-// value ('1/4' a beat, dotted '1/8.', a triplet '1/8t'), a value by name with a factor ('1.1 duration'), or seconds
+// one term of a time: a note value ('1/4' a beat, dotted '1/8.', a triplet '1/8t'), seconds, or a value by name read as its mapping
+// (mappings.ts): its factor ('1.1 duration'), held between two ('duration in 0.2..0.6', at least so much with no top, '0.5 rise in 0.05..')
 function termTime(term: string, written: string, values: Values): number {
-  const heldBetween = term.match(/^(.+) in ([\d.]+)\.\.([\d.]*)$/);
-  if (heldBetween) {
-    return heldTime(heldBetween, written, values);
-  }
   const beats = noteValueBeats(term);
   if (beats !== undefined) {
     return noteValueTime(beats, written, values);
   }
-  const named = namedTime(term, values);
-  if (named !== undefined) {
-    return named;
-  }
   if (/^-?[\d.]+$/.test(term)) {
     return +term;
   }
-  throw new Error(`a time it can't read: ${written}`);
-}
-// a value by name, with a factor, held between two, or at least the first where there's no second
-function heldTime([, named = '', low = '', high = '']: RegExpMatchArray, written: string, values: Values): number {
-  const value = namedTime(named, values);
-  if (value === undefined) {
+  const mapping = mappingOf(term);
+  const value = mapping && mappedValue(mapping, values);
+  if (typeof value !== 'number') {
     throw new Error(`a time it can't read: ${written}`);
   }
-  return clamp(value, +low, high === '' ? Infinity : +high);
+  return value;
 }
 // a note value at the beat, so many beats of it: '1/4' a beat, dotted '1/8.', a triplet '1/8t'
 function noteValueTime(beats: number, written: string, values: Values): number {
@@ -154,16 +142,6 @@ function noteValueTime(beats: number, written: string, values: Values): number {
     throw new Error(`a note value with no beat: ${written}`);
   }
   return beat * beats;
-}
-// a value by name with a factor ('1.1 duration'); none where it isn't one
-function namedTime(term: string, values: Values): number | undefined {
-  const [, factorWritten, name] = term.match(/^(-?[\d.]+)?\s*([a-z]+)$/) ?? [];
-  const namedValue = name === undefined ? undefined : values[name];
-  if (typeof namedValue !== 'number') {
-    return undefined;
-  }
-  const factor = factorWritten === undefined ? 1 : +factorWritten;
-  return factor * namedValue;
 }
 // whether a time is written as a note value ('1/8', '1/4.', '1/8t'), as a delay line's time can be
 export function isNoteValue(term: string): boolean {

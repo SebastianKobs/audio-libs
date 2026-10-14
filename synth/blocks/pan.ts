@@ -5,14 +5,14 @@
 import type { Block } from '../plan-builder.ts';
 import { val } from '../values.ts';
 import type { Pan } from '../patch.ts';
+import { PAN } from '../../params/index.ts';
 
 export default {
   key: 'pan',
   paramSpecs: {
-    name: 'pan',
-    range: [-1, 1, 0.01],
+    ...PAN,
     parts: {
-      position: { name: 'position', range: [-1, 1, 0.01] },
+      position: { ...PAN, name: 'position' },
       mono: { name: 'mono', choices: ['up-mix', 'pan pot'], default: 'up-mix' },
     },
   },

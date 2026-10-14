@@ -37,7 +37,7 @@ export { BuiltModule, MOVE_GLIDE } from './module.ts';
 export { FxModules } from './modules.ts';
 export { DeviceParams } from './device-params.ts';
 export { TEMPO_TIME } from './tempo.ts';
-export type { InsertModule, InsertParamSpec, LimiterSettings } from './inserts.ts';
+export type { InsertModule, LimiterSettings } from './inserts.ts';
 
 // a module in a chain: its name, its patch, and its params, read each time the chain is built
 export interface Module {

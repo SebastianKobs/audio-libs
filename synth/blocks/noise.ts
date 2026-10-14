@@ -7,7 +7,7 @@ import { freq, val } from '../values.ts';
 import type { PlanNode } from '../../audio-plan/index.ts';
 import type { Block, PlanBuilder } from '../plan-builder.ts';
 import type { Noise } from '../patch.ts';
-import { FILTER_SPECS } from '../params.ts';
+import { FILTER_SPECS, LEVEL_SPEC, STOP_SPEC } from '../params.ts';
 import type { ParamSpecs } from '../../params/index.ts';
 
 // its values (params.ts): its buffer, how far into it it starts at most, its own filter, its level, and its stop
@@ -15,8 +15,8 @@ const NOISE_SPECS = {
   buffer: { name: 'buffer', choices: ['noise', 'breath'], default: 'noise' },
   offset: { name: 'offset', unit: 's', range: [0, 2, 0.01] },
   filter: FILTER_SPECS,
-  level: { name: 'level', range: [0, 2, 0.01] },
-  stop: { name: 'stop', unit: 's', range: [0, 10, 0.01] },
+  level: LEVEL_SPEC,
+  stop: STOP_SPEC,
 } as const satisfies ParamSpecs;
 // s: how long each buffer is, the plan naming it by its length
 const NOISE_SECONDS = { noise: 2, breath: 0.2 } as const satisfies Record<
