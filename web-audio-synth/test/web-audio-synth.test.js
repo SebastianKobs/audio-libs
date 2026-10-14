@@ -5,17 +5,13 @@
 // studio, are tested in mockup/test/unit/ (follow-edits.test.js, sound-owner.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { adsr } from '../../synth/index.ts';
 import { Patches, playNote } from '../index.ts';
 
 let time = 10;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 // a small voice: a triangle into a lowpass, its VCA moved by an envelope, let go over 0.3 s
 const VOICE = {
   vca: { level: 0.2 },

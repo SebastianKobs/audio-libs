@@ -3,7 +3,7 @@
 // recordings (mockup/test/unit/instruments.test.js); these are their parts on their own; the routing's on its own in libs/mixer/
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { StandInContext, into, outOf } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { FxChain, RING_OUT } from '../../web-audio-fx/index.ts';
 import { Mixer } from '../index.ts';
@@ -20,7 +20,6 @@ const engine = (more = {}) => {
   time = 10;
   return new Engine({ AudioContext: Context, ...more });
 };
-const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 const beat = 60 / 72; // a beat at 72 BPM, for an FX chain's context
 
 test('the mixer: the sum into the master and the master to the output, the master fading in from 0, never at full volume; an insert on the master between them', () => {
@@ -497,12 +496,9 @@ test('a device on an insert slot: a chain of one FX module between a way in and 
   const { chain, insert } = deviceInsert(e, { name: 'utility', patch: GAIN, params: () => ({ level: 0.5 }), beat });
   assert.equal(insert.name, 'utility');
   assert.deepEqual([insert.input.kind, insert.output.kind], ['gain', 'gain']);
-  const [level] = e.audioContext.rec.edges.filter((edge) => edge.from === insert.input).map((edge) => edge.to);
+  const [level] = outOf(e.audioContext, insert.input);
   assert.deepEqual(level.gain.events, [['value', 0.5]], 'its module at its params');
-  assert.deepEqual(
-    e.audioContext.rec.edges.filter((edge) => edge.from === level).map((edge) => edge.to),
-    [insert.output],
-  );
+  assert.deepEqual(outOf(e.audioContext, level), [insert.output]);
   time = 11;
   chain.set('gain.gain', 0.25);
   assert.deepEqual(level.gain.events.at(-1), ['target', 0.25, 11, 0.05]);
@@ -524,7 +520,7 @@ test('a chain of a module made of several, a limiter: the channel comes in at it
     const [compressor] = ac.rec.nodes.filter((o) => o.kind === 'compressor'); // the chain's: the mixer has none of its own
     const [drive] = into(ac, compressor);
     assert.ok(into(ac, drive).includes(ch.input), "the channel's input into its gain");
-    const [back] = ac.rec.edges.filter((edge) => edge.from === compressor).map((edge) => edge.to);
+    const [back] = outOf(ac, compressor);
     assert.ok(into(ac, ch.level).includes(back), 'out of the gain that takes the makeup back, into the level');
     c.rebuild();
     mock.timers.tick(RING_OUT);

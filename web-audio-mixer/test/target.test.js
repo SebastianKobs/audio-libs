@@ -2,18 +2,14 @@
 // value set there now, at a time or gliding; when a change lands. On the engine and its stand-in for Web Audio, as build.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
 import { Mixer, buildChannel, buildFxChannel, setOn, timingOf } from '../index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 
 test("a change set on a built strip by its key, by a timing: its volume and its pan, a send, a slot's param at its device's port; none for a mute, a send to no return, a port its device lacks", () => {
   const { track, reverb } = desk();

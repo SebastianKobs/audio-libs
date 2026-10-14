@@ -3,15 +3,11 @@
 // bringing back the one it started from. On the engine's stand-in for Web Audio
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { FILTER, FxChain, FxModules, GAIN } from '../index.ts';
 
-class Context extends StandInContext {
-  constructor() {
-    super(() => 10);
-  }
-}
+const Context = contextOn(() => 10);
 
 test('FX modules as they play: copies of those handed in, by name; an edit plays on every chain that plays it, rebuilt, a chain playing another left be; a reset brings back the one it started from', () => {
   mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go

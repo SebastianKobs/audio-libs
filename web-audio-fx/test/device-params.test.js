@@ -3,17 +3,13 @@
 // gliding, or the chain rebuilt where it has none; a param in beats played as the note length it matches. On the engine's stand-in
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DEVICES, DeviceParams, FILTER, FxChain, TEMPO_TIME, UTILITY } from '../index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 const beat = 0.5;
 
 test("a device's params as they play: a copy of its start, handed out as copies, set by param; its start kept, for a reset", () => {

@@ -4,18 +4,14 @@
 // its stand-in for Web Audio, as build.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
 import { Mixer, TrackStrips, buildChannel, buildFxChannel } from '../index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 // a track's template: the air and a Utility, a send to the reverb, into garden sings
 const TEMPLATE = {
   inserts: [

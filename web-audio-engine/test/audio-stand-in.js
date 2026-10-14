@@ -212,6 +212,21 @@ export class StandInContext {
     return a;
   }
 }
+// an audio context class on a time, as an engine is made with one (new Engine({ AudioContext })): its time now()
+export function contextOn(now) {
+  return class extends StandInContext {
+    constructor() {
+      super(now);
+    }
+  };
+}
+// what feeds a node, and where a node goes, as a context recorded its edges
+export function into(ctx, node) {
+  return ctx.rec.edges.filter((edge) => edge.to === node).map((edge) => edge.from);
+}
+export function outOf(ctx, node) {
+  return ctx.rec.edges.filter((edge) => edge.from === node).map((edge) => edge.to);
+}
 // puts the stand-in where tool/audio/studio/engine.ts looks for a browser's. node's own navigator does: it has no audio session and doesn't vibrate
 export function install(now) {
   globalThis.window = {

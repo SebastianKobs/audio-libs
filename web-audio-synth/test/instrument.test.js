@@ -5,17 +5,13 @@
 // or once its voice has stopped; its knobs, the tempo and its draws handed in, read as each note starts; its patch from a bank, by name
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { adsr } from '../../synth/index.ts';
 import { Instrument, Patches } from '../index.ts';
 
 let time = 10;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 // a small voice: a triangle into a lowpass, its VCA moved by an envelope, let go over its release, a knob, a quarter unless it's turned;
 // a held note gliding to a pitch by 0.05 s
 const VOICE = {
@@ -57,7 +53,6 @@ function setup(more = {}) {
   });
   return { ac, out, room, patches, instrument, nodes: () => ac.rec.nodes };
 }
-const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 const oscillators = (nodes, wave = 'triangle') =>
   nodes.filter((node) => node.kind === 'oscillator' && node.props.type === wave);
 

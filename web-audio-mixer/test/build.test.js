@@ -3,18 +3,14 @@
 // and the desk's routing made from the same data. On the engine and its stand-in for Web Audio, as mixer.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DEVICES } from '../../web-audio-fx/index.ts';
 import { Mixer, buildChannel, buildFxChannel } from '../index.ts';
 import { routingOf } from '../../desk-plan/index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 // a desk as data: a reverb, a delay sending to it into a bus, the bus into the master
 const DESK = [
   { fx: 'reverb', chain: [{ effect: 'room' }], inserts: [{ slot: 'level', device: 'utility', start: { level: 0.6 } }] },
@@ -30,7 +26,6 @@ const TRACK = {
   sends: ['reverb', { to: 'delay', from: 'pre' }, { to: 'reverb', from: 'utility' }],
   out: 'sings',
 };
-const into = (ac, node) => ac.rec.edges.filter((edge) => edge.to === node).map((edge) => edge.from);
 
 test("a strip from its data: each slot's device out of the registry, in order, at its start or at what its owner hands over; its volume, pan and way out", () => {
   const { on, ac } = desk();

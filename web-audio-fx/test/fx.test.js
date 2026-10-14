@@ -3,19 +3,14 @@
 // theme's modules, or built into the mixer's FX channels, in mockup/test/unit/fx.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DEVICES, FxChain, GAIN, PAN_POT, TEMPO_TIME, UTILITY } from '../index.ts';
 import { delayBeats, plan } from '../../synth/index.ts';
 import { positionOf } from '../../params/index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
-const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
+const Context = contextOn(() => time);
 const beat = 60 / 72; // a beat at 72 BPM
 
 test("a chain set at a time, or now, and read: a port's param and node as they were built, a tower's cutoff set at a phrase's first note", () => {

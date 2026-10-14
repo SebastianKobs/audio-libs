@@ -3,19 +3,14 @@
 // its room's, each set by a per-note controller as it starts and glided to by one that comes later; let go
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn, into, outOf } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { NoteStages } from '../index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 // every stage a note can have: an instrument answering them all, your playing's (V3)
 const EVERY_STAGE = ['brightness', 'volume', 'pan', 'effects 1 depth'];
-const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 // an engine on the stand-in, its time 10
 function setup() {
   time = 10;
@@ -33,7 +28,7 @@ test("a note's own stages: its pan pot at #10 Pan, then a lowpass at #74 Brightn
   const n = new NoteStages(engine, { into: out, room, heard, answers: EVERY_STAGE });
   assert.equal(n.input.kind, 'panner');
   assert.deepEqual(n.input.pan.events, [['value', 0.3]], 'its pan as it starts, as a voice was panned (place())');
-  const [air] = ac.rec.edges.filter((e) => e.from === n.input).map((e) => e.to);
+  const [air] = outOf(ac, n.input);
   assert.deepEqual([air.kind, air.type], ['biquad', 'lowpass']);
   assert.deepEqual(air.frequency.events, [
     ['value', 24000],
@@ -63,7 +58,7 @@ test("a note's own stages glide to each per-note controller that comes later, as
     heard: { pan: 0, brightness: 5000, volume: 0.5, 'effects 1 depth': 0.2 },
     answers: EVERY_STAGE,
   });
-  const [air] = ac.rec.edges.filter((e) => e.from === n.input).map((e) => e.to);
+  const [air] = outOf(ac, n.input);
   const [dry] = into(ac, out);
   const [roomGain] = into(ac, room);
   time = 11;

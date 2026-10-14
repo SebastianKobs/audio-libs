@@ -4,7 +4,7 @@
 // mixer's own in mockup/test/unit/mixer.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from './audio-stand-in.js';
+import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { Engine, makeupOf } from '../index.ts';
 import { noise } from '../buffers.ts';
 import { near } from '../../util/test/near.js';
@@ -29,7 +29,6 @@ const draws = () => {
   let drawn = 0;
   return () => (drawn++ % 97) / 97;
 };
-const into = (ac, node) => ac.rec.edges.filter((e) => e.to === node).map((e) => e.from);
 const dB = (g) => 20 * Math.log10(g);
 // the inserts' blocks, built (F1b, mockup/architecture/mixer-and-fx.md, "Inserts as FX modules"): how Web Audio does what a plan asks, at
 // the edge, where Web Audio's own ways are
@@ -303,7 +302,7 @@ test('a meter the engine builds on a node (F5a): a splitter, an analyser for eac
   const meter = e.meter(node);
   const splitter = ac.rec.edges.find((x) => x.from === node).to;
   assert.equal(splitter.kind, 'splitter', 'the node into a splitter');
-  const sides = ac.rec.edges.filter((x) => x.from === splitter).map((x) => x.to);
+  const sides = outOf(ac, splitter);
   assert.deepEqual(
     sides.map((a) => [a.kind, a.fftSize]),
     [

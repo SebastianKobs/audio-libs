@@ -4,18 +4,14 @@
 // chains handed back; the chains following the tempo. On the engine and its stand-in for Web Audio, as build.test.js
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
+import { contextOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { DeviceParams, FILTER, FxModules, GAIN, DEVICES, LIMITER_SETTINGS } from '../../web-audio-fx/index.ts';
 import { nameOf } from '../../desk-plan/index.ts';
 import { Desk } from '../index.ts';
 
 let time = 0;
-class Context extends StandInContext {
-  constructor() {
-    super(() => time);
-  }
-}
+const Context = contextOn(() => time);
 const beat = 60 / 72;
 // a desk as data: a reverb with its Utility, garden sings, a delay into it whose chain has params of its own
 const DESK = [
