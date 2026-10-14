@@ -12,13 +12,13 @@
 import { Holding } from './holding.ts';
 
 // A track: the owner of its play, and when the play starts and dies away.
-export interface Track {
+export interface PoolTrack {
   owner?: object;
   from?: number;
   until?: number;
 }
 export class TrackPool {
-  readonly tracks: Track[] = [];
+  readonly tracks: PoolTrack[] = [];
   // Each owner's last track; forgotten with the owner.
   readonly #last = new WeakMap<object, number>();
   readonly #holding: Holding[] = []; // how long each track is held, by track index

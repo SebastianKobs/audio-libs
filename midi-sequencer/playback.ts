@@ -13,7 +13,7 @@
 import type { Seconds, TimeMap } from '../clock/index.ts';
 import { Player, type PlayedFrom } from '../timeline/index.ts';
 import type { Address, Input } from './input.ts';
-import { lastValueAt, valueAt, type LanePoint } from './lanes.ts';
+import { lastValueAt, laneValueAt, type LanePoint } from './lanes.ts';
 import { NoteRotation, noteMessages, type Message, type PerNoteControllerName } from '../midi/index.ts';
 import type { Lane, RecordedNote, Region } from './recorder.ts';
 import { timedValue } from '../util/index.ts';
@@ -86,7 +86,7 @@ export class RecordingPlayer<Track extends string> {
     });
     this.#lanes = new Map(played.flatMap((one) => one.lane.points.map((point) => [point, one] as const)));
     this.#putBack = played.flatMap((one) => {
-      const value = valueAt(one.lane.points, from.end);
+      const value = laneValueAt(one.lane.points, from.end);
       return value === undefined ? [] : [{ ...one, value }];
     });
     this.#player.play({ events: notes, held: played.map(({ lane }) => lane.points) }, from);
@@ -179,7 +179,7 @@ export class RecordingPlayer<Track extends string> {
       this.#sendLane(played, point.value, t, point.glide);
       return;
     }
-    this.#sendLane(played, valueAt(played.lane.points, from)!, t); // in effect there: a value then
+    this.#sendLane(played, laneValueAt(played.lane.points, from)!, t); // in effect there: a value then
   }
   // playback ended at a clock time: each lane it played back as it was when it started, but one moved by hand, its move standing; once
   #putLanesBack(t: Seconds): void {

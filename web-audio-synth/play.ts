@@ -5,7 +5,7 @@
 import type { Context, Note, Params, Patch } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import type { Patches } from './patches.ts';
-import { builtNote, type Played } from './sounding.ts';
+import { builtNote, type PlayingNote } from './sounding.ts';
 
 // a note to play: its pitch, when it sounds, a clock time, how strong, full unless given; its length, with none held open until it's let
 // go; a bend, a vibrato, its glides ([[time, pitch]], clock times), a rise, where its patch reads them
@@ -68,7 +68,7 @@ function noteFor(
 // a played note's controls, taking clock times, each told it as the plan it has then makes it, an edit's (G0.2b), its time from its start
 // worked out as it's called: set and release, and a held note's glide where its patch has it; whether it has stopped, by the context's
 // time now
-function controlsOf(played: Played, sinceStart: (at: number) => number, now: () => number): NoteControls {
+function controlsOf(played: PlayingNote, sinceStart: (at: number) => number, now: () => number): NoteControls {
   const controls: NoteControls = {
     set: (port, value, at, timeConstant) => {
       const since = sinceStart(at);

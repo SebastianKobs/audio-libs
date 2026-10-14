@@ -3,6 +3,6 @@
 // play, by name, each edit reaching every note of one that sounds, a value glided there, a change of structure rebuilt and crossfaded
 export { playNote, type NoteControls, type NoteToPlay } from './play.ts';
 export { Patches } from './patches.ts';
-export { Sounding, builtNote, type Played, type SoundingNote, type Told } from './sounding.ts';
+export { Sounding, builtNote, type PlayingNote, type SoundingNote, type Told } from './sounding.ts';
 export { NoteStages, HEARD_PER_NOTE, ROOM_PER_NOTE, type StageController } from './note-stages.ts';
 export { Instrument } from './instrument.ts';

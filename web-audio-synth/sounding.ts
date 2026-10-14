@@ -27,7 +27,7 @@ export interface SoundingNote {
 export type Told = (current: Plan) => Operation[];
 // a note as it plays on: its plan as it plays now, an edit's, and what it's told, turned into operations by that plan and applied; and
 // whether it has stopped by now, a context time (V3)
-export interface Played {
+export interface PlayingNote {
   readonly plan: Plan;
   tell(told: Told): void;
   stopped(now: number): boolean;
@@ -45,7 +45,7 @@ const CROSSFADE = 0.1; // s: a rebuilt voice fades in, and the old one out, over
 export class Sounding {
   readonly #notes = new WeakMap<Patch, Set<Kept>>(); // each instrument's notes, by its patch as it plays
   // a note that sounds on a patch, from its start: how it plays on
-  add(patch: Patch, note: SoundingNote): Played {
+  add(patch: Patch, note: SoundingNote): PlayingNote {
     const notes = this.#notesOf(patch);
     letGoOfStopped(notes, note.start);
     const kept: Kept = { note: { ...note }, told: [], ops: [], stops: stopsOf(note.plan) };

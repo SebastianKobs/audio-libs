@@ -18,4 +18,4 @@ export { BeatGrid, HISTORY, type GridSettings, type TimeMap } from './beat-grid.
 export { PPQ, STEP, COMMON_TIME, barTicks, beatTicks, startsBar, type Meter, type Ticks } from './ticks.ts';
 export { noteValueBeats } from './note-values.ts';
 export { AudioClock, type AudioContextLike } from './audio-clock.ts';
-export { GRIDS, type Grid, type SnapOptions } from './quantizer.ts';
+export { GRIDS, type SnapGrid, type SnapOptions } from './quantizer.ts';

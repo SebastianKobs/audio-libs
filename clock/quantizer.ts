@@ -4,7 +4,7 @@ import { noteValueBeats } from './note-values.ts';
 
 // the grids a time can snap to: note values on the beat grid, in 16ths. Triplets are always straight
 // a grid's step in 16ths, and whether it's a triplet; off, none
-export type Grid = { g: number; triplet?: boolean } | null;
+export type SnapGrid = { g: number; triplet?: boolean } | null;
 // an option given as undefined is one not given
 export interface SnapOptions {
   straight?: boolean | undefined;
@@ -18,13 +18,13 @@ interface GridOf {
   time: (step: number) => number;
 }
 
-export const GRIDS: Readonly<Record<string, Grid>> = {
+export const GRIDS: Readonly<Record<string, SnapGrid>> = {
   off: null,
   ...Object.fromEntries(['1/4', '1/4t', '1/8', '1/8t', '1/16', '1/16t'].map((name) => [name, gridOfNoteValue(name)])),
 };
 
 // a tap grid's step in 16ths, from its note value; a triplet's marked
-function gridOfNoteValue(name: string): Grid {
+function gridOfNoteValue(name: string): SnapGrid {
   const steps = noteValueBeats(name)! * 4; // the names above are note values
   if (name.endsWith('t')) {
     return { g: steps, triplet: true };

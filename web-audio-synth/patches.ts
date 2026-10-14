@@ -4,7 +4,7 @@
 // down, so whoever holds it plays the change
 import type { Patch } from '../synth/index.ts';
 import { LiveCopies } from '../util/index.ts';
-import { Sounding, type Played, type SoundingNote } from './sounding.ts';
+import { Sounding, type PlayingNote, type SoundingNote } from './sounding.ts';
 
 // the patches as they play (the tool's instruments, by its roles, until Z7)
 export class Patches extends LiveCopies<Patch> {
@@ -16,7 +16,7 @@ export class Patches extends LiveCopies<Patch> {
     this.onSet((_name, playing) => this.#sounding.edit(playing, now()));
   }
   // a note a patch sounds, the patch the one it plays: hands back how it plays on, told what it's told (sounding.ts)
-  sounds(patch: Patch, note: SoundingNote): Played {
+  sounds(patch: Patch, note: SoundingNote): PlayingNote {
     return this.#sounding.add(patch, note);
   }
 }

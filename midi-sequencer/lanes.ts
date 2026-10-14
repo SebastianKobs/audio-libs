@@ -14,7 +14,7 @@ export function samePoint(before: LanePoint, after: LanePoint): boolean {
 }
 // a lane's value at a time: its last point's by then, a jump's its value, a glide's where it had got to from where the lane was, by its
 // time constant, as Web Audio's setTargetAtTime goes; none before its first point
-export function valueAt(points: readonly LanePoint[], t: Seconds): number | undefined {
+export function laneValueAt(points: readonly LanePoint[], t: Seconds): number | undefined {
   let value: number | undefined;
   let gliding: { point: LanePoint; from: number } | null = null;
   for (const point of points) {
