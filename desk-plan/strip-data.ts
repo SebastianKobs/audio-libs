@@ -1,5 +1,5 @@
-// ---------- libs/web-audio-mixer/strip-data: a strip as data, and a desk's routing made from it ----------
-// The form a desk's own strips and its tracks' templates are written in, which build.ts builds.
+// ---------- libs/desk-plan/strip-data: a strip as data, and a desk's routing made from it ----------
+// The form a desk's own strips and its tracks' templates are written in, which libs/web-audio-mixer/'s build.ts builds.
 // Shape: a strip's insert slots, each a device with its start, its sends and its way out.
 // A desk's entry is either a return, an FX channel with its chain of effects, or a bus.
 // Names: a desk's returns, buses, slots, devices and effects are strings here; a user hands

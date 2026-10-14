@@ -1,4 +1,4 @@
-// ---------- libs/web-audio-mixer/params: a strip's own parameters, as a plugin declares its own ----------
+// ---------- libs/desk-plan/params: a strip's own parameters, as a plugin declares its own ----------
 // Each with its name, its range and its taper (libs/synth/'s ParamSpec), so a knob, a lane and a controller's CC each turn a position
 // into a value the same way. A gain is a share, shown in dB, its range in dB.
 //   volume, and each send: by the fader law, unity two thirds up, +6 dB at the top, as Ableton's faders and sends;

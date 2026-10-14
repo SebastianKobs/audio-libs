@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { FILTER, UTILITY } from '../../web-audio-fx/index.ts';
-import { Mixer, buildChannel, buildFxChannel, routingOf } from '../index.ts';
+import { Mixer, buildChannel, buildFxChannel } from '../index.ts';
+import { routingOf } from '../../desk-plan/index.ts';
 
 let time = 0;
 class Context extends StandInContext {
@@ -80,18 +81,6 @@ test('an FX channel from its data: its slots after its chain, its sends by name 
     ['level'],
   );
   assert.equal(on.built.reverb.chains.level.paramOf('gain.gain').value, 0.6, 'its Utility at its start');
-});
-
-test("the desk's routing from its data, before there's any sound: each strip a return or a bus, where it goes, what it sends to", () => {
-  const routing = routingOf(DESK);
-  assert.deepEqual(
-    ['reverb', 'sings', 'delay'].map((name) => [routing.kindOf(name), routing.outOf(name), [...routing.sentTo(name)]]),
-    [
-      ['return', 'master', []],
-      ['bus', 'master', []],
-      ['return', 'sings', ['reverb']],
-    ],
-  );
 });
 
 // the desk built from its data on a mixer of its own: what a strip is built on, and each desk strip as built

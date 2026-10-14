@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-mixer/build: a strip built from its data, a desk's own or a track's ----------
-// One builder for every strip: a desk's own (strip-data.ts's DeskEntry) and its tracks'.
+// One builder for every strip: a desk's own (libs/desk-plan/'s DeskEntry) and its tracks'.
 // How a strip is built:
 //   1. Each insert slot, in order: its device out of the registry handed in, a chain of one FX
 //      module (device-insert.ts), at its start, or at the params the strip's owner hands over
@@ -14,7 +14,7 @@ import type { Channel, Insert, Send, StripOptions } from './channel.ts';
 import type { FxChannel } from './fx-channel.ts';
 import type { Mixer } from './mixer.ts';
 import { deviceInsert } from './device-insert.ts';
-import { returnOf, type StripEntry } from './strip-data.ts';
+import { returnOf, type StripEntry } from '../desk-plan/index.ts';
 
 // What a strip is built on: the desk's mixer and its engine, a beat's length for a device's
 // params in note values, and the devices a slot may hold, each an FX module, by name.

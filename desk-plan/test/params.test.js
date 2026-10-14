@@ -1,4 +1,4 @@
-// A strip's own parameters (mockup/src/libs/web-audio-mixer/params.ts, U2c4a), declared as a plugin declares its own: a name, a range
+// A strip's own parameters (mockup/src/libs/desk-plan/params.ts, U2c4a; libs/web-audio-mixer/'s until U2c4a3), declared as a plugin declares its own: a name, a range
 // and a taper, so a knob, a lane and a controller's CC each turn a position into a value the same way (libs/synth/taper.ts)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
