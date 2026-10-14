@@ -135,7 +135,7 @@ test("Web Audio's own makeup, for a hard knee: 0.6 times how far its curve bring
   near(makeupOf(0, 6), 0, 'threshold 0: none');
 });
 
-test('a pan, built: a stereo panner, the sound made stereo before it, so a mono sound is as loud in the middle; or a pan pot', () => {
+test('a pan, built: a stereo panner, the sound made stereo before it, so a mono sound is as loud in the middle; or a pan pot; with no stereo panner, passed through', () => {
   const e = engine();
   const dest = e.audioContext.createGain();
   const [pan] = e.build({ nodes: [unplayed('panner', { pan: [['value', -0.5]] })], edges: [[0, 'out']] }, 12, dest);
@@ -150,6 +150,9 @@ test('a pan, built: a stereo panner, the sound made stereo before it, so a mono 
   );
   assert.notEqual(pot.channelCountMode, 'explicit', "a pan pot: a mono sound panned as it comes, Web Audio's own way");
   assert.equal(pot.mono, undefined, 'made so, not told');
+  e.audioContext.createStereoPanner = undefined;
+  const [through] = e.build({ nodes: [unplayed('panner', { pan: [['value', -0.5]] })], edges: [[0, 'out']] }, 12, dest);
+  assert.deepEqual([through.kind, through.gain.value], ['gain', 1], 'no stereo panner: it passes through, unpanned');
 });
 
 test("a limiter, built: its gain into a compressor held at its ceiling as hard as Web Audio's goes, Web Audio's makeup taken back after; set live, in its own units", () => {

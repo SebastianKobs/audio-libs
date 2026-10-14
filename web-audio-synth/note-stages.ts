@@ -28,7 +28,7 @@ const EVERY_STAGE: readonly StageController[] = Object.freeze(['brightness', 'vo
 
 // a note's own stages, what a spot was (G0c3) and its voice's pan, set by the note's per-note controllers, not by an emitter of their
 // own: the garden's emitter sends what it sets as them (mockup/architecture/done.md, G0). Built by the engine (F6c): its pan, the Pan
-// module, a pan pot, at #10 Pan as it starts, as a voice was panned (Space.place()), none for a note sent with none, a sound with no
+// module, a pan pot, at #10 Pan as it starts, as a voice was panned until V5, none for a note sent with none, a sound with no
 // place; its air, the Filter module, its cutoff #74 Brightness; its dry gain, a Gain module, into `into`, its level #7 Volume; and its
 // room's, another, into `room`, taken after the air, its level #91 Effects 1 Depth. Each only where its instrument answers its controller
 // (answers, every one unless it says, V3): with none, its air, its sound goes into `into` as it is; the room only after the air. A voice
