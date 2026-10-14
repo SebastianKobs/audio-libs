@@ -3,6 +3,7 @@ import type { Desk, MixerEngine } from './mixer.ts';
 import type { Insert } from './channel.ts';
 import { BuiltModule, GAIN, PAN } from '../web-audio-fx/index.ts';
 import { MUTE } from './gains.ts';
+import { MASTER } from '../mixer/index.ts';
 
 // An FX channel's stages, each a module the engine built.
 interface Stages {
@@ -51,7 +52,7 @@ export class FxChannel {
     engine: MixerEngine,
     desk: Desk,
     name: string,
-    { level = 1, pan, sends = {}, out = 'master', inserts = [] }: FxOptions,
+    { level = 1, pan, sends = {}, out = MASTER, inserts = [] }: FxOptions,
   ) {
     this.#engine = engine;
     this.#desk = desk;

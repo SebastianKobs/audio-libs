@@ -2,18 +2,17 @@
 import { plan as planPatch, type Patch, type Plan, type Context, type Params } from '../synth/index.ts';
 import type { Automation } from '../audio-plan/index.ts';
 import { inputOf, outputOf, paramOf, type BuiltNode, type Engine } from '../web-audio-engine/index.ts';
+import { MOVED, portSet, type Settable, type Timing } from './timing.ts';
 
 type ModuleEngine = Pick<Engine, 'now' | 'build' | 'apply'>;
 
 const CONTEXT: Context = { random: () => 0.5 }; // a gain or a pan reads no tempo and draws nothing
-export const MOVE_GLIDE = 0.05; // s: the time constant a port moved with none of its own glides there by, a control moved by hand's (G3c3)
 
 // a module built on its own, at its params, into where its sound goes (into), as the mixer's stages are (F5); with none, its caller wires
-// its way out (an FX channel's input, before its chain). Its way in (input) and out (output), each a node of the engine's; a port glided
-// there through its plan's controls (set()), set at a time (setAt()) or now (setNow()), as an FX chain's, so it's a stage set from
-// outside (a track's controllers), a port it hasn't left alone; or given events of its own (automate()); times the context's. Its value
-// now read back (value())
-export class BuiltModule {
+// its way out (an FX channel's input, before its chain). Its way in (input) and out (output), each a node of the engine's; a port set
+// by a timing (set()), as an FX chain's, so it's a stage set from outside (a track's controllers), a port it hasn't left alone; or given
+// events of its own (automate()); times the context's. Its value now read back (value())
+export class BuiltModule implements Settable {
   readonly input: AudioNode;
   readonly output: AudioNode;
   readonly #engine: ModuleEngine;
@@ -27,15 +26,9 @@ export class BuiltModule {
     this.input = inputOf(this.#node(this.#plan.input!)); // an effect module's plan names its input
     this.output = outputOf(this.#node(this.#plan.edges.find(([, to]) => to === 'out')![0])); // and goes out
   }
-  // a port gliding there by its time constant, from a time to come, a context time, else from now (V3)
-  set(port: string, value: number, timeConstant = MOVE_GLIDE, from = this.#engine.now()): void {
-    this.#move(port, value, from, timeConstant);
-  }
-  setAt(port: string, value: number, at: number): void {
-    this.#move(port, value, at, 0);
-  }
-  setNow(port: string, value: number): void {
-    this.automate(port, [['value', value]]);
+  // a port set by a timing, gliding from a time to come where it's given one, a context time (V3); one it lacks left alone
+  set(port: string, value: number, timing: Timing = MOVED): void {
+    this.#engine.apply(this.#nodes, portSet(this.#plan, port, value, timing, this.#engine.now()), 0);
   }
   automate(port: string, events: Automation[]): void {
     const operations = this.#offered(port).map((offered) => ({ id: offered.id, param: offered.param!, events }));
@@ -48,13 +41,6 @@ export class BuiltModule {
       throw new Error(`no port ${port} on this module`);
     }
     return paramOf(this.#node(offered.id), offered.param!).value;
-  }
-  // a port moved through its plan's controls, from at: gliding by its time constant, or at once with none; a port it lacks left alone
-  #move(port: string, value: number, at: number, timeConstant: number): void {
-    if (!this.#plan.ports[port]) {
-      return;
-    }
-    this.#engine.apply(this.#nodes, this.#plan.controls.set(port, value, at, timeConstant), 0);
   }
   // let go of, once nothing plays into it: each of its nodes' way out disconnected
   letGo(): void {

@@ -4,8 +4,8 @@
 // mixer's between its input and its inserts, or its level, or any other two, in order, each into the next.
 // modules: [{ name, patch, params }], params a function, read each time the chain is built, so a setting bound to one is read as it is
 // then. context: a module's, a beat's length and random(); it plays no note. tempo(beat) glides what follows the beat (a delay line's time);
-// set(port, value, timeConstant) glides a port of every module that has it (a delay's feedback), setAt(port, value, at) sets it at a time,
-// setNow(port, value) now, as a param's value is set; time() is the first delay line's time now, in
+// set(port, value, timing) sets a port of every module that has it (a delay's feedback), now, at a time or gliding (timing.ts); time() is
+// the first delay line's time now, in
 // seconds, and feedback() its feedback. rebuild() plans and builds the chain again, from its patches as they are now (an editor changed one): the new chain is built
 // beside the old, where it starts moves over to it, and the old one rings out (RING_OUT) before it's let go, so its repeats aren't
 // cut off. plans() for an editor's flow; points() and readings() what its modules offer to read. Times start at the context's now.
@@ -31,9 +31,10 @@ import {
   type Engine,
   type Automatable,
 } from '../web-audio-engine/index.ts';
-import { MOVE_GLIDE } from './module.ts';
+import { MOVED, portSet, type Settable, type Timing } from './timing.ts';
 export { FILTER, GAIN, INSERTS, LIMITER, LIMITER_SETTINGS, PAN, PAN_PARAMS, PAN_POT, UTILITY } from './inserts.ts';
-export { BuiltModule, MOVE_GLIDE } from './module.ts';
+export { BuiltModule } from './module.ts';
+export { MOVED, type Settable, type Target, type Timing } from './timing.ts';
 export { FxModules } from './modules.ts';
 export { DeviceParams } from './device-params.ts';
 export { TEMPO_TIME } from './tempo.ts';
@@ -70,7 +71,7 @@ interface ChainEnds {
 
 export const RING_OUT = 8000; // ms an old chain rings out after a rebuild before it's let go
 
-export class FxChain {
+export class FxChain implements Settable {
   readonly #engine: ChainEngine;
   readonly #between: ChainEnds;
   readonly #modules: Module[];
@@ -91,26 +92,10 @@ export class FxChain {
     this.#context.beat = beat;
     this.#run((plan, at) => plan.handle?.tempo?.(beat, at));
   }
-  set(port: string, value: number, timeConstant = MOVE_GLIDE): void {
-    this.#run((plan, at) => {
-      if (!plan.ports[port]) {
-        return null;
-      }
-      return plan.controls.set(port, value, at, timeConstant);
-    });
-  }
-  // a port set at a time, at once, as a phrase's first note sets a tower's cutoff; the time in the context's
-  setAt(port: string, value: number, at: number): void {
-    this.#run((plan) => (plan.ports[port] ? plan.controls.set(port, value, at, 0) : null));
-  }
-  // a port set now, at once, as a param's value is set: as a track's controllers set it as it's made
-  setNow(port: string, value: number): void {
-    this.#run(
-      (plan) =>
-        (plan.ports[port] ?? [])
-          .filter((offered) => offered.param)
-          .map((offered) => ({ id: offered.id, param: offered.param!, events: [['value', value]] })), // offering a param, as filtered
-    );
+  // a port of every module that has it set by a timing: now, as a track's controllers set it as it's made; at a time, as a phrase's
+  // first note sets a tower's cutoff; or gliding, as a control moved by hand; times the context's
+  set(port: string, value: number, timing: Timing = MOVED): void {
+    this.#run((plan, now) => portSet(plan, port, value, timing, now));
   }
   // a port's param as it was built, for what shows it or records it: the first module's that offers it, or none
   paramOf(port: string): Automatable | undefined {

@@ -4,29 +4,17 @@
 //   a send: the send's stage, once it's built;
 //   a slot's param: the slot's chain, at the port its device declares for the param.
 // None for a mute or a solo, which silence a strip by the routing, nor where nothing's built at it yet.
-// A value lands there now, at a time on the audio's clock, or gliding by a time constant.
+// A value lands there by a timing (libs/web-audio-fx/'s): now, at a time on the audio's clock, or gliding by a time constant.
 import { SEND, type ParamKey } from '../desk-plan/index.ts';
+import type { Settable, Target } from '../web-audio-fx/index.ts';
 import type { Channel } from './channel.ts';
 import type { FxChannel } from './fx-channel.ts';
 
-// a stage a value is set on at a port: a built module, or a chain of them
-interface Stage {
-  set(port: string, value: number, timeConstant?: number): void;
-  setAt(port: string, value: number, at: number): void;
-  setNow(port: string, value: number): void;
-}
-// where a parameter lands: a stage and its port
-export interface Target {
-  stage: Stage;
-  port: string;
-}
 // a slot's chain and the ports its device declares, by param
 interface Slotted {
-  chain: Stage;
+  chain: Settable;
   ports: Readonly<Record<string, string>>;
 }
-// when a value lands: now, at a time on the audio's clock, or gliding by a time constant
-export type Timing = 'now' | { at: number } | { glide: number };
 
 // A key's target on a built strip; slotted: a slot's chain and its device's ports, by the slot's name.
 export function targetOf(
@@ -47,18 +35,6 @@ export function targetOf(
     return null;
   }
   return { stage: device.chain, port };
-}
-// A value set on its target, as its timing says.
-export function setTarget({ stage, port }: Target, value: number, timing: Timing): void {
-  if (timing === 'now') {
-    stage.setNow(port, value);
-    return;
-  }
-  if ('at' in timing) {
-    stage.setAt(port, value, timing.at);
-    return;
-  }
-  stage.set(port, value, timing.glide);
 }
 
 // a strip's own param's target: its volume or its pan; none for a mute or a solo

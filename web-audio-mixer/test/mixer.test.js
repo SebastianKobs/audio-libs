@@ -412,8 +412,8 @@ test("a channel with inserts: its input through each insert in order, then its f
   assert.deepEqual(t.fader.gain.events.slice(1), [['target', 0.4, 11, 0.05]], 'and so does the fader');
   assert.equal(t.faderStage.input, t.fader, 'its fader handed out as a stage, the Gain module it is (F6b)');
   assert.equal(t.sendStages.delay.input, t.sends.delay, 'and each send');
-  t.faderStage.setAt('gain.gain', 0.2, 12);
-  t.sendStages.reverb.setAt('gain.gain', 0.1, 12);
+  t.faderStage.set('gain.gain', 0.2, { at: 12 });
+  t.sendStages.reverb.set('gain.gain', 0.1, { at: 12 });
   assert.deepEqual(
     [t.fader.gain.events.at(-1), t.sends.reverb.gain.events.at(-1)],
     [

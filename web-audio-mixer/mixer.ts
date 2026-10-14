@@ -1,7 +1,7 @@
 // ---------- libs/web-audio-mixer/mixer: the desk, its strips by name, the sum, the master's insert, the master and their peaks ----------
 import { Channel, sentTo } from './channel.ts';
 import type { StripOptions } from './channel.ts';
-import { Routing, type StripKind } from '../mixer/index.ts';
+import { Routing, type StripKind, MASTER } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
 import type { FxOptions } from './fx-channel.ts';
@@ -66,7 +66,7 @@ export class Mixer {
     this.master = this.#master.input as GainNode; // a Gain module's one gain
     this.#insert = master;
     this.#volume = volume;
-    this.#master.set('gain.gain', volume, FADE_IN); // never start at full volume
+    this.#master.set('gain.gain', volume, { glide: FADE_IN }); // never start at full volume
     this.sum = new BuiltModule(engine, { patch: GAIN, into: master?.input ?? this.master }).input as GainNode; // as the master
     master?.output.connect(this.master);
     this.#points = { master: this.master, ...master?.points };
@@ -111,13 +111,13 @@ export class Mixer {
   // The master faded out, quickly. Switching the audio off once it's quiet is the
   // desk's owner's: a desk has no power switch of its own.
   fadeOut(): void {
-    this.#master.set('gain.gain', 0, FADE_OUT);
+    this.#master.set('gain.gain', 0, { glide: FADE_OUT });
   }
   // The master faded in again, never at full volume.
   // fromSilence: the audio was off, so from 0; otherwise from where the fade got to.
   fadeIn({ fromSilence = false }: { fromSilence?: boolean } = {}): void {
     if (!fromSilence) {
-      this.#master.set('gain.gain', this.#volume, FADE_IN);
+      this.#master.set('gain.gain', this.#volume, { glide: FADE_IN });
       return;
     }
     const at = this.#engine.now();
@@ -192,7 +192,7 @@ export class Mixer {
   }
   // the node a way out reaches: the master's sum, or a bus's input
   #outOf(out: string): AudioNode {
-    if (out === 'master') {
+    if (out === MASTER) {
       return this.sum;
     }
     return this.#on(out).input;

@@ -9,7 +9,8 @@
 import type { DeviceParams } from '../web-audio-fx/index.ts';
 import type { Patch } from '../synth/index.ts';
 import type { ParamSpecs } from '../params/index.ts';
-import { MASTER, deviceAt, nameOf, type DeskEntry, type Names, type StripEntry } from '../desk-plan/index.ts';
+import { deviceAt, nameOf, type DeskEntry, type Names, type StripEntry } from '../desk-plan/index.ts';
+import { MASTER } from '../mixer/index.ts';
 
 // Adds the desk's live devices to the device params.
 //   desk, master: its strips' data and the master's;

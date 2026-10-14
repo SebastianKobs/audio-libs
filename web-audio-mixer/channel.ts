@@ -3,6 +3,7 @@ import type { Desk, MixerEngine } from './mixer.ts';
 import { BuiltModule, GAIN, PAN } from '../web-audio-fx/index.ts';
 import { MUTE } from './gains.ts';
 import { setByName } from './fx-channel.ts';
+import { MASTER } from '../mixer/index.ts';
 
 // An insert on a strip: modules the caller built in the context, in at input, out at output.
 // tap: where a send can be taken before the insert's level.
@@ -68,7 +69,7 @@ export class Channel {
     engine: MixerEngine,
     desk: Desk,
     name: string,
-    { volume = 1, pan, sends = [], out = 'master', inserts = [] }: StripOptions,
+    { volume = 1, pan, sends = [], out = MASTER, inserts = [] }: StripOptions,
   ) {
     this.#engine = engine;
     this.#desk = desk;

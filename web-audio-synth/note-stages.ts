@@ -1,15 +1,10 @@
 // ---------- libs/web-audio-synth/note-stages: a note's own stages, set by its per-note controllers (G0b; the space's until V3) ----------
-import { BuiltModule, FILTER, GAIN, PAN_POT } from '../web-audio-fx/index.ts';
+import { BuiltModule, FILTER, GAIN, PAN_POT, type Target } from '../web-audio-fx/index.ts';
 import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 
 // the engine a note's stages are built by
 type StagesEngine = Pick<Engine, 'now' | 'build' | 'apply'>;
-// a stage a controller sets: its module, and the port
-interface Stage {
-  module: BuiltModule;
-  port: string;
-}
 // the per-note controllers a note's stages answer, each with a stage of its own: #74 Brightness, #7 Volume, #10 Pan, #91 Effects 1 Depth
 export type StageController = 'brightness' | 'volume' | 'pan' | 'effects 1 depth';
 
@@ -40,7 +35,7 @@ export class NoteStages {
   readonly #air: BuiltModule | null;
   readonly #dry: BuiltModule | null;
   readonly #room: BuiltModule | null;
-  readonly #stages: ReadonlyMap<PerNoteControllerName, Stage>; // by the controller that sets it; its pan set as it starts, by its params
+  readonly #stages: ReadonlyMap<PerNoteControllerName, Target>; // by the controller that sets it; its pan set as it starts, by its params
 
   constructor(
     engine: StagesEngine,
@@ -65,7 +60,7 @@ export class NoteStages {
   // stage for left alone
   glide(controller: PerNoteControllerName, value: number, timeConstant: number, from?: number): void {
     const stage = this.#stages.get(controller);
-    stage?.module.set(stage.port, value, timeConstant, from);
+    stage?.stage.set(stage.port, value, { glide: timeConstant, from });
   }
   // each one's way out disconnected, its pan's too
   letGo(): void {
@@ -95,25 +90,25 @@ function stagesOf(
   air: BuiltModule | null,
   dry: BuiltModule | null,
   room: BuiltModule | null,
-): Map<PerNoteControllerName, Stage> {
-  const stages = new Map<PerNoteControllerName, Stage>();
+): Map<PerNoteControllerName, Target> {
+  const stages = new Map<PerNoteControllerName, Target>();
   if (air) {
-    stages.set('brightness', { module: air, port: HEARD_PER_NOTE.brightness });
+    stages.set('brightness', { stage: air, port: HEARD_PER_NOTE.brightness });
   }
   if (dry) {
-    stages.set('volume', { module: dry, port: HEARD_PER_NOTE.volume });
+    stages.set('volume', { stage: dry, port: HEARD_PER_NOTE.volume });
   }
   if (room) {
-    stages.set('effects 1 depth', { module: room, port: ROOM_PER_NOTE['effects 1 depth'] });
+    stages.set('effects 1 depth', { stage: room, port: ROOM_PER_NOTE['effects 1 depth'] });
   }
   return stages;
 }
 // each stage at its per-note controller sent with the note, its value as it starts
-function setAsItStarts(stages: ReadonlyMap<PerNoteControllerName, Stage>, heard: PerNoteValues): void {
-  for (const [controller, { module, port }] of stages) {
+function setAsItStarts(stages: ReadonlyMap<PerNoteControllerName, Target>, heard: PerNoteValues): void {
+  for (const [controller, { stage, port }] of stages) {
     const value = heard[controller];
     if (value !== undefined) {
-      module.setNow(port, value);
+      stage.set(port, value, 'now');
     }
   }
 }

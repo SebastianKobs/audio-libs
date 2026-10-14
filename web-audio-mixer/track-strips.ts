@@ -8,11 +8,11 @@
 //     that isn't, its owner sets otherwise (a live mix).
 // A change is set by its key through its target (target.ts): now, at its time on the audio's
 // clock, or gliding by a time constant.
-import type { FxChain } from '../web-audio-fx/index.ts';
+import type { FxChain, Timing } from '../web-audio-fx/index.ts';
 import type { Change, ParamKey, StripEntry } from '../desk-plan/index.ts';
 import { buildChannel, type BuildOn, type StripValues } from './build.ts';
 import type { Channel } from './channel.ts';
-import { setTarget, targetOf, type Timing } from './target.ts';
+import { targetOf } from './target.ts';
 
 // a track's template: its strip as data, and the values it's built at
 interface Template {
@@ -83,7 +83,7 @@ export class TrackStrips<TrackStrip> {
     if (!target) {
       return false;
     }
-    setTarget(target, change.value, this.#timingOf(change));
+    target.stage.set(target.port, change.value, this.#timingOf(change));
     return true;
   }
   // a track's strip, made from its template the first time; none for a track with no template

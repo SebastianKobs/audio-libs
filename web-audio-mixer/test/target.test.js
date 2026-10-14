@@ -6,7 +6,7 @@ import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
 import { UTILITY } from '../../web-audio-fx/index.ts';
 import { SEND, routingOf } from '../../desk-plan/index.ts';
-import { Mixer, buildChannel, buildFxChannel, setTarget, targetOf } from '../index.ts';
+import { Mixer, buildChannel, buildFxChannel, targetOf } from '../index.ts';
 
 let time = 0;
 class Context extends StandInContext {
@@ -49,11 +49,11 @@ test('a value set on its target now, at a time, or gliding', () => {
   const target = targetOf(track.strip, { strip: 'track', param: 'volume' }, () => undefined);
   const events = track.strip.fader.gain.events;
   time = 12;
-  setTarget(target, 0.5, 'now');
+  target.stage.set(target.port, 0.5, 'now');
   assert.deepEqual(events.at(-1), ['value', 0.5], 'now');
-  setTarget(target, 0.25, { at: 13 });
+  target.stage.set(target.port, 0.25, { at: 13 });
   assert.deepEqual(events.at(-1), ['set', 0.25, 13], 'at its time');
-  setTarget(target, 0.75, { glide: 0.1 });
+  target.stage.set(target.port, 0.75, { glide: 0.1 });
   assert.deepEqual(events.at(-1).slice(0, 2), ['target', 0.75], 'gliding');
   assert.equal(events.at(-1)[3], 0.1, 'by its time constant');
 });

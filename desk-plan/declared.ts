@@ -7,9 +7,9 @@
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { specOf, type ParamKey } from './keys.ts';
 import { nameOf, type DeskEntry, type Names, type StripEntry } from './strip-data.ts';
+import { MASTER } from '../mixer/index.ts';
 
 // the master's name, as a key names its strip
-export const MASTER = 'master';
 
 // A desk's declarations, by key.
 //   desk, master: its strips' data and the master's; templateOf(): a track's strip's template;

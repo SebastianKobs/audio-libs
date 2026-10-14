@@ -10,7 +10,6 @@
 import type { DeviceParams } from '../web-audio-fx/index.ts';
 import {
   HeldChanges,
-  MASTER,
   SEND,
   controllerOf,
   deviceAt,
@@ -19,6 +18,7 @@ import {
   type ParamKey,
   type Ticking,
 } from '../desk-plan/index.ts';
+import { MASTER } from '../mixer/index.ts';
 
 // The live mix, its owner's: a strip's own volume and pan and its sends, kept as its owner
 // keeps them, and its switches.

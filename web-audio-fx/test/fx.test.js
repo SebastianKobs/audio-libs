@@ -35,9 +35,9 @@ test("a chain set at a time, or now, and read: a port's param and node as they w
   });
   const frequency = c.paramOf('filter.frequency');
   assert.equal(frequency, ac.rec.nodes.find((o) => o.kind === 'biquad').frequency, 'the built param');
-  c.setAt('filter.frequency', 1200, 12.5);
+  c.set('filter.frequency', 1200, { at: 12.5 });
   assert.deepEqual(frequency.events.at(-1), ['set', 1200, 12.5], 'at its time, at once');
-  c.setNow('filter.frequency', 900);
+  c.set('filter.frequency', 900, 'now');
   assert.deepEqual(frequency.events.at(-1), ['value', 900], 'now, as a value is set');
   assert.equal(c.paramOf('nowhere.gain'), undefined, 'a port no module offers: none');
   assert.equal(
@@ -91,7 +91,7 @@ test('a module built on its own into where its sound goes: its way in and out, a
   const m = new BuiltModule(e, { patch: GAIN, params: { level: 0 }, into: dest });
   assert.equal(m.input, m.output, "a Gain's one gain, its way in and out");
   assert.deepEqual(into(ac, dest), [m.output], 'into where its sound goes');
-  m.set('gain.gain', 0.6, 0.25);
+  m.set('gain.gain', 0.6, { glide: 0.25 });
   m.automate('gain.gain', [
     ['cancel', 10],
     ['set', 0, 10],
@@ -106,16 +106,16 @@ test('a module built on its own into where its sound goes: its way in and out, a
 
 // a module built on its own as a stage set from outside (F6b): now, at a time, or gliding, as an FX chain is; a port it hasn't left
 // alone; its value read back
-test('a module built on its own is a stage: a port set now, at a time or gliding, one it lacks left alone, its value read back', async () => {
+test('a module built on its own is a stage: a port set now, at a time or gliding, by one timing (DRY8a), one it lacks left alone, its value read back', async () => {
   const { BuiltModule, FILTER, GAIN } = await import('../index.ts');
   time = 10;
   const e = new Engine({ AudioContext: Context });
   const m = new BuiltModule(e, { patch: GAIN });
-  m.setNow('gain.gain', 0.4);
-  m.setAt('gain.gain', 0.2, 12);
-  m.set('gain.gain', 0.7, 0.08);
-  m.setNow('filter.frequency', 900);
-  m.setAt('pan.pan', 0.5, 12);
+  m.set('gain.gain', 0.4, 'now');
+  m.set('gain.gain', 0.2, { at: 12 });
+  m.set('gain.gain', 0.7, { glide: 0.08 });
+  m.set('filter.frequency', 900, 'now');
+  m.set('pan.pan', 0.5, { at: 12 });
   assert.deepEqual(m.input.gain.events, [
     ['value', 1],
     ['value', 0.4],
@@ -124,8 +124,8 @@ test('a module built on its own is a stage: a port set now, at a time or gliding
   ]);
   assert.equal(m.value('gain.gain'), 0.4, 'its value now, as Web Audio has it');
   const air = new BuiltModule(e, { patch: FILTER });
-  air.setNow('gain.gain', 0.3);
-  air.setNow('filter.frequency', 900);
+  air.set('gain.gain', 0.3, 'now');
+  air.set('filter.frequency', 900, 'now');
   assert.deepEqual(air.input.frequency.events, [
     ['value', 24000],
     ['value', 900],
@@ -140,8 +140,8 @@ test('a module built on its own glides from a time to come where it is given one
   time = 10;
   const e = new Engine({ AudioContext: Context });
   const m = new BuiltModule(e, { patch: GAIN });
-  m.set('gain.gain', 0, 0.25, 10.5);
-  m.set('gain.gain', 1, 0.25);
+  m.set('gain.gain', 0, { glide: 0.25, from: 10.5 });
+  m.set('gain.gain', 1, { glide: 0.25 });
   assert.deepEqual(m.input.gain.events, [
     ['value', 1],
     ['target', 0, 10.5, 0.25],

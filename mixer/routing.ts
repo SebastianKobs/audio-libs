@@ -14,7 +14,7 @@ interface Place {
   readonly to: string[];
 }
 
-const MASTER = 'master'; // the way out of the desk, where every strip ends
+export const MASTER = 'master'; // the way out of the desk, where every strip ends
 
 export class Routing {
   readonly #strips = new Map<string, Place>();

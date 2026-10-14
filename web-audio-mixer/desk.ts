@@ -15,19 +15,12 @@
 import { FxChain, type DeviceParams, type FxModules } from '../web-audio-fx/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import type { Patch, Params } from '../synth/index.ts';
-import {
-  MASTER,
-  deviceAt,
-  nameOf,
-  routingOf,
-  type DeskEntry,
-  type Names,
-  type StripEntry,
-} from '../desk-plan/index.ts';
+import { deviceAt, nameOf, routingOf, type DeskEntry, type Names, type StripEntry } from '../desk-plan/index.ts';
 import type { Routing } from '../mixer/index.ts';
 import { Mixer, type MasterInsert } from './mixer.ts';
 import { buildChannel, buildFxChannel, slotsOf, type BuildOn, type StripValues } from './build.ts';
 import type { Insert } from './channel.ts';
+import { MASTER } from '../mixer/index.ts';
 
 // a strip's slots' chains as built, by slot
 type Chains = Partial<Record<string, FxChain>>;

@@ -8,6 +8,6 @@ export { nameOf, returnOf, routingOf, slotStart } from './strip-data.ts';
 export type { DeskEntry, Names, SendEntry, SlotEntry, StripEntry } from './strip-data.ts';
 export { SEND_PARAM, STRIP_PARAMS } from './params.ts';
 export { SEND, controllerOf, deviceAt, keyOf, keyOn, keyText, specOf, type ParamKey } from './keys.ts';
-export { MASTER, declaredIn } from './declared.ts';
+export { declaredIn } from './declared.ts';
 export { HeldChanges } from './changes.ts';
 export type { Change, Ticking } from './changes.ts';

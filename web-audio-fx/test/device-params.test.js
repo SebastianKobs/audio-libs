@@ -5,7 +5,8 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio-engine/test/audio-stand-in.js';
 import { Engine } from '../../web-audio-engine/index.ts';
-import { DeviceParams, FILTER, FxChain, INSERTS, MOVE_GLIDE, TEMPO_TIME, UTILITY } from '../index.ts';
+import { DeviceParams, FILTER, FxChain, INSERTS, TEMPO_TIME, UTILITY } from '../index.ts';
+import { SMOOTHING } from '../../audio-plan/index.ts';
 
 let time = 0;
 class Context extends StandInContext {
@@ -42,7 +43,7 @@ test('a param set on the chain that plays it: at the port its module declares, g
     devices.set('tap/utility', 'level', 0.25);
     assert.deepEqual(
       utility.paramOf('gain.gain').events.at(-1),
-      ['target', 0.25, 10, MOVE_GLIDE],
+      ['target', 0.25, 10, SMOOTHING],
       'at its port, gliding',
     );
     const built = biquads().length;
