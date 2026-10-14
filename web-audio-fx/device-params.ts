@@ -8,7 +8,7 @@
 // A param declared in beats is played as the note length it matches,
 // or seconds at the beat where none does.
 import { delayTimeOf, type Params } from '../synth/index.ts';
-import type { ParamSpec } from '../params/index.ts';
+import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 
 // a chain that plays a device: set at a port, or rebuilt
 interface Playing {
@@ -23,7 +23,7 @@ interface Playing {
 interface Declared {
   start: Params;
   ports?: Readonly<Record<string, string>>;
-  specs?: Readonly<Partial<Record<string, ParamSpec>>>;
+  specs?: ParamSpecs;
 }
 // a device as it plays: its declaration, its params now, the chain that plays it once built
 interface Device extends Required<Declared> {
@@ -79,8 +79,8 @@ export class DeviceParams {
     played.chain.set(port, value);
   }
   // A value as its param plays it: in beats, a note length; any other as it comes.
-  #playedAs(spec: ParamSpec | undefined, value: number): number | string {
-    if (spec?.unit !== 'beats') {
+  #playedAs(spec: ParamSpec | ParamSpecs | undefined, value: number): number | string {
+    if (!spec || !('name' in spec) || spec.unit !== 'beats') {
       return value;
     }
     return delayTimeOf(value, this.#beat());
