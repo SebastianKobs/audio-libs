@@ -8,4 +8,4 @@
 export { specAt, type ParamSpec, type ParamSpecs, type RangedSpec, type Taper } from './spec.ts';
 export { faderGain, faderPosition, positionOf, valueAt } from './taper.ts';
 export { dBOf, gainOf, SILENCE } from './decibels.ts';
-export { FADER_GAIN, PAN, SWITCH } from './common.ts';
+export { FADER_GAIN, isSwitch, PAN, SWITCH } from './common.ts';

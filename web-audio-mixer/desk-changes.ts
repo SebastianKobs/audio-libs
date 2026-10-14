@@ -15,6 +15,7 @@ import type { DeviceParams, Timing } from '../web-audio-fx/index.ts';
 import {
   HeldChanges,
   SEND,
+  STRIP_PARAMS,
   controllerOf,
   deviceAt,
   returnsIn,
@@ -35,9 +36,8 @@ export interface LiveMix {
   setSolo(strip: string, on: boolean): void;
 }
 
-// a strip's own params; the master's, which has no pan
-const OWN: ReadonlySet<string> = new Set(['volume', 'pan', 'mute', 'solo']);
-const MASTER_OWN: ReadonlySet<string> = new Set(['volume', 'mute', 'solo']);
+// a strip's own params, as declared; the master has no pan
+const OWN: ReadonlySet<string> = new Set(Object.keys(STRIP_PARAMS));
 
 export class DeskChanges {
   readonly #mix: LiveMix;
@@ -100,7 +100,7 @@ export class DeskChanges {
   }
   #has({ strip, slot, param }: ParamKey): boolean {
     if (slot === undefined) {
-      return (strip === MASTER ? MASTER_OWN : OWN).has(param);
+      return OWN.has(param) && !(strip === MASTER && param === 'pan');
     }
     if (slot === SEND) {
       return strip !== MASTER && this.#returns.has(param);

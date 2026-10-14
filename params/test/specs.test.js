@@ -2,7 +2,7 @@
 // the FX modules and the synth's blocks each name as their own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dBOf, FADER_GAIN, gainOf, PAN, positionOf, SILENCE, SWITCH, valueAt } from '../index.ts';
+import { dBOf, FADER_GAIN, gainOf, isSwitch, PAN, positionOf, SILENCE, SWITCH, valueAt } from '../index.ts';
 import { near } from '../../util/test/near.js';
 
 test('a gain in dB and back: 0 dB unity, -6 about half, +6 about twice; the silence floor -80 dB', () => {
@@ -19,4 +19,12 @@ test("the specs shared: a fader's gain, -60 to +6 dB by the fader law; a pan, -1
   assert.deepEqual([positionOf(PAN, -1), positionOf(PAN, 0), positionOf(PAN, 1)], [0, 0.5, 1]);
   assert.deepEqual([valueAt(SWITCH, 0.4), valueAt(SWITCH, 0.6)], [0, 1]);
   assert.ok(Object.isFrozen(FADER_GAIN) && Object.isFrozen(PAN.range), 'frozen: each module names its own copy');
+});
+
+test("a switch: a param off 0 or on 1, nothing between, whatever its name; a fader's gain or a pan none", () => {
+  assert.deepEqual(
+    [isSwitch(SWITCH), isSwitch({ ...SWITCH, name: 'mute' }), isSwitch(FADER_GAIN), isSwitch(PAN)],
+    [true, true, false, false],
+  );
+  assert.equal(isSwitch({ name: 'steps', range: [0, 4, 1] }), false, 'more than on or off');
 });
