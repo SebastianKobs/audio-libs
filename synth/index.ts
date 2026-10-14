@@ -40,11 +40,21 @@ import pan from './blocks/pan.ts';
 import limiter from './blocks/limiter.ts';
 import note from './blocks/note.ts';
 export type { Delay, Envelope, Osc, Patch } from './patch.ts';
-export type { Plan } from './plan.ts';
+export { portValue, type Plan } from './plan.ts';
 export type { Block } from './plan-builder.ts';
 export { LIMITER_SPECS, MAPPING_SPECS, PER_NOTE_SPECS } from './params.ts';
 export { kindOf } from './shapes.ts';
-export { isNoteValue, time, val, type Context, type Note, type Params, type Values, type Valued } from './values.ts';
+export {
+  isNoteValue,
+  NO_DRAWS,
+  time,
+  val,
+  type Context,
+  type Note,
+  type Params,
+  type Values,
+  type Valued,
+} from './values.ts';
 export { adsr, perc, stage, swell } from './blocks/envelope.ts';
 
 export { mtof } from '../music-theory/index.ts';

@@ -3,7 +3,7 @@
 // beat; or a param holding one: 'time'), its feedback (how much of each repeat comes round again), its tone (the lowpass, in hertz) and
 // the longest time it can take (max, 4 s). It goes in at the delay and out from the lowpass. With the patch's handle.tempo, it follows
 // a new beat, gliding (tc). Its ports: 'delay', 'delay.time', 'delay.feedback', 'delay.tone'
-import { time, val } from '../values.ts';
+import { NO_DRAWS, time, val } from '../values.ts';
 import type { Block } from '../plan-builder.ts';
 import type { Delay } from '../patch.ts';
 import type { ParamSpecs } from '../../params/index.ts';
@@ -61,7 +61,7 @@ export default {
 
 // a delay's time in beats, as a track's controller carries it (G3c4): a note length's at its value, seconds at the beat
 export function delayBeats(delayTime: string | number, beat: number): number {
-  return time(delayTime, { beat, random: () => 0.5 }) / beat; // a time draws nothing
+  return time(delayTime, { ...NO_DRAWS, beat }) / beat;
 }
 // a delay's time from beats: the note length it matches, or seconds at the beat where none does
 export function delayTimeOf(beats: number, beat: number): string | number {

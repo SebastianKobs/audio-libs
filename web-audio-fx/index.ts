@@ -4,36 +4,17 @@
 // mixer's between its input and its inserts, or its level, or any other two, in order, each into the next.
 // modules: [{ name, patch, params }], params a function, read each time the chain is built, so a setting bound to one is read as it is
 // then. context: a module's, a beat's length and random(); it plays no note. tempo(beat) glides what follows the beat (a delay line's time);
-// set(port, value, timing) sets a port of every module that has it (a delay's feedback), now, at a time or gliding (timing.ts); time() is
-// the first delay line's time now, in
-// seconds, and feedback() its feedback. rebuild() plans and builds the chain again, from its patches as they are now (an editor changed one): the new chain is built
-// beside the old, where it starts moves over to it, and the old one rings out (RING_OUT) before it's let go, so its repeats aren't
+// set(port, value, timing) sets a port of every module that has it (a delay's feedback), now, at a time or gliding (timing.ts);
+// valueOf(port) a port's value as its module plans it now (a delay line's time, 'delay.time', and feedback). rebuild() plans and builds
+// the chain again, from its patches as they are now (an editor changed one): the new chain is built beside the old, where it starts moves over to it, and the old one rings out (RING_OUT) before it's let go, so its repeats aren't
 // cut off. plans() for an editor's flow; points() and readings() what its modules offer to read. Times start at the context's now.
 // As they play: the FX modules (modules.ts, FxModules), and a device's params (device-params.ts, DeviceParams).
-import {
-  plan as planPatch,
-  type Patch,
-  type Plan,
-  time,
-  val,
-  type Context,
-  type Params,
-  type Values,
-  type Delay,
-} from '../synth/index.ts';
-import type { Operation } from '../audio-plan/index.ts';
-import {
-  inputOf,
-  outputOf,
-  paramOf,
-  sourceOf,
-  type BuiltNode,
-  type Engine,
-  type Automatable,
-} from '../web-audio-engine/index.ts';
-import { MOVED, portSet, type Settable, type Timing } from './timing.ts';
+import { plan as planPatch, portValue, type Context, type Params, type Patch, type Plan } from '../synth/index.ts';
+import { paramOf, type Automatable, type BuiltNode } from '../web-audio-engine/index.ts';
+import { BuiltModule, type ModuleEngine } from './module.ts';
+import { MOVED, type Settable, type Timing } from './timing.ts';
 export { FILTER, GAIN, INSERTS, LIMITER, LIMITER_SETTINGS, PAN, PAN_PARAMS, PAN_POT, UTILITY } from './inserts.ts';
-export { BuiltModule } from './module.ts';
+export { BuiltModule, type ModuleEngine } from './module.ts';
 export { MOVED, type Settable, type Target, type Timing } from './timing.ts';
 export { FxModules } from './modules.ts';
 export { DeviceParams } from './device-params.ts';
@@ -46,18 +27,16 @@ export interface Module {
   patch: Patch;
   params?: () => Params; // its device's parameters, as they are now
 }
-// a module as built in the chain: its plan, and the nodes the engine made of it
+// a module as built in the chain: the module, and what's built of it
 interface Part {
   module: Module;
-  plan: Plan;
-  made: BuiltNode[];
+  built: BuiltModule;
 }
 // the chain as built: its parts, in order, and its first node, where it starts goes in
 interface Built {
   parts: Part[];
   first: AudioNode;
 }
-type ChainEngine = Pick<Engine, 'now' | 'build' | 'apply'>;
 // a built node that offers points a meter reads inside it, and readings of itself
 type Offering = BuiltNode & {
   readonly points: Readonly<Record<string, AudioNode>>;
@@ -72,14 +51,14 @@ interface ChainEnds {
 export const RING_OUT = 8000; // ms an old chain rings out after a rebuild before it's let go
 
 export class FxChain implements Settable {
-  readonly #engine: ChainEngine;
+  readonly #engine: ModuleEngine;
   readonly #between: ChainEnds;
   readonly #modules: Module[];
   readonly #context: Context; // its own, its tempo moved by tempo()
   #built: Built;
 
   constructor(
-    engine: ChainEngine,
+    engine: ModuleEngine,
     { between, modules, context }: { between: ChainEnds; modules: Module[]; context: Context },
   ) {
     this.#engine = engine;
@@ -90,20 +69,34 @@ export class FxChain implements Settable {
   }
   tempo(beat: number): void {
     this.#context.beat = beat;
-    this.#run((plan, at) => plan.handle?.tempo?.(beat, at));
+    const now = this.#engine.now();
+    for (const { built } of this.#built.parts) {
+      built.apply(built.plan.handle?.tempo?.(beat, now));
+    }
   }
   // a port of every module that has it set by a timing: now, as a track's controllers set it as it's made; at a time, as a phrase's
   // first note sets a tower's cutoff; or gliding, as a control moved by hand; times the context's
   set(port: string, value: number, timing: Timing = MOVED): void {
-    this.#run((plan, now) => portSet(plan, port, value, timing, now));
+    for (const { built } of this.#built.parts) {
+      built.set(port, value, timing);
+    }
+  }
+  // a port's value as its module plans it now, at its params and the tempo as they are: the first module's that offers it, or none. A
+  // delay line's time and feedback, as a sung phrase's echoes are drawn
+  valueOf(port: string): number | undefined {
+    const part = this.#built.parts.find(({ built }) => built.plan.ports[port]);
+    if (!part) {
+      return undefined;
+    }
+    return portValue(planOf(part.module, this.#context), port);
   }
   // a port's param as it was built, for what shows it or records it: the first module's that offers it, or none
   paramOf(port: string): Automatable | undefined {
-    const offered = this.#offering(port);
-    if (!offered?.param) {
+    const offering = this.#offering(port);
+    if (!offering?.param) {
       return undefined;
     }
-    return paramOf(offered.node, offered.param);
+    return paramOf(offering.node, offering.param);
   }
   // the node offering a port as it was built, for what reads it (a limiter's points and readings): the first module's, or none
   nodeOf(port: string): BuiltNode | undefined {
@@ -120,20 +113,6 @@ export class FxChain implements Settable {
     const names = this.#offered().flatMap((node) => Object.keys(node.readings));
     return Object.fromEntries(names.map((name) => [name, () => this.#reading(name)]));
   }
-  time(): number {
-    const part = this.#line();
-    if (!part) {
-      return 0;
-    }
-    return time(delayOf(part).time, this.#values(part));
-  }
-  feedback(): number {
-    const part = this.#line();
-    if (!part) {
-      return 0;
-    }
-    return val(delayOf(part).feedback, this.#values(part));
-  }
   rebuild(): void {
     const old = this.#built;
     this.#built = this.#build();
@@ -141,89 +120,56 @@ export class FxChain implements Settable {
     setTimeout(() => letGo(old), RING_OUT);
   }
   plans(): Plan[] {
-    return this.#built.parts.map(({ plan }) => plan);
+    return this.#built.parts.map(({ built }) => built.plan);
   }
-  // each module planned and built, the last into its way out, each before it into the next
+  // each module planned and built in its context, the last into its way out, each before it into the next
   #build(): Built {
-    const now = this.#engine.now();
     const parts: Part[] = [];
     let into: AudioNode = this.#between.chainOut;
     for (const module of [...this.#modules].reverse()) {
-      const plan = planOf(module, this.#context);
-      const made = this.#engine.build(plan, now, into);
-      parts.unshift({ module, plan, made });
-      into = moduleInputOf(module, plan, made);
+      const built = new BuiltModule(this.#engine, {
+        patch: module.patch,
+        params: module.params?.() ?? {},
+        into,
+        context: this.#context,
+      });
+      parts.unshift({ module, built });
+      into = built.input;
     }
     this.#between.input.connect(into);
     return { parts, first: into };
   }
-  // what each module's plan is told now, run on its nodes
-  #run(operationsFor: (plan: Plan, at: number) => Operation[] | null | undefined): void {
-    const at = this.#engine.now();
-    for (const { plan, made } of this.#built.parts) {
-      const operations = operationsFor(plan, at);
-      if (operations?.length) {
-        this.#engine.apply(made, operations, 0);
-      }
-    }
-  }
   // the first module's node that offers a port, and the param it offers there, if it's one
   #offering(port: string): { node: BuiltNode; param: string | undefined } | undefined {
-    for (const { plan, made } of this.#built.parts) {
-      const [offered] = plan.ports[port] ?? [];
-      const node = offered && made[offered.id];
-      if (node) {
-        return { node, param: offered.param };
+    for (const { built } of this.#built.parts) {
+      const offering = built.offering(port);
+      if (offering) {
+        return offering;
       }
     }
     return undefined;
   }
   // the nodes its modules built that offer points or readings, a module made of several's
   #offered(): Offering[] {
-    return this.#built.parts.flatMap(({ made }) => made.filter(isOffering));
+    return this.#built.parts.flatMap(({ built }) => built.nodes.filter(isOffering));
   }
   // a reading by name, from the chain as built now; 0 where none offers it any more
   #reading(name: string): number {
     const node = this.#offered().find((offering) => name in offering.readings);
     return node?.readings[name]!() ?? 0; // offered, as found
   }
-  // the first delay line
-  #line(): Part | undefined {
-    return this.#built.parts.find(({ module }) => module.patch.delay);
-  }
-  // the values a module's own refer to
-  #values({ module }: Part): Values {
-    return { ...module.patch.params, ...module.params?.(), ...this.#context };
-  }
 }
 // whether a built node offers points and readings, as a module made of several does
 function isOffering(node: BuiltNode): node is Offering {
   return 'points' in node && 'readings' in node;
 }
+// a module planned in a context, at its params now
 function planOf(module: Module, context: Context): Plan {
   return planPatch(module.patch, {}, context, module.params?.() ?? {});
 }
-function delayOf(part: Part) {
-  return part.module.patch.delay as Delay; // a module's delay line, as written
-}
-// where a module's sound comes in: the node its plan names its input
-function moduleInputOf(module: Module, plan: Plan, made: BuiltNode[]): AudioNode {
-  const input = made[plan.input!];
-  if (!input) {
-    throw new Error(`an FX module with no input: ${module.name}`);
-  }
-  return inputOf(input); // a node made of several, a limiter, comes in at its own input
-}
 // an old chain, once it has rung out: its LFOs stopped, every node let go
 function letGo({ parts }: Built): void {
-  for (const { plan, made } of parts) {
-    made.forEach((node, id) => {
-      if (plan.nodes[id]?.starts.length) {
-        try {
-          sourceOf(node).stop!();
-        } catch {}
-      } // its LFOs
-      outputOf(node).disconnect();
-    });
+  for (const { built } of parts) {
+    built.letGo();
   }
 }

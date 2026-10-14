@@ -43,6 +43,9 @@ export type Valued<Value> =
   Value | { if: Condition; then: Valued<Value>; else: Valued<Value> } | { between: [number, number] } | string;
 export type Time = Valued<number | string>;
 export type Freq = Valued<number | { key: number; max?: number }>;
+
+// a context that draws nothing: a gain's, a pan's, a time read at a beat
+export const NO_DRAWS: Context = Object.freeze({ random: () => 0.5 });
 export function when(block: { when?: Condition }, values: Values): boolean {
   return block.when === undefined || holds(block.when, values);
 }

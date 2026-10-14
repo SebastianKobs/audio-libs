@@ -24,3 +24,13 @@ export interface Plan extends AudioPlan {
     release(at: number): Operation[];
   };
 }
+
+// a port's value as planned: its first param's value as the plan sets it; none where it sets none, or there's no such port
+export function portValue(plan: Plan, port: string): number | undefined {
+  const offering = plan.ports[port]?.find((offered) => offered.param);
+  if (!offering) {
+    return undefined;
+  }
+  const set = plan.nodes[offering.id]?.params[offering.param!]?.find(([kind]) => kind === 'value'); // offering a param, as found
+  return set?.[1];
+}

@@ -1,10 +1,7 @@
 // ---------- libs/web-audio-synth/note-stages: a note's own stages, set by its per-note controllers (G0b; the space's until V3) ----------
-import { BuiltModule, FILTER, GAIN, PAN_POT, type Target } from '../web-audio-fx/index.ts';
+import { BuiltModule, FILTER, GAIN, PAN_POT, type ModuleEngine, type Target } from '../web-audio-fx/index.ts';
 import type { PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
-import type { Engine } from '../web-audio-engine/index.ts';
 
-// the engine a note's stages are built by
-type StagesEngine = Pick<Engine, 'now' | 'build' | 'apply'>;
 // the per-note controllers a note's stages answer, each with a stage of its own: #74 Brightness, #7 Volume, #10 Pan, #91 Effects 1 Depth
 export type StageController = 'brightness' | 'volume' | 'pan' | 'effects 1 depth';
 
@@ -38,7 +35,7 @@ export class NoteStages {
   readonly #stages: ReadonlyMap<PerNoteControllerName, Target>; // by the controller that sets it; its pan set as it starts, by its params
 
   constructor(
-    engine: StagesEngine,
+    engine: ModuleEngine,
     {
       into,
       room = null,
@@ -73,7 +70,7 @@ export class NoteStages {
 
 // its room's gain, into the room, where it has one, its instrument answers #91 Effects 1 Depth and it has an air to take it after
 function roomOf(
-  engine: StagesEngine,
+  engine: ModuleEngine,
   room: AudioNode | null,
   air: BuiltModule | null,
   answers: readonly StageController[],
@@ -118,7 +115,7 @@ function frontOf(air: BuiltModule | null, dry: BuiltModule | null, into: AudioNo
 }
 
 // its pan pot in front of the rest, its air, at its pan; none for a note sent with none
-function panOf(engine: StagesEngine, pan: number | undefined, front: AudioNode): BuiltModule | null {
+function panOf(engine: ModuleEngine, pan: number | undefined, front: AudioNode): BuiltModule | null {
   if (pan === undefined) {
     return null;
   }
