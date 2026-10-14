@@ -29,6 +29,7 @@
 export { Mixer } from './mixer.ts';
 export type { MasterInsert, Strip } from './mixer.ts';
 export { Channel } from './channel.ts';
+export { deviceInsert } from './device-insert.ts';
 export type { Insert, Send, StripOptions } from './channel.ts';
 export { FxChannel } from './fx-channel.ts';
 export type { FxOptions } from './fx-channel.ts';

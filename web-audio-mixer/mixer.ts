@@ -8,11 +8,16 @@ import type { FxOptions } from './fx-channel.ts';
 import { BuiltModule, GAIN } from '../web-audio-fx/index.ts';
 // what the mixer and its strips need of the engine: the context, its time, a meter on a node, a plan built and set, and whether it can pan
 export type MixerEngine = Pick<Engine, 'audioContext' | 'now' | 'meter' | 'build' | 'apply' | 'canPan'>;
-// where on the desk a strip goes, which the mixer gives it as it's made, the routing having said it may: the node an output reaches (the
-// master's sum or a bus's input), and an FX channel's input, for a send
+// The desk as a strip sees it as it's made, the routing having said where it may go:
+//   outOf(): the node a way out reaches, the master's sum or a bus's input;
+//   fxInput(): an FX channel's input, for a send;
+//   returns(): the FX channels on the desk now, in the order they were built;
+//   sendAdded(): a send turned up for the first time, put on the routing.
 export interface Desk {
   outOf(out: string): AudioNode;
   fxInput(name: string): AudioNode;
+  returns(): readonly string[];
+  sendAdded(from: string, to: string): void;
 }
 // a strip on the desk: a channel, a bus or an FX channel
 export type Strip = Channel | FxChannel;
@@ -26,9 +31,8 @@ export interface MasterInsert {
   reduction?(): number;
 }
 
-const FADE_IN = 0.25;
-const FADE_OUT = 0.08;
-const STOP_AFTER = 400; // time constants in s; ms before a pause stops the context
+const FADE_IN = 0.25; // s, a time constant
+const FADE_OUT = 0.08; // s, a time constant
 
 export class Mixer {
   readonly sum: GainNode;
@@ -44,7 +48,6 @@ export class Mixer {
   #volume: number;
   #muting: { muted: ReadonlySet<string>; soloed: ReadonlySet<string> } = { muted: new Set(), soloed: new Set() };
   readonly #silent = new Set<string>(); // the strips silent now, as mute and solo have them
-  #pausing: ReturnType<typeof setTimeout> | undefined; // the timer that stops it once it has faded
 
   // routing: where its strips go, its owner's, made before the desk is built, so what's on it is known before there's any sound (Z3);
   // its own otherwise
@@ -69,11 +72,13 @@ export class Mixer {
     this.#desk = {
       outOf: (out) => this.#outOf(out),
       fxInput: (name) => this.#on(name).input,
+      returns: () => Object.keys(this.strips).filter((name) => this.strips[name] instanceof FxChannel),
+      sendAdded: (from, to) => this.routing.send(from, to),
     };
   }
   // a channel (see Channel), on the desk by its name, where the routing says it may go
   channel(name: string, options: StripOptions = {}, kind: 'channel' | 'bus' = 'channel'): Channel {
-    const out = this.#placed(name, { kind, out: options.out, to: sentTo(options.sends ?? [], options.room ?? null) });
+    const out = this.#placed(name, { kind, out: options.out, to: sentTo(options.sends ?? []) });
     const channel = new Channel(this.#engine, this.#desk, name, { ...options, out });
     this.strips[name] = channel;
     this.#silence(); // muted or soloed as it's made
@@ -85,7 +90,7 @@ export class Mixer {
   // an FX channel (see FxChannel), a return, as a channel is
   fx(name: string, options: FxOptions = {}): FxChannel {
     const out = this.#placed(name, { kind: 'return', out: options.out, to: Object.keys(options.sends ?? {}) });
-    const fxChannel = new FxChannel(this.#engine, this.#desk, { ...options, out });
+    const fxChannel = new FxChannel(this.#engine, this.#desk, name, { ...options, out });
     this.strips[name] = fxChannel;
     this.#silence();
     return fxChannel;
@@ -102,26 +107,16 @@ export class Mixer {
     this.#volume = value;
     this.#master.set('gain.gain', value);
   }
-  pause(): void {
-    const audioContext = this.#engine.audioContext;
-    if (audioContext.state !== 'running') {
-      return;
-    }
+  // The master faded out, quickly. Switching the audio off once it's quiet is the
+  // desk's owner's: a desk has no power switch of its own.
+  fadeOut(): void {
     this.#master.set('gain.gain', 0, FADE_OUT);
-    this.#pausing = setTimeout(() => {
-      this.#pausing = undefined;
-      void audioContext.suspend(); // fire and forget: nothing waits for it
-    }, STOP_AFTER);
   }
-  resume(): void {
-    const audioContext = this.#engine.audioContext;
-    if (this.#pausing) {
-      clearTimeout(this.#pausing);
-      this.#pausing = undefined;
+  // The master faded in again, never at full volume.
+  // fromSilence: the audio was off, so from 0; otherwise from where the fade got to.
+  fadeIn({ fromSilence = false }: { fromSilence?: boolean } = {}): void {
+    if (!fromSilence) {
       this.#master.set('gain.gain', this.#volume, FADE_IN);
-      return;
-    } // back before it stopped
-    if (audioContext.state === 'running') {
       return;
     }
     const at = this.#engine.now();
@@ -130,7 +125,6 @@ export class Mixer {
       ['set', 0, at],
       ['target', this.#volume, at, FADE_IN],
     ]);
-    void audioContext.resume(); // fire and forget, as suspend()
   }
   // which strips are muted and which soloed, as Ableton's mute and solo, by name: each strip silenced as the routing says (silenced()),
   // now, and one made later as it's made; a name not built yet waiting for it (Z4)

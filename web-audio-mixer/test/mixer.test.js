@@ -15,10 +15,6 @@ class Context extends StandInContext {
     super(() => time);
     Context.opts = opts;
   }
-  resume() {
-    super.resume();
-    Context.resumed = (Context.resumed ?? 0) + 1;
-  }
 }
 const engine = (more = {}) => {
   time = 10;
@@ -73,14 +69,14 @@ test("the master's insert's readings: what it takes away, in dB, and its points,
   );
 });
 
-test("a channel's input, fader, pan, sends and room, each built by the engine from the Gain or the Pan module (F5c); with no stereo panner, no pan", () => {
+test("a channel's input, fader, pan and sends, each built by the engine from the Gain or the Pan module (F5c); with no stereo panner, no pan", () => {
   const e = engine();
   const m = new Mixer(e);
   m.fx('reverb', {});
-  const c = m.channel('tap', { volume: 0.7, pan: -0.2, sends: [{ to: 'reverb', amount: 0.3 }], room: 'reverb' });
+  const c = m.channel('tap', { volume: 0.7, pan: -0.2, sends: [{ to: 'reverb', amount: 0.3 }] });
   assert.deepEqual(
-    [c.input.gain.events, c.fader.gain.events, c.pan.pan.events, c.sends.reverb.gain.events, c.room.gain.events],
-    [[['value', 1]], [['value', 0.7]], [['value', -0.2]], [['value', 0.3]], [['value', 0.7]]],
+    [c.input.gain.events, c.fader.gain.events, c.pan.pan.events, c.sends.reverb.gain.events],
+    [[['value', 1]], [['value', 0.7]], [['value', -0.2]], [['value', 0.3]]],
     "each written by its module's plan, its input's unity too",
   );
   const unpanned = engine();
@@ -109,12 +105,12 @@ test("an FX channel's input, level, pan, output and sends, each built by the eng
   assert.equal(d.chainOut, d.level, 'with no inserts, its chain into its level');
 });
 
-test("the desk's channels: a fader into the sum, or a bus, sent after it to an FX channel; a room input only to it; a volume glides both", () => {
+test("the desk's channels: a fader into the sum, or a bus, sent after it to an FX channel; a volume glides it", () => {
   const e = engine();
   const m = new Mixer(e);
   const r = m.fx('reverb', { level: 0.4 });
-  const sings = m.bus('sings', { volume: 1, room: 'reverb' });
-  const a = m.channel('tap', { volume: 0.7, sends: ['reverb'], room: 'reverb' });
+  const sings = m.bus('sings', { volume: 1 });
+  const a = m.channel('tap', { volume: 0.7, sends: ['reverb'] });
   const b = m.channel('ambient', { volume: 0.5 });
   const c = m.channel('late', { out: 'sings' });
   assert.ok(
@@ -124,20 +120,14 @@ test("the desk's channels: a fader into the sum, or a bus, sent after it to an F
   );
   assert.deepEqual(into(e.audioContext, a.fader), [a.input], 'in through its mute, at 1');
   assert.deepEqual(into(e.audioContext, sings.input), [c.fader], 'out into a bus');
-  assert.deepEqual(
-    into(e.audioContext, r.input).sort((x, y) => x.id - y.id),
-    [sings.room, a.fader, a.room],
-    "the send and the rooms go to the FX channel's input",
-  );
-  assert.equal(b.room, null);
+  assert.deepEqual(into(e.audioContext, r.input), [a.fader], "the send goes to the FX channel's input");
+  assert.ok(!into(e.audioContext, r.input).includes(sings.fader) && !into(e.audioContext, r.input).includes(b.fader));
   time = 11;
   a.volume(0.2);
-  for (const g of [a.fader, a.room]) {
-    assert.deepEqual(g.gain.events, [
-      ['value', 0.7],
-      ['target', 0.2, 11, 0.05],
-    ]);
-  }
+  assert.deepEqual(a.fader.gain.events, [
+    ['value', 0.7],
+    ['target', 0.2, 11, 0.05],
+  ]);
   assert.throws(
     () => m.channel('x', { sends: ['echo'] }),
     /not on the desk as a return: echo/,
@@ -269,23 +259,70 @@ test("an FX channel's inserts: after its chain, before its level, in order; its 
   assert.equal(m.fx('d').chainOut, m.strips.d.level, 'none: its chain into its level');
 });
 
-// a channel's room, the far reverb its far sounds get, a send of its own to the FX channel it names: its amount times its fader's level
-test("a room as a send: its amount times its fader's level, set by sendTo() as any send, following the fader, muted with the strip", () => {
+test("a strip's own control by its name, as a desk's remote control has them: its fader's volume, its pan, a send by its return's name (U1)", () => {
   const e = engine();
   const m = new Mixer(e);
-  const far = m.fx('far reverb');
-  const s = m.bus('sings', { volume: 0.8, room: 'far reverb', roomAmount: 0.5 });
-  assert.equal(s.room.gain.value, 0.4, "its amount times its fader's level");
-  assert.deepEqual(into(e.audioContext, far.input), [s.room]);
+  m.fx('reverb');
+  const c = m.channel('tap', { volume: 0.7, pan: 0, sends: [{ to: 'reverb', amount: 0.3 }] });
+  const r = m.fx('delay', { level: 0.8, pan: 0, sends: { reverb: 0.2 } });
   time = 11;
-  s.sendTo('far reverb', 1);
-  assert.deepEqual(s.room.gain.events.at(-1), ['target', 0.8, 11, 0.05], 'set as any send');
-  s.volume(0.5);
-  assert.deepEqual(s.room.gain.events.at(-1), ['target', 0.5, 11, 0.05], 'following the fader');
-  s.muted(true);
-  s.muted(false);
-  assert.equal(s.room.gain.events.at(-1)[1], 0.5, 'back at its level when unmuted');
-  assert.equal(m.channel('c', { room: 'far reverb' }).room.gain.value, 1, 'an amount of 1 when none is given');
+  for (const strip of [c, r]) {
+    strip.set('volume', 0.5);
+    strip.set('pan', -0.4);
+    strip.set('reverb', 0.6);
+  }
+  assert.deepEqual(
+    [c.fader.gain.events.at(-1), c.pan.pan.events.at(-1), c.sends.reverb.gain.events.at(-1)],
+    [
+      ['target', 0.5, 11, 0.05],
+      ['target', -0.4, 11, 0.05],
+      ['target', 0.6, 11, 0.05],
+    ],
+  );
+  assert.deepEqual(
+    [r.level.gain.events.at(-1), r.pan.pan.events.at(-1), r.sends.reverb.gain.events.at(-1)],
+    [
+      ['target', 0.5, 11, 0.05],
+      ['target', -0.4, 11, 0.05],
+      ['target', 0.6, 11, 0.05],
+    ],
+  );
+});
+
+// Every strip has a send to every return on the desk, as Ableton's (U1).
+// Built as the strip is made: the sends its setup lists.
+// Built once first turned up: the others, after its fader and pan, gliding from 0, routed then.
+// An FX channel sends only to returns built before it, so there are no loops.
+test("every strip a send to every return on the desk, as Ableton's: those its setup lists built as it's made, the others once first turned up, after its fader and pan, gliding from 0, routed then; an FX channel's only to the returns built before it (U1)", () => {
+  const e = engine();
+  const m = new Mixer(e);
+  const reverb = m.fx('reverb');
+  const delay = m.fx('delay', { sends: { reverb: 0.2 } });
+  const c = m.channel('tap', { pan: 0, sends: [{ to: 'reverb', amount: 0.3, from: 'pre' }] });
+  assert.deepEqual(c.returns, ['reverb', 'delay'], 'every return on the desk');
+  assert.deepEqual(Object.keys(c.sends), ['reverb'], 'built as it was made: the one its setup lists');
+  c.sendTo('delay', 0);
+  assert.deepEqual(Object.keys(c.sends), ['reverb'], 'still down: nothing built');
+  time = 11;
+  c.sendTo('delay', 0.5);
+  assert.deepEqual(into(e.audioContext, c.sends.delay), [c.tail], 'after its fader and pan');
+  assert.deepEqual(
+    c.sends.delay.gain.events,
+    [
+      ['value', 0],
+      ['target', 0.5, 11, 0.05],
+    ],
+    'gliding from 0',
+  );
+  assert.ok(into(e.audioContext, delay.input).includes(c.sends.delay), 'into the return');
+  assert.deepEqual(m.routing.sentTo('tap'), ['reverb', 'delay'], 'routed then');
+  assert.deepEqual([reverb.returns, delay.returns], [[], ['reverb']], 'an FX channel: the returns built before it');
+  m.fx('far');
+  delay.sendTo('far', 0.5);
+  assert.equal(delay.sends.far, undefined, 'a return built after it: none');
+  const listed = m.channel('listed', { sends: ['reverb'] });
+  listed.sendTo('reverb', 0.5);
+  assert.deepEqual(Object.keys(listed.sends), [], 'one its setup sends by name, at 1: no second send built');
 });
 
 test("a bus with sends, a group: what's routed into it summed, through its fader, sent after it, out to the master", () => {
@@ -307,8 +344,8 @@ test("a bus with sends, a group: what's routed into it summed, through its fader
 test("route(): a strip's output moved while it plays, to the master or a bus, and never into a loop", () => {
   const e = engine();
   const m = new Mixer(e);
-  m.fx('reverb'); // the room the sings bus sends to
-  const sings = m.bus('sings', { room: 'reverb' });
+  m.fx('reverb');
+  const sings = m.bus('sings', { sends: ['reverb'] });
   const bg = m.bus('background', { sends: ['reverb'] });
   const a = m.channel('a');
   const d = m.fx('delay', { pan: 0.4, out: 'sings' });
@@ -428,42 +465,48 @@ test('a strip mutes at its input, so its sends go quiet too; an FX channel at it
   assert.deepEqual(r.output.gain.events.at(-1), ['target', 0, 11, 0.01], 'its output to 0, after its unity');
 });
 
-test('the mixer pauses: the master fades out and the context stops once it has; it fades in again, from 0 once it had stopped', () => {
-  mock.timers.enable({ apis: ['setTimeout'] });
-  try {
-    const e = engine();
-    const m = new Mixer(e, { volume: 0.6 });
-    const ev = () => m.master.gain.events.slice(2);
-    m.pause();
-    assert.deepEqual(ev(), [['target', 0, 10, 0.08]]);
-    mock.timers.tick(399);
-    assert.equal(e.audioContext.state, 'running', 'still fading');
-    m.resume(); // back before it stopped: from where the fade got to
-    assert.deepEqual(ev().slice(1), [['target', 0.6, 10, 0.25]]);
-    mock.timers.tick(10);
-    assert.equal(e.audioContext.state, 'running', 'it never stops');
-    m.volume(0.3);
-    m.pause();
-    mock.timers.tick(400);
-    assert.equal(e.audioContext.state, 'suspended');
-    time = 20;
-    m.resume();
-    assert.deepEqual(
-      ev().slice(-3),
-      [
-        ['cancel', 20],
-        ['set', 0, 20],
-        ['target', 0.3, 20, 0.25],
-      ],
-      'from 0, to the volume set last',
-    );
-    assert.equal(e.audioContext.state, 'running');
-  } finally {
-    mock.timers.reset();
-  }
+test("the mixer fades its master out, and in again: from where the fade got to, or from silence; the audio's power its user's (U1)", () => {
+  const e = engine();
+  const m = new Mixer(e, { volume: 0.6 });
+  const ev = () => m.master.gain.events.slice(2);
+  m.fadeOut();
+  assert.deepEqual(ev(), [['target', 0, 10, 0.08]]);
+  m.fadeIn(); // back before it stopped: from where the fade got to
+  assert.deepEqual(ev().slice(1), [['target', 0.6, 10, 0.25]]);
+  m.volume(0.3);
+  m.fadeOut();
+  time = 20;
+  m.fadeIn({ fromSilence: true });
+  assert.deepEqual(
+    ev().slice(-3),
+    [
+      ['cancel', 20],
+      ['set', 0, 20],
+      ['target', 0.3, 20, 0.25],
+    ],
+    'from 0, to the volume set last',
+  );
+  assert.equal(e.audioContext.state, 'running', 'its power left alone');
 });
 
-// an FX chain built into an FX channel (out of fx.test.js in X4, the mixer's since it's below it): a limiter, a module made of several
+test('a device on an insert slot: a chain of one FX module between a way in and a way out of its own, unity gains the engine builds, set through its chain (U1)', async () => {
+  const { GAIN } = await import('../../web-audio-fx/index.ts');
+  const { deviceInsert } = await import('../index.ts');
+  const e = engine();
+  const { chain, insert } = deviceInsert(e, { name: 'utility', patch: GAIN, params: () => ({ level: 0.5 }), beat });
+  assert.equal(insert.name, 'utility');
+  assert.deepEqual([insert.input.kind, insert.output.kind], ['gain', 'gain']);
+  const [level] = e.audioContext.rec.edges.filter((edge) => edge.from === insert.input).map((edge) => edge.to);
+  assert.deepEqual(level.gain.events, [['value', 0.5]], 'its module at its params');
+  assert.deepEqual(
+    e.audioContext.rec.edges.filter((edge) => edge.from === level).map((edge) => edge.to),
+    [insert.output],
+  );
+  time = 11;
+  chain.set('gain.gain', 0.25);
+  assert.deepEqual(level.gain.events.at(-1), ['target', 0.25, 11, 0.05]);
+});
+
 test('a chain of a module made of several, a limiter: the channel comes in at its gain, out of what takes its makeup back; rebuilt, the old one let go of', () => {
   mock.timers.enable({ apis: ['setTimeout'] });
   try {

@@ -11,7 +11,7 @@ export type StripKind = 'channel' | 'bus' | 'return';
 interface Place {
   readonly kind: StripKind;
   out: string;
-  readonly to: readonly string[];
+  readonly to: string[];
 }
 
 const MASTER = 'master'; // the way out of the desk, where every strip ends
@@ -39,6 +39,19 @@ export class Routing {
       throw new Error(`a loop: ${out} feeds ${name}`);
     }
     strip.out = out;
+  }
+  // A send added to a strip on the desk, as a send knob turned up for the first time.
+  // Only to a return on the desk, never into what feeds the strip; listed once.
+  send(name: string, to: string): void {
+    const strip = this.#on(name);
+    this.#on(to, 'return');
+    if (strip.to.includes(to)) {
+      return;
+    }
+    if (this.#feeds(to, name)) {
+      throw new Error(`a loop: ${to} feeds ${name}`);
+    }
+    strip.to.push(to);
   }
   // whether a strip is on the desk; the master is where they end, not one of them
   has(name: string): boolean {

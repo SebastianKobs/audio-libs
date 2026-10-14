@@ -121,3 +121,19 @@ test("reached(): everything the strips named feed, through each one's way out an
     'a name not on the desk kept, not followed',
   );
 });
+
+// A send added to a strip once it's on the desk, as a desk's send knob turned up for the first time (U1).
+test('send(): a send added later, only to a return on the desk, never into what feeds the strip; listed once; followed as any send', () => {
+  const routing = new Routing();
+  routing.add('reverb', { kind: 'return' });
+  routing.add('delay', { kind: 'return', to: ['reverb'] });
+  routing.add('tap', { kind: 'channel' });
+  routing.send('tap', 'delay');
+  routing.send('tap', 'delay');
+  assert.deepEqual(routing.sentTo('tap'), ['delay'], 'listed once');
+  assert.deepEqual([...routing.reached(['tap'])].sort(), ['delay', 'reverb', 'tap'], 'followed');
+  assert.throws(() => routing.send('tap', 'nowhere'), /not on the desk as a return: nowhere/);
+  assert.throws(() => routing.send('nobody', 'reverb'), /not on the desk: nobody/);
+  assert.throws(() => routing.send('reverb', 'delay'), /a loop: delay feeds reverb/, 'a return into one that feeds it');
+  assert.deepEqual(routing.sentTo('reverb'), [], 'a send refused is not added');
+});
