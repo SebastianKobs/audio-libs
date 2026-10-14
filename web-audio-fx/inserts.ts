@@ -48,8 +48,7 @@ export const PAN: Patch = Object.freeze({
 export const PAN_PARAMS = Object.freeze({
   pan: Object.freeze({ name: 'pan', range: Object.freeze([-1, 1, 0.01] as const) }),
 }) satisfies InsertParams;
-// a Pan whose pan is a pan pot: a mono sound panned as it comes, constant power, as a console's; a voice's pan, where it is in the garden
-// (sound/space/, F6c)
+// a Pan whose pan is a pan pot: a mono sound panned as it comes, constant power, as a console's
 export const PAN_POT: Patch = Object.freeze({ ...PAN, pan: Object.freeze({ position: 'pan', mono: 'pan pot' }) });
 // a Utility: a Gain, then a Pan, the two combined, as data, so it can't drift from them; its params level and pan, its ports 'gain.gain'
 // and 'pan.pan'
