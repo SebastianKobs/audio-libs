@@ -8,7 +8,8 @@
 import { val, type Valued, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
 import { eventTime, type Automation } from '../automation/index.ts';
-import { releaseOf, stagesOf, type Target } from './stages.ts';
+import { releaseOf, stagesOf } from './stages.ts';
+import type { EnvelopeTarget } from '../plan/blocks/index.ts';
 import { SILENCE } from '../params/index.ts';
 
 // what an envelope needs of the note being planned (plan-builder.ts's builder): its values, its velocity, whether it runs on
@@ -65,7 +66,11 @@ function noteOf(envelope: Envelope, planning: Planning, scale: Scale): Parameter
   return { values: planning.values, continuous: planning.continuous, target: targetOf(envelope, planning, scale) };
 }
 // its target: what a point of its shape is at the port, by the port's kind, and the ramp each stage takes there
-function targetOf(envelope: Envelope, planning: Planning, { kind = 'linear', base, rest = 0, silence }: Scale): Target {
+function targetOf(
+  envelope: Envelope,
+  planning: Planning,
+  { kind = 'linear', base, rest = 0, silence }: Scale,
+): EnvelopeTarget {
   const amount = amountOf(envelope.amount, planning.values);
   if (kind === 'pitch') {
     return { valueAt: (point) => (base ?? 1) * Math.pow(2, (amount * point) / 12), rampOf: () => 'exp' };
