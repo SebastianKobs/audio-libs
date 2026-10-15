@@ -21,6 +21,7 @@ import type { Block } from '../blocks/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
 import { withChannels, type LooseJack } from './channels.ts';
 import { problemsIn } from './check.ts';
+import type { Form } from './form.ts';
 import { Kinds } from './kinds.ts';
 import type { Template, TemplateChild, ValuesByAddress } from './template.ts';
 
@@ -43,10 +44,11 @@ interface Given {
 export class Planner {
   readonly #kinds: Kinds;
 
-  // the templates, each checked well-formed; every failure said at once
-  constructor(templates: readonly Template[]) {
+  // the templates, each checked well-formed and held to its form; every failure said at once
+  constructor(templates: readonly Template[], forms: readonly Form[] = []) {
     this.#kinds = new Kinds(templates);
-    const problems = templates.flatMap((template) => problemsIn(template, this.#kinds));
+    const byName = new Map(forms.map((form) => [form.name, form]));
+    const problems = templates.flatMap((template) => problemsIn(template, this.#kinds, byName));
     if (problems.length) {
       throw new Error(['templates not well-formed:', ...problems].join('\n'));
     }

@@ -4,8 +4,10 @@
 // Its parts:
 //   - template.ts: a composite's description, written short;
 //   - planner.ts: the planner, handed the templates once, a plan for any of them;
-//   - check.ts: a template checked well-formed as it's handed in, every failure said;
+//   - check.ts: a template checked well-formed as it's handed in, then held to its form, every failure said;
+//   - form.ts: the constraints a template has to fulfil, as data; form-check.ts, a template held to its form;
 //   - kinds.ts: the kinds a template names, blocks and templates, as seen from outside;
 //   - channels.ts: a jack's channels as they come, where its block doesn't fix them.
 export { Planner, type Asked } from './planner.ts';
 export type { Template, TemplateChild, TemplatePool, ValuesByAddress } from './template.ts';
+export type { Form, FormFrom, FormRole, FormRule, FormTo, FormWire } from './form.ts';

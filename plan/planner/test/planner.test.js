@@ -2,15 +2,16 @@
 //   - a template planned: its blocks' specs, values and settings as they start, its macros onto its children;
 //   - values and settings changed by address, a preset's; a template of templates; a pool's child ready;
 //   - a jack's channels as they come, by what's wired into it;
-//   - every template checked well-formed as it's handed in, every failure said at once.
+//   - every template checked well-formed as it's handed in, every failure said at once;
+//   - each held to its form: its roles, how many, in order, the wires it allows, no loops, every way out ending in a role.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Planner } from '../index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { UTILITY as UTILITY_PLAN } from '../../format/test/plans.ts';
-import { LOOP, STRIP, SYNTH, UTILITY, VOICE } from './templates.js';
+import { CHANNEL_FORM, DESK, DESK_FORM, LOOP, STRIP, SYNTH, UTILITY, VOICE } from './templates.js';
 
-const planner = new Planner([UTILITY, STRIP, VOICE, SYNTH, LOOP]);
+const planner = new Planner([UTILITY, STRIP, DESK, VOICE, SYNTH, LOOP], [CHANNEL_FORM, DESK_FORM]);
 
 test("a template planned, as the format's tests wrote it out by hand: the Utility, its blocks' specs, values and settings as they start, its jacks' channels, its macros onto its children", () => {
   assert.deepEqual(planner.plan('Utility', { name: 'utility' }), UTILITY_PLAN);
@@ -31,6 +32,8 @@ test("a template of templates: a child's template planned into it, its role kept
     [
       ['utility', 'Utility', 'insert'],
       ['lowpass', 'filter', 'insert'],
+      ['fader', 'gain', 'fader'],
+      ['pan', 'pan', 'pan'],
     ],
   );
   assert.equal(plan.node.form, 'channel');
@@ -124,4 +127,90 @@ test('every template checked well-formed as it is handed in, every failure said 
       return true;
     },
   );
+});
+
+test("a template that fulfils its form planned: a desk of channels, each of the channel's form, its roles kept", () => {
+  const plan = planner.plan('Desk');
+  assert.deepEqual(
+    plan.node.inside.children.map(({ name, role, form }) => [name, role, form]),
+    [
+      ['my tap 1', 'channel', 'channel'],
+      ['my playing', 'bus', 'channel'],
+      ['reverb', 'return', 'channel'],
+      ['master', 'master', 'channel'],
+    ],
+  );
+  assert.throws(() => new Planner([{ kind: 'Mixer', form: 'mixer' }]), /Mixer: no form mixer/);
+});
+
+// a planner's failures, each a line after its heading
+function failuresOf(templates, forms) {
+  try {
+    new Planner(templates, forms);
+  } catch (error) {
+    return error.message.split('\n').slice(1);
+  }
+  return [];
+}
+
+test("each template held to its form, every failure said: a child with no role, a role the form hasn't, a kind or form not the role's; too few or too many; out of order", () => {
+  const backwards = {
+    kind: 'Backwards',
+    form: 'channel',
+    inputs: [{ name: 'in', channels: 2 }],
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [
+      { name: 'pan', kind: 'pan', role: 'pan' },
+      { name: 'fader', kind: 'filter', role: 'fader' },
+      { name: 'eq', kind: 'filter', role: 'insert' },
+      { name: 'loud', kind: 'gain', role: 'fader' },
+      { name: 'odd', kind: 'gain' },
+      { name: 'side', kind: 'gain', role: 'sidechain' },
+    ],
+  };
+  assert.deepEqual(failuresOf([backwards], [CHANNEL_FORM]), [
+    'Backwards: form channel: fader: a filter, not a gain',
+    'Backwards: form channel: odd: no role',
+    'Backwards: form channel: side: no role sidechain in it',
+    'Backwards: form channel: role fader: 2 children, at most 1',
+    'Backwards: form channel: fader: its role fader after pan, out of order',
+    'Backwards: form channel: eq: its role insert after pan, out of order',
+    'Backwards: form channel: loud: its role fader after pan, out of order',
+  ]);
+});
+
+test("each template held to its form's wires and rules: a wire the form doesn't allow, into an input or a param, a loop, a way out not ending in the master", () => {
+  const tangled = {
+    kind: 'Tangled',
+    form: 'desk',
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [
+      { name: 'a', kind: 'Strip', role: 'channel' },
+      { name: 'b', kind: 'Strip', role: 'bus' },
+      { name: 'c', kind: 'Strip', role: 'bus' },
+      { name: 'stray', kind: 'Strip', role: 'channel' },
+      { name: 'master', kind: 'Strip', role: 'master' },
+      { name: 'pan', kind: 'pan', role: 'return' },
+    ],
+    wires: [
+      { from: { node: 'a', output: 'out' }, to: { node: 'b', input: 'in' } },
+      { from: { node: 'b', output: 'out' }, to: { node: 'c', input: 'in' } },
+      { from: { node: 'c', output: 'out' }, to: { node: 'b', input: 'in' } },
+      { from: { node: 'a', output: 'reverb' }, to: { node: 'stray', input: 'in' } },
+      { from: { node: 'a', output: 'out' }, to: { node: 'b', param: 'volume' } },
+      { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
+    ],
+  };
+  assert.deepEqual(failuresOf([UTILITY, STRIP, tangled], [CHANNEL_FORM, DESK_FORM]), [
+    'Tangled: form desk: pan: a pan, not of form channel',
+    'Tangled: form desk: a wire from a into stray: not allowed',
+    'Tangled: form desk: a wire from a into b: not allowed',
+    'Tangled: form desk: a loop through b',
+    'Tangled: form desk: a loop through c',
+    "Tangled: form desk: a: its way out doesn't end in the master",
+    "Tangled: form desk: b: its way out doesn't end in the master",
+    "Tangled: form desk: c: its way out doesn't end in the master",
+    "Tangled: form desk: stray: its way out doesn't end in the master",
+    "Tangled: form desk: pan: its way out doesn't end in the master",
+  ]);
 });

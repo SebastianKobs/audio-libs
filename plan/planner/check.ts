@@ -1,28 +1,40 @@
 // ---------- plan/planner/check: a template checked as the planner is handed it ----------
-// Well-formed, every template alike:
+// Held to its form where it names one (form-check.ts), once it's well-formed, every template alike:
 //   1. its children's names one of a kind, each child's kind known, none holding the template;
 //   2. the values and settings a child changes there inside it;
 //   3. each wire's ends there: an input, an output, a param;
 //   4. each macro's targets params inside; a voice's note's addresses too.
 // Every failure said, plainly: its template, its child or wire, its rule.
 import { addressOf, addressText, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
+import type { Form } from './form.ts';
+import { formProblems } from './form-check.ts';
 import type { Kinds } from './kinds.ts';
 import type { Template, TemplateChild } from './template.ts';
 
 // what a note sets in a voice
 const NOTE_SOURCES = ['pitch', 'velocity', 'gate'] as const;
 
-// What's wrong with a template, each failure a line; none where it's well-formed.
-export function problemsIn(template: Template, kinds: Kinds): string[] {
+// What's wrong with a template, each failure a line: not well-formed, or, once it is, its form
+// not handed in or not fulfilled; none where it's well-formed and fulfils its form.
+export function problemsIn(template: Template, kinds: Kinds, forms: ReadonlyMap<string, Form>): string[] {
+  const problems = wellFormedProblems(template, kinds);
+  if (!problems.length && template.form !== undefined) {
+    const form = forms.get(template.form);
+    problems.push(...(form ? formProblems(template, form, kinds) : [`no form ${template.form}`]));
+  }
+  return problems.map((problem) => `${template.kind}: ${problem}`);
+}
+
+// what keeps a template from being well-formed
+function wellFormedProblems(template: Template, kinds: Kinds): string[] {
   const children = kinds.childrenOf(template);
-  const problems = [
+  return [
     ...namesTwice(children),
     ...children.flatMap((child) => childProblems(child, template, kinds)),
     ...wiresOf(template).flatMap((wire) => wireProblems(wire, template, kinds)),
     ...macroProblems(template, kinds),
     ...noteProblems(template, kinds),
   ];
-  return problems.map((problem) => `${template.kind}: ${problem}`);
 }
 
 // a name two children have, said once, at the first

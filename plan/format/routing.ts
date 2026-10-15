@@ -8,7 +8,7 @@ import type { Wire, WireFrom, WireTo } from './wire.ts';
 // What the names given reach over the inside's wires, they among it, in the order found.
 // Only the wires through() lets through (all, unless it says): a send turned up, say.
 export function reached(
-  inside: Inside,
+  inside: Pick<Inside, 'wires'>,
   names: Iterable<string>,
   through: (wire: Wire) => boolean = () => true,
 ): Set<string> {
@@ -27,7 +27,7 @@ export function reached(
 }
 // Whether one child reaches another over the wires, itself among it:
 // a wire from the second into the first would be a loop.
-export function feeds(inside: Inside, from: string, to: string): boolean {
+export function feeds(inside: Pick<Inside, 'wires'>, from: string, to: string): boolean {
   return reached(inside, [from]).has(to);
 }
 
