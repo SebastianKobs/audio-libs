@@ -2,6 +2,8 @@
 // As a rack's macro: one knob moving several params inside, each its own way.
 // Each target mapped as the synth maps a term: times its factor, held in its range,
 // plus its offset. That covers an Ableton macro's min and max.
+// A choice mapped by its index, as a builder holds it: a macro onto a delay's note.
+import { choiceIndex } from '../../params/index.ts';
 import { clamp } from '../../util/index.ts';
 import type { Address } from './address.ts';
 import type { Param } from './param.ts';
@@ -15,9 +17,8 @@ export interface MacroTarget {
   readonly low?: number;
   readonly high?: number;
 }
-// a macro: a param of the composite's own, a number, and its targets
+// a macro: a param of the composite's own, a number or one of its choices, and its targets
 export interface Macro extends Param {
-  readonly value: number;
   readonly maps: readonly MacroTarget[];
 }
 
@@ -28,7 +29,9 @@ export function mapOnto(
 ): number {
   return clamp(factor * value, low, high) + offset;
 }
-// A macro's value onto each of its targets, as a builder sets them: its own, unless given one.
+// A macro's value onto each of its targets, as a builder sets them: its own, unless given one;
+// a choice by its index.
 export function macroValues(macro: Macro, value = macro.value): { to: Address; value: number }[] {
-  return macro.maps.map((target) => ({ to: target.to, value: mapOnto(target, value) }));
+  const held = typeof value === 'number' ? value : choiceIndex(macro.spec, value);
+  return macro.maps.map((target) => ({ to: target.to, value: mapOnto(target, held) }));
 }

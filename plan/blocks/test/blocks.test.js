@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BLOCKS, biquadQs } from '../index.ts';
 import { near } from '../../../util/test/near.js';
-import { isSwitch, NOTE_VALUES } from '../../../params/index.ts';
+import { dBOf, FADER_GAIN, isSwitch, NOTE_VALUES } from '../../../params/index.ts';
 
 const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise', 'limiter', 'envelope'];
 const MONO = 1;
@@ -23,12 +23,13 @@ function declared({ params, settings, inputs, outputs }) {
     outputs: outputs.map(jack),
   };
 }
-// whether a value is one its spec's control can take: within its range, or one of its choices
-function onControl({ range, choices }, value) {
+// whether a value is one its spec's control can take: within its range, a gain's in dB, or one of its choices
+function onControl({ range, choices, dB }, value) {
   if (choices) {
     return choices.includes(value);
   }
-  return value >= range[0] && value <= range[1];
+  const shown = dB ? dBOf(value) : value;
+  return shown >= range[0] && shown <= range[1];
 }
 
 test('the nine blocks, each declared by its kind, the contract every builder meets', () => {
@@ -76,7 +77,7 @@ test('what each block declares, in short standard terms: its params, its setting
   });
 });
 
-test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colours; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves", () => {
+test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colours; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves; a gain the fader's", () => {
   const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   assert.deepEqual(setting('oscillator', 'wave').choices, ['sine', 'triangle', 'square', 'sawtooth']);
@@ -89,6 +90,7 @@ test("the blocks' choices: an oscillator's waves, a filter's three types, a pan'
   assert.equal(param('delay', 'ms').unit, 'ms');
   assert.ok(isSwitch(param('envelope', 'gate')), 'opened and closed by the note');
   assert.deepEqual([param('filter', 'frequency').taper, param('filter', 'resonance').taper], ['octaves', 'octaves']);
+  assert.deepEqual(param('gain', 'gain'), { ...FADER_GAIN, unit: 'dB', default: 1 }, "a gain the fader's, in dB, at 1");
 });
 
 test("a filter's stages, for a builder that builds it from biquads: at 12 dB one, at its resonance, Web Audio's own where none; at 24 two in series, a lowpass's or a highpass's a 4th-order Butterworth's at 0.707, its second moved by the resonance; a bandpass's both at it", () => {

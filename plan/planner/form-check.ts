@@ -1,10 +1,11 @@
 // ---------- plan/planner/form-check: a template held to its form ----------
 // Each failure said plainly, in this order:
-//   1. each child's role: there, one of the form's, of its kind or form;
-//   2. how many of each role, at least and at most;
-//   3. the roles in their order, where the form says;
-//   4. each wire one the form allows, where it lists them;
-//   5. its rules: no loops; every way out ending in a role.
+//   1. its inputs and outputs the form's, where it names them;
+//   2. each child's role: there, one of the form's, of its kind or form, where it names roles;
+//   3. how many of each role, at least and at most;
+//   4. the roles in their order, where the form says;
+//   5. each wire one the form allows, where it lists them;
+//   6. its rules: no loops; every way out ending in a role.
 import { feeds, reached, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
 import type { Form, FormFrom, FormRole, FormRule, FormTo } from './form.ts';
 import type { Kinds } from './kinds.ts';
@@ -14,9 +15,11 @@ import type { Template, TemplateChild } from './template.ts';
 export function formProblems(template: Template, form: Form, kinds: Kinds): string[] {
   const children = template.children ?? [];
   const pooled = (template.pools ?? []).map((pool) => pool.child);
+  const roles = form.roles ?? [];
   const problems = [
-    ...[...children, ...pooled].flatMap((child) => roleProblems(child, form, kinds)),
-    ...form.roles.flatMap((role) => countProblems(role, children)),
+    ...jackProblems(template, form),
+    ...(form.roles ? [...children, ...pooled].flatMap((child) => roleProblems(child, roles, kinds)) : []),
+    ...roles.flatMap((role) => countProblems(role, children)),
     ...(form.ordered ? orderProblems(children, form) : []),
     ...wireProblems(template, form),
     ...(form.rules ?? []).flatMap((rule) => ruleProblems(rule, template)),
@@ -24,12 +27,23 @@ export function formProblems(template: Template, form: Form, kinds: Kinds): stri
   return problems.map((problem) => `form ${form.name}: ${problem}`);
 }
 
+// its inputs and outputs by name, in order, those the form names
+function jackProblems(template: Template, form: Form): string[] {
+  return (['inputs', 'outputs'] as const).flatMap((side) => {
+    const wanted = form[side];
+    const names = (template[side] ?? []).map((jack) => jack.name).join(', ');
+    if (wanted === undefined || names === wanted.join(', ')) {
+      return [];
+    }
+    return [`its ${side} ${names || 'none'}, where the form has ${wanted.join(', ') || 'none'}`];
+  });
+}
 // a child's role there, one of the form's, its kind or form the role's
-function roleProblems(child: TemplateChild, form: Form, kinds: Kinds): string[] {
+function roleProblems(child: TemplateChild, roles: readonly FormRole[], kinds: Kinds): string[] {
   if (child.role === undefined) {
     return [`${child.name}: no role`];
   }
-  const role = form.roles.find((each) => each.role === child.role);
+  const role = roles.find((each) => each.role === child.role);
   if (!role) {
     return [`${child.name}: no role ${child.role} in it`];
   }
@@ -54,13 +68,14 @@ function countProblems({ role, least = 0, most = Infinity }: FormRole, children:
 }
 // each child after those of a later role out of order, said against the latest role before it
 function orderProblems(children: readonly TemplateChild[], form: Form): string[] {
-  const placeOf = (role: string | undefined): number => form.roles.findIndex((each) => each.role === role);
+  const roles = form.roles ?? [];
+  const placeOf = (role: string | undefined): number => roles.findIndex((each) => each.role === role);
   const problems: string[] = [];
   let latest = -1;
   for (const child of children.filter((each) => placeOf(each.role) !== -1)) {
     const place = placeOf(child.role);
     if (place < latest) {
-      problems.push(`${child.name}: its role ${child.role} after ${form.roles[latest]!.role}, out of order`);
+      problems.push(`${child.name}: its role ${child.role} after ${roles[latest]!.role}, out of order`);
     }
     latest = Math.max(latest, place);
   }

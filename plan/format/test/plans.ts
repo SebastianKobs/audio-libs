@@ -7,6 +7,8 @@ import type { Node, Plan } from '../index.ts';
 
 const STEREO = 2;
 const MONO = 1;
+// a gain block's, the fader's in dB, at 1: a Utility's level its
+const GAIN = { unit: 'dB', range: [-60, 6, 0.1], dB: true, taper: 'fader', default: 1 } as const;
 
 // a gain into a pan, as the Utility is: its level and its pan, macros onto the two's; its blocks as
 // libs/plan/blocks/ declares them, so the planner's tests hold its Utility to this one
@@ -26,7 +28,7 @@ export const UTILITY: Plan = {
           kind: 'gain',
           inputs: [{ name: 'in', channels: STEREO }],
           outputs: [{ name: 'out', channels: STEREO }],
-          params: [{ spec: { name: 'gain', range: [0, 2, 0.01], default: 1 }, value: 1 }],
+          params: [{ spec: { ...GAIN, name: 'gain' }, value: 1 }],
           settings: [],
         },
         {
@@ -45,7 +47,7 @@ export const UTILITY: Plan = {
       ],
       macros: [
         {
-          spec: { name: 'level', range: [0, 2, 0.01], default: 1 },
+          spec: { ...GAIN, name: 'level' },
           value: 1,
           hint: 'How loud it comes out.',
           maps: [{ to: ['gain', 'gain'], factor: 1, offset: 0 }],

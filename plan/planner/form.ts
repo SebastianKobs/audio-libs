@@ -1,5 +1,6 @@
 // ---------- plan/planner/form: the constraints a template has to fulfil, as data ----------
-// A kind's rules, a channel's or a desk's, declared, not built into code:
+// A kind's rules, a channel's, a desk's or an effect's, declared, not built into code:
+//   - its own inputs and outputs, by name, where it names them;
 //   - its children by role: each role's kind or form, how many, at least and at most;
 //   - in the roles' order, where the form says;
 //   - the wires it allows: from a role's output, its main one or a tap, or the parent's own
@@ -26,11 +27,16 @@ export interface FormWire {
 }
 // a rule by name: no loops between its children; every child's way out, by its main outputs, ending in a role
 export type FormRule = { readonly rule: 'no loops' } | { readonly rule: 'ends in'; readonly role: string };
-// a form, by its name: its roles, in order where it says; the wires it allows, any where it lists none; its rules
+// A form, by its name:
+//   - its jacks, any where it names none;
+//   - its roles, in order where it says; children free of roles where it names none;
+//   - the wires it allows, any where it lists none; its rules.
 export interface Form {
   readonly name: string;
+  readonly inputs?: readonly string[];
+  readonly outputs?: readonly string[];
   readonly ordered?: boolean;
-  readonly roles: readonly FormRole[];
+  readonly roles?: readonly FormRole[];
   readonly wires?: readonly FormWire[];
   readonly rules?: readonly FormRule[];
 }

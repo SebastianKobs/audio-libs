@@ -3,7 +3,8 @@
 // an instrument, a channel, a whole studio, before anything plays:
 //   1. a block's params and settings its specs, each at its value: given, or its default;
 //   2. a child's template planned into it, the values it's given by their addresses;
-//   3. a macro's value onto its targets: a param a macro moves is the macro's;
+//   3. a macro's spec, its own or its first target's; its value onto its targets, a choice by its
+//      index: a param a macro moves is the macro's;
 //   4. a jack's channels as they come, where its block doesn't fix them;
 //   5. a pool's child ready, as each copy will be.
 // No note: a voice's note sets its params as it plays.
@@ -21,10 +22,10 @@ import {
 import type { Block } from '../blocks/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
 import { withChannels, type LooseJack } from './channels.ts';
-import { problemsIn } from './check.ts';
+import { problemsInAll } from './check.ts';
 import type { Form } from './form.ts';
 import { Kinds } from './kinds.ts';
-import type { Template, TemplateChild } from './template.ts';
+import type { Template, TemplateChild, TemplateMacro } from './template.ts';
 
 // what a plan is asked with: its top node's name, its kind's unless given; values and settings
 // changed by their addresses, a preset's
@@ -45,11 +46,12 @@ interface Given {
 export class Planner {
   readonly #kinds: Kinds;
 
-  // the templates, each checked well-formed and held to its form; every failure said at once
+  // the templates, each checked well-formed and held to its form, then its macros onto choices;
+  // every failure said at once
   constructor(templates: readonly Template[], forms: readonly Form[] = []) {
     this.#kinds = new Kinds(templates);
     const byName = new Map(forms.map((form) => [form.name, form]));
-    const problems = templates.flatMap((template) => problemsIn(template, this.#kinds, byName));
+    const problems = problemsInAll(templates, this.#kinds, byName);
     if (problems.length) {
       throw new Error(['templates not well-formed:', ...problems].join('\n'));
     }
@@ -74,10 +76,7 @@ export class Planner {
   }
   // a template planned: its macros at their values, onto their targets; its children, its pools
   #composite(child: TemplateChild, template: Template, { values, settings, at }: Given): Node {
-    const macros = (template.macros ?? []).map((macro): Macro => ({
-      ...macro,
-      value: numberOr(values[macro.spec.name], macro.value),
-    }));
+    const macros = (template.macros ?? []).map((macro) => this.#macro(template, macro, { values, settings, at }));
     const moved = macros.flatMap((macro) =>
       macroValues(macro).map(({ to, value }) => [addressText(to), value] as const),
     );
@@ -108,6 +107,12 @@ export class Planner {
       inside: { children, wires: template.wires ?? [], macros, pools },
     };
   }
+  // a macro planned: its spec, its own or its first target's; its value given, or written, or its default
+  #macro(template: Template, macro: TemplateMacro, { values, at }: Given): Macro {
+    const spec = this.#kinds.macroSpec(template, macro)!; // a spec or a target, as the check found
+    const { value } = valued(spec, values[macro.name] ?? macro.value, [...at, macro.name]);
+    return { spec, value, ...(macro.hint !== undefined && { hint: macro.hint }), maps: macro.maps };
+  }
   // the jacks of a template's block children whose channels their blocks don't fix
   #loose(template: Template): LooseJack[] {
     return (template.children ?? []).flatMap(({ name, kind }) => {
@@ -135,13 +140,21 @@ function blockNode(child: TemplateChild, block: Block, { values, settings, at }:
     settings: block.settings.map((spec) => valued(spec, settings[spec.name], [...at, spec.name])),
   };
 }
-// a param or a setting at its value: given, or its default; refused where it has neither
+// A param or a setting at its value: given, or its default; refused where it has neither.
+// A choice given by its index, as a macro moves it, written as the choice; one past them refused.
 function valued(spec: ParamSpec, given: number | string | undefined, at: Address): Param {
   const value = given ?? spec.default;
   if (value === undefined) {
     throw new Error(`${addressText(at)}: no value, and no default`);
   }
-  return { spec, value };
+  if (typeof value !== 'number' || !spec.choices) {
+    return { spec, value };
+  }
+  const choice = spec.choices[value];
+  if (choice === undefined) {
+    throw new Error(`${addressText(at)}: no choice ${value}`);
+  }
+  return { spec, value: choice };
 }
 // a child's name, and its role where it has one
 function named({ name, role }: TemplateChild): Pick<Node, 'name' | 'role'> {
@@ -155,8 +168,4 @@ function under(values: ValuesByAddress, name: string): ValuesByAddress {
       .filter(([address]) => address.startsWith(prefix))
       .map(([address, value]) => [address.slice(prefix.length), value]),
   );
-}
-// a macro's value: the one given, where it's a number; else its own
-function numberOr(given: number | string | undefined, own: number): number {
-  return typeof given === 'number' ? given : own;
 }

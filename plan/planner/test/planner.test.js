@@ -3,11 +3,14 @@
 //   - values and settings changed by address, a preset's; a template of templates; a pool's child ready;
 //   - a jack's channels as they come, by what's wired into it;
 //   - every template checked well-formed as it's handed in, every failure said at once;
-//   - each held to its form: its roles, how many, in order, the wires it allows, no loops, every way out ending in a role.
+//   - each held to its form: its jacks, its roles, how many, in order, the wires it allows, no loops, every way out ending
+//     in a role; a macro's spec its target's where it has none;
+//   - a template read from data, YAML's, its shape checked first.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Planner } from '../index.ts';
+import { Planner, templateOf } from '../index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
+import { BLOCKS } from '../../blocks/index.ts';
 import { UTILITY as UTILITY_PLAN } from '../../format/test/plans.ts';
 import { CHANNEL_FORM, DESK, DESK_FORM, LOOP, STRIP, SYNTH, UTILITY, VOICE } from './templates.js';
 
@@ -102,7 +105,8 @@ test('every template checked well-formed as it is handed in, every failure said 
     ],
     macros: [
       {
-        spec: { name: 'level', range: [0, 2, 0.01] },
+        name: 'level',
+        spec: { range: [0, 2, 0.01] },
         value: 1,
         maps: [{ to: ['gain', 'level'], factor: 1, offset: 0 }],
       },
@@ -213,4 +217,115 @@ test("each template held to its form's wires and rules: a wire the form doesn't 
     "Tangled: form desk: stray: its way out doesn't end in the master",
     "Tangled: form desk: pan: its way out doesn't end in the master",
   ]);
+});
+
+// an effect's form: one input and one output, its children playing no role
+const EFFECT_FORM = { name: 'effect', inputs: ['in'], outputs: ['out'] };
+// an effect: a gain, its level a macro naming no spec of its own
+const LEVEL = {
+  kind: 'Level',
+  form: 'effect',
+  inputs: [{ name: 'in', channels: 2 }],
+  outputs: [{ name: 'out', channels: 2 }],
+  children: [{ name: 'gain', kind: 'gain' }],
+  wires: [
+    { from: { input: 'in' }, to: { node: 'gain', input: 'in' } },
+    { from: { node: 'gain', output: 'out' }, to: { output: 'out' } },
+  ],
+  macros: [{ name: 'level', maps: [{ to: ['gain', 'gain'], factor: 1, offset: 0 }] }],
+};
+
+test("a form's jacks: an effect's one input and one output, its children free of roles where it names none; jacks not the form's said", () => {
+  assert.doesNotThrow(() => new Planner([LEVEL], [EFFECT_FORM]));
+  const sided = { ...LEVEL, kind: 'Sided', inputs: [...LEVEL.inputs, { name: 'side', channels: 1 }] };
+  assert.deepEqual(failuresOf([sided], [EFFECT_FORM]), [
+    'Sided: form effect: its inputs in, side, where the form has in',
+  ]);
+});
+
+test("a macro with no spec of its own its first target's, under its name, its value its default unless written; one with no name refused", () => {
+  const planned = new Planner([LEVEL], [EFFECT_FORM]).plan('Level');
+  const [level] = planned.node.inside.macros;
+  assert.deepEqual(
+    [level.spec, level.value],
+    [{ ...BLOCKS.gain.params[0], name: 'level' }, BLOCKS.gain.params[0].default],
+  );
+  assert.equal(paramAt(planned, ['level']).spec.name, 'level');
+  const nameless = { ...LEVEL, kind: 'Nameless', macros: [{ maps: LEVEL.macros[0].maps }] };
+  assert.deepEqual(failuresOf([nameless], [EFFECT_FORM]), ['Nameless: a macro with no name']);
+});
+
+test("a template read from data, as YAML's is: its shape checked, each failure said, naming where it was read from", () => {
+  assert.equal(templateOf(LEVEL, 'level.yaml'), LEVEL, 'one of the shape, as it is');
+  const bent = {
+    kind: 3,
+    form: ['effect'],
+    inputs: { name: 'in' },
+    children: [{ name: 'gain' }, 'pan'],
+    wires: [{ from: { input: 'in' } }],
+    macros: [{ name: 'level' }],
+    pools: [{ wires: [] }],
+  };
+  assert.throws(() => templateOf(bent, 'bent.yaml'), {
+    message: [
+      'bent.yaml: not of the shape of a template:',
+      '  its kind not a word',
+      '  its form not a word',
+      '  its inputs not a list',
+      '  children 1: no kind',
+      '  children 2: not an object',
+      '  wires 1: no to',
+      '  macros 1: no maps',
+      '  pools 1: no child',
+    ].join('\n'),
+  });
+  assert.throws(() => templateOf(null, 'empty.yaml'), {
+    message: 'empty.yaml: not of the shape of a template:\n  not an object: none',
+  });
+});
+
+test("a macro onto a choice: its choices the choice's own, as it moves it by position; other choices, or none, refused once every template is well-formed", () => {
+  const onto = (to) => [{ to, factor: 1, offset: 0 }];
+  const NOTES = BLOCKS.delay.params.find((spec) => spec.name === 'note').choices;
+  const pace = {
+    kind: 'Pace',
+    inputs: [{ name: 'in', channels: 2 }],
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [{ name: 'line', kind: 'delay' }],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'line', input: 'in' } },
+      { from: { node: 'line', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: [
+      { name: 'note', maps: onto(['line', 'note']) },
+      { name: 'pace', spec: { choices: ['slow', 'fast'], default: 'slow' }, maps: onto(['line', 'note']) },
+      { name: 'steps', spec: { range: [0, 11, 1], default: 4 }, maps: onto(['line', 'note']) },
+    ],
+  };
+  const held = {
+    kind: 'Held',
+    inputs: [{ name: 'in', channels: 2 }],
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [{ name: 'pace', kind: 'Pace' }],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'pace', input: 'in' } },
+      { from: { node: 'pace', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: [
+      { name: 'note', maps: onto(['pace', 'note']) },
+      { name: 'speed', spec: { choices: ['slow', 'fast'], default: 'fast' }, maps: onto(['pace', 'note']) },
+      { name: 'backwards', spec: { choices: [...NOTES].reverse(), default: '1/8' }, maps: onto(['pace', 'note']) },
+    ],
+  };
+  assert.deepEqual(failuresOf([pace, held]), [
+    'Pace: macro pace: its choices not those of line/note, which it moves by position',
+    'Pace: macro steps: its choices not those of line/note, which it moves by position',
+    'Held: macro speed: its choices not those of pace/note, which it moves by position',
+    'Held: macro backwards: its choices not those of pace/note, which it moves by position',
+  ]);
+  const fine = { ...pace, macros: [pace.macros[0]] };
+  assert.doesNotThrow(
+    () => new Planner([fine, { ...held, macros: [held.macros[0]] }]),
+    'its own, through a template too',
+  );
 });

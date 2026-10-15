@@ -3,7 +3,10 @@
 //   1. its children's names one of a kind, each child's kind known, none holding the template;
 //   2. the values and settings a child changes there inside it;
 //   3. each wire's ends there: an input, an output, a param;
-//   4. each macro's targets params inside; a voice's note's addresses too.
+//   4. each macro named, its targets params inside, one at least where it has no spec of its own;
+//      a voice's note's addresses params inside too.
+// Then, once every template is, a spec followed down safely, past no template holding itself:
+//   5. each macro onto a choice: its choices the choice's own, as it moves it by position.
 // Every failure said, plainly: its template, its child or wire, its rule.
 import { addressOf, addressText, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
 import type { Form } from './form.ts';
@@ -14,9 +17,25 @@ import type { Template, TemplateChild } from './template.ts';
 // what a note sets in a voice
 const NOTE_SOURCES = ['pitch', 'velocity', 'gate'] as const;
 
+// What's wrong with the templates, each failure a line: each one's own; once there are none,
+// each macro onto a choice with other choices than the choice's.
+export function problemsInAll(
+  templates: readonly Template[],
+  kinds: Kinds,
+  forms: ReadonlyMap<string, Form>,
+): string[] {
+  const problems = templates.flatMap((template) => problemsIn(template, kinds, forms));
+  if (problems.length) {
+    return problems;
+  }
+  return templates.flatMap((template) =>
+    choiceProblems(template, kinds).map((problem) => `${template.kind}: ${problem}`),
+  );
+}
+
 // What's wrong with a template, each failure a line: not well-formed, or, once it is, its form
 // not handed in or not fulfilled; none where it's well-formed and fulfils its form.
-export function problemsIn(template: Template, kinds: Kinds, forms: ReadonlyMap<string, Form>): string[] {
+function problemsIn(template: Template, kinds: Kinds, forms: ReadonlyMap<string, Form>): string[] {
   const problems = wellFormedProblems(template, kinds);
   if (!problems.length && template.form !== undefined) {
     const form = forms.get(template.form);
@@ -119,13 +138,37 @@ function outsideOfChild(name: string, template: Template, kinds: Kinds): ReturnT
   const child = kinds.childrenOf(template).find((each) => each.name === name);
   return child && kinds.outsideOf(child.kind);
 }
-// each macro's targets params inside: a child's by its name, then within it
+// each macro named; its targets params inside, a child's by its name, then within it; a target
+// to take its spec from where it has none
 function macroProblems(template: Template, kinds: Kinds): string[] {
-  return (template.macros ?? []).flatMap((macro) =>
-    macro.maps
+  return (template.macros ?? []).flatMap((macro) => {
+    if (typeof macro.name !== 'string') {
+      return ['a macro with no name']; // as YAML may write it
+    }
+    if (!macro.spec && !macro.maps.length) {
+      return [`macro ${macro.name}: no spec, and no target to take one from`];
+    }
+    return macro.maps
       .filter((target) => !paramInside(target.to, template, kinds))
-      .map((target) => `macro ${macro.spec.name}: ${addressText(target.to)} is no param`),
-  );
+      .map((target) => `macro ${macro.name}: ${addressText(target.to)} is no param`);
+  });
+}
+// Each macro onto a choice: its own choices the same, in the same order.
+// It moves a choice by position: another list, or none, would land on other words.
+function choiceProblems(template: Template, kinds: Kinds): string[] {
+  return (template.macros ?? []).flatMap((macro) => {
+    const own = kinds.macroSpec(template, macro)?.choices ?? [];
+    return macro.maps
+      .filter(({ to }) => {
+        const choices = kinds.paramSpecIn(template.kind, to)?.choices;
+        return choices !== undefined && !sameChoices(own, choices);
+      })
+      .map(({ to }) => `macro ${macro.name}: its choices not those of ${addressText(to)}, which it moves by position`);
+  });
+}
+// two lists of choices the same, in the same order
+function sameChoices(one: readonly string[], other: readonly string[]): boolean {
+  return one.length === other.length && one.every((choice, index) => choice === other[index]);
 }
 // a voice's note's addresses params inside its pool's child
 function noteProblems(template: Template, kinds: Kinds): string[] {

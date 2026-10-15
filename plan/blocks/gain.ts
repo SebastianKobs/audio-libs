@@ -1,11 +1,12 @@
 // ---------- plan/blocks/gain: a level ----------
-// Its gain, a share: 1 as it comes, 2 twice as loud.
+// Its gain, a share: 1 as it comes, 2 twice as loud; shown in dB by the fader law, as a fader's.
+import { FADER_GAIN } from '../../params/index.ts';
 import type { Block } from './block.ts';
 
 export default {
   kind: 'gain',
   inputs: [{ name: 'in' }],
   outputs: [{ name: 'out' }],
-  params: [{ name: 'gain', range: [0, 2, 0.01], default: 1 }],
+  params: [{ ...FADER_GAIN, unit: 'dB', default: 1 }],
   settings: [],
 } as const satisfies Block;

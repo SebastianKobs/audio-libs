@@ -2,10 +2,12 @@
 // Written as a plan's node, short:
 //   - a child by its kind, a block's or another template's, with only the values and settings
 //     it changes, by their addresses within it;
-//   - its own inputs, outputs, wires, macros and pools as the plan has them;
+//   - its own inputs, outputs, wires and pools as the plan has them;
+//   - a macro by its name, its spec its first target's where it writes none;
 //   - its child's role in it, and the form it fulfils, where it has one.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
-import type { Input, Macro, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
+import type { ParamSpec } from '../../params/index.ts';
+import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
 
 // a child as a template writes it
 export interface TemplateChild {
@@ -14,6 +16,15 @@ export interface TemplateChild {
   readonly role?: string;
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
+}
+// A macro as a template writes it: its name and its targets; where it writes none of its own,
+// its spec its first target's, its value its spec's default.
+export interface TemplateMacro {
+  readonly name: string;
+  readonly spec?: Omit<ParamSpec, 'name'>;
+  readonly value?: number | string;
+  readonly hint?: string;
+  readonly maps: readonly MacroTarget[];
 }
 // a pool as a template writes it: its child, the wires each copy is wired by, a voice's note
 export interface TemplatePool {
@@ -29,6 +40,6 @@ export interface Template {
   readonly outputs?: readonly Output[];
   readonly children?: readonly TemplateChild[];
   readonly wires?: readonly Wire[];
-  readonly macros?: readonly Macro[];
+  readonly macros?: readonly TemplateMacro[];
   readonly pools?: readonly TemplatePool[];
 }

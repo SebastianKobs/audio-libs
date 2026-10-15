@@ -1,0 +1,16 @@
+# The Filter: a lowpass, wide open to start.
+# Its cutoff and its q macros onto the filter's frequency and resonance, their specs theirs.
+# Its slope a setting (filter/slope), 12 dB an octave unless a preset says 24.
+kind: Filter
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: filter, kind: filter }
+wires:
+  - { from: { input: in }, to: { node: filter, input: in } }
+  - { from: { node: filter, output: out }, to: { output: out } }
+macros:
+  - { name: cutoff, maps: [{ to: [filter, frequency], factor: 1, offset: 0 }] }
+  # a small bump at the cutoff, as it was when Web Audio read 0.707 in dB
+  - { name: q, value: 1.085, maps: [{ to: [filter, resonance], factor: 1, offset: 0 }] }

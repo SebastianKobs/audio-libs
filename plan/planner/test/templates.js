@@ -1,5 +1,5 @@
 // Small templates, as a theme or the studio's setup would write them: the planner's tests' data.
-//   UTILITY: a gain into a pan, its level and pan macros onto theirs.
+//   UTILITY: a gain into a pan, its level and pan macros onto theirs, their specs theirs.
 //   STRIP: a channel: a Utility and a lowpass its inserts, then its fader and its pan, a tap off its fader;
 //     its volume a macro onto the Utility's level.
 //   DESK: a desk of strips: your tap's channel into your bus and, by its tap, into the reverb, all into the master.
@@ -23,13 +23,8 @@ export const UTILITY = {
     { from: { node: 'pan', output: 'out' }, to: { output: 'out' } },
   ],
   macros: [
-    {
-      spec: { name: 'level', range: [0, 2, 0.01], default: 1 },
-      value: 1,
-      hint: 'How loud it comes out.',
-      maps: [{ to: ['gain', 'gain'], ...PLAIN }],
-    },
-    { spec: { name: 'pan', range: [-1, 1, 0.01], default: 0 }, value: 0, maps: [{ to: ['pan', 'pan'], ...PLAIN }] },
+    { name: 'level', hint: 'How loud it comes out.', maps: [{ to: ['gain', 'gain'], ...PLAIN }] },
+    { name: 'pan', maps: [{ to: ['pan', 'pan'], ...PLAIN }] },
   ],
 };
 
@@ -57,7 +52,8 @@ export const STRIP = {
   ],
   macros: [
     {
-      spec: { name: 'volume', range: [0, 2, 0.01], default: 1 },
+      name: 'volume',
+      spec: { range: [0, 2, 0.01], default: 1 },
       value: 0.5,
       maps: [{ to: ['utility', 'level'], ...PLAIN }],
     },

@@ -4,8 +4,8 @@
 // chain is built (a module's params()) and set live (set()). No theme has its own: they're the desk's.
 // Each a device (DEVICES): its name, its module, its params declared and the port each is set at.
 import type { Patch } from '../synth/index.ts';
-import { LIMITER_SPECS, RESONANCE } from '../plan/blocks/index.ts';
-import { FADER_GAIN, PAN as PAN_SPEC, type RangedSpec } from '../params/index.ts';
+import { BLOCKS, LIMITER_SPECS, RESONANCE } from '../plan/blocks/index.ts';
+import { PAN as PAN_SPEC, type RangedSpec } from '../params/index.ts';
 import { frozen } from '../util/index.ts';
 
 // the limiter, as Ableton's and FabFilter's Pro-L: its gain into it, in dB, and held at its ceiling, where it acts and the most that comes
@@ -45,7 +45,7 @@ export const GAIN: Patch = Object.freeze({
   gain: 'level',
   params: Object.freeze({ level: 1 }),
 });
-const GAIN_PARAMS: InsertParams = Object.freeze({ level: Object.freeze({ ...FADER_GAIN, unit: 'dB' }) });
+const GAIN_PARAMS: InsertParams = Object.freeze({ level: BLOCKS.gain.params[0] }); // the gain block's: the fader's, in dB
 // a Pan: the pan block, a mono sound up-mixed to stereo first, as the mixer's pans are, centred unless its params say otherwise; its param
 // pan, its port 'pan.pan'. A strip's pan (F5)
 export const PAN: Patch = Object.freeze({
