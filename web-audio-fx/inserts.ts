@@ -82,7 +82,7 @@ const FILTER_PARAMS: InsertParams = Object.freeze({
 // after it brings it back down
 export const LIMITER_SETTINGS: LimiterSettings = Object.freeze({ gain: 16, ceiling: -0.3, release: 0.3 });
 // a Limiter, as Ableton's on the master: the limiter block, its gain, ceiling and release its params, as it starts (LIMITER_SETTINGS);
-// how it holds there is the engine's (libs/web-audio-engine/limiter.ts). Its ports 'limiter.gain', 'limiter.ceiling', 'limiter.release'
+// how it holds there is the builder's (libs/build/web-audio/blocks/limiter.ts). Its ports 'limiter.gain', 'limiter.ceiling', 'limiter.release'
 export const LIMITER: Patch = Object.freeze({
   effect: true,
   chain: ['limiter'],

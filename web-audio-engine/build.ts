@@ -5,9 +5,8 @@
 //   3. a source started and stopped at its times;
 //   4. wired by the plan's edges: into another's input or param, or out where its sound goes.
 // A handle's operations run on them later, by the node's id (index.ts, apply()).
-import type { BuiltNode, WebAudioNode } from './built-node.ts';
+import type { Automatable, BuiltNode, WebAudioNode } from '../build/web-audio/index.ts';
 import { MADE_WITH, type NodeMaker } from './nodes.ts';
-import type { Automatable } from './param-in-units.ts';
 import type { BufferSpec, Edge, NodeKind, PlanNode } from '../audio-plan/index.ts';
 import type { Automation } from '../automation/index.ts';
 

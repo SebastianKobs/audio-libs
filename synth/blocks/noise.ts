@@ -5,6 +5,7 @@
 // (its level), 'noise 1.frequency' (its filter)
 import type { Block } from '../plan-builder.ts';
 import { biquadsOf } from './filter.ts';
+import { NOISE_SECONDS } from '../../plan/blocks/index.ts';
 import type { Noise } from '../patch.ts';
 import { FILTER_SPECS, LEVEL_SPEC, STOP_SPEC } from '../params.ts';
 import type { ParamSpecs } from '../../params/index.ts';
@@ -17,12 +18,6 @@ const NOISE_SPECS = {
   level: LEVEL_SPEC,
   stop: STOP_SPEC,
 } as const satisfies ParamSpecs;
-// s: how long each buffer is, the plan naming it by its length
-const NOISE_SECONDS = { noise: 2, breath: 0.2 } as const satisfies Record<
-  (typeof NOISE_SPECS.buffer.choices)[number],
-  number
->;
-
 export default {
   key: 'noise',
   many: true,

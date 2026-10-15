@@ -20,5 +20,6 @@ export {
 } from './envelope-curve.ts';
 export { biquadQs, FILTER_SLOPE, RESONANCE, type FilterStages } from './filter.ts';
 export { LIMITER_SPECS } from './limiter.ts';
+export { NOISE_SECONDS } from './noise.ts';
 export { DETUNE, WAVE } from './oscillator.ts';
 export { REVERB_LENGTH } from './reverb.ts';

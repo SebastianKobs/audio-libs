@@ -1,9 +1,11 @@
-// ---------- libs/web-audio-engine/limiter: how a limiter holds at its ceiling, as hard as Web Audio's compressor goes ----------
+// ---------- libs/build/web-audio/blocks/limiter: how a limiter holds at its ceiling, as hard as Web Audio's compressor goes ----------
 // Its settings are the Limiter module's (libs/web-audio-fx/inserts.ts) and a limiter block's (libs/synth/blocks/limiter.ts); Web Audio's quirk, the
 // makeup gain its compressor adds, is taken back here, at the edge, where Web Audio is
-import { BuiltNode } from './built-node.ts';
-import { ParamInUnits } from './param-in-units.ts';
-import { gainOf } from '../params/index.ts';
+import { BuiltNode } from '../built-node.ts';
+import { ParamInUnits } from '../param-units.ts';
+import { gainOf } from '../../../params/index.ts';
+import type { Node } from '../../../plan/format/index.ts';
+import { atValues, type Making } from '../making.ts';
 
 const HOLD = { ratio: 20, knee: 0, attack: 0.003 }; // as hard as Web Audio's compressor goes
 // Web Audio's compressor adds a makeup gain of its own, which nothing turns off: for a hard knee, 0.6 times how far its curve brings full
@@ -14,10 +16,14 @@ export function makeupOf(threshold: number, ratio: number): number {
 // a limiter as Web Audio holds it, as a limiter block plans it (libs/synth/blocks/limiter.ts): its gain (drive) into a compressor at its
 // ceiling, as hard as it goes, and the gain (back) that takes its makeup back; its params in the plan's units, its gain in dB, its ceiling
 // in dBFS, its release in s. Read as Ableton's: its in after its gain, its out, and how much it takes away now, in dB
-export function limiterNodes(audioContext: BaseAudioContext): BuiltNode {
-  const drive = audioContext.createGain();
-  const compressor = audioContext.createDynamicsCompressor();
-  const back = audioContext.createGain();
+// kept: each node it makes, handed to whoever takes them apart later
+export function limiterNodes(
+  audioContext: BaseAudioContext,
+  kept = <Made extends AudioNode>(node: Made): Made => node,
+): BuiltNode {
+  const drive = kept(audioContext.createGain());
+  const compressor = kept(audioContext.createDynamicsCompressor());
+  const back = kept(audioContext.createGain());
   for (const setting of ['ratio', 'knee', 'attack'] as const) {
     compressor[setting].value = HOLD[setting];
   }
@@ -36,4 +42,11 @@ export function limiterNodes(audioContext: BaseAudioContext): BuiltNode {
     points: { in: drive, out: back },
     readings: { reduction: () => -compressor.reduction },
   });
+}
+// A limiter block made, at its gain, ceiling and release as it starts.
+export function limiter(node: Node, making: Making): BuiltNode {
+  return atValues(
+    limiterNodes(making.context, (made) => making.kept(made)),
+    node,
+  );
 }

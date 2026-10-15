@@ -9,23 +9,18 @@
 // passed in, so it reads no globals: the AudioContext class, and random() for its buffers' noise.
 // Its parts:
 //   - nodes.ts: the kinds of node a plan names, made in the context;
-//   - built-node.ts: a node built, one of Web Audio's or one made of several, in one shape: its way in
-//     and out, its params, where a meter reads it and what it says of itself;
 //   - build.ts: a plan's nodes made, started, wired and automated;
-//   - limiter.ts: how a limiter holds at its ceiling, Web Audio's makeup taken back, made of several,
-//     its params in the plan's units (param-in-units.ts);
-//   - buffers.ts: a buffer's samples; meters.ts: a meter.
+//   - meters.ts: a meter.
+// A node as built, a param in the plan's units, the limiter, a pan, a biquad and the buffers are the
+// builder's (libs/build/web-audio/), which takes over from it.
 
-import { impulse, noise } from './buffers.ts';
 import { automate, buildNode, connectEdge, nodeOf, paramOf, type Building } from './build.ts';
-import type { BuiltNode } from './built-node.ts';
+import { Buffers, type BuiltNode } from '../build/web-audio/index.ts';
 import { meterOn, type PeakMeter } from './meters.ts';
 import { nodeMakers } from './nodes.ts';
 import type { AudioPlan, BufferSpec, Operation } from '../audio-plan/index.ts';
 export { paramOf } from './build.ts';
-export { makeupOf } from './limiter.ts';
-export type { BuiltNode } from './built-node.ts';
-export type { Automatable } from './param-in-units.ts';
+export { makeupOf, type Automatable, type BuiltNode } from '../build/web-audio/index.ts';
 export type { PeakMeter };
 
 export interface EngineOptions {
@@ -38,8 +33,7 @@ export interface EngineOptions {
 export class Engine {
   readonly audioContext: AudioContext;
   readonly #toContext: (t: number) => number;
-  readonly #random: () => number;
-  readonly #buffers = new Map<string, AudioBuffer>(); // each made once, when a plan first names it
+  readonly #buffers: Buffers; // each made once, when a plan first names it
   readonly #building: Building; // what a plan's node is made by: its kinds, made in the context (nodes.ts), and its buffers
 
   constructor({
@@ -51,7 +45,7 @@ export class Engine {
     const audioContext = new AudioContext({ latencyHint });
     this.audioContext = audioContext;
     this.#toContext = toContext;
-    this.#random = random;
+    this.#buffers = new Buffers(audioContext, random);
     this.#building = {
       makers: nodeMakers(audioContext, () => this.canPan()),
       buffer: (spec) => this.buffer(spec),
@@ -64,25 +58,12 @@ export class Engine {
   at(t: number): number {
     return Math.max(this.#toContext(t), this.now());
   }
+  // a buffer a plan names: so many seconds of noise, or a reverb's impulse response
   buffer(spec: BufferSpec): AudioBuffer {
-    const key = JSON.stringify(spec);
-    const made = this.#buffers.get(key);
-    if (made) {
-      return made;
-    }
-    const sampleRate = this.audioContext.sampleRate;
-    const channels = this.#samplesOf(spec, sampleRate);
-    const audioBuffer = this.audioContext.createBuffer(channels.length, channels[0].length, sampleRate);
-    channels.forEach((samples, channel) => audioBuffer.getChannelData(channel).set(samples));
-    this.#buffers.set(key, audioBuffer);
-    return audioBuffer;
-  }
-  // a buffer's samples, a channel each: so many seconds of noise, or a reverb's impulse response
-  #samplesOf(spec: BufferSpec, sampleRate: number): [Float32Array, ...Float32Array[]] {
     if ('noise' in spec) {
-      return noise(spec.noise, sampleRate, this.#random);
+      return this.#buffers.noise(spec.noise);
     }
-    return impulse(spec.impulse, sampleRate, this.#random);
+    return this.#buffers.impulse(spec.impulse);
   }
   // a plan's nodes, each made and started at the plan's times from t, then wired to each other and the destination; with none, its way
   // out is its caller's to wire (an FX channel's input, before its chain)

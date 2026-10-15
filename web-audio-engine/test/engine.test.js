@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { Engine, makeupOf } from '../index.ts';
-import { noise } from '../buffers.ts';
+import { noise } from '../../build/web-audio/index.ts';
 import { near } from '../../util/test/near.js';
 
 let time = 0;

@@ -1,6 +1,6 @@
-// ---------- libs/web-audio-engine/built-node: a node the engine built from a plan, in one shape ----------
+// ---------- libs/build/web-audio/built-node: a node built from a plan, in one shape ----------
 // A plan's node is one of Web Audio's (BuiltNode.of()), or one the engine builds from
-// several (a limiter, limiter.ts). Either way it has:
+// several (a limiter, blocks/limiter.ts). Either way it has:
 //   - input, output: where its sound comes in and goes out; a Web Audio node is both;
 //   - its params by the plan's names; one built from several has them in the plan's units
 //     (param-in-units.ts), so a sound can't be cabled into them;
@@ -8,7 +8,7 @@
 //     (a limiter's in, after its gain, and out; how much it takes away);
 //   - node: the Web Audio node it is, which a plan sets, starts and stops; none for one
 //     built from several, which stops with what plays into it.
-import type { Automatable } from './param-in-units.ts';
+import type { Automatable } from './param-units.ts';
 
 // one of Web Audio's nodes, its props and params read by the plan's names
 export type WebAudioNode = AudioNode & Scheduled & Record<string, unknown>;
@@ -27,6 +27,7 @@ export class BuiltNode {
   readonly node: WebAudioNode | null;
   readonly kind: string; // what it is, for an error's message
   readonly #params: Readonly<Record<string, unknown>>;
+  readonly #cables: Readonly<Record<string, readonly AudioParam[]>>;
 
   // one of Web Audio's: its own way in and out, its params its own
   static of(made: AudioNode): BuiltNode {
@@ -37,6 +38,7 @@ export class BuiltNode {
     input,
     output,
     params,
+    cables = {},
     points = {},
     readings = {},
     node = null,
@@ -45,6 +47,7 @@ export class BuiltNode {
     input: AudioNode;
     output: AudioNode;
     params: Readonly<Record<string, unknown>>;
+    cables?: Readonly<Record<string, readonly AudioParam[]>>;
     points?: Record<string, AudioNode>;
     readings?: Record<string, () => number>;
     node?: WebAudioNode | null;
@@ -53,6 +56,7 @@ export class BuiltNode {
     this.input = input;
     this.output = output;
     this.#params = params;
+    this.#cables = cables;
     this.points = points;
     this.readings = readings;
     this.node = node;
@@ -71,6 +75,11 @@ export class BuiltNode {
       throw new Error(`${name}: not a param a sound can be cabled into, on ${this.kind}`);
     }
     return param as AudioParam; // a Web Audio node's: its own
+  }
+  // The Web Audio params a sound cabled into a param goes into: those it names for the param,
+  // several where one param moves several (a filter's two stages' cutoffs); else its own.
+  cablesOf(name: string): readonly AudioParam[] {
+    return this.#cables[name] ?? [this.cableable(name)];
   }
   // stopped at a time, or now: a source, one of Web Audio's
   stop(...at: [] | [number]): void {
