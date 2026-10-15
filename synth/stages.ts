@@ -6,7 +6,7 @@
 import { time, val, type Time, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
 import { eventTime, levelAt, type Automation } from '../automation/index.ts';
-import { ENVELOPE_SPECS } from './params.ts';
+import { ENVELOPE_SPECS } from '../plan/blocks/index.ts';
 
 // a stage of a shape
 export type Stage = 'attack' | 'decay' | 'release';

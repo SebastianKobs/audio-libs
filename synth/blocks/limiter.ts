@@ -5,7 +5,7 @@
 import type { Block } from '../plan-builder.ts';
 import { val } from '../values.ts';
 import type { Limiter } from '../patch.ts';
-import { LIMITER_SPECS } from '../params.ts';
+import { LIMITER_SPECS } from '../../plan/blocks/index.ts';
 
 export default {
   key: 'limiter',

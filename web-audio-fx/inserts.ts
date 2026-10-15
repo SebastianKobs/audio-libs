@@ -3,7 +3,8 @@
 // return, as Ableton's are: a patch with an input and an output, built by an FxChain between two points, its values params, read as the
 // chain is built (a module's params()) and set live (set()). No theme has its own: they're the desk's.
 // Each a device (DEVICES): its name, its module, its params declared and the port each is set at.
-import { LIMITER_SPECS, type Patch } from '../synth/index.ts';
+import type { Patch } from '../synth/index.ts';
+import { LIMITER_SPECS, RESONANCE } from '../plan/blocks/index.ts';
 import { FADER_GAIN, PAN as PAN_SPEC, type RangedSpec } from '../params/index.ts';
 import { frozen } from '../util/index.ts';
 
@@ -75,7 +76,7 @@ const FILTER_PARAMS: InsertParams = Object.freeze({
     range: Object.freeze([20, 24000, 1] as const),
     taper: 'octaves' as const,
   }),
-  q: Object.freeze({ name: 'resonance', range: Object.freeze([0, 30, 0.001] as const) }),
+  q: RESONANCE, // the filter block's
 });
 // Its gain 16 dB brings the garden at its busiest just under a ceiling of -0.3 dBFS; a much fuller one is held there. The master volume
 // after it brings it back down

@@ -1,0 +1,16 @@
+// ---------- plan/blocks/delay: a delay ----------
+// Its time with a sync switch, as Ableton's: synced, a note value at the tempo; free, in ms.
+// Each builder turns a synced note into seconds by the tempo. Its longest time a setting.
+import { timeSpecs } from '../../params/index.ts';
+import type { Block } from './block.ts';
+
+// its time's three params: synced to an 8th to start; free, up to its longest time
+export const DELAY_TIME = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
+
+export default {
+  kind: 'delay',
+  inputs: [{ name: 'in' }],
+  outputs: [{ name: 'out' }],
+  params: [DELAY_TIME.sync, DELAY_TIME.note, DELAY_TIME.ms],
+  settings: [{ name: 'longest', unit: 's', range: [0.1, 10, 0.1], default: 4 }],
+} as const satisfies Block;

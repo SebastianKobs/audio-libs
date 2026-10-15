@@ -10,13 +10,14 @@ import type { Osc, Patch } from '../patch.ts';
 import type { PlanNode } from '../../audio-plan/index.ts';
 import type { ParamSpecs } from '../../params/index.ts';
 import { LEVEL_SPEC, RATIO_SPEC, STOP_SPEC } from '../params.ts';
+import { DETUNE, WAVE } from '../../plan/blocks/index.ts';
 
 // its values (params.ts): its wave; its frequency, by one of them; its detune, level and stop
 const OSC_SPECS = {
-  wave: { name: 'wave', choices: ['sine', 'triangle', 'square', 'sawtooth'], default: 'sine' },
+  wave: WAVE,
   hz: { name: 'hz', unit: 'Hz', range: [20, 20000, 1] },
   ratio: { ...RATIO_SPEC, default: 1 },
-  detune: { name: 'detune', unit: 'cents', range: [-100, 100, 1] },
+  detune: DETUNE,
   level: LEVEL_SPEC,
   stop: STOP_SPEC,
 } as const satisfies ParamSpecs;

@@ -11,11 +11,10 @@
 import { val, type Values } from '../values.ts';
 import type { Block } from '../plan-builder.ts';
 import type { Delay } from '../patch.ts';
-import { timeSpecs, type ParamSpecs, type Time } from '../../params/index.ts';
+import type { ParamSpecs, Time } from '../../params/index.ts';
+import { DELAY_TIME } from '../../plan/blocks/index.ts';
 import { timeSeconds } from '../../clock/index.ts';
 
-// its time's three params: synced to an 8th to start; free, up to the longest time it takes
-export const DELAY_TIME = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
 // its values (params.ts): its time, its feedback, its tone, and the longest time it can take
 const DELAY_SPECS = {
   ...DELAY_TIME,

@@ -3,10 +3,11 @@
 import type { Block } from '../plan-builder.ts';
 import type { Reverb } from '../patch.ts';
 import type { ParamSpecs } from '../../params/index.ts';
+import { REVERB_LENGTH } from '../../plan/blocks/index.ts';
 
 // its value (params.ts): how long its tail is
 const REVERB_SPECS = {
-  seconds: { name: 'length', unit: 's', range: [0.2, 8, 0.1], default: 3.5 },
+  seconds: REVERB_LENGTH,
 } as const satisfies ParamSpecs;
 
 export default {

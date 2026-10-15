@@ -12,7 +12,7 @@
 import type { Block } from '../plan-builder.ts';
 import type { Envelope } from '../patch.ts';
 import type { Time } from '../values.ts';
-import { ENVELOPE_SPECS } from '../params.ts';
+import { ENVELOPE_SPECS } from '../../plan/blocks/index.ts';
 
 // what the presets are written with: their times; a share of its full level to sustain at; whether it follows the note's velocity
 interface Adsr {
