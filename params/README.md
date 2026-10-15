@@ -14,6 +14,7 @@ valueAt(level, 1);      // 2: +6 dB at the top
 | [`spec.ts`](spec.ts) | `ParamSpec`: a param's name, unit, range, choices, default, whether a gain shown in dB, its taper; `specAt()`, a value's spec by its path |
 | [`taper.ts`](taper.ts) | A position on a knob, a lane or a CC turned into a value and back, by the param's taper: the fader law, octaves or a line |
 | [`decibels.ts`](decibels.ts) | A gain in dB and back (`gainOf()`, `dBOf()`), and the floor of silence, -80 dB (`SILENCE`): what the engine's limiter, the synth's ramps and the views' meters and knobs share (DRY3) |
+| [`time.ts`](time.ts) | A time with a sync switch, as Ableton's (LAY3a): synced, a note value following the tempo, free, in ms for a length or Hz for a rate, both kept, the switch choosing (`Time`); declared as three params side by side, each its own control and lane, `sync` a switch, `note` the note values it steps through (`NOTE_VALUES`, shortest first, a 16th triplet to a dotted half), its free one named by its unit, `ms` or `hz`, by octaves (`timeSpecs()`); its seconds the clock's (`libs/clock/`'s `timeSeconds()`) |
 | [`common.ts`](common.ts) | The specs modules share, each spreading its own copy under its own name: a fader's gain (`FADER_GAIN`), a pan (`PAN`), a switch (`SWITCH`); a desk's strip, the FX modules and the synth's pan (DRY3) |
 
 Its tests, in `test/`, run in node.
