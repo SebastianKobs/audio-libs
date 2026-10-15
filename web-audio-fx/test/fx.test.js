@@ -7,7 +7,7 @@ import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES, FILTER, FxChain, GAIN, PAN_POT, RING_OUT, UTILITY } from '../index.ts';
 import { DELAY_TIME, NO_DRAWS, plan } from '../../synth/index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
-import { isSwitch, NOTE_VALUES } from '../../params/index.ts';
+import { dBOf, isSwitch, NOTE_VALUES } from '../../params/index.ts';
 
 let time = 0;
 const beat = 60 / 72; // a beat at 72 BPM
@@ -131,9 +131,9 @@ test('a module built on its own follows its plan edited from now: a changed valu
   m.set('filter.frequency', 900, { at: 12 });
   assert.equal(m.follow(plan(FILTER, {}, NO_DRAWS, { q: 2 })), true);
   assert.deepEqual(filter.Q.events, [
-    ['value', 0.707],
-    ['target', 2, 10, SMOOTHING],
-  ]);
+    ['value', dBOf(1.085)],
+    ['target', dBOf(2), 10, SMOOTHING],
+  ]); // a resonance a ratio, in Web Audio's dB
   assert.deepEqual(
     filter.frequency.events,
     [

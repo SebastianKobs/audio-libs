@@ -163,6 +163,26 @@ test('a pan, built: a stereo panner, the sound made stereo before it, so a mono 
   assert.deepEqual([through.kind, through.gain.value], ['gain', 1], 'no stereo panner: it passes through, unpanned');
 });
 
+test("a filter's resonance a plain ratio, Q as an EQ shows it, 0.707 flat: a lowpass's and a highpass's in Web Audio's dB, its level at the cutoff, set or moved; a bandpass's a ratio there too; one not set Web Audio's own", () => {
+  const e = engine();
+  const dest = e.audioContext.createGain();
+  const filter = (type, q) =>
+    e.build({ nodes: [{ ...unplayed('biquad', q), props: { type } }], edges: [[0, 'out']] }, 12, dest)[0].node;
+  const [[, flat]] = filter('lowpass', { Q: [['value', Math.SQRT1_2]] }).Q.events;
+  near(flat, -3.0103, 'flat: −3 dB at its cutoff', 1e-4);
+  const [[, unity], [kind, peak, at]] = filter('highpass', {
+    Q: [
+      ['value', 1],
+      ['linear', 2, 1],
+    ],
+  }).Q.events;
+  near(unity, 0, 'a ratio of 1: level at its cutoff');
+  assert.deepEqual([kind, at], ['linear', 13]);
+  near(peak, 6.0206, 'twice: +6 dB, moved in its units', 1e-4);
+  assert.deepEqual(filter('bandpass', { Q: [['value', 2]] }).Q.events, [['value', 2]], 'a ratio in Web Audio already');
+  assert.deepEqual(filter('lowpass', {}).Q.events, [], "not set: Web Audio's own");
+});
+
 test("a limiter, built: its gain into a compressor held at its ceiling as hard as Web Audio's goes, Web Audio's makeup taken back after; set live, in its own units", () => {
   const e = engine();
   const ac = e.audioContext;

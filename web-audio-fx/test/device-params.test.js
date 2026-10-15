@@ -6,7 +6,7 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES, DeviceParams, FILTER, FxChain, UTILITY } from '../index.ts';
-import { timeSpecs } from '../../params/index.ts';
+import { dBOf, timeSpecs } from '../../params/index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
 
 let time = 0;
@@ -54,8 +54,8 @@ test('a param set on the chain that plays it: at the port its module declares, g
     assert.equal(biquads().length, built, 'a resonance has no port: no node made');
     assert.deepEqual(
       [biquads().at(-1).Q.events.at(-1), air.paramOf('filter.frequency').events],
-      [['target', 2, 10, SMOOTHING], [['value', 2000]]],
-      'glided to the change from now, the rest as it was',
+      [['target', dBOf(2), 10, SMOOTHING], [['value', 2000]]],
+      "glided to the change from now, the rest as it was; a resonance a ratio, in Web Audio's dB",
     );
   } finally {
     mock.timers.reset();

@@ -61,13 +61,13 @@ export const PAN_POT: Patch = Object.freeze({ ...PAN, pan: Object.freeze({ posit
 // and 'pan.pan'
 export const UTILITY: Patch = combined(GAIN, PAN);
 const UTILITY_PARAMS: InsertParams = Object.freeze({ ...GAIN_PARAMS, ...PAN_PARAMS });
-// a Filter: the synth's filter block, a lowpass, its resonance and cutoff its params, Q 0.707 and wide open unless they say otherwise: 0.5
-// a tower's dullness. Its port 'filter.frequency'
+// a Filter: the synth's filter block, a lowpass, its resonance and cutoff its params, Q 1.085 (a small bump at the cutoff, as it was
+// when Web Audio read 0.707 in dB) and wide open unless they say otherwise: 1.059 a tower's dullness. Its port 'filter.frequency'
 export const FILTER: Patch = Object.freeze({
   effect: true,
   chain: ['filter'],
   filter: Object.freeze({ type: 'lowpass', q: 'q', freq: 'cutoff' }),
-  params: Object.freeze({ q: 0.707, cutoff: 24000 }),
+  params: Object.freeze({ q: 1.085, cutoff: 24000 }),
 });
 const FILTER_PARAMS: InsertParams = Object.freeze({
   cutoff: Object.freeze({

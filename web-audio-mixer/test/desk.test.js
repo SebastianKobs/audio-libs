@@ -6,6 +6,7 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DeviceParams, FILTER, FxModules, GAIN, DEVICES, LIMITER_SETTINGS } from '../../web-audio-fx/index.ts';
+import { dBOf } from '../../params/index.ts';
 import { nameOf } from '../../desk-plan/index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
 import { Desk } from '../index.ts';
@@ -143,7 +144,7 @@ test("an FX channel's chain of modules as they play, by the effect its data name
     modules.set('filter', { ...FILTER, params: { q: 3, cutoff: 24000 } });
     assert.deepEqual(
       [biquads().length, biquads().at(-1).Q.events.at(-1)],
-      [count, ['target', 3, 10, SMOOTHING]],
+      [count, ['target', dBOf(3), 10, SMOOTHING]], // a resonance a ratio, in Web Audio's dB
       'its module edited: glided there, its own params kept',
     );
     const tempo = mock.method(desk.chains.delay, 'tempo');

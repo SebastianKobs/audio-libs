@@ -1,5 +1,5 @@
 // ---------- libs/synth/blocks/filter: the chain's filter ----------
-// A biquad: its type, resonance (q) and cutoff (hertz, or following the note: { key, max }); an envelope cabled to 'filter.frequency'
+// A biquad: its type, resonance (q, a plain ratio, 0.707 flat) and cutoff (hertz, or following the note: { key, max }); an envelope cabled to 'filter.frequency'
 // sweeps it over the note from there, in semitones (blocks/envelope.ts, I1h). Its ports: 'filter', 'filter.frequency'
 import { freq, val } from '../values.ts';
 import type { Block, PlanBuilder } from '../plan-builder.ts';

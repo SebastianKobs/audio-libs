@@ -37,7 +37,7 @@ export const FILTER_SPECS = {
     name: 'type',
     choices: ['lowpass', 'highpass', 'bandpass', 'notch', 'peaking', 'lowshelf', 'highshelf', 'allpass'],
   },
-  q: { name: 'q', range: [0, 30, 0.1] },
+  q: { name: 'q', range: [0.1, 30, 0.001] }, // a plain ratio, 0.707 flat
   freq: {
     name: 'freq',
     unit: 'Hz',

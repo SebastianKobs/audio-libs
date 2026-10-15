@@ -3,8 +3,8 @@
 // The three types the themes use; another added when a sound asks for it.
 import type { Block } from './block.ts';
 
-// its resonance, its Q
-export const RESONANCE = { name: 'resonance', range: [0, 30, 0.001] } as const;
+// its resonance, its Q as a plain ratio, as an EQ shows it: 0.707 flat (Butterworth), more a bump at the cutoff
+export const RESONANCE = { name: 'resonance', range: [0.1, 30, 0.001] } as const;
 
 export default {
   kind: 'filter',
