@@ -17,5 +17,6 @@ export { Clock, LOOKAHEAD, type ClockSettings, type Seconds } from './clock.ts';
 export { BeatGrid, HISTORY, type GridSettings, type TimeMap } from './beat-grid.ts';
 export { PPQ, STEP, COMMON_TIME, barTicks, beatTicks, startsBar, type Meter, type Ticks } from './ticks.ts';
 export { noteValueBeats } from './note-values.ts';
+export { Cues } from './cues.ts';
 export { AudioClock, type AudioContextLike } from './audio-clock.ts';
 export { GRIDS, type SnapGrid, type SnapOptions } from './quantizer.ts';
