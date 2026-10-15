@@ -5,12 +5,14 @@
 //   - built.ts: what it hands back, its front panel; parts.ts, the parts it's taken apart by;
 //   - making.ts: what a block's maker is handed; wiring.ts, a node's jacks, a composite's wires made;
 //   - placeholder.ts: a block it can't make, passed through;
+//   - rebuild.ts: what's built built again, the old ringing out, faded where it makes sound of its own;
 //   - built-node.ts: a node built, one of Web Audio's or one made of several, in one shape;
 //   - param-units.ts: a param in a plan's units, moving the Web Audio params behind it;
 //   - buffers.ts: the buffers a noise or a reverb plays, each made once;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
-export { WebAudioBuilt } from './built.ts';
+export { WebAudioBuilt, type Building } from './built.ts';
+export { CROSSFADE, RING_OUT } from './rebuild.ts';
 export { BuiltNode, type WebAudioNode } from './built-node.ts';
 export { ParamInUnits, type Automatable } from './param-units.ts';
 export { automate } from './automation.ts';

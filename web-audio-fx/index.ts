@@ -17,7 +17,9 @@ import { keptDraws } from '../util/index.ts';
 import { paramOf, type Automatable, type BuiltNode } from '../web-audio-engine/index.ts';
 import { BuiltModule, type ModuleEngine } from './module.ts';
 import { MOVED, type Settable, type Timing } from './timing.ts';
+import { RING_OUT } from '../build/web-audio/index.ts'; // ms an old chain rings out, its structure changed, before it's let go
 export { DEVICES, FILTER, GAIN, LIMITER, LIMITER_SETTINGS, PAN, PAN_POT, UTILITY } from './inserts.ts';
+export { RING_OUT } from '../build/web-audio/index.ts';
 export { BuiltModule, type ModuleEngine } from './module.ts';
 export { MOVED, type Settable, type Target, type Timing } from './timing.ts';
 export { FxModules } from './modules.ts';
@@ -46,8 +48,6 @@ interface ChainEnds {
   readonly input: AudioNode;
   readonly chainOut: AudioNode;
 }
-
-export const RING_OUT = 8000; // ms an old chain rings out, its structure changed, before it's let go
 
 export class FxChain implements Settable {
   readonly #engine: ModuleEngine;

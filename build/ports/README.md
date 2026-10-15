@@ -12,6 +12,7 @@ built.preset({ 'filter/frequency': 900 }, { 'filter/slope': '12' }); // its valu
 built.tempo(60 / 96);                                     // each synced time following a new beat
 const voice = built.add(['synth', 'voice'], 3);           // a pool's copy, wired by its rule: ['synth', 'voice 3']
 built.letGo(voice);                                       // once it has rung out, as its owner says
+built.rebuild(plan);                                      // a setting or its structure changed: built again, the old ringing out
 built.placeholders;                                       // what it couldn't build, by address
 built.dispose();
 ```
@@ -19,6 +20,6 @@ built.dispose();
 | | |
 |---|---|
 | `Builder<Into>` | handed a plan and where its sound goes, a builder's own (Web Audio's a node), it builds it and hands back what's built (`builder.ts`) |
-| `Built` | what's built: a param set by its address, now, at a time or gliding there (`When`, `libs/automation/`), a choice as its param's choices have it; automated, its events' times from a time; a preset's values set together, a setting it changes a rebuild; a new tempo, each synced time following it; a pool's copy added by its pool's address and its number, its address handed back, and let go, an instrument's voice and a desk's channel alike; the placeholders it put in, by address, a block's sound passed straight through, a source silent; disposed (`built.ts`) |
+| `Built` | what's built: a param set by its address, now, at a time or gliding there (`When`, `libs/automation/`), a choice as its param's choices have it; automated, its events' times from a time; a preset's values set together, a setting it changes a rebuild; a new tempo, each synced time following it; a pool's copy added by its pool's address and its number, its address handed back, and let go, an instrument's voice and a desk's channel alike; built again from a plan, a setting or its structure changed, the old ringing out; the placeholders it put in, by address, a block's sound passed straight through, a source silent; disposed (`built.ts`) |
 
 Types only: what meets them is tested where it's built (`libs/build/web-audio/`).

@@ -1,7 +1,7 @@
 // What's built set by address (mockup/src/libs/build/web-audio), on the stand-in for Web Audio:
 //   - a param set now, at a time or gliding there; a macro onto its targets; a filter's on every stage;
 //   - a delay's time, its sync switch, note and ms, moving its one delay line; following a new tempo while synced;
-//   - a param automated; a preset's values set together, a changed setting refused till a rebuild;
+//   - a param automated; a preset's values set together, a setting it keeps passed over;
 //   - an address with no param refused, a setting refused, a placeholder's param left alone.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -133,7 +133,7 @@ test("a param automated from a time; a macro's automation onto its targets", () 
   );
 });
 
-test('a preset sent: its values by their addresses set together, at one time; a setting it changes refused till a rebuild, one it keeps passed over', () => {
+test('a preset sent: its values by their addresses set together, at one time; a setting it keeps passed over', () => {
   const { what, made } = built(UTILITY);
   what.preset({ level: 0.25, 'pan/pan': 0.5 }, { 'pan/law': 'stereo' }, { at: 3 });
   assert.deepEqual(
@@ -143,7 +143,6 @@ test('a preset sent: its values by their addresses set together, at one time; a 
       ['set', 0.5, 3],
     ],
   );
-  assert.throws(() => what.preset({}, { 'pan/law': 'pan pot' }), /pan\/law: a setting changed, rebuilt/);
 });
 
 test("an address with no param refused; a setting refused, a preset's; a placeholder's param left alone", () => {

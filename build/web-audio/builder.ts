@@ -15,7 +15,7 @@ import { WebAudioBuilt } from './built.ts';
 import type { Making } from './making.ts';
 import { BuiltParts } from './parts.ts';
 import { placeholder } from './placeholder.ts';
-import { blockJacks, compositeJacks, connectInto, type Jacks, type OwnJacks } from './wiring.ts';
+import { blockJacks, compositeJacks, type Jacks, type OwnJacks } from './wiring.ts';
 
 // what the builder is made with: the context, the beat's length now, the random its noise is drawn from
 export interface WebAudioOptions {
@@ -41,16 +41,16 @@ export class WebAudioBuilder implements Builder<AudioNode> {
   }
   // a plan built, fed from where its inputs come from, its output into where it goes
   build(plan: Plan, { into, from = {} }: WebAudioWhere): WebAudioBuilt {
-    const parts = new BuiltParts();
-    const top = this.#jacksOf(plan.node, [], parts);
-    for (const [name, source] of Object.entries(from)) {
-      (top.inputs[name] ?? []).forEach((destination) => connectInto(source, destination));
-    }
-    for (const output of top.outputs.out ?? []) {
-      output.connect(into);
-    }
-    const copied = (node: Node, at: Address, copy: BuiltParts): Jacks => this.#jacksOf(node, at, copy);
-    return new WebAudioBuilt({ plan, parts, context: this.#context, copied });
+    return new WebAudioBuilt(plan, {
+      context: this.#context,
+      into,
+      from,
+      planned: (planned) => {
+        const parts = new BuiltParts();
+        return { parts, top: this.#jacksOf(planned.node, [], parts) };
+      },
+      copied: (node, at, copy) => this.#jacksOf(node, at, copy),
+    });
   }
 
   // a node's jacks as built into its parts: a composite's children built and wired, a node at each of

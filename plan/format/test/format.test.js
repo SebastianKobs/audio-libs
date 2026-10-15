@@ -21,6 +21,7 @@ import {
   settingAt,
   under,
   versionOf,
+  withSettings,
 } from '../index.ts';
 import { DESK, SYNTH, UTILITY } from './plans.ts';
 import { near } from '../../../util/test/near.js';
@@ -104,4 +105,14 @@ test("what feeds what over one inside's wires: each name and what it reaches, by
   assert.equal(feeds(desk, 'master', 'my tap 1'), false, 'a wire from the master back would be a loop');
   assert.equal(feeds(desk, 'reverb', 'my playing'), false);
   assert.equal(feeds(desk, 'reverb', 'reverb'), true, 'itself: a wire into it would loop');
+});
+
+test("a plan's settings changed by address, a new plan, the old as it was: a child's, a pool's child's by a copy's address; a setting not there refused", () => {
+  const changed = withSettings(UTILITY, { 'pan/law': 'pan pot' });
+  assert.equal(settingAt(changed, ['pan', 'law']).value, 'pan pot');
+  assert.equal(settingAt(UTILITY, ['pan', 'law']).value, 'stereo', 'the old as it was');
+  assert.equal(paramAt(changed, ['gain', 'gain']).value, 1, 'the rest as it was');
+  const waved = withSettings(SYNTH, { 'voice 2/oscillator/wave': 'square' });
+  assert.equal(settingAt(waved, ['voice 1', 'oscillator', 'wave']).value, 'square', "the pool's child, every copy");
+  assert.throws(() => withSettings(UTILITY, { 'gain/law': 'x' }), /gain\/law: no setting/);
 });

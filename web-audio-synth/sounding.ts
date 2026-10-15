@@ -12,6 +12,7 @@ import { fadeIn, fadeOut, plan, type Patch, type Plan, type Context, type Note, 
 import { followEdit, lastStop, type Operation } from '../audio-plan/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
 import { entryOf, keptDraws } from '../util/index.ts';
+import { CROSSFADE } from '../build/web-audio/index.ts'; // a rebuilt voice fades in, and the old one out, over this
 
 // a note as it sounds, as its instrument hands it over: its plan, its start (a context time), its operations applied to what was built of
 // it; its plan again from an edited patch; and a voice of its own built from a plan, as if it had started with the note, into where it
@@ -39,8 +40,6 @@ interface Kept {
   ops: Operation[];
   stops: Map<number, number>;
 }
-
-const CROSSFADE = 0.1; // s: a rebuilt voice fades in, and the old one out, over this
 
 export class Sounding {
   readonly #notes = new WeakMap<Patch, Set<Kept>>(); // each instrument's notes, by its patch as it plays

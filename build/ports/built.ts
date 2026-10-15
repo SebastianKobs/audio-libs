@@ -8,11 +8,12 @@
 //   - tempo(): a new beat, each synced time following it;
 //   - add(), letGo(): a pool's copy added by its pool's address and its number, its address handed
 //     back; let go once it has rung out, as its owner says: an instrument's voice, a desk's channel;
+//   - rebuild(): built again from a plan, a setting or its structure changed, the old ringing out;
 //   - placeholders: what it couldn't build, by address: a block's sound passed straight through,
 //     a source silent; said, so it's seen, not only heard missing;
 //   - dispose(): taken apart, its sound stopped.
 import type { Automation, When } from '../../automation/index.ts';
-import type { Address, ValuesByAddress } from '../../plan/format/index.ts';
+import type { Address, Plan, ValuesByAddress } from '../../plan/format/index.ts';
 
 // what's built
 export interface Built {
@@ -22,6 +23,7 @@ export interface Built {
   tempo(beat: number, when?: When): void;
   add(pool: Address, number: number): Address;
   letGo(copy: Address): void;
+  rebuild(plan: Plan): void;
   readonly placeholders: readonly Address[];
   dispose(): void;
 }
