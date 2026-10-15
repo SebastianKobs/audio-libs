@@ -5,11 +5,15 @@
 // modules: [{ name, patch, params }], params a function, read each time the chain is built, so a setting bound to one is read as it is
 // then. context: a module's, a beat's length and random(); it plays no note. tempo(beat) glides what follows the beat (a delay line's time);
 // set(port, value, timing) sets a port of every module that has it (a delay's feedback), now, at a time or gliding (timing.ts);
-// valueOf(port) a port's value as its module plans it now (a delay line's time, 'delay.time', and feedback). rebuild() plans and builds
-// the chain again, from its patches as they are now (an editor changed one): the new chain is built beside the old, where it starts moves over to it, and the old one rings out (RING_OUT) before it's let go, so its repeats aren't
-// cut off. plans() for an editor's flow; points() and readings() what its modules offer to read. Times start at the context's now.
+// valueOf(port) a port's value as its module plans it now (a delay line's time, 'delay.time', and feedback).
+// follow(): its modules followed as they are now, an editor having changed one, or a param with no port:
+//   - each planned again, with the draws it made, and glided there from where it plays;
+//   - where one's structure changed (a reverb's length), the chain built again beside the old, where it starts moved over to it,
+//     and the old one ringing out (RING_OUT) before it's let go, so its repeats aren't cut off.
+// plans() for an editor's flow; points() and readings() what its modules offer to read. Times start at the context's now.
 // As they play: the FX modules (modules.ts, FxModules), and a device's params (device-params.ts, DeviceParams).
 import { plan as planPatch, portValue, type Context, type Params, type Patch, type Plan } from '../synth/index.ts';
+import { keptDraws } from '../util/index.ts';
 import { paramOf, type Automatable, type BuiltNode } from '../web-audio-engine/index.ts';
 import { BuiltModule, type ModuleEngine } from './module.ts';
 import { MOVED, type Settable, type Timing } from './timing.ts';
@@ -27,10 +31,11 @@ export interface Module {
   patch: Patch;
   params?: () => Params; // its device's parameters, as they are now
 }
-// a module as built in the chain: the module, and what's built of it
+// a module as built in the chain: the module, what's built of it, and the random draws its plan made, to plan it again alike
 interface Part {
   module: Module;
   built: BuiltModule;
+  draws: ReturnType<typeof keptDraws>;
 }
 // the chain as built: its parts, in order, and its first node, where it starts goes in
 interface Built {
@@ -43,7 +48,7 @@ interface ChainEnds {
   readonly chainOut: AudioNode;
 }
 
-export const RING_OUT = 8000; // ms an old chain rings out after a rebuild before it's let go
+export const RING_OUT = 8000; // ms an old chain rings out, its structure changed, before it's let go
 
 export class FxChain implements Settable {
   readonly #engine: ModuleEngine;
@@ -83,7 +88,7 @@ export class FxChain implements Settable {
     if (!part) {
       return undefined;
     }
-    return portValue(planOf(part.module, this.#context), port);
+    return portValue(this.#planned(part), port);
   }
   // A param by its name as the chain plays it, one with a port or none (a Filter's resonance):
   // its module's params now over its patch's. The first module's that has it, or none.
@@ -119,31 +124,45 @@ export class FxChain implements Settable {
     const names = this.#nodes().flatMap((node) => Object.keys(node.readings));
     return Object.fromEntries(names.map((name) => [name, () => this.#reading(name)]));
   }
-  rebuild(): void {
+  // Its modules followed as they are now: each glided there where it can be (BuiltModule.follow()).
+  // Where one's structure changed, the whole chain built again.
+  follow(): void {
+    const followed = this.#built.parts.every((part) => part.built.follow(this.#planned(part)));
+    if (!followed) {
+      this.#rebuild();
+    }
+  }
+  plans(): Plan[] {
+    return this.#built.parts.map(({ built }) => built.plan);
+  }
+  // built again beside the old: where it starts moved over to the new one, the old one let go once it has rung out
+  #rebuild(): void {
     const old = this.#built;
     this.#built = this.#build();
     this.#between.input.disconnect(old.first);
     setTimeout(() => letGo(old), RING_OUT);
   }
-  plans(): Plan[] {
-    return this.#built.parts.map(({ built }) => built.plan);
-  }
-  // each module planned and built in its context, the last into its way out, each before it into the next
+  // each module planned and built in its context, its draws kept, the last into its way out, each before it into the next
   #build(): Built {
     const parts: Part[] = [];
     let into: AudioNode = this.#between.chainOut;
     for (const module of [...this.#modules].reverse()) {
+      const draws = keptDraws(this.#context.random);
       const built = new BuiltModule(this.#engine, {
         patch: module.patch,
         params: module.params?.() ?? {},
         into,
-        context: this.#context,
+        context: { ...this.#context, random: draws.random },
       });
-      parts.unshift({ module, built });
+      parts.unshift({ module, built, draws });
       into = built.input;
     }
     this.#between.input.connect(into);
     return { parts, first: into };
+  }
+  // a part's module planned again as it is now: its patch and params now, at the tempo, with the draws it made
+  #planned({ module, draws }: Part): Plan {
+    return planPatch(module.patch, {}, { ...this.#context, random: draws.again() }, module.params?.() ?? {});
   }
   // the first module's node that offers a port, and the param it offers there, if it's one
   #offering(port: string): { node: BuiltNode; param: string | undefined } | undefined {
@@ -164,10 +183,6 @@ export class FxChain implements Settable {
     const node = this.#nodes().find((offering) => name in offering.readings);
     return node?.readings[name]!() ?? 0; // offered, as found
   }
-}
-// a module planned in a context, at its params now
-function planOf(module: Module, context: Context): Plan {
-  return planPatch(module.patch, {}, context, module.params?.() ?? {});
 }
 // an old chain, once it has rung out: its LFOs stopped, every node let go
 function letGo({ parts }: Built): void {

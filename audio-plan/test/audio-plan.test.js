@@ -1,6 +1,7 @@
 // The audio plan's unit tests (mockup/src/libs/audio-plan, W2c), on plans written by hand, no synth's: a param's level as Web Audio
 // plays its automation; a sounding plan following an edit, a held value glided by the smoothing, a ramp coming taken on, a source's stop
-// moved, a change of structure a rebuild's; a plan faded out and in through one of its gains
+// moved, a change of structure a rebuild's; a lasting one glided to an edit from where it plays; a plan faded out and in through one of
+// its gains
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -9,6 +10,7 @@ import {
   fadeInThrough,
   fadeOutThrough,
   followEdit,
+  glideEdit,
   lastStop,
   levelAt,
   restartAt,
@@ -117,6 +119,39 @@ test("a source's stop moved where the edit has it; one that would never stop now
   assert.equal(followEdit(SOUND, { ...SOUND, edges: [[0, 'out']] }, 2), null, 'an edge changed');
   const filtered = { ...SOUND, nodes: [SOUND.nodes[0], { ...SOUND.nodes[1], node: 'biquad' }] };
   assert.equal(followEdit(SOUND, filtered, 2), null, "a node's kind changed");
+});
+
+test('a lasting graph edited: each param the edit changed glided there from where it plays, nothing cancelled; one unchanged left be', () => {
+  assert.deepEqual(glideEdit(SOUND, withGain([['value', 0.8]]), 2), [
+    { id: 1, param: 'gain', events: [['target', 0.8, 2, SMOOTHING]] },
+  ]);
+  assert.deepEqual(
+    glideEdit(SOUND, withGain([['value', 0.8]]), 2, 0.2)[0].events,
+    [['target', 0.8, 2, 0.2]],
+    'by one asked for',
+  );
+  assert.deepEqual(glideEdit(SOUND, withGain([['value', 0.5]]), 2), [], 'unchanged');
+});
+
+test('a lasting graph edited: a target the edited plan approaches, approached from where it plays by its own time constant', () => {
+  const approaching = withGain([
+    ['set', 0.5, 0],
+    ['target', 0.9, 1, 0.3],
+  ]);
+  assert.deepEqual(glideEdit(SOUND, approaching, 2)[0].events, [['target', 0.9, 2, 0.3]]);
+});
+
+test("a lasting graph edited: none where its structure or a source's stops changed, or a changed param has events still to come, a rebuild's", () => {
+  assert.equal(glideEdit(SOUND, { ...SOUND, edges: [[0, 'out']] }, 2), null, 'an edge changed');
+  assert.equal(glideEdit(SOUND, withStops([[5]]), 2), null, 'a stop moved');
+  const ramp = (to) =>
+    withGain([
+      ['set', 0.5, 0],
+      ['linear', to, 3],
+    ]);
+  assert.equal(glideEdit(ramp(0.2), ramp(1), 1), null, 'a ramp coming');
+  assert.equal(glideEdit(ramp(0.2), withGain([['value', 0.8]]), 1), null, 'one coming as it plays');
+  assert.deepEqual(glideEdit(ramp(0.2), ramp(0.2), 1), [], 'one coming, unchanged');
 });
 
 test('a plan faded out through one of its gains, its sources stopped once it has; one faded in through its own', () => {

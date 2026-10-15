@@ -23,7 +23,7 @@ export function entryOf<Key, Value>(map: Keyed<Key, Value>, key: Key, make: () =
   return map.get(key)!; // made just above, if it wasn't there
 }
 // target given from's values in place, all the way down: each object or array in it that stays one is kept, so whatever holds a part of it
-// sees the change (a chain rebuilt from the module it holds); nothing is shared with from. Returns target
+// sees the change (a chain planned again from the module it holds); nothing is shared with from. Returns target
 export function updateInPlace<T extends object>(target: T, from: T): T {
   const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object';
   if (Array.isArray(target)) {

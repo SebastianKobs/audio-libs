@@ -1,11 +1,12 @@
 // The FX chains' unit tests (mockup/src/libs/web-audio-fx, its test/ folder since X2b), on the engine's stand-in for Web Audio: a chain
-// set at a time, or now, and read; the Limiter, Gain and Pan modules as data; a module built on its own, and as a stage. Those on a
-// theme's modules, or built into the mixer's FX channels, in mockup/test/unit/fx.test.js
-import { test } from 'node:test';
+// set at a time, or now, and read; a chain and a module following an edit; the Limiter, Gain and Pan modules as data; a module built on
+// its own, and as a stage. Those on a theme's modules, or built into the mixer's FX channels, in mockup/test/unit/fx.test.js
+import { mock, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
-import { DEVICES, FxChain, GAIN, PAN_POT, TEMPO_TIME, UTILITY } from '../index.ts';
-import { delayBeats, plan } from '../../synth/index.ts';
+import { DEVICES, FILTER, FxChain, GAIN, PAN_POT, RING_OUT, TEMPO_TIME, UTILITY } from '../index.ts';
+import { delayBeats, NO_DRAWS, plan } from '../../synth/index.ts';
+import { SMOOTHING } from '../../audio-plan/index.ts';
 import { positionOf } from '../../params/index.ts';
 
 let time = 0;
@@ -76,6 +77,74 @@ test('the Gain and Pan modules, a block each; the Utility the two combined, as d
     plan(PAN, {}, context, { pan: -0.3 }).nodes.map((n) => [n.node, n.params.pan]),
     [['panner', [['value', -0.3]]]],
   );
+});
+
+// a chain following its modules as they are now (DRY17), an editor having changed one: each planned again with the draws it made, and
+// glided there on the chain as built; a change of structure the only rebuild, the old chain ringing out beside the new
+test('a chain follows its modules as they are now: a changed value glided there on the chain as built, its draws kept; a change of structure rebuilds it', () => {
+  mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go
+  try {
+    time = 10;
+    const e = engineOn(() => time);
+    const ac = e.audioContext;
+    let drawn = 0;
+    const params = { cutoff: 900 };
+    const wobbled = {
+      effect: true,
+      chain: ['filter'],
+      filter: { type: 'lowpass', freq: 'cutoff' },
+      lfos: [{ rate: { between: [0.3, 0.6] }, depth: 50, target: 'filter.frequency', free: true }],
+    };
+    const c = new FxChain(e, {
+      between: { input: ac.createGain(), chainOut: ac.createGain() },
+      modules: [{ name: 'dull', patch: wobbled, params: () => params }],
+      context: { beat, random: () => (drawn += 0.25) },
+    });
+    const made = ac.rec.nodes.length;
+    const [filter] = ac.rec.nodes.filter((o) => o.kind === 'biquad');
+    const lfo = ac.rec.nodes.find((o) => o.kind === 'oscillator');
+    time = 12;
+    params.cutoff = 600;
+    c.follow();
+    assert.equal(ac.rec.nodes.length, made, 'no node made');
+    assert.deepEqual(filter.frequency.events.at(-1), ['target', 600, 12, SMOOTHING], 'glided there from now');
+    assert.equal(lfo.frequency.events.length, 1, 'its rate drawn as it was');
+    assert.equal(c.valueOf('filter.frequency'), 600, 'as it plays now');
+    wobbled.filter = { ...wobbled.filter, type: 'highpass' };
+    c.follow();
+    assert.equal(ac.rec.nodes.filter((o) => o.kind === 'biquad').length, 2, 'a change of structure: built again');
+    mock.timers.tick(RING_OUT);
+    assert.equal(lfo.stops.length, 1, 'the old one let go once it has rung out');
+  } finally {
+    mock.timers.reset();
+  }
+});
+
+// a module built on its own following its plan edited (DRY17), as a chain's parts do: from where it plays, on the context's clock
+test('a module built on its own follows its plan edited from now: a changed value glided there, one told ahead of its time kept; false where its structure changed, nothing done', async () => {
+  const { BuiltModule } = await import('../index.ts');
+  time = 4;
+  const e = engineOn(() => time);
+  const m = new BuiltModule(e, { patch: FILTER });
+  const filter = m.input;
+  time = 10;
+  m.set('filter.frequency', 900, { at: 12 });
+  assert.equal(m.follow(plan(FILTER, {}, NO_DRAWS, { q: 2 })), true);
+  assert.deepEqual(filter.Q.events, [
+    ['value', 0.707],
+    ['target', 2, 10, SMOOTHING],
+  ]);
+  assert.deepEqual(
+    filter.frequency.events,
+    [
+      ['value', 24000],
+      ['set', 900, 12],
+    ],
+    'its cutoff as told, ahead of its time',
+  );
+  assert.deepEqual(m.plan.nodes[0].params.Q, [['value', 2]], 'its plan the edited one');
+  assert.equal(m.follow(plan(GAIN, {}, NO_DRAWS)), false, 'a change of structure');
+  assert.equal(filter.Q.events.length, 2, 'nothing done');
 });
 
 // a module built on its own (F5b), as a strip's gains and the mixer's sum and master are: into where its sound goes, its way in and out;

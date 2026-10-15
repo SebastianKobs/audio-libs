@@ -504,7 +504,7 @@ test('a device on an insert slot: a chain of one FX module between a way in and 
   assert.deepEqual(level.gain.events.at(-1), ['target', 0.25, 11, 0.05]);
 });
 
-test('a chain of a module made of several, a limiter: the channel comes in at its gain, out of what takes its makeup back; rebuilt, the old one let go of', () => {
+test('a chain of a module made of several, a limiter: the channel comes in at its gain, out of what takes its makeup back; rebuilt for a change of structure, the old one let go of', () => {
   mock.timers.enable({ apis: ['setTimeout'] });
   try {
     time = 10;
@@ -522,7 +522,9 @@ test('a chain of a module made of several, a limiter: the channel comes in at it
     assert.ok(into(ac, drive).includes(ch.input), "the channel's input into its gain");
     const [back] = outOf(ac, compressor);
     assert.ok(into(ac, ch.level).includes(back), 'out of the gain that takes the makeup back, into the level');
-    c.rebuild();
+    patch.chain = ['gain', 'limiter'];
+    patch.gain = 1;
+    c.follow();
     mock.timers.tick(RING_OUT);
     assert.ok(ac.rec.disconnects.includes(back), "the old one's way out let go of");
   } finally {

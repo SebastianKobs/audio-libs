@@ -1,6 +1,7 @@
 // A device's params as they play (mockup/src/libs/web-audio-fx/device-params.ts, U2c4b1b), as FxModules has the modules: each device by
 // its name, a live copy of its start, handed out as copies; a param set on the chain that plays it, at the port its module declares,
-// gliding, or the chain rebuilt where it has none; a param in beats played as the note length it matches. On the engine's stand-in
+// gliding, or the chain planned again where it has none, followed from now; a param in beats played as the note length it matches. On
+// the engine's stand-in
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
@@ -22,8 +23,8 @@ test("a device's params as they play: a copy of its start, handed out as copies,
   assert.deepEqual(devices.start('tap/utility'), { level: 0.5, pan: 0 }, 'its start kept');
 });
 
-test('a param set on the chain that plays it: at the port its module declares, gliding; the chain rebuilt where it has none, playing the change', () => {
-  mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go
+test('a param set on the chain that plays it: at the port its module declares, gliding; the chain planned again where it has none, glided to the change from now', () => {
+  mock.timers.enable({ apis: ['setTimeout'] }); // an old chain would ring out before it's let go
   try {
     time = 10;
     const engine = engineOn(() => time);
@@ -43,21 +44,17 @@ test('a param set on the chain that plays it: at the port its module declares, g
     devices.set('tap/utility', 'level', 0.3, { at: 13 });
     assert.deepEqual(utility.paramOf('gain.gain').events.at(-1), ['set', 0.3, 13], 'by a timing: at its time');
     assert.deepEqual(
-      [
-        devices.rebuilds('tap/air', 'q'),
-        devices.rebuilds('tap/air', 'cutoff'),
-        devices.rebuilds('tap/utility', 'level'),
-      ],
+      [devices.replans('tap/air', 'q'), devices.replans('tap/air', 'cutoff'), devices.replans('tap/utility', 'level')],
       [true, false, false],
-      'a param with no port rebuilds its chain',
+      'a param with no port plans its chain again',
     );
     const built = biquads().length;
     devices.set('tap/air', 'q', 2);
-    assert.equal(biquads().length, built + 1, 'a resonance has no port: its chain rebuilt');
+    assert.equal(biquads().length, built, 'a resonance has no port: no node made');
     assert.deepEqual(
-      [biquads().at(-1).Q.value, air.paramOf('filter.frequency').value],
-      [2, 2000],
-      'playing the change, the rest as it was',
+      [biquads().at(-1).Q.events.at(-1), air.paramOf('filter.frequency').events],
+      [['target', 2, 10, SMOOTHING], [['value', 2000]]],
+      'glided to the change from now, the rest as it was',
     );
   } finally {
     mock.timers.reset();

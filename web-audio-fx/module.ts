@@ -1,6 +1,6 @@
 // ---------- libs/web-audio-fx/module: one module built into where its sound goes: a strip's gain or pan, an FX chain's part ----------
 import { NO_DRAWS, plan as planPatch, type Context, type Params, type Patch, type Plan } from '../synth/index.ts';
-import type { Automation, Operation } from '../audio-plan/index.ts';
+import { glideEdit, type Automation, type Operation } from '../audio-plan/index.ts';
 import { paramOf, type BuiltNode, type Engine } from '../web-audio-engine/index.ts';
 import { MOVED, portSet, type Settable, type Timing } from './timing.ts';
 
@@ -18,12 +18,14 @@ interface Offering {
 // Its way in (input) and out (output), each a node of the engine's; its plan and the nodes built of it.
 // A port set by a timing (set()), so it's a stage set from outside (a track's controllers), a port it hasn't left alone; given events of
 // its own (automate()) or a plan's operations (apply()); times the context's. Its value now read back (value()).
+// Its plan edited, followed from now, gliding (follow()); a change of structure left to its owner to build again.
 export class BuiltModule implements Settable {
   readonly input: AudioNode;
   readonly output: AudioNode;
-  readonly plan: Plan;
   readonly nodes: BuiltNode[];
   readonly #engine: ModuleEngine;
+  readonly #start: number; // the context time it was built at, its plan's times from it
+  #plan: Plan;
 
   constructor(
     engine: ModuleEngine,
@@ -35,18 +37,34 @@ export class BuiltModule implements Settable {
     }: { patch: Patch; params?: Params; into?: AudioNode; context?: Context },
   ) {
     this.#engine = engine;
-    this.plan = planPatch(patch, {}, context, params);
-    this.nodes = engine.build(this.plan, engine.now(), into);
-    const input = this.plan.input;
+    this.#plan = planPatch(patch, {}, context, params);
+    this.#start = engine.now();
+    this.nodes = engine.build(this.#plan, this.#start, into);
+    const input = this.#plan.input;
     if (input === undefined || input === null) {
       throw new Error('a module with no input');
     }
     this.input = this.#node(input).input; // a node made of several, a limiter, comes in at its own input
-    this.output = this.#node(this.plan.edges.find(([, to]) => to === 'out')![0]).output; // an effect's plan goes out
+    this.output = this.#node(this.#plan.edges.find(([, to]) => to === 'out')![0]).output; // an effect's plan goes out
+  }
+  // its plan as it plays: as built, or as an edit it has followed since
+  get plan(): Plan {
+    return this.#plan;
+  }
+  // A plan edited, followed from now: each param the edit changed glided there from where it plays (glideEdit()).
+  // False where its structure changed, nothing done, for its owner to build it again.
+  follow(edited: Plan): boolean {
+    const ops = glideEdit(this.#plan, edited, this.#engine.now() - this.#start);
+    if (ops === null) {
+      return false;
+    }
+    this.#engine.apply(this.nodes, ops, this.#start);
+    this.#plan = edited;
+    return true;
   }
   // a port set by a timing, gliding from a time to come where it's given one, a context time (V3); one it lacks left alone
   set(port: string, value: number, timing: Timing = MOVED): void {
-    this.apply(portSet(this.plan, port, value, timing, this.#engine.now()));
+    this.apply(portSet(this.#plan, port, value, timing, this.#engine.now()));
   }
   // its plan's operations run on its nodes: a tempo followed, a port set
   apply(operations: readonly Operation[] | null | undefined): void {
@@ -67,7 +85,7 @@ export class BuiltModule implements Settable {
   }
   // the node offering a port, and its param where it's one, for what reads it (a limiter's points); none where it offers no such port
   offering(port: string): Offering | undefined {
-    const [offered] = this.plan.ports[port] ?? [];
+    const [offered] = this.#plan.ports[port] ?? [];
     const node = offered && this.nodes[offered.id];
     if (!node) {
       return undefined;
@@ -77,7 +95,7 @@ export class BuiltModule implements Settable {
   // let go of, once nothing plays into it: its sources stopped (an LFO's), each of its nodes' way out disconnected
   letGo(): void {
     this.nodes.forEach((node, id) => {
-      if (this.plan.nodes[id]?.starts.length) {
+      if (this.#plan.nodes[id]?.starts.length) {
         try {
           node.stop();
         } catch {}
@@ -87,7 +105,7 @@ export class BuiltModule implements Settable {
   }
   // the params a port offers, a node's input left out
   #offered(port: string): { id: number; param?: string | undefined }[] {
-    return (this.plan.ports[port] ?? []).filter((offered) => offered.param);
+    return (this.#plan.ports[port] ?? []).filter((offered) => offered.param);
   }
   #node(id: number): BuiltNode {
     return this.nodes[id]!; // a node its plan made

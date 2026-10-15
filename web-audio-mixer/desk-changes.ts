@@ -10,7 +10,7 @@
 // When, each held (libs/desk-plan/'s HeldChanges), its state changing then:
 //   - one that can glide: until its lead ahead of its time, then set on the audio at its time
 //     (target.ts's timingOf()), as a clock hands its 16ths out ahead;
-//   - a switch, and a param that rebuilds its device: until its time.
+//   - a switch, and a param that plans its device again: until its time.
 import type { DeviceParams, Timing } from '../web-audio-fx/index.ts';
 import {
   HeldChanges,
@@ -46,7 +46,7 @@ export class DeskChanges {
   readonly #clock: Ticking;
   readonly #at: (t: number) => number;
   readonly #ahead: HeldChanges; // those that can glide, set their lead ahead
-  readonly #due: HeldChanges; // switches and rebuilds, set at their time
+  readonly #due: HeldChanges; // switches and params with no port, set at their time
 
   // desk: its strips as data, which names its returns; clock: its time now and its ticks;
   // at(): a time on it on the audio's clock; lead: how far ahead one that can glide is set
@@ -82,7 +82,7 @@ export class DeskChanges {
     }
     this.#ahead.change(change);
   }
-  // a switch, and a param that rebuilds its device: neither can be set ahead of its time
+  // a switch, and a param that plans its device again: neither can be set ahead of its time
   #heldUntilDue({ strip, slot, param }: ParamKey): boolean {
     if (slot === undefined) {
       return param === 'mute' || param === 'solo';
@@ -90,7 +90,7 @@ export class DeskChanges {
     if (slot === SEND) {
       return false;
     }
-    return this.#params.rebuilds(deviceAt(strip, slot), param);
+    return this.#params.replans(deviceAt(strip, slot), param);
   }
   // throws for a key the desk's strip can't have
   #check(key: ParamKey): void {

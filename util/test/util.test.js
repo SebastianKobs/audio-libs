@@ -8,6 +8,7 @@ import {
   entryOf,
   Events,
   firstAfter,
+  keptDraws,
   lastAtOrBefore,
   LiveCopies,
   modulo,
@@ -203,6 +204,17 @@ test('an item picked from a list, each as likely, by a random of its own or Math
     pickFrom([], () => 0.5),
     undefined,
   );
+});
+
+test('random draws kept as they are drawn: drawn again, the same in turn, then fresh ones once they have run out', () => {
+  const random = seeded(3);
+  const draws = keptDraws(seeded(3));
+  const first = [draws.random(), draws.random()];
+  assert.deepEqual(first, [random(), random()], "the source's own, as they come");
+  const again = draws.again();
+  assert.deepEqual([again(), again(), again()], [...first, random()], 'the same in turn, then fresh');
+  const twice = draws.again();
+  assert.deepEqual([twice(), twice()], first, 'each time again from the first');
 });
 
 test('things due at a time: kept in their time order, after those at the same time; those whose time has come taken in it', () => {

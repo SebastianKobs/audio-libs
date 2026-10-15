@@ -11,7 +11,7 @@
 import { fadeIn, fadeOut, plan, type Patch, type Plan, type Context, type Note, type Params } from '../synth/index.ts';
 import { followEdit, lastStop, type Operation } from '../audio-plan/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';
-import { entryOf } from '../util/index.ts';
+import { entryOf, keptDraws } from '../util/index.ts';
 
 // a note as it sounds, as its instrument hands it over: its plan, its start (a context time), its operations applied to what was built of
 // it; its plan again from an edited patch; and a voice of its own built from a plan, as if it had started with the note, into where it
@@ -108,25 +108,6 @@ export function builtNote(
 function built(engine: Engine, planned: Plan, start: number, into: AudioNode): (ops: Operation[]) => void {
   const made = engine.build(planned, start, into);
   return (ops) => engine.apply(made, ops, start);
-}
-// a source of random draws kept as it draws, so a note planned again draws the same: again(), a source handing them back in turn, then
-// fresh ones once they've run out
-function keptDraws(random: () => number): { random: () => number; again: () => () => number } {
-  const drawn: number[] = [];
-  return {
-    random: () => {
-      const draw = random();
-      drawn.push(draw);
-      return draw;
-    },
-    again: () => {
-      let next = 0;
-      return () => {
-        next += 1;
-        return drawn[next - 1] ?? random();
-      };
-    },
-  };
 }
 // a note told something: kept as asked, turned into operations by its plan as it plays now, applied
 function tell(kept: Kept, told: Told): void {

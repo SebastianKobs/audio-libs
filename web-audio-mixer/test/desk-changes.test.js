@@ -1,7 +1,7 @@
 // Changes to a desk's params by their keys (mockup/src/libs/web-audio-mixer/desk-changes.ts, U2c5c2, DRY9c): checked as they come, a
 // key the desk's strip can't have thrown; set by the key's shape: a strip's own and its sends to a live mix, mute and solo to its
 // switches, a slot's param to its device among the device params; one that can glide set at once by its timing, on time; a switch and a
-// rebuild held until their time. On a live mix and a clock of the test's own
+// param with no port held until their time. On a live mix and a clock of the test's own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DeviceParams, DEVICES } from '../../web-audio-fx/index.ts';
@@ -48,7 +48,7 @@ test("a change by its key's shape: a strip's own and a send to the live mix, mut
   assert.equal(params.current('reverb/utility').level, 0.4, 'its device, among the device params');
 });
 
-test("a change for later: one that can glide set its lead ahead, at its time on the audio's clock or gliding from it; a switch, and a param that rebuilds its device, held until their time", () => {
+test("a change for later: one that can glide set its lead ahead, at its time on the audio's clock or gliding from it; a switch, and a param that plans its device again, held until their time", () => {
   const { changes, told, params, tick } = changesOf();
   changes.change({ key: { strip: 'you', param: 'pan' }, value: -0.5, t: 10.05 });
   changes.change({ key: { strip: 'you', param: 'volume' }, value: 0.4, t: 11, glide: 0.05 });
@@ -63,7 +63,7 @@ test("a change for later: one that can glide set its lead ahead, at its time on 
   assert.equal(params.current('reverb/utility').level, 0.2, 'a param at its port: its lead ahead');
   changes.change({ key: { strip: 'you', param: 'mute' }, value: 1, t: 11 });
   changes.change({ key: { strip: 'reverb', slot: 'air', param: 'q' }, value: 3, t: 11 });
-  assert.deepEqual([told.length, params.current('reverb/air').q], [2, 0.707], 'a switch and a rebuild held');
+  assert.deepEqual([told.length, params.current('reverb/air').q], [2, 0.707], 'a switch and a param with no port held');
   tick(11);
   assert.deepEqual([told.at(-1), params.current('reverb/air').q], [['mute', 'you', true], 3], 'as their time comes');
 });

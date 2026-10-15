@@ -7,6 +7,7 @@
 // of structure, a node, an edge, a node's kind, its props (an osc's wave, a buffer) or its starts, comes back as none: a rebuild's, the
 // old graph faded out through one of its gains (fadeOutThrough()) as a new one, its plan faded in through its own (fadeInThrough()),
 // comes in (G0.2b); a synth's voice's through its out (libs/synth/fades.ts)
+// A lasting graph, an FX module, follows an edit with no account of what it was told: glideEdit()
 import { eventTime, levelAt, restartAt } from './automation.ts';
 import { lastStop, type AudioPlan, type Automation, type Operation, type PlanNode } from './plan.ts';
 import type { Seconds } from '../clock/index.ts';
@@ -39,6 +40,31 @@ export function followEdit(
     ops.push(...stop);
   }
   return ops;
+}
+
+// The operations that glide a lasting graph, an FX module, from its plan before an edit to its plan after it, from at.
+// It keeps no account of what it was told, so each param the edit changed goes on from where it plays, nothing cancelled:
+//   - a value glided to by the smoothing, a target the edited plan approaches approached by its own time constant;
+//   - a value told it ahead of its time keeps its place.
+// None where the two differ in structure or in a source's stops, or a changed param has events still to come: a rebuild's.
+export function glideEdit(
+  before: AudioPlan,
+  after: AudioPlan,
+  at: Seconds,
+  smoothing: Seconds = SMOOTHING,
+): Operation[] | null {
+  if (!sameStructure(before, after) || !sameStops(before, after)) {
+    return null;
+  }
+  const glided: Operation[] = [];
+  for (const [index, node] of before.nodes.entries()) {
+    const ops = glidedParams(node, after.nodes[index]!, at, smoothing); // the same structure: as many nodes
+    if (ops === null) {
+      return null;
+    }
+    glided.push(...ops);
+  }
+  return glided;
 }
 
 // a graph faded out from at over a time through one of its gains, as a rebuilt one fades in (G0.2b): the gain from where it is as it
@@ -124,6 +150,21 @@ function played(automation: Automation[], told: readonly Operation[]): Automatio
     }
   }
   return events;
+}
+// whether a lasting graph's sources stop alike before an edit and after it
+function sameStops(before: AudioPlan, after: AudioPlan): boolean {
+  return before.nodes.every((node, index) => JSON.stringify(node.stops) === JSON.stringify(after.nodes[index]!.stops));
+}
+// A node's params an edit changed, each glided from where it plays to where the edited plan has it.
+// None where a changed param has events still to come, as it plays or as edited: nothing is cancelled.
+function glidedParams(node: PlanNode, edited: PlanNode, at: Seconds, smoothing: Seconds): Operation[] | null {
+  const changed = Object.keys(node.params).filter(
+    (param) => !sameFrom(node.params[param]!, edited.params[param]!, at), // the same structure: the same params
+  );
+  if (changed.some((param) => later(node.params[param]!, at).length || later(edited.params[param]!, at).length)) {
+    return null;
+  }
+  return changed.map((param) => ({ id: node.id, param, events: onTheWay(edited.params[param]!, at, [], smoothing) }));
 }
 // whether two automations go on alike from at: the same level there, approaching the same target, the same events after it
 function sameFrom(playing: Automation[], wanted: Automation[], at: Seconds): boolean {

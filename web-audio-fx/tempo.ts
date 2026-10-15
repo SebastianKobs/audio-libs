@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-fx/tempo: a module's time in beats, following the tempo ----------
-// A delay line's time, as an FX channel's own param is automated: in beats, so it follows the tempo, its chain rebuilt at a new one; by
+// A delay line's time, as an FX channel's own param is automated: in beats, so it follows the tempo, its chain planned again at a new one; by
 // octaves, a 16th triplet to a dotted half, the shortest and the longest note length a delay line takes (libs/synth/'s delay block).
 import { delayBeats } from '../synth/index.ts';
 import type { ParamSpec } from '../params/index.ts';

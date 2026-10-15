@@ -2,7 +2,7 @@
 // As a desk's insert slot holds a device: one FX module (libs/web-audio-fx/) in a chain,
 // between a way in and a way out of its own, unity Gain modules the engine builds.
 // The strip it's put on wires those. The module reads its params each time it's built,
-// and is set through its chain, rebuilt live as its patch changes.
+// and is set through its chain, following its patch live as it changes.
 import { BuiltModule, FxChain, GAIN } from '../web-audio-fx/index.ts';
 import type { Params, Patch } from '../synth/index.ts';
 import type { Engine } from '../web-audio-engine/index.ts';

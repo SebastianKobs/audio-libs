@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DeviceParams, FILTER, FxModules, GAIN, DEVICES, LIMITER_SETTINGS } from '../../web-audio-fx/index.ts';
 import { nameOf } from '../../desk-plan/index.ts';
+import { SMOOTHING } from '../../audio-plan/index.ts';
 import { Desk } from '../index.ts';
 
 let time = 0;
@@ -125,8 +126,8 @@ test("the master's insert slots, from its data, a chain in their order between t
   assert.equal(trim.gain.value, 0.5, 'a slot not among them at its start');
 });
 
-test("an FX channel's chain of modules as they play, by the effect its data names, its own params among the device params; an edit to either rebuilding it; following the tempo", () => {
-  mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go
+test("an FX channel's chain of modules as they play, by the effect its data names, its own params among the device params; an edit to either followed on it; following the tempo", () => {
+  mock.timers.enable({ apis: ['setTimeout'] }); // an old chain would ring out before it's let go
   try {
     const { desk, engine, params, modules } = deskOf();
     desk.build(engine);
@@ -134,10 +135,17 @@ test("an FX channel's chain of modules as they play, by the effect its data name
     assert.equal(desk.chains.delay.paramOf('filter.frequency').value, 500, 'its own params');
     const count = biquads().length;
     params.set('delay/echo', 'cutoff', 900);
-    assert.equal(biquads().length, count + 1, 'its own param set: rebuilt');
-    assert.equal(desk.chains.delay.paramOf('filter.frequency').value, 900, 'playing it');
+    assert.deepEqual(
+      [biquads().length, desk.chains.delay.paramOf('filter.frequency').events.at(-1)],
+      [count, ['target', 900, 10, SMOOTHING]],
+      'its own param set: glided there',
+    );
     modules.set('filter', { ...FILTER, params: { q: 3, cutoff: 24000 } });
-    assert.equal(biquads().length, count + 2, 'its module edited: rebuilt');
+    assert.deepEqual(
+      [biquads().length, biquads().at(-1).Q.events.at(-1)],
+      [count, ['target', 3, 10, SMOOTHING]],
+      'its module edited: glided there, its own params kept',
+    );
     const tempo = mock.method(desk.chains.delay, 'tempo');
     desk.tempo(0.5);
     assert.deepEqual(
