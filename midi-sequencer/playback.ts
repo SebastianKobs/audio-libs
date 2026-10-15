@@ -16,8 +16,7 @@ import type { Address, Input } from './input.ts';
 import { lastValueAt, laneValueAt, type LanePoint } from './lanes.ts';
 import { NoteRotation, noteMessages, type Message, type PerNoteControllerName } from '../midi/index.ts';
 import type { Lane, RecordedNote, Region } from './recorder.ts';
-import { timedValue } from '../util/index.ts';
-import type { TimedValue } from '../util/index.ts';
+import { timedValue, type TimedValue } from '../automation/index.ts';
 import { valuesAt } from './recorder.ts';
 
 // a note's point after its start: a change to one of its per-note controllers, its pitch's a glide, gliding there where it came with a

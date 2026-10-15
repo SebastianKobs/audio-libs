@@ -6,7 +6,7 @@
 // a per-note one's too, carries how it moves there, as an automation point's curve: jumping at its time, or gliding from it by a time
 // constant (glide), so what's recorded plays back as it was heard
 import type { Seconds } from '../clock/index.ts';
-import type { TimedValue } from '../util/index.ts';
+import type { TimedValue } from '../automation/index.ts';
 
 // a note that starts: its index, pitch and velocity; which part of its clip's element sounds it (a bulb, a leaf, a crystal)
 export interface NoteOn {

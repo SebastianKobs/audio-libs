@@ -10,7 +10,7 @@
 // It builds nothing and knows no clock: its times are the caller's.
 import type { Heard } from './model.ts';
 import type { Place, Placed, Position } from '../spatial/index.ts';
-import type { When } from '../util/index.ts';
+import type { When } from '../automation/index.ts';
 
 // a value set from what an emitter hears
 export type Law = (heard: Heard) => number;

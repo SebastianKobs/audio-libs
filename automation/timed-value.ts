@@ -1,4 +1,5 @@
-// ---------- util/timed: a value at a time, and when a value lands ----------
+// ---------- automation/timed-value: a value at a time, when a value lands, and changes as automation ----------
+import type { Automation } from './automation.ts';
 
 // a value at a time: jumping there, or gliding there from its time by a time constant (glide), as an automation point's curve
 export interface TimedValue {
@@ -28,4 +29,23 @@ export function timedAt(value: number, { at, glide }: When, now: number): TimedV
     return { value, t: now, glide };
   }
   return { value, t: at ?? now };
+}
+// Changes in time order as automation:
+//   1. The first set at its time: nothing before it to glide from.
+//   2. Each after it a jump or a glide.
+export function automationOf(changes: readonly TimedValue[]): Automation[] {
+  return changes.map((change, index) => {
+    if (index === 0) {
+      return ['set', change.value, change.t];
+    }
+    return eventOf(change);
+  });
+}
+// a change as an automation event: a jump set at its time; a glide a target by its time constant
+// A glide of 0 is a jump: Web Audio's setTargetAtTime would get there at once.
+export function eventOf({ value, t, glide }: TimedValue): Automation {
+  if (!glide) {
+    return ['set', value, t];
+  }
+  return ['target', value, t, glide];
 }

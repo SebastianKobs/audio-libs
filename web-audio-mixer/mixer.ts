@@ -5,7 +5,7 @@ import { Routing, type StripKind, MASTER } from '../mixer/index.ts';
 import type { Engine, PeakMeter } from '../web-audio-engine/index.ts';
 import { FxChannel } from './fx-channel.ts';
 import { BuiltModule, DEVICES, GAIN, MOVED, type Timing } from '../web-audio-fx/index.ts';
-import { restartAt } from '../audio-plan/index.ts';
+import { restartAt } from '../automation/index.ts';
 // what the mixer and its strips need of the engine: the context, its time, a meter on a node, a plan built and set, and whether it can pan
 export type MixerEngine = Pick<Engine, 'audioContext' | 'now' | 'meter' | 'build' | 'apply' | 'canPan'>;
 // The desk as a strip sees it as it's made, the routing having said where it may go:

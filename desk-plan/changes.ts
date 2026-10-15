@@ -6,7 +6,7 @@
 // The clock is the user's, as this interface has it: its time now, and its ticks.
 import type { ParamKey } from './keys.ts';
 import { DueQueue } from '../util/index.ts';
-import type { TimedValue } from '../util/index.ts';
+import type { TimedValue } from '../automation/index.ts';
 
 // a change to a param: its key, its value, when it lands, and the time constant it glides there by, where it has one
 export interface Change extends TimedValue {

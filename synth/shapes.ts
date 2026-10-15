@@ -7,7 +7,7 @@
 // dB; a pitch or a cutoff in semitones from its own, every stage straight in them; anything else its amount added, straight
 import { val, type Valued, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
-import { eventTime, type Automation } from '../audio-plan/index.ts';
+import { eventTime, type Automation } from '../automation/index.ts';
 import { releaseOf, stagesOf, type Target } from './stages.ts';
 import { SILENCE } from '../params/index.ts';
 

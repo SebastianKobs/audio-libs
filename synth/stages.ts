@@ -5,7 +5,7 @@
 // says what a point of the shape is there, and how each stage gets there: straight in its target's scale
 import { time, val, type Time, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
-import { eventTime, levelAt, type Automation } from '../audio-plan/index.ts';
+import { eventTime, levelAt, type Automation } from '../automation/index.ts';
 import { ENVELOPE_SPECS } from './params.ts';
 
 // a stage of a shape

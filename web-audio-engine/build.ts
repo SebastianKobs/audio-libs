@@ -8,7 +8,8 @@
 import type { BuiltNode, WebAudioNode } from './built-node.ts';
 import { MADE_WITH, type NodeMaker } from './nodes.ts';
 import type { Automatable } from './param-in-units.ts';
-import type { Automation, BufferSpec, Edge, NodeKind, PlanNode } from '../audio-plan/index.ts';
+import type { BufferSpec, Edge, NodeKind, PlanNode } from '../audio-plan/index.ts';
+import type { Automation } from '../automation/index.ts';
 
 // what building a node asks of the engine: the kinds it makes, and a buffer a plan names, made once
 export interface Building {

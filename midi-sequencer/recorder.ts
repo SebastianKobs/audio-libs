@@ -16,7 +16,8 @@ import { endOf, LATEST, Timeline, placed, thinned, type TimedEvent } from '../ti
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { NoteOff, PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { Play, PlayedNote } from './stream.ts';
-import { entryOf, timedValue } from '../util/index.ts';
+import { entryOf } from '../util/index.ts';
+import { timedValue } from '../automation/index.ts';
 
 // what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of; the track's
 // name, as its play was sent to it

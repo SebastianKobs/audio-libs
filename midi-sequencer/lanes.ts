@@ -2,7 +2,8 @@
 // A point a value at a time, jumping there, or gliding there by a time constant, as Web Audio's setTargetAtTime goes: the music's, on the
 // timeline as an event that holds until the next of its lane (libs/timeline/); the timeline's until L1c2
 import type { Seconds } from '../clock/index.ts';
-import { approach, lastAtOrBefore, type TimedValue } from '../util/index.ts';
+import { automationOf, levelAt, type TimedValue } from '../automation/index.ts';
+import { lastAtOrBefore } from '../util/index.ts';
 
 // a lane's point: a value at a time, jumping there, or gliding there by a time constant (glide), as an automation point's curve
 export type LanePoint = TimedValue;
@@ -12,30 +13,14 @@ export type LanePoint = TimedValue;
 export function samePoint(before: LanePoint, after: LanePoint): boolean {
   return after.value === before.value && after.glide === before.glide;
 }
-// a lane's value at a time: its last point's by then, a jump's its value, a glide's where it had got to from where the lane was, by its
-// time constant, as Web Audio's setTargetAtTime goes; none before its first point
+// a lane's value at a time, as its points play as automation: a jump's its value, a glide's where
+// it had got to from where the lane was; none before its first point
 export function laneValueAt(points: readonly LanePoint[], t: Seconds): number | undefined {
-  let value: number | undefined;
-  let gliding: { point: LanePoint; from: number } | null = null;
-  for (const point of points) {
-    if (point.t > t) {
-      break;
-    }
-    if (gliding) {
-      value = glidedTo(gliding, point.t);
-    }
-    if (point.glide === undefined || value === undefined) {
-      value = point.value;
-      gliding = null;
-      continue;
-    }
-    gliding = { point, from: value };
+  const first = points[0];
+  if (!first || first.t > t) {
+    return undefined;
   }
-  return gliding ? glidedTo(gliding, t) : value;
-}
-// where a glide had got to by a time
-function glidedTo({ point, from }: { point: LanePoint; from: number }, t: Seconds): number {
-  return approach(from, point.value, t - point.t, point.glide!); // a glide has its time constant
+  return levelAt(automationOf(points), t);
 }
 // a lane's last point's value by a time, what it was set to, a glide's curve not followed; none before its first point
 export function lastValueAt(points: readonly LanePoint[], t: Seconds): number | undefined {

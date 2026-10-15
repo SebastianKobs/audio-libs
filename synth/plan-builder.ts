@@ -9,15 +9,8 @@ import { mtof } from '../music-theory/index.ts';
 import { time, val, when, type Valued, type Values } from './values.ts';
 import { events, kindOf, released, type Scale } from './shapes.ts';
 import type { Envelope, Patch } from './patch.ts';
-import {
-  SMOOTHING,
-  lastStop,
-  type Automation,
-  type Edge,
-  type NodeKind,
-  type Operation,
-  type PlanNode,
-} from '../audio-plan/index.ts';
+import { SMOOTHING, lastStop, type Edge, type NodeKind, type Operation, type PlanNode } from '../audio-plan/index.ts';
+import { eventOf, type Automation } from '../automation/index.ts';
 import type { Handles, Plan } from './plan.ts';
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
 import { NOTE_SPECS } from './blocks/note.ts';
@@ -236,7 +229,7 @@ export class PlanBuilder {
       set: (port: string, value: number, at: number, tc = SMOOTHING): Operation[] =>
         this.#portsNamed(port)
           .filter((offered) => offered.param)
-          .map(({ node, param }) => ({ id: node.id, param, events: [glideTo(value, at, tc)] })),
+          .map(({ node, param }) => ({ id: node.id, param, events: [eventOf({ value, t: at, glide: tc })] })),
       release: (at: number): Operation[] => this.#release(at),
     };
   }
@@ -354,11 +347,4 @@ function silentFrom(
   const latest = Math.max(...(onward.get(id) ?? []).map((to) => (to === 'out' ? Infinity : silentFrom(to, graph))));
   visiting.delete(id);
   return Math.min(closed.get(id) ?? Infinity, latest);
-}
-// a value a control moves to: gliding by its time constant, or, with none, at once, at its time, as Web Audio's setValueAtTime
-function glideTo(value: number, at: number, timeConstant: number): Automation {
-  if (timeConstant === 0) {
-    return ['set', value, at];
-  }
-  return ['target', value, at, timeConstant];
 }

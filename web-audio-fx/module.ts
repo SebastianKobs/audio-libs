@@ -1,6 +1,7 @@
 // ---------- libs/web-audio-fx/module: one module built into where its sound goes: a strip's gain or pan, an FX chain's part ----------
 import { NO_DRAWS, plan as planPatch, type Context, type Params, type Patch, type Plan } from '../synth/index.ts';
-import { glideEdit, type Automation, type Operation } from '../audio-plan/index.ts';
+import { glideEdit, type Operation } from '../audio-plan/index.ts';
+import type { Automation } from '../automation/index.ts';
 import { paramOf, type BuiltNode, type Engine } from '../web-audio-engine/index.ts';
 import { MOVED, portSet, type Settable, type Timing } from './timing.ts';
 

@@ -8,8 +8,8 @@
 // old graph faded out through one of its gains (fadeOutThrough()) as a new one, its plan faded in through its own (fadeInThrough()),
 // comes in (G0.2b); a synth's voice's through its out (libs/synth/fades.ts)
 // A lasting graph, an FX module, follows an edit with no account of what it was told: glideEdit()
-import { eventTime, levelAt, restartAt } from './automation.ts';
-import { lastStop, type AudioPlan, type Automation, type Operation, type PlanNode } from './plan.ts';
+import { eventTime, levelAt, restartAt, type Automation } from '../automation/index.ts';
+import { lastStop, type AudioPlan, type Operation, type PlanNode } from './plan.ts';
 import type { Seconds } from '../clock/index.ts';
 
 // s: the time constant a held value glides to a new one by, as a plugin smooths a knob against zipper noise: an edit's, a control's set

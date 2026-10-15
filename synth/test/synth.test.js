@@ -739,7 +739,7 @@ test("an envelope's shape (I1h): from 0 after its delay, up to 1 over its attack
 });
 
 test("an envelope's curve as Web Audio plays it (I1g3): set, ramps from where the last event left it, a target approaching from its start", async () => {
-  const { levelAt } = await import('../../audio-plan/index.ts');
+  const { levelAt } = await import('../../automation/index.ts');
   const automation = [
     ['set', 0.0001, 0],
     ['exp', 1, 0.1],

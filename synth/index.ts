@@ -14,7 +14,7 @@
 // A patch edited while a note sounds: the note follows it from now, its plan before and after compared (followEdit(), libs/audio-plan/, G0.2b),
 // or, its structure changed, it's rebuilt, crossfaded through its out (fades.ts).
 // No Web Audio: an engine builds the plan
-import type { Automation } from '../audio-plan/index.ts';
+import type { Automation } from '../automation/index.ts';
 import type { Plan } from './plan.ts';
 import { events, kindOf } from './shapes.ts';
 import { PlanBuilder, type Block } from './plan-builder.ts';

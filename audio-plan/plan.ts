@@ -3,15 +3,9 @@
 // and automation, its starts and stops, and the block it belongs to; its edges, by sound or into a param, 'out' being its one output;
 // and its input, where it has one. Times are seconds from its start. What a sounding one is told (Operation): a param's new automation,
 // or a node's stop. A synth's note's plan is one, with what a voice adds (libs/synth/plan.ts, W0)
+import type { Automation } from '../automation/index.ts';
 import type { Seconds } from '../clock/index.ts';
 
-// a param's automation, as Web Audio's: ['set', value, at], ['exp' | 'linear', value, at], ['target', value, at, tc], ['value', value],
-// ['cancel', at]; times in seconds from the plan's start
-export type Automation =
-  | [kind: 'value', value: number]
-  | [kind: 'set' | 'exp' | 'linear', value: number, at: number]
-  | [kind: 'target', value: number, at: number, timeConstant: number]
-  | [kind: 'cancel', at: number];
 // a buffer a plan's node names, the engine making it: so many seconds of white noise, or a reverb's impulse response, noise darkening as it
 // decays (W2b)
 export type BufferSpec = { noise: Seconds } | { impulse: Seconds };
