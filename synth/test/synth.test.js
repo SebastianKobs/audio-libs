@@ -3,7 +3,20 @@
 // patches, the blocks planned in any order and a block of one's own among them, in mockup/test/unit/synth-themes.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { amountSpec, envelopeEvents, mappingOf, plan, termOf, adsr, perc, stage, swell, time, val } from '../index.ts';
+import {
+  amountSpec,
+  envelopeEvents,
+  mappingOf,
+  paramOf,
+  plan,
+  termOf,
+  adsr,
+  perc,
+  stage,
+  swell,
+  time,
+  val,
+} from '../index.ts';
 import { mtof } from '../../music-theory/index.ts';
 import { near } from '../../util/test/near.js';
 
@@ -409,6 +422,59 @@ test("a filter's resonance can be a param, as its cutoff can: the Filter module'
   const filter = p.nodes.find((n) => n.block === 'filter');
   assert.deepEqual(filter.params.Q, [['value', 0.5]], 'its Q from the params');
   assert.deepEqual(filter.params.frequency, [['value', 24000]], 'its cutoff the default');
+});
+
+test("a filter's slope, 12 or 24 dB an octave: at 24 two biquads in series, flat at a resonance of 0.707, its cutoff on both, an LFO moving both; a noise's own too; a slope a param names", () => {
+  const biquads = (p) => p.nodes.filter((n) => n.node === 'biquad');
+  const planned = (filter, more = {}) =>
+    plan({ oscs: [{ wave: 'sine' }], chain: ['filter'], filter, ...more }, ...played());
+  assert.equal(biquads(planned({ type: 'lowpass', freq: 800 })).length, 1, 'at 12, one');
+  const p = planned({ type: 'lowpass', freq: 800, q: Math.SQRT1_2, slope: '24' });
+  const [first, second] = biquads(p);
+  near(first.params.Q[0][1], 0.5412, 'flat: the first', 1e-4);
+  near(second.params.Q[0][1], 1.3066, 'flat: the second', 1e-4);
+  assert.deepEqual([first.params.frequency, second.params.frequency], [[['value', 800]], [['value', 800]]]);
+  assert.deepEqual(
+    p.edges.filter(([from]) => from === first.id).map(([, to]) => to),
+    [second.id],
+    'in series: the first only into the second',
+  );
+  const lfo = planned(
+    { type: 'lowpass', freq: 800, slope: '24' },
+    { lfos: [{ rate: 0.1, depth: 100, target: 'filter.frequency', free: true }] },
+  );
+  const moved = biquads(lfo).map((b) =>
+    lfo.edges.some(([, to]) => Array.isArray(to) && to[0] === b.id && to[1] === 'frequency'),
+  );
+  assert.deepEqual(moved, [true, true], 'its cutoff moved on both');
+  const noisy = plan(
+    { noise: [{ filter: { type: 'bandpass', freq: 1000, q: 2, slope: '24' }, level: 0.1, into: 'out' }] },
+    ...played(),
+  );
+  assert.deepEqual(
+    biquads(noisy).map((b) => b.params.Q),
+    [[['value', 2]], [['value', 2]]],
+    "a noise's own: a bandpass's both at its resonance",
+  );
+  const [noiseFirst, noiseLast] = biquads(noisy);
+  assert.deepEqual(
+    noisy.edges.filter(([from]) => from === noiseFirst.id).map(([, to]) => to),
+    [noiseLast.id],
+    "a noise's own in series too, its level after the last",
+  );
+  const named = plan(
+    {
+      effect: true,
+      chain: ['filter'],
+      filter: { type: 'lowpass', q: 'q', freq: 'cutoff', slope: 'slope' },
+      params: { q: 0.707, cutoff: 24000, slope: '12' },
+    },
+    {},
+    { beat: 0.8, random: () => 0.5 },
+    { slope: '24' },
+  );
+  assert.equal(biquads(named).length, 2, 'a slope a param names');
+  assert.equal(paramOf(['filter', 'q']).taper, 'octaves', 'its resonance by octaves, as the filter block declares it');
 });
 
 test("a control set with no glide jumps at its time, as Web Audio's setValueAtTime: a tower's cutoff at a phrase's first note", () => {

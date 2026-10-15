@@ -73,6 +73,7 @@ export interface Biquad {
   type: string;
   q?: Valued<number>; // a number, or a param's (the Filter module's)
   freq?: Freq;
+  slope?: string; // 12 or 24 dB an octave, or a param that holds one
 }
 export interface Filter extends Biquad {
   when?: Condition;

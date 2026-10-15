@@ -107,13 +107,15 @@ function named(written: string, values: Values): number | undefined {
   const mapping = mappingOf(written);
   return mapping ? mappedValue(mapping, values) : undefined;
 }
+// A word as written, or the one the param it names holds: a delay's note, a filter's slope.
+export function wordOf(written: string, values: Values): string {
+  const held = values[written];
+  return typeof held === 'string' ? held : written;
+}
 export function time(spec: Time, values: Values): number {
   let resolved = val(spec, values);
   if (typeof resolved === 'string') {
-    const named = values[resolved];
-    if (typeof named === 'string') {
-      resolved = named; // a param that holds a time: a knob's note value
-    }
+    resolved = wordOf(resolved, values); // a param that holds a time: a knob's note value
   }
   if (typeof resolved === 'number') {
     return resolved;

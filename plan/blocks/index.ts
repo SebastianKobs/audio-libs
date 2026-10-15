@@ -18,7 +18,7 @@ export {
   type EnvelopeTarget,
   type EnvelopeTimes,
 } from './envelope-curve.ts';
-export { RESONANCE } from './filter.ts';
+export { biquadQs, FILTER_SLOPE, RESONANCE, type FilterStages } from './filter.ts';
 export { LIMITER_SPECS } from './limiter.ts';
 export { DETUNE, WAVE } from './oscillator.ts';
 export { REVERB_LENGTH } from './reverb.ts';

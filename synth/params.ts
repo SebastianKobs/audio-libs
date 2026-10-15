@@ -4,6 +4,7 @@
 // Here what several blocks share: a filter's values, a level, a ratio, a stop, and the patch's own, its handle's. An envelope's and a
 // limiter's are the building blocks' (libs/plan/blocks/, LAY6a).
 import type { ParamSpec, ParamSpecs } from '../params/index.ts';
+import { FILTER_SLOPE, RESONANCE } from '../plan/blocks/index.ts';
 
 // a level, a share, 1 at 0 dB
 export const LEVEL_SPEC = { name: 'level', range: [0, 2, 0.01] } as const satisfies ParamSpec;
@@ -37,7 +38,8 @@ export const FILTER_SPECS = {
     name: 'type',
     choices: ['lowpass', 'highpass', 'bandpass', 'notch', 'peaking', 'lowshelf', 'highshelf', 'allpass'],
   },
-  q: { name: 'q', range: [0.1, 30, 0.001] }, // a plain ratio, 0.707 flat
+  q: { ...RESONANCE, name: 'q' }, // the filter block's resonance: a plain ratio, 0.707 flat, by octaves
+  slope: FILTER_SLOPE,
   freq: {
     name: 'freq',
     unit: 'Hz',

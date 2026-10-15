@@ -8,7 +8,7 @@
 // It goes in at the delay and out from the lowpass.
 // While synced, with the patch's handle.tempo, it follows a new beat, gliding (tc).
 // Its ports: 'delay', 'delay.time', 'delay.feedback', 'delay.tone'.
-import { val, type Values } from '../values.ts';
+import { val, wordOf, type Values } from '../values.ts';
 import type { Block } from '../plan-builder.ts';
 import type { Delay } from '../patch.ts';
 import type { ParamSpecs, Time } from '../../params/index.ts';
@@ -54,10 +54,9 @@ export default {
 
 // its time as its values set it: its note a value, or the param it names
 function timeOf(delay: Delay, values: Values): Time {
-  const named = values[delay.note];
   return {
     sync: val(delay.sync, values) === 1,
-    note: typeof named === 'string' ? named : delay.note,
+    note: wordOf(delay.note, values),
     free: val(delay.ms, values),
     unit: 'ms',
   };

@@ -4,7 +4,7 @@
 // offset into its buffer, a share of the note's rand(), so each brush hit is noise from somewhere else in it. Its ports: 'noise 1.gain'
 // (its level), 'noise 1.frequency' (its filter)
 import type { Block } from '../plan-builder.ts';
-import { biquadOf } from './filter.ts';
+import { biquadsOf } from './filter.ts';
 import type { Noise } from '../patch.ts';
 import { FILTER_SPECS, LEVEL_SPEC, STOP_SPEC } from '../params.ts';
 import type { ParamSpecs } from '../../params/index.ts';
@@ -32,10 +32,10 @@ export default {
       buffer: { noise: NOISE_SECONDS[noise.buffer ?? NOISE_SPECS.buffer.default] },
       loop: !!noise.loop,
     });
-    const fl = biquadOf(noise.filter, builder, `noise ${index}`);
+    const { first, last } = biquadsOf(noise.filter, builder, `noise ${index}`);
     const gain = builder.levelGain(`noise ${index}`, noise.level);
-    builder.link(source, fl);
-    builder.link(fl, gain);
+    builder.link(source, first);
+    builder.link(last, gain);
     builder.into(gain, noise.into);
     builder.start(source, noise.offset === undefined ? undefined : builder.values.random() * noise.offset);
     builder.stop(source, noise.stop);
