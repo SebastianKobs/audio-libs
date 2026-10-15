@@ -5,7 +5,8 @@
 //   - a position on a knob, a lane or a CC turned into its value and back, the fader law among the tapers (taper.ts);
 //   - a gain in dB and back, the floor of silence (decibels.ts);
 //   - the specs modules share: a fader's gain, a pan, a switch (common.ts);
-//   - a time with a sync switch, its three params and the note values it steps through (time.ts).
+//   - a time with a sync switch, its three params, found among a part's keys, and the note values it
+//     steps through (time.ts).
 // The synth's blocks, the FX modules and a desk's strips declare theirs on it.
 export {
   choiceAt,
@@ -20,4 +21,12 @@ export {
 export { faderGain, faderPosition, positionOf, valueAt } from './taper.ts';
 export { dBOf, gainOf, SILENCE } from './decibels.ts';
 export { FADER_GAIN, isSwitch, PAN, SWITCH } from './common.ts';
-export { NOTE_VALUES, timeSpecs, type FreeUnit, type Time, type TimeSpecs } from './time.ts';
+export {
+  NOTE_VALUES,
+  timeParamsIn,
+  timeSpecs,
+  type FreeUnit,
+  type Time,
+  type TimeParams,
+  type TimeSpecs,
+} from './time.ts';

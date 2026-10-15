@@ -2,7 +2,7 @@
 // free, in ms or Hz; declared as three params side by side.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isSwitch, NOTE_VALUES, timeSpecs } from '../index.ts';
+import { isSwitch, NOTE_VALUES, timeParamsIn, timeSpecs } from '../index.ts';
 
 test('the note values a synced time steps through: shortest first, a 16th triplet to a dotted half', () => {
   assert.deepEqual(NOTE_VALUES, [
@@ -36,4 +36,16 @@ test("a rate's free value in Hz, named hz; a time starting free has its switch o
   assert.deepEqual(Object.keys(specs), ['sync', 'note', 'hz']);
   assert.equal(specs.sync.default, 0, 'off');
   assert.equal(specs.hz.unit, 'Hz');
+});
+
+test("a time's three params among a part's keys, as a device declares them: its sync switch, its note and its free one, ms or hz; none without all three", () => {
+  assert.deepEqual(timeParamsIn(['sync', 'note', 'ms', 'feedback', 'tone']), {
+    sync: 'sync',
+    note: 'note',
+    free: 'ms',
+  });
+  assert.deepEqual(timeParamsIn(['rate', 'hz', 'note', 'sync']), { sync: 'sync', note: 'note', free: 'hz' });
+  assert.equal(timeParamsIn(['note', 'ms', 'feedback']), undefined, 'no switch');
+  assert.equal(timeParamsIn(['sync', 'ms']), undefined, 'no note');
+  assert.equal(timeParamsIn(['sync', 'note']), undefined, 'no free one');
 });

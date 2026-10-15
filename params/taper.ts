@@ -4,6 +4,7 @@
 //   fader: a gain, a share, by the fader law, as a console's and Ableton's: unity two thirds up, +6 dB at the top;
 //   octaves: a value on its range, each doubling as far up as the last, as a frequency;
 //   line: a value on its range in a straight line, the default; a switch, its step its whole range, lands on its ends.
+// A param with choices: a step each, by its index among them, as a controller carries it.
 import type { ParamSpec } from './spec.ts';
 import { clamp, clamp01 } from '../util/index.ts';
 
@@ -23,7 +24,7 @@ export function positionOf(spec: ParamSpec, value: number): number {
   if (spec.taper === 'fader') {
     return faderPosition(Math.max(0, value));
   }
-  const [low, high] = spec.range!; // a param on a control has its range
+  const [low, high] = rangeOf(spec);
   const within = clamp(value, low, high);
   if (spec.taper === 'octaves') {
     return Math.log(within / low) / Math.log(high / low);
@@ -36,13 +37,23 @@ export function valueAt(spec: ParamSpec, position: number): number {
   if (spec.taper === 'fader') {
     return faderGain(along);
   }
-  const [low, high, step] = spec.range!; // a param on a control has its range
+  const [low, high, step] = rangeOf(spec);
   if (spec.taper === 'octaves') {
     return low * (high / low) ** along;
   }
   const value = low + along * (high - low);
+  if (spec.choices) {
+    return Math.round(value); // a choice's index: the nearest
+  }
   if (step >= high - low) {
     return Math.round(along) === 0 ? low : high; // a switch
   }
   return value;
+}
+// a param's range on its control: its own; a choice's, its indices, a step each
+function rangeOf(spec: ParamSpec): readonly [low: number, high: number, step: number] {
+  if (spec.choices) {
+    return [0, spec.choices.length - 1, 1];
+  }
+  return spec.range!; // a param on a control has its range or its choices
 }

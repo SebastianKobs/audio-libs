@@ -34,3 +34,13 @@ test("a param's taper: a gain by the fader law, a frequency by octaves, the rest
   assert.deepEqual([positionOf(mute, 1), valueAt(mute, 0.4), valueAt(mute, 0.6)], [1, 0, 1], 'a switch, by its step');
   assert.deepEqual([positionOf(pan, 3), positionOf(cutoff, 1)], [1, 0], 'held to its range');
 });
+
+test('a param with choices: a step each, by its index among them, the first at the bottom, the last at the top; and back, the nearest', () => {
+  const note = { name: 'note', choices: ['1/16', '1/8', '1/4', '1/2'] };
+  assert.deepEqual(
+    [0, 1, 2, 3].map((index) => positionOf(note, index)),
+    [0, 1 / 3, 2 / 3, 1],
+  );
+  assert.deepEqual([valueAt(note, 0.3), valueAt(note, 0.9)], [1, 3], 'the nearest index');
+  assert.deepEqual([positionOf(note, 7), positionOf(note, -1)], [1, 0], 'held to its choices');
+});
