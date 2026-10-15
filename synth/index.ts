@@ -34,7 +34,7 @@ import envelope from './blocks/envelope.ts';
 import out from './blocks/out.ts';
 export { volumeOf } from './blocks/out.ts';
 import delay from './blocks/delay.ts';
-export { delayBeats, delayTimeOf } from './blocks/delay.ts';
+export { DELAY_TIME } from './blocks/delay.ts';
 import reverb from './blocks/reverb.ts';
 import gain from './blocks/gain.ts';
 import pan from './blocks/pan.ts';
@@ -45,17 +45,7 @@ export { portValue, type Plan } from './plan.ts';
 export type { Block } from './plan-builder.ts';
 export { LIMITER_SPECS, MAPPING_SPECS, PER_NOTE_SPECS } from './params.ts';
 export { kindOf } from './shapes.ts';
-export {
-  isNoteValue,
-  NO_DRAWS,
-  time,
-  val,
-  type Context,
-  type Note,
-  type Params,
-  type Values,
-  type Valued,
-} from './values.ts';
+export { NO_DRAWS, time, val, type Context, type Note, type Params, type Values, type Valued } from './values.ts';
 export { adsr, perc, stage, swell } from './blocks/envelope.ts';
 
 export { mappingOf, termOf, type Mapping } from './mappings.ts';

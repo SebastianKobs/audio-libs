@@ -1,18 +1,19 @@
 // A device's params as they play (mockup/src/libs/web-audio-fx/device-params.ts, U2c4b1b), as FxModules has the modules: each device by
 // its name, a live copy of its start, handed out as copies; a param set on the chain that plays it, at the port its module declares,
-// gliding, or the chain planned again where it has none, followed from now; a param in beats played as the note length it matches. On
+// gliding, or the chain planned again where it has none, followed from now; a param with choices played as its choice by its index. On
 // the engine's stand-in
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
-import { DEVICES, DeviceParams, FILTER, FxChain, TEMPO_TIME, UTILITY } from '../index.ts';
+import { DEVICES, DeviceParams, FILTER, FxChain, UTILITY } from '../index.ts';
+import { timeSpecs } from '../../params/index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
 
 let time = 0;
 const beat = 0.5;
 
 test("a device's params as they play: a copy of its start, handed out as copies, set by param; its start kept, for a reset", () => {
-  const devices = new DeviceParams({ beat: () => beat });
+  const devices = new DeviceParams();
   devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: DEVICES.utility.ports });
   assert.deepEqual([devices.has('tap/utility'), devices.has('you/utility')], [true, false], 'a device added, one not');
   assert.deepEqual(devices.current('tap/utility'), { level: 0.5, pan: 0 }, 'at its start');
@@ -29,7 +30,7 @@ test('a param set on the chain that plays it: at the port its module declares, g
     time = 10;
     const engine = engineOn(() => time);
     const biquads = () => engine.audioContext.rec.nodes.filter((node) => node.kind === 'biquad');
-    const devices = new DeviceParams({ beat: () => beat });
+    const devices = new DeviceParams();
     devices.add('tap/utility', { start: { level: 0.5, pan: 0 }, ports: DEVICES.utility.ports });
     devices.add('tap/air', { start: { q: 0.707, cutoff: 2000 }, ports: DEVICES.filter.ports });
     const utility = chainOf(engine, devices, 'tap/utility', UTILITY);
@@ -61,13 +62,15 @@ test('a param set on the chain that plays it: at the port its module declares, g
   }
 });
 
-test('a param declared in beats, tempo-synced: played as the note length it matches, or seconds at the beat where none does', () => {
-  const devices = new DeviceParams({ beat: () => beat });
-  devices.add('delay 1/delay', { start: { time: '1/8' }, specs: { time: TEMPO_TIME } });
-  devices.set('delay 1/delay', 'time', 0.75);
-  assert.equal(devices.current('delay 1/delay').time, '1/8.', 'three quarters of a beat: a dotted 8th');
-  devices.set('delay 1/delay', 'time', 0.3);
-  assert.equal(devices.current('delay 1/delay').time, 0.15, 'no note length: seconds at the beat');
+test('a param with choices, as a controller carries it: played as its choice by its index; any other as it comes', () => {
+  const devices = new DeviceParams();
+  const specs = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
+  devices.add('delay 1/delay', { start: { sync: 1, note: '1/8', ms: 417 }, specs });
+  devices.set('delay 1/delay', 'note', 7);
+  assert.equal(devices.current('delay 1/delay').note, specs.note.choices[7], 'its eighth note value');
+  devices.set('delay 1/delay', 'ms', 300);
+  devices.set('delay 1/delay', 'sync', 0);
+  assert.deepEqual(devices.current('delay 1/delay'), { sync: 0, note: '1/4', ms: 300 });
 });
 
 // a chain of one device's module, playing its params as they play

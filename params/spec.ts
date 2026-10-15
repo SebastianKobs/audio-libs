@@ -5,6 +5,7 @@
 // shown in dB, its range in dB; and its taper, where a value lies on a control, a lane or a CC (taper.ts), its own as VST3 and AU declare
 // theirs (U2c4a). A value written either as itself or by its parts (a cutoff, or { key, max }) has both. A surface only decides how to
 // draw one: a slider or a knob. What's structure has no spec: a condition, where a sound goes, what a modulator moves, the chain, a switch.
+import { clamp } from '../util/index.ts';
 
 // a param's taper, how a position on a control, a lane or a CC maps to its value (taper.ts)
 export type Taper = 'fader' | 'octaves' | 'line';
@@ -44,7 +45,8 @@ export function specAt(
   }
   return at && isParamSpec(at) ? at : undefined;
 }
-function isParamSpec(specs: ParamSpec | ParamSpecs): specs is ParamSpec {
+// whether a spec is a param's, not a module's or a part's specs by their keys
+export function isParamSpec(specs: ParamSpec | ParamSpecs): specs is ParamSpec {
   return typeof specs.name === 'string';
 }
 // within a value: a part by its key, itself for a range's end
@@ -53,4 +55,14 @@ function partOf(spec: ParamSpec, key: string): ParamSpec | ParamSpecs | undefine
     return spec;
   }
   return spec.parts?.[key];
+}
+// A param with choices, as a controller carries it: a choice by its index among them.
+// A place between two rounded to the nearer; one past either end at that end.
+export function choiceAt({ choices = [] }: ParamSpec, index: number): string {
+  const nearest = clamp(Math.round(index), 0, choices.length - 1);
+  return choices[nearest]!; // a param with choices has one there
+}
+// and back: a choice's index among its param's choices
+export function choiceIndex({ choices = [] }: ParamSpec, choice: string): number {
+  return choices.indexOf(choice);
 }

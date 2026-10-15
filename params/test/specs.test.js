@@ -2,7 +2,19 @@
 // the FX modules and the synth's blocks each name as their own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dBOf, FADER_GAIN, gainOf, isSwitch, PAN, positionOf, SILENCE, SWITCH, valueAt } from '../index.ts';
+import {
+  choiceAt,
+  choiceIndex,
+  dBOf,
+  FADER_GAIN,
+  gainOf,
+  isSwitch,
+  PAN,
+  positionOf,
+  SILENCE,
+  SWITCH,
+  valueAt,
+} from '../index.ts';
 import { near } from '../../util/test/near.js';
 
 test('a gain in dB and back: 0 dB unity, -6 about half, +6 about twice; the silence floor -80 dB', () => {
@@ -27,4 +39,16 @@ test("a switch: a param off 0 or on 1, nothing between, whatever its name; a fad
     [true, true, false, false],
   );
   assert.equal(isSwitch({ name: 'steps', range: [0, 4, 1] }), false, 'more than on or off');
+});
+
+test('a param with choices, as a controller carries it: a choice by its index among them, and back; a place between two rounded, one past the ends at the end', () => {
+  const spec = { name: 'note', choices: ['1/16', '1/8', '1/4'] };
+  assert.deepEqual(
+    [0, 1, 2].map((index) => choiceAt(spec, index)),
+    ['1/16', '1/8', '1/4'],
+  );
+  assert.equal(choiceIndex(spec, '1/8'), 1);
+  assert.equal(choiceAt(spec, 1.4), '1/8', 'rounded');
+  assert.equal(choiceAt(spec, 7), '1/4', 'at the end');
+  assert.equal(choiceAt(spec, -1), '1/16');
 });

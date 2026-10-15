@@ -22,7 +22,6 @@ export { BuiltModule, type ModuleEngine } from './module.ts';
 export { MOVED, type Settable, type Target, type Timing } from './timing.ts';
 export { FxModules } from './modules.ts';
 export { DeviceParams } from './device-params.ts';
-export { TEMPO_TIME } from './tempo.ts';
 export type { Device, DeviceKind, DeviceName, LimiterSettings } from './inserts.ts';
 
 // a module in a chain: its name, its patch, and its params, read each time the chain is built

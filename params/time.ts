@@ -18,6 +18,11 @@ export interface Time {
   unit: FreeUnit;
 }
 
+// a time's three params by their names: sync, note, and its free one by its unit, ms or hz
+export type TimeSpecs<Unit extends FreeUnit> = Readonly<
+  { sync: RangedSpec; note: ParamSpec } & Record<Lowercase<Unit>, RangedSpec>
+>;
+
 // the note values a synced time steps through, shortest first: a 16th triplet to a dotted half
 // By length, so a step up is always longer: a triplet comes before the dotted note a step shorter.
 export const NOTE_VALUES: readonly string[] = Object.freeze([
@@ -37,20 +42,20 @@ export const NOTE_VALUES: readonly string[] = Object.freeze([
 
 // A time's three params, as a device declares them, each starting where start has it.
 // The free one by octaves: a time doubled is a step as far at any length.
-export function timeSpecs({
+export function timeSpecs<Unit extends FreeUnit>({
   unit,
   range,
   start,
 }: {
-  unit: FreeUnit;
+  unit: Unit;
   range: RangedSpec['range'];
   start: Omit<Time, 'unit'>;
-}): Readonly<Record<string, ParamSpec>> {
+}): TimeSpecs<Unit> {
   const free = unit.toLowerCase(); // ms, hz
-  const specs: Record<string, ParamSpec> = {
+  const specs = {
     sync: { ...SWITCH, name: 'sync', default: start.sync ? 1 : 0 },
     note: { name: 'note', choices: NOTE_VALUES, default: start.note },
     [free]: { name: free, unit, range, default: start.free, taper: 'octaves' },
   };
-  return Object.freeze(specs);
+  return Object.freeze(specs) as TimeSpecs<Unit>; // a computed key types as any string: its free one is its unit's
 }

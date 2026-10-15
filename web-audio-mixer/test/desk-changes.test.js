@@ -17,7 +17,7 @@ function changesOf() {
     setMute: (strip, on) => told.push(['mute', strip, on]),
     setSolo: (strip, on) => told.push(['solo', strip, on]),
   };
-  const params = new DeviceParams({ beat: () => 0.5 });
+  const params = new DeviceParams();
   params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: DEVICES.utility.ports });
   params.add('reverb/air', { start: { q: 0.707, cutoff: 2000 }, ports: DEVICES.filter.ports });
   const ticks = [];

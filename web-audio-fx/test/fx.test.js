@@ -4,10 +4,10 @@
 import { mock, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
-import { DEVICES, FILTER, FxChain, GAIN, PAN_POT, RING_OUT, TEMPO_TIME, UTILITY } from '../index.ts';
-import { delayBeats, NO_DRAWS, plan } from '../../synth/index.ts';
+import { DEVICES, FILTER, FxChain, GAIN, PAN_POT, RING_OUT, UTILITY } from '../index.ts';
+import { DELAY_TIME, NO_DRAWS, plan } from '../../synth/index.ts';
 import { SMOOTHING } from '../../audio-plan/index.ts';
-import { positionOf } from '../../params/index.ts';
+import { isSwitch, NOTE_VALUES } from '../../params/index.ts';
 
 let time = 0;
 const beat = 60 / 72; // a beat at 72 BPM
@@ -217,21 +217,17 @@ test('a module built on its own glides from a time to come where it is given one
 });
 
 // each param a module may be automated by, declared with its taper (U2c4a), as a plugin declares its own
-test("the params declared with their tapers: a Utility's level by the fader law, its pan in a line; a Filter's cutoff by octaves; the limiter's in lines; a delay's time in beats by octaves, a 16th triplet to a dotted half, following the tempo", () => {
+test("the params declared with their tapers: a Utility's level by the fader law, its pan in a line; a Filter's cutoff by octaves; the limiter's in lines; a delay's time with a sync switch, its note values, its ms by octaves", () => {
   const { utility, filter, limiter } = DEVICES;
   assert.deepEqual(
     [utility.params.level.taper, utility.params.pan.taper, filter.params.cutoff.taper, limiter.params.gain.taper],
     ['fader', undefined, 'octaves', undefined],
     'a line where none is named',
   );
-  assert.deepEqual(
-    [TEMPO_TIME.name, TEMPO_TIME.unit, TEMPO_TIME.taper, TEMPO_TIME.range.slice(0, 2)],
-    ['time', 'beats', 'octaves', [delayBeats('1/16t', 1), delayBeats('1/2.', 1)]],
-  );
-  assert.ok(
-    Math.abs(positionOf(TEMPO_TIME, delayBeats('1/8', 1)) - 0.4) < 0.1,
-    "an 8th, a little under halfway, as an octave's share",
-  );
+  const { sync, note, ms } = DELAY_TIME;
+  assert.ok(isSwitch(sync));
+  assert.deepEqual(note.choices, NOTE_VALUES);
+  assert.deepEqual([ms.unit, ms.taper, ms.range.slice(0, 2)], ['ms', 'octaves', [1, 4000]], 'up to its longest time');
 });
 
 // each device, by the name a strip's data gives it (U2c4b1a, DRY9a): its name as its device shows it, its module, its params declared

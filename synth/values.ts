@@ -1,8 +1,8 @@
 // ---------- libs/synth/values: the values in a patch that depend on the note ----------
 // values (a builder's n) hold the patch's params, the note's values and its context (see index.ts). In a patch:
 // - a time is seconds, or a sum of terms in its values: '0.35 duration', 'decay + 0.05', '2 rise', 'duration in 0.1..0.5' (clamped), or
-//   note values, from the length of a beat: '1/8', '1/4.' (dotted), '1/8t' (a triplet). A time can name a param that holds one: 'time',
-//   with params: { time: '1/8' }
+//   note values, from the length of a beat: '1/8', '1/4.' (dotted), '1/8t' (a triplet). A time can name a param that holds one: 'release',
+//   with params: { release: '1/4' }
 // - a value can depend on the note, { if: 'held && vibrato > 12', then: 0.1, else: 0.06 }, or name one of its values: 'vibrato', or be
 //   drawn between two with the context's random(): { between: [0.35, 0.65] }
 // - a block can be there only when: { when: 'held' }. Conditions: 'held', '!held', 'vibrato > 12', joined by &&
@@ -112,7 +112,7 @@ export function time(spec: Time, values: Values): number {
   if (typeof resolved === 'string') {
     const named = values[resolved];
     if (typeof named === 'string') {
-      resolved = named; // a param that holds a time: a delay line's note value
+      resolved = named; // a param that holds a time: a knob's note value
     }
   }
   if (typeof resolved === 'number') {
@@ -145,10 +145,6 @@ function noteValueTime(beats: number, written: string, values: Values): number {
     throw new Error(`a note value with no beat: ${written}`);
   }
   return beat * beats;
-}
-// whether a time is written as a note value ('1/8', '1/4.', '1/8t'), as a delay line's time can be
-export function isNoteValue(term: string): boolean {
-  return noteValueBeats(term) !== undefined;
 }
 export function freq(written: Freq, noteFrequency: number, values: Values): number {
   const value = val(written, values);

@@ -77,8 +77,11 @@ export interface Biquad {
 export interface Filter extends Biquad {
   when?: Condition;
 }
+// a delay line: its time with a sync switch, synced its note value at the beat, free in ms; each a value or a param it names
 export interface Delay {
-  time: Time;
+  sync: Valued<number>;
+  note: string;
+  ms: Valued<number>;
   feedback: Valued<number>;
   tone: Valued<number>;
   max?: number;

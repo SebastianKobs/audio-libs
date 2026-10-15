@@ -3,21 +3,7 @@
 // patches, the blocks planned in any order and a block of one's own among them, in mockup/test/unit/synth-themes.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  amountSpec,
-  delayBeats,
-  delayTimeOf,
-  envelopeEvents,
-  mappingOf,
-  plan,
-  termOf,
-  adsr,
-  perc,
-  stage,
-  swell,
-  time,
-  val,
-} from '../index.ts';
+import { amountSpec, envelopeEvents, mappingOf, plan, termOf, adsr, perc, stage, swell, time, val } from '../index.ts';
 import { mtof } from '../../music-theory/index.ts';
 import { near } from '../../util/test/near.js';
 
@@ -63,17 +49,24 @@ test("an LFO's rate can be a note value: one turn in that time, so it follows th
   near(lfo(5).params.frequency[0][1], 5, 'hertz stay hertz:');
 });
 
-test("a delay's time in beats and back: a note length at its value, dotted and triplet; seconds at the beat; one matching no note length back as seconds", () => {
-  const BEAT = 60 / 72; // s: a beat at 72 BPM
-  assert.deepEqual(
-    ['1/8', '1/8.', '1/8t', '1/4', 0.5].map((time) => delayBeats(time, BEAT)),
-    [0.5, 0.75, 1 / 3, 1, 0.5 / BEAT],
-  );
-  assert.deepEqual(
-    [0.5, 0.75, 1 / 3, 1].map((beats) => delayTimeOf(beats, BEAT)),
-    ['1/8', '1/8.', '1/8t', '1/4'],
-  );
-  assert.ok(Math.abs(delayTimeOf(0.5 / BEAT, BEAT) - 0.5) < 1e-12, 'seconds, where no note length matches');
+test("a delay's time with a sync switch: synced, its note at the beat, glided to a new beat; free, its ms, a new beat leaving it; each a value or a param it names", () => {
+  const [, context] = played(); // a beat of 0.8 s
+  const delay = (time) => ({
+    effect: true,
+    chain: ['delay'],
+    delay: { feedback: 0.4, tone: 2000, ...time },
+    handle: { tempo: { tc: 0.3 } },
+  });
+  const timeOf = (p) => p.nodes.find((n) => n.node === 'delay').params.delayTime[0][1];
+  const synced = plan(delay({ sync: 1, note: '1/8.', ms: 300 }), {}, context);
+  near(timeOf(synced), 0.6, 'a dotted 8th at the beat');
+  assert.deepEqual(synced.handle.tempo(1, 2)[0].events, [['target', 0.75, 2, 0.3]], 'a new beat: glided there');
+  const free = plan(delay({ sync: 0, note: '1/8.', ms: 300 }), {}, context);
+  near(timeOf(free), 0.3, '300 ms');
+  assert.equal(free.handle?.tempo, undefined, 'a new beat leaves it');
+  const named = plan(delay({ sync: 'sync', note: 'note', ms: 'ms' }), {}, context, { sync: 1, note: '1/4', ms: 300 });
+  near(timeOf(named), 0.8, 'each a param it names');
+  assert.throws(() => plan(delay({ sync: 1, note: '1/8', ms: 300 }), {}, { ...context, beat: undefined }), /no beat/);
 });
 
 test('a value, or a whole block, can depend on the note', () => {

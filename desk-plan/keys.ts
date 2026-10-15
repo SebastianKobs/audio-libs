@@ -7,7 +7,7 @@
 // Strip, slot and param names hold no slash.
 // A controller sent to a strip's track names the key without its strip, the track's:
 // `volume`, `send/reverb`, `utility/level`.
-import type { ParamSpec, ParamSpecs } from '../params/index.ts';
+import { isParamSpec, type ParamSpec, type ParamSpecs } from '../params/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from './params.ts';
 
 // a parameter's key: its strip, its slot where it's a send's or a device's, and its param
@@ -64,8 +64,8 @@ export function specOf(
     return SEND_PARAM;
   }
   const spec = slotSpecs(strip, slot)?.[param];
-  if (spec === undefined || !('name' in spec)) {
+  if (spec === undefined || !isParamSpec(spec)) {
     return undefined; // a nested part is no param
   }
-  return spec as ParamSpec;
+  return spec;
 }

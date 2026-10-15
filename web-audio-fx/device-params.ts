@@ -5,10 +5,9 @@
 //   - at the port its module declares for it, by a timing, gliding there unless it says;
 //   - where it has none, the chain planned again from the params as they are now,
 //     followed from now (replans()).
-// A param declared in beats is played as the note length it matches,
-// or seconds at the beat where none does.
-import { delayTimeOf, type Params } from '../synth/index.ts';
-import type { ParamSpec, ParamSpecs } from '../params/index.ts';
+// A param with choices is played as its choice, by its index as a controller carries it.
+import type { Params } from '../synth/index.ts';
+import { choiceAt, isParamSpec, type ParamSpec, type ParamSpecs } from '../params/index.ts';
 import { LiveCopies } from '../util/index.ts';
 import type { Follows } from './modules.ts';
 import { MOVED, type Settable, type Timing } from './timing.ts';
@@ -19,7 +18,7 @@ type Playing = Settable & Follows;
 //   start: its params as it starts, which a reset brings back;
 //   ports: the port its module declares for each param, by the param's name;
 //     none for one set only as it's built;
-//   specs: its params' specs where they change how a value plays (a param in beats).
+//   specs: its params' specs where they change how a value plays (a param with choices).
 interface Declared {
   start: Params;
   ports?: Readonly<Record<string, string>>;
@@ -33,14 +32,9 @@ interface Device {
 }
 
 export class DeviceParams {
-  readonly #beat: () => number;
   readonly #params = new LiveCopies<Params>(); // each device's, its start and its live copy
   readonly #devices = new Map<string, Device>();
 
-  // beat: a beat's length now, for a param in beats
-  constructor({ beat }: { beat: () => number }) {
-    this.#beat = beat;
-  }
   add(device: string, { start, ports = {}, specs = {} }: Declared): void {
     this.#params.add(device, start);
     this.#devices.set(device, { ports, specs, chain: null });
@@ -80,11 +74,11 @@ export class DeviceParams {
     }
     played.chain.set(port, value, timing);
   }
-  // A value as its param plays it: in beats, a note length; any other as it comes.
+  // A value as its param plays it: with choices, its choice by its index; any other as it comes.
   #playedAs(spec: ParamSpec | ParamSpecs | undefined, value: number): number | string {
-    if (!spec || !('name' in spec) || spec.unit !== 'beats') {
+    if (!spec || !isParamSpec(spec) || !spec.choices) {
       return value;
     }
-    return delayTimeOf(value, this.#beat());
+    return choiceAt(spec, value);
   }
 }

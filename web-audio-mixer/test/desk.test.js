@@ -164,7 +164,7 @@ function deskOf() {
   time = 10;
   const engine = engineOn(() => time);
   const modules = new FxModules({ modules: { gain: GAIN, filter: FILTER } });
-  const params = new DeviceParams({ beat: () => beat });
+  const params = new DeviceParams();
   params.add('reverb/utility', { start: { level: 0.6, pan: 0 }, ports: DEVICES.utility.ports });
   params.add('delay/echo', { start: { cutoff: 500 } });
   params.add('master/limiter', { start: { ...LIMITER_SETTINGS }, ports: DEVICES.limiter.ports });
