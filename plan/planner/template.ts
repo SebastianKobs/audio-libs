@@ -17,6 +17,13 @@ export interface TemplateChild {
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
 }
+// A preset on a template, as a theme writes one: the template's kind, and the values and settings
+// it changes, by their addresses within it.
+export interface Preset {
+  readonly kind: string;
+  readonly values?: ValuesByAddress;
+  readonly settings?: ValuesByAddress;
+}
 // A macro as a template writes it: its name and its targets; where it writes none of its own,
 // its spec its first target's, its value its spec's default.
 export interface TemplateMacro {
@@ -32,9 +39,11 @@ export interface TemplatePool {
   readonly wires: readonly Wire[];
   readonly note?: NoteAddresses;
 }
-// a template, by its kind, the name other templates give it; a list it doesn't write, none
+// A template, by its kind, the name other templates give it; a list it doesn't write, none.
+// Built on another where it names one (extends): its base's whole, then its own (extend.ts).
 export interface Template {
   readonly kind: string;
+  readonly extends?: string;
   readonly form?: string;
   readonly inputs?: readonly Input[];
   readonly outputs?: readonly Output[];

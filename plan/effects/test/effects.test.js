@@ -1,5 +1,5 @@
 // The effects' unit tests (mockup/src/libs/plan/effects): each a template, as its YAML writes it.
-//   - the five, each of the effect's form, one input and one output, planned with no failure;
+//   - the six, each of the effect's form, one input and one output, planned with no failure; the Tape delay the Delay's;
 //   - their params macros by today's names, a desk's keys; a macro's spec its target's where it writes none;
 //   - the Delay's note a choice through its macro; the Utility's pan pot a setting; the Reverb's length one.
 import { test } from 'node:test';
@@ -17,21 +17,26 @@ function macrosOf(kind, asked) {
   return Object.fromEntries(macros.map((macro) => [macro.spec.name, macro.value]));
 }
 
-test("the five effects, each of the effect's form, one input and one output, each planned", () => {
+test("the six effects, each of the effect's form, one input and one output, each planned; the Tape delay the Delay's", () => {
   assert.deepEqual(
-    EFFECT_TEMPLATES.map((template) => [template.kind, template.form]),
+    EFFECT_TEMPLATES.map(({ kind }) => [kind, planner.plan(kind).node.form]),
     [
       ['Utility', 'effect'],
       ['Filter', 'effect'],
       ['Limiter', 'effect'],
       ['Delay', 'effect'],
+      ['TapeDelay', 'effect'],
       ['Reverb', 'effect'],
     ],
   );
   assert.deepEqual(EFFECT_FORM, { name: 'effect', inputs: ['in'], outputs: ['out'] });
-  for (const { kind } of EFFECT_TEMPLATES) {
-    assert.equal(planner.plan(kind).node.kind, kind);
-  }
+  const tape = planner.plan('TapeDelay').node.inside;
+  assert.deepEqual(
+    tape.children.map((child) => child.name),
+    ['line', 'lowpass', 'loop', 'wobble', 'depth'],
+    "the Delay's, then its wobble",
+  );
+  assert.deepEqual(tape.wires.at(-1), { from: { node: 'depth', output: 'out' }, to: { node: 'line', param: 'ms' } });
 });
 
 test("their params macros by today's names, at today's values as each starts: a desk's keys and its lanes' names kept", () => {
@@ -39,6 +44,7 @@ test("their params macros by today's names, at today's values as each starts: a 
   assert.deepEqual(macrosOf('Filter'), { cutoff: 24000, q: 1.085 });
   assert.deepEqual(macrosOf('Limiter'), { gain: 16, ceiling: -0.3, release: 0.3 });
   assert.deepEqual(macrosOf('Delay'), { sync: 1, note: '1/8', ms: 417, feedback: 0.45, tone: 2400 });
+  assert.deepEqual(macrosOf('TapeDelay'), { ...macrosOf('Delay'), rate: 0.5, depth: 0.004 }, '0.5 Hz, 4 ms either way');
   assert.deepEqual(macrosOf('Reverb'), {}, 'its length a setting');
 });
 

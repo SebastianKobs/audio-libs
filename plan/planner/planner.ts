@@ -9,6 +9,7 @@
 //   5. a pool's child ready, as each copy will be.
 // No note: a voice's note sets its params as it plays.
 import {
+  addressOf,
   addressText,
   macroValues,
   VERSION,
@@ -23,6 +24,7 @@ import type { Block } from '../blocks/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
 import { withChannels, type LooseJack } from './channels.ts';
 import { problemsInAll } from './check.ts';
+import { extendedAll } from './extend.ts';
 import type { Form } from './form.ts';
 import { Kinds } from './kinds.ts';
 import type { Template, TemplateChild, TemplateMacro } from './template.ts';
@@ -46,20 +48,33 @@ interface Given {
 export class Planner {
   readonly #kinds: Kinds;
 
-  // the templates, each checked well-formed and held to its form, then its macros onto choices;
-  // every failure said at once
+  // The templates, each merged with the one it's built on, then checked well-formed and held to
+  // its form, then its macros onto choices; every failure said at once.
   constructor(templates: readonly Template[], forms: readonly Form[] = []) {
-    this.#kinds = new Kinds(templates);
+    const merged = extendedAll(templates);
+    this.#kinds = new Kinds(merged.templates);
     const byName = new Map(forms.map((form) => [form.name, form]));
-    const problems = problemsInAll(templates, this.#kinds, byName);
+    const problems = merged.problems.length ? merged.problems : problemsInAll(merged.templates, this.#kinds, byName);
     if (problems.length) {
       throw new Error(['templates not well-formed:', ...problems].join('\n'));
     }
   }
   // a plan for a template, its top node named as asked
+  // a plan for a template, its top node named as asked; what it's asked for at an address it hasn't refused
   plan(kind: string, { name = kind, values = {}, settings = {} }: Asked = {}): Plan {
     if (!this.#kinds.template(kind)) {
       throw new Error(`no template ${kind}`);
+    }
+    const missing = [
+      ...Object.keys(values)
+        .filter((key) => !this.#kinds.paramIn(kind, addressOf(key)))
+        .map((key) => `no param ${key}`),
+      ...Object.keys(settings)
+        .filter((key) => !this.#kinds.settingIn(kind, addressOf(key)))
+        .map((key) => `no setting ${key}`),
+    ];
+    if (missing.length) {
+      throw new Error([`${kind}: asked for what it has not:`, ...missing].join('\n  '));
     }
     return { version: VERSION, node: this.#node({ name, kind }, { values, settings, at: [] }) };
   }

@@ -1,6 +1,6 @@
 // ---------- plan/planner/check: a template checked as the planner is handed it ----------
 // Held to its form where it names one (form-check.ts), once it's well-formed, every template alike:
-//   1. its children's names one of a kind, each child's kind known, none holding the template;
+//   1. its children's names one of a kind, its macros' too, each child's kind known, none holding the template;
 //   2. the values and settings a child changes there inside it;
 //   3. each wire's ends there: an input, an output, a param;
 //   4. each macro named, its targets params inside, one at least where it has no spec of its own;
@@ -48,7 +48,10 @@ function problemsIn(template: Template, kinds: Kinds, forms: ReadonlyMap<string,
 function wellFormedProblems(template: Template, kinds: Kinds): string[] {
   const children = kinds.childrenOf(template);
   return [
-    ...namesTwice(children),
+    ...namesTwice(children.map((child) => child.name)).map((name) => `${name}: a name two children have`),
+    ...namesTwice((template.macros ?? []).map((macro) => macro.name)).map(
+      (name) => `macro ${name}: a name two macros have`,
+    ),
     ...children.flatMap((child) => childProblems(child, template, kinds)),
     ...wiresOf(template).flatMap((wire) => wireProblems(wire, template, kinds)),
     ...macroProblems(template, kinds),
@@ -56,12 +59,9 @@ function wellFormedProblems(template: Template, kinds: Kinds): string[] {
   ];
 }
 
-// a name two children have, said once, at the first
-function namesTwice(children: readonly TemplateChild[]): string[] {
-  const names = children.map((child) => child.name);
-  return names
-    .filter((name, index) => names.indexOf(name) === index && names.lastIndexOf(name) !== index)
-    .map((name) => `${name}: a name two children have`);
+// each name given twice or more, once, where it's first given
+function namesTwice(names: readonly string[]): string[] {
+  return names.filter((name, index) => names.indexOf(name) === index && names.lastIndexOf(name) !== index);
 }
 // a child's kind unknown, or holding the template; a value or a setting it changes not there
 function childProblems(child: TemplateChild, template: Template, kinds: Kinds): string[] {

@@ -1,6 +1,6 @@
 // The Web Audio builder's unit tests (mockup/src/libs/build/web-audio), on the stand-in for Web Audio beside them:
 //   - a plan built between where its sound comes from and where it goes, a composite opened, its wires by names;
-//   - each block made by its kind, at its values and settings;
+//   - each block made by its kind, at its values and settings; a signal into a delay's time;
 //   - a placeholder for a block it can't make, said by its address, its sound passed straight through, a source silent;
 //   - what's built taken apart.
 import { test } from 'node:test';
@@ -119,6 +119,30 @@ test('each block made by its kind, at its values and settings: an oscillator and
   const [room] = made('convolver');
   assert.deepEqual([room.buffer.duration, room.buffer.numberOfChannels], [1.5, 2], 'its impulse, its length');
   assert.ok(made('compressor').length === 1, 'a limiter: a compressor between its drive and its makeup');
+});
+
+test("a signal wired into a delay's time, by its ms: into its line's own time, moving it in seconds, as Web Audio's does; into its note, refused", () => {
+  const wobbled = (param) => {
+    const plan = chainOf(block('line', 'delay'));
+    plan.node.inside.children.push(
+      block('wobble', 'oscillator', { frequency: 0.5 }),
+      block('depth', 'gain', { gain: 0.004 }),
+    );
+    plan.node.inside.wires.push(
+      { from: { node: 'wobble', output: 'out' }, to: { node: 'depth', input: 'in' } },
+      { from: { node: 'depth', output: 'out' }, to: { node: 'line', param } },
+    );
+    return plan;
+  };
+  const { context, builder, made } = builderOn();
+  builder.build(wobbled('ms'), { into: context.destination });
+  const [line] = made('delay');
+  const [depth] = made('gain');
+  assert.deepEqual(outOf(context, depth), [line.delayTime], '4 ms either way: a depth of 0.004');
+  assert.throws(
+    () => builderOn().builder.build(wobbled('note'), { into: context.destination }),
+    /note: not a param a sound/,
+  );
 });
 
 test('a noise, looping, started, its buffer by its colour; a source with nothing wired into it', () => {

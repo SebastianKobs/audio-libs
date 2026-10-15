@@ -2,6 +2,8 @@
 // Made for its longest time. Its time with a sync switch, three params side by side, moving its one
 // delay line: synced, its note at the beat; free, its ms; turned into seconds by the clock's note values.
 // While synced, a new tempo followed, gliding.
+// A signal wired into its ms goes into the line's own time: it moves the line in seconds, as
+// Web Audio's does, whichever of the three sets it (a tape's wobble, 0.004 four ms either way).
 import { timeSeconds } from '../../../clock/index.ts';
 import { NOTE_VALUES } from '../../../params/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
@@ -34,6 +36,7 @@ export function delay(node: Node, making: Making): BuiltNode {
     input: made,
     output: made,
     params: { sync: time.param('sync'), note: time.param('note'), ms: time.param('ms') },
+    cables: { ms: [made.delayTime] },
     kind: 'a DelayNode',
   });
 }

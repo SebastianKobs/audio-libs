@@ -1,6 +1,7 @@
 // ---------- plan/blocks/delay: a delay ----------
 // Its time with a sync switch, as Ableton's: synced, a note value at the tempo; free, in ms.
 // Each builder turns a synced note into seconds by the tempo. Its longest time a setting.
+// A signal wired into its ms moves its line in seconds, as Web Audio's does: a tape's wobble.
 import { timeSpecs } from '../../params/index.ts';
 import type { Block } from './block.ts';
 

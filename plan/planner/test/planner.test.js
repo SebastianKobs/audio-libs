@@ -8,7 +8,7 @@
 //   - a template read from data, YAML's, its shape checked first.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Planner, templateOf } from '../index.ts';
+import { Planner, presetsOf, templateOf } from '../index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { BLOCKS } from '../../blocks/index.ts';
 import { UTILITY as UTILITY_PLAN } from '../../format/test/plans.ts';
@@ -328,4 +328,82 @@ test("a macro onto a choice: its choices the choice's own, as it moves it by pos
     () => new Planner([fine, { ...held, macros: [held.macros[0]] }]),
     'its own, through a template too',
   );
+});
+
+test("a template built on another: its base's jacks, form, children, wires, macros and pools, then its own; planned flat, checked as one", () => {
+  const wobbled = {
+    kind: 'Wobbled',
+    extends: 'Level',
+    children: [{ name: 'wobble', kind: 'oscillator', values: { frequency: 0.5 } }],
+    wires: [{ from: { node: 'wobble', output: 'out' }, to: { node: 'gain', param: 'gain' } }],
+    macros: [
+      {
+        name: 'rate',
+        spec: { unit: 'Hz', range: [0.01, 20, 0.01], default: 0.5 },
+        maps: [{ to: ['wobble', 'frequency'], factor: 1, offset: 0 }],
+      },
+    ],
+  };
+  const plan = new Planner([LEVEL, wobbled], [EFFECT_FORM]).plan('Wobbled');
+  const { node } = plan;
+  assert.deepEqual(
+    [node.kind, node.form, node.inputs, node.outputs],
+    ['Wobbled', 'effect', LEVEL.inputs, LEVEL.outputs],
+  );
+  assert.deepEqual(
+    node.inside.children.map((child) => child.name),
+    ['gain', 'wobble'],
+    "its base's first",
+  );
+  assert.equal(node.inside.wires.length, 3);
+  assert.deepEqual(
+    node.inside.macros.map((macro) => macro.spec.name),
+    ['level', 'rate'],
+  );
+  assert.equal(paramAt(plan, ['wobble', 'frequency']).value, 0.5);
+  const twice = { ...wobbled, kind: 'Twice', macros: [{ name: 'level', maps: LEVEL.macros[0].maps }] };
+  assert.deepEqual(failuresOf([LEVEL, twice], [EFFECT_FORM]), ['Twice: macro level: a name two macros have']);
+});
+
+test('a template built on one not handed in, or on a block, said; extensions in a loop said; its own kind as a word', () => {
+  const on = (kind, base) => ({ kind, extends: base, outputs: [{ name: 'out', channels: 1 }] });
+  assert.deepEqual(failuresOf([on('Lost', 'Nowhere'), on('Blocky', 'gain')]), [
+    'Lost: extends Nowhere, no template handed in',
+    'Blocky: extends gain, no template handed in',
+  ]);
+  assert.deepEqual(failuresOf([on('First', 'Second'), on('Second', 'First')]), [
+    'First: extends Second, which extends First: a loop',
+    'Second: extends First, which extends Second: a loop',
+  ]);
+  assert.throws(() => templateOf({ kind: 'Bent', extends: 3 }, 'bent.yaml'), /its extends not a word/);
+});
+
+test("a value or a setting asked for at an address the template doesn't have, refused, every one said", () => {
+  assert.throws(
+    () => planner.plan('Utility', { values: { volume: 1, 'gain/gian': 0.5 }, settings: { 'pan/lwa': 'pan pot' } }),
+    {
+      message: [
+        'Utility: asked for what it has not:',
+        '  no param volume',
+        '  no param gain/gian',
+        '  no setting pan/lwa',
+      ].join('\n'),
+    },
+  );
+});
+
+test("presets read from data, as a theme's YAML writes them, by name: each a template's kind, its values and settings by address; their shape checked", () => {
+  const read = {
+    delay: { kind: 'Delay', values: { feedback: 0.45 } },
+    room: { kind: 'Reverb', settings: { 'room/length': 3.5 } },
+  };
+  assert.equal(presetsOf(read, 'effects.yaml'), read, 'of the shape, as they are');
+  assert.throws(() => presetsOf({ delay: { values: [] }, room: 'Reverb' }, 'bent.yaml'), {
+    message: [
+      'bent.yaml: not of the shape of presets:',
+      '  delay: no kind',
+      '  delay: its values not by address',
+      '  room: not an object',
+    ].join('\n'),
+  });
 });

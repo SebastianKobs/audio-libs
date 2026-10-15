@@ -10,7 +10,7 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `gain` | gain, a share, shown in dB by the fader law | | in; out |
 | `filter` | frequency (Hz, by octaves, wide open to start), resonance (Q, a plain ratio, 0.707 flat) | type: lowpass, highpass, bandpass; slope: 12 or 24 dB an octave | in; out |
 | `pan` | pan | law: stereo, pan pot | in; out, stereo |
-| `delay` | sync, note, ms: a time with a sync switch (`libs/params/`'s `timeSpecs()`) | longest (s) | in; out |
+| `delay` | sync, note, ms: a time with a sync switch (`libs/params/`'s `timeSpecs()`); a signal wired into its ms moves its line in seconds, as Web Audio's does | longest (s) | in; out |
 | `reverb` | | length (s) | in; out, stereo |
 | `noise` | | colour: noise, breath | none; out, mono |
 | `limiter` | gain (dB), ceiling (dBFS), release (s) | | in; out |
