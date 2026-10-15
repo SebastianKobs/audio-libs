@@ -5,10 +5,9 @@
 //   3. a source started and stopped at its times;
 //   4. wired by the plan's edges: into another's input or param, or out where its sound goes.
 // A handle's operations run on them later, by the node's id (index.ts, apply()).
-import type { Automatable, BuiltNode, WebAudioNode } from '../build/web-audio/index.ts';
+import { automate, type Automatable, type BuiltNode, type WebAudioNode } from '../build/web-audio/index.ts';
 import { MADE_WITH, type NodeMaker } from './nodes.ts';
 import type { BufferSpec, Edge, NodeKind, PlanNode } from '../audio-plan/index.ts';
-import type { Automation } from '../automation/index.ts';
 
 // what building a node asks of the engine: the kinds it makes, and a buffer a plan names, made once
 export interface Building {
@@ -72,23 +71,6 @@ export function paramOf(node: BuiltNode, name: string): Automatable {
     throw new Error(`no param ${name} on ${node.kind}`);
   }
   return param;
-}
-export function automate(param: Automatable, events: Automation[], t: number): void {
-  for (const [kind, value, at, timeConstant] of events) {
-    if (kind === 'value') {
-      param.value = value;
-    } else if (kind === 'set') {
-      param.setValueAtTime(value, t + at);
-    } else if (kind === 'exp') {
-      param.exponentialRampToValueAtTime(value, t + at);
-    } else if (kind === 'linear') {
-      param.linearRampToValueAtTime(value, t + at);
-    } else if (kind === 'target') {
-      param.setTargetAtTime(value, t + at, timeConstant);
-    } else if (kind === 'cancel') {
-      param.cancelScheduledValues(t + value);
-    }
-  }
 }
 // an edge's end: the destination, a node's param by name, or a node
 export function connectEdge(

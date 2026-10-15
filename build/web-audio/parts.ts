@@ -1,14 +1,16 @@
 // ---------- build/web-audio/parts: the parts of what's built ----------
-// Every node made, every source started, each block by its address, the placeholders put in:
-// what's built is taken apart by them, and set by its blocks' addresses.
+// Every node made, every source started, each block by its address, the placeholders put in, what
+// follows a new tempo: what's built is taken apart by them, set by its blocks' addresses, told a tempo.
 import type { Address } from '../../plan/format/index.ts';
 import type { BuiltNode } from './built-node.ts';
+import type { TempoFollower } from './making.ts';
 
 export class BuiltParts {
   readonly nodes: AudioNode[] = [];
   readonly sources: AudioScheduledSourceNode[] = [];
   readonly blocks = new Map<string, BuiltNode>(); // by its address as text
   readonly placeholders: Address[] = [];
+  readonly tempoFollowers: TempoFollower[] = [];
 
   // a node made, kept to take apart with the rest
   keep<Made extends AudioNode>(node: Made): Made {

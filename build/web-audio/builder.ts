@@ -48,6 +48,7 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       canPan: typeof this.#context.createStereoPanner === 'function',
       kept: (node) => parts.keep(node),
       started: (source) => parts.start(source),
+      followsTempo: (follower) => parts.tempoFollowers.push(follower),
     };
     const top = this.#jacksOf(plan.node, [], making, parts);
     for (const [name, source] of Object.entries(from)) {
@@ -56,7 +57,7 @@ export class WebAudioBuilder implements Builder<AudioNode> {
     for (const output of top.outputs.out ?? []) {
       output.connect(into);
     }
-    return new WebAudioBuilt(parts);
+    return new WebAudioBuilt(plan, parts, this.#context);
   }
 
   // a node's jacks as built: a composite's children built and wired; a block made, or a placeholder in its place

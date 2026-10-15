@@ -14,8 +14,8 @@
 // A node as built, a param in the plan's units, the limiter, a pan, a biquad and the buffers are the
 // builder's (libs/build/web-audio/), which takes over from it.
 
-import { automate, buildNode, connectEdge, nodeOf, paramOf, type Building } from './build.ts';
-import { Buffers, type BuiltNode } from '../build/web-audio/index.ts';
+import { buildNode, connectEdge, nodeOf, paramOf, type Building } from './build.ts';
+import { automate, Buffers, type BuiltNode } from '../build/web-audio/index.ts';
 import { meterOn, type PeakMeter } from './meters.ts';
 import { nodeMakers } from './nodes.ts';
 import type { AudioPlan, BufferSpec, Operation } from '../audio-plan/index.ts';

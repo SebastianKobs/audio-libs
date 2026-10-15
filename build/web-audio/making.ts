@@ -1,8 +1,10 @@
 // ---------- build/web-audio/making: what a block's maker is handed ----------
-// The context and its buffers, the beat, whether it can pan; and two hands for what it makes:
+// The context and its buffers, the beat, whether it can pan; and hands for what it makes:
 //   - kept(): a node made, taken apart with the rest;
-//   - started(): a source, started as it's built, stopped with the rest.
+//   - started(): a source, started as it's built, stopped with the rest;
+//   - followsTempo(): what follows a new beat, a synced delay's time.
 // And a block's values and settings read from its node, its values set on what's built.
+import type { When } from '../../automation/index.ts';
 import type { Node } from '../../plan/format/index.ts';
 import type { Buffers } from './buffers.ts';
 import type { BuiltNode } from './built-node.ts';
@@ -15,7 +17,10 @@ export interface Making {
   readonly canPan: boolean;
   kept<Made extends AudioNode>(node: Made): Made;
   started<Source extends AudioScheduledSourceNode>(source: Source): Source;
+  followsTempo(follower: TempoFollower): void;
 }
+// what follows a new beat: told it, when it lands, and the context's time now
+export type TempoFollower = (beat: number, when: When, now: number) => void;
 // a block's maker: its node as planned, made in Web Audio
 export type Maker = (node: Node, making: Making) => BuiltNode;
 

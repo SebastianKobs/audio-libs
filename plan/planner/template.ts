@@ -5,10 +5,8 @@
 //   - its own inputs, outputs, wires, macros and pools as the plan has them;
 //   - its child's role in it, and the form it fulfils, where it has one.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
-import type { Input, Macro, NoteAddresses, Output, Wire } from '../format/index.ts';
+import type { Input, Macro, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
 
-// values by their addresses' text within a node: a number, or one of its choices
-export type ValuesByAddress = Readonly<Record<string, number | string>>;
 // a child as a template writes it
 export interface TemplateChild {
   readonly name: string;

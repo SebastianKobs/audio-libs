@@ -5,6 +5,8 @@
 
 // an address: the names on the way down, the param's or the setting's last
 export type Address = readonly string[];
+// values by their addresses as text: a number, or one of its choices; a preset's, a template's child's
+export type ValuesByAddress = Readonly<Record<string, number | string>>;
 
 const SLASH = '/';
 

@@ -13,6 +13,7 @@ export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './bui
 export { WebAudioBuilt } from './built.ts';
 export { BuiltNode, type WebAudioNode } from './built-node.ts';
 export { ParamInUnits, type Automatable } from './param-units.ts';
+export { automate } from './automation.ts';
 export { Buffers, impulse, noise } from './buffers.ts';
 export { biquadOf } from './blocks/filter.ts';
 export { limiterNodes, makeupOf } from './blocks/limiter.ts';

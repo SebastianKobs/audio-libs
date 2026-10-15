@@ -13,7 +13,7 @@
 //   - param-at.ts: a node, a param or a setting found by its address;
 //   - routing.ts: what feeds what over one inside's wires, the loop check;
 //   - version.ts: a stored plan's version.
-export { addressOf, addressText, under, type Address } from './address.ts';
+export { addressOf, addressText, under, type Address, type ValuesByAddress } from './address.ts';
 export type { Channels, Input, Output } from './input-output.ts';
 export type { Inside } from './inside.ts';
 export { macroValues, mapOnto, type Macro, type MacroTarget } from './macro.ts';

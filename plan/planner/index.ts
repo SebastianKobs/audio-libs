@@ -9,5 +9,5 @@
 //   - kinds.ts: the kinds a template names, blocks and templates, as seen from outside;
 //   - channels.ts: a jack's channels as they come, where its block doesn't fix them.
 export { Planner, type Asked } from './planner.ts';
-export type { Template, TemplateChild, TemplatePool, ValuesByAddress } from './template.ts';
+export type { Template, TemplateChild, TemplatePool } from './template.ts';
 export type { Form, FormFrom, FormRole, FormRule, FormTo, FormWire } from './form.ts';

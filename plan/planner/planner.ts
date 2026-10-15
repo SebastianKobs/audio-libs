@@ -16,6 +16,7 @@ import {
   type Node,
   type Param,
   type Plan,
+  type ValuesByAddress,
 } from '../format/index.ts';
 import type { Block } from '../blocks/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
@@ -23,7 +24,7 @@ import { withChannels, type LooseJack } from './channels.ts';
 import { problemsIn } from './check.ts';
 import type { Form } from './form.ts';
 import { Kinds } from './kinds.ts';
-import type { Template, TemplateChild, ValuesByAddress } from './template.ts';
+import type { Template, TemplateChild } from './template.ts';
 
 // what a plan is asked with: its top node's name, its kind's unless given; values and settings
 // changed by their addresses, a preset's
