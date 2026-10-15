@@ -10,6 +10,8 @@ built.set(['my tap 1', 'utility', 'level'], 0.5, { glide: 0.05 }); // a knob tur
 built.automate(['voice 3', 'filter', 'frequency'], automation);    // a lane's curve, from now
 built.preset({ 'filter/frequency': 900 }, { 'filter/slope': '12' }); // its values together; a setting changed, a rebuild
 built.tempo(60 / 96);                                     // each synced time following a new beat
+const voice = built.add(['synth', 'voice'], 3);           // a pool's copy, wired by its rule: ['synth', 'voice 3']
+built.letGo(voice);                                       // once it has rung out, as its owner says
 built.placeholders;                                       // what it couldn't build, by address
 built.dispose();
 ```
@@ -17,6 +19,6 @@ built.dispose();
 | | |
 |---|---|
 | `Builder<Into>` | handed a plan and where its sound goes, a builder's own (Web Audio's a node), it builds it and hands back what's built (`builder.ts`) |
-| `Built` | what's built: a param set by its address, now, at a time or gliding there (`When`, `libs/automation/`), a choice as its param's choices have it; automated, its events' times from a time; a preset's values set together, a setting it changes a rebuild; a new tempo, each synced time following it; the placeholders it put in, by address, a block's sound passed straight through, a source silent; disposed (`built.ts`) |
+| `Built` | what's built: a param set by its address, now, at a time or gliding there (`When`, `libs/automation/`), a choice as its param's choices have it; automated, its events' times from a time; a preset's values set together, a setting it changes a rebuild; a new tempo, each synced time following it; a pool's copy added by its pool's address and its number, its address handed back, and let go, an instrument's voice and a desk's channel alike; the placeholders it put in, by address, a block's sound passed straight through, a source silent; disposed (`built.ts`) |
 
 Types only: what meets them is tested where it's built (`libs/build/web-audio/`).

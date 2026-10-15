@@ -3,6 +3,7 @@
 //   - a param set or automated by its address: a block's, on what's built of it; a macro's, onto
 //     its targets; a choice by its index, as its block's param holds it; a placeholder's left alone;
 //   - a preset's values set together; a new tempo told what follows it;
+//   - a pool's copy added by its pool's address and its number, wired by its rule; let go;
 //   - its placeholders, by address; taken apart, its sources stopped, its nodes disconnected.
 // Times are the context's.
 import { eventOf, timedAt, type Automation, type When } from '../../automation/index.ts';
@@ -10,27 +11,47 @@ import { choiceIndex } from '../../params/index.ts';
 import {
   addressOf,
   addressText,
+  copyOf,
   mapOnto,
   nodeAt,
   paramAt,
   settingAt,
   type Address,
+  type Node,
   type Plan,
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
 import type { Built } from '../ports/index.ts';
 import { automate } from './automation.ts';
-import type { BuiltParts } from './parts.ts';
+import { BuiltParts, type PoolHolder } from './parts.ts';
+import { wireInside, type Jacks } from './wiring.ts';
+
+// a copy as added: its parts, the composite it's in, its name there
+interface Copy {
+  readonly parts: BuiltParts;
+  readonly holder: PoolHolder;
+  readonly name: string;
+}
+// what what's built is made with: its plan, its parts, the context, and how a copy's node is built into its parts
+interface Making {
+  readonly plan: Plan;
+  readonly parts: BuiltParts;
+  readonly context: BaseAudioContext;
+  readonly copied: (node: Node, at: Address, parts: BuiltParts) => Jacks;
+}
 
 export class WebAudioBuilt implements Built {
   readonly #plan: Plan;
   readonly #parts: BuiltParts;
   readonly #context: BaseAudioContext;
+  readonly #copied: Making['copied'];
+  readonly #copies = new Map<string, Copy>(); // by its address as text
 
-  constructor(plan: Plan, parts: BuiltParts, context: BaseAudioContext) {
+  constructor({ plan, parts, context, copied }: Making) {
     this.#plan = plan;
     this.#parts = parts;
     this.#context = context;
+    this.#copied = copied;
   }
   get placeholders(): readonly Address[] {
     return this.#parts.placeholders;
@@ -55,7 +76,10 @@ export class WebAudioBuilt implements Built {
       return;
     }
     const built = this.#parts.blocks.get(addressText(address.slice(0, -1)));
-    const param = built?.param(name); // none on a placeholder, or a pan made a gain where the context can't pan
+    if (!built) {
+      throw new Error(`${addressText(address)}: not built`); // a copy not added
+    }
+    const param = built.param(name); // none on a placeholder, or a pan made a gain where the context can't pan
     if (param) {
       automate(param, automation, from);
     }
@@ -78,12 +102,43 @@ export class WebAudioBuilt implements Built {
       follower(beat, when, this.#context.currentTime);
     }
   }
-  dispose(): void {
-    for (const source of this.#parts.sources) {
-      source.stop();
+  // A pool's copy added, by its pool's address and its number from 1: built from the pool's child,
+  // wired by its rule, set by its own address; its address handed back.
+  add(pool: Address, number: number): Address {
+    const holder = this.#parts.poolHolders.get(addressText(pool.slice(0, -1)));
+    const kept = holder?.node.inside?.pools.find((each) => each.child.name === pool.at(-1));
+    if (!holder || !kept) {
+      throw new Error(`${addressText(pool)}: no pool`);
     }
-    for (const node of this.#parts.nodes) {
-      node.disconnect();
+    const { node, wires } = copyOf(kept, number);
+    const at = [...pool.slice(0, -1), node.name];
+    if (holder.children.has(node.name)) {
+      throw new Error(`${addressText(at)}: added already`);
+    }
+    const parts = new BuiltParts();
+    holder.children.set(node.name, this.#copied(node, at, parts));
+    for (const wire of wires) {
+      wireInside(holder.node, wire, { children: holder.children, own: holder.own });
+    }
+    this.#parts.takeIn(parts);
+    this.#copies.set(addressText(at), { parts, holder, name: node.name });
+    return at;
+  }
+  // a copy let go: its sources stopped, its nodes disconnected, its address no longer set
+  letGo(copy: Address): void {
+    const added = this.#copies.get(addressText(copy));
+    if (!added) {
+      throw new Error(`${addressText(copy)}: not added`);
+    }
+    added.parts.takeApart();
+    this.#parts.giveBack(added.parts);
+    added.holder.children.delete(added.name);
+    this.#copies.delete(addressText(copy));
+  }
+  dispose(): void {
+    this.#parts.takeApart();
+    for (const { parts } of this.#copies.values()) {
+      parts.takeApart();
     }
   }
 
