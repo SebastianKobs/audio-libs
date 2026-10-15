@@ -49,7 +49,7 @@ export class Desk<Named extends Names = Names> {
   // params: the device params, a slot's device or a chain's module by deviceAt()
   // beat: a beat's length now, for a device's params in note values
   // valuesOf(): the values a strip is built at, its owner's
-  // built(): a strip's slots' chains, handed back as it's built
+  // built(): a strip's slots' chains, handed back as it's built, where its owner asks
   // volume(): the master's volume
   constructor({
     desk,
@@ -60,7 +60,7 @@ export class Desk<Named extends Names = Names> {
     params,
     beat,
     valuesOf,
-    built,
+    built = () => {},
     volume,
   }: {
     desk: readonly DeskEntry<Named>[];
@@ -71,7 +71,7 @@ export class Desk<Named extends Names = Names> {
     params: DeviceParams;
     beat: () => number;
     valuesOf: (entry: DeskEntry<Named>) => StripValues;
-    built: (strip: string, chains: Chains) => void;
+    built?: (strip: string, chains: Chains) => void;
     volume: () => number;
   }) {
     this.#desk = desk;
