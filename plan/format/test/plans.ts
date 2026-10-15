@@ -2,6 +2,7 @@
 // Typed as plans, so the type check holds them to the format.
 //   UTILITY: an effect, a gain into a pan; its level and pan macros onto theirs.
 //   SYNTH: an instrument, a pool of voices; a voice an oscillator into a gain its envelope moves.
+//   DESK: a desk, four channels, one with a tap into a return.
 import type { Node, Plan } from '../index.ts';
 
 const STEREO = 2;
@@ -129,6 +130,46 @@ export const SYNTH: Plan = {
           note: { pitch: [['oscillator', 'frequency']], velocity: [], gate: [['envelope', 'gate']] },
         },
       ],
+    },
+  },
+};
+
+// a channel on the desk, its inside left out: its input, its main output, a tap for each return
+function channel(name: string, taps: readonly string[] = []): Node {
+  return {
+    name,
+    kind: 'channel',
+    form: 'channel',
+    inputs: [{ name: 'in', channels: STEREO }],
+    outputs: [{ name: 'out', channels: STEREO }, ...taps.map((tap) => ({ name: tap, channels: STEREO }) as const)],
+    params: [],
+    settings: [],
+  };
+}
+
+// a desk: your tap's channel into your bus and, by its tap, into the reverb; both into the master,
+// the master into the desk's output
+export const DESK: Plan = {
+  version: 1,
+  node: {
+    name: 'desk',
+    kind: 'desk',
+    form: 'desk',
+    inputs: [],
+    outputs: [{ name: 'out', channels: STEREO }],
+    params: [],
+    settings: [],
+    inside: {
+      children: [channel('my tap 1', ['reverb']), channel('my playing'), channel('reverb'), channel('master')],
+      wires: [
+        { from: { node: 'my tap 1', output: 'out' }, to: { node: 'my playing', input: 'in' } },
+        { from: { node: 'my tap 1', output: 'reverb' }, to: { node: 'reverb', input: 'in' } },
+        { from: { node: 'my playing', output: 'out' }, to: { node: 'master', input: 'in' } },
+        { from: { node: 'reverb', output: 'out' }, to: { node: 'master', input: 'in' } },
+        { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
+      ],
+      macros: [],
+      pools: [],
     },
   },
 };

@@ -2,7 +2,7 @@
 // I1i (mockup/architecture/done.md): a time or a value written as a term ('0.35 decay', 'decay + 0.05', '1.5 rise in 0.15..', 'vibrato')
 // is one source by name, a macro or a note's value, times its factor, held within its range, plus its offset, as values.ts reads it; as
 // Ableton's macro mapping list gives a mapping its range. Read from a term (mappingOf()) and written back as one (termOf())
-import { clamp } from '../util/index.ts';
+import { mapOnto } from '../plan/format/index.ts';
 
 // a source by name, times its factor, held at least its low and at most its high where it has them, plus its offset
 export interface Mapping {
@@ -44,17 +44,14 @@ export function termOf({ source, factor, offset, low, high }: Mapping): string {
   return offset === 0 ? held : `${held} + ${numeral(offset)}`;
 }
 
-// a mapping's value, its source's as the note's values give it times its factor, held within its range, plus its offset; none where its
-// source isn't a number there (a word: a wave, a filter's type)
-export function mappedValue(
-  { source, factor, offset, low = -Infinity, high = Infinity }: Mapping,
-  values: Readonly<Record<string, unknown>>,
-): number | undefined {
-  const value = values[source];
+// a mapping's value, its source's as the note's values give it, mapped as a macro's onto a target (plan/format's mapOnto()); none
+// where its source isn't a number there (a word: a wave, a filter's type)
+export function mappedValue(mapping: Mapping, values: Readonly<Record<string, unknown>>): number | undefined {
+  const value = values[mapping.source];
   if (typeof value !== 'number') {
     return undefined;
   }
-  return clamp(factor * value, low, high) + offset;
+  return mapOnto(mapping, value);
 }
 
 // a named term's source, factor and range, its offset added by its caller
