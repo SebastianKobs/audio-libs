@@ -10,6 +10,9 @@ export default {
   kind: 'filter',
   inputs: [{ name: 'in' }],
   outputs: [{ name: 'out' }],
-  params: [{ name: 'frequency', unit: 'Hz', range: [20, 24000, 1], default: 24000, taper: 'octaves' }, RESONANCE],
+  params: [
+    { name: 'frequency', unit: 'Hz', range: [20, 24000, 1], default: 24000, taper: 'octaves' },
+    { ...RESONANCE, default: 0.707 },
+  ],
   settings: [{ name: 'type', choices: ['lowpass', 'highpass', 'bandpass'], default: 'lowpass' }],
 } as const satisfies Block;

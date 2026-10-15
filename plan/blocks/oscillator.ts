@@ -11,6 +11,9 @@ export default {
   kind: 'oscillator',
   inputs: [],
   outputs: [{ name: 'out', channels: 1 }],
-  params: [{ name: 'frequency', unit: 'Hz', range: [20, 20000, 1], default: 440, taper: 'octaves' }, DETUNE],
+  params: [
+    { name: 'frequency', unit: 'Hz', range: [20, 20000, 1], default: 440, taper: 'octaves' },
+    { ...DETUNE, default: 0 },
+  ],
   settings: [WAVE],
 } as const satisfies Block;
