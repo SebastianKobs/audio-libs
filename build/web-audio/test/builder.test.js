@@ -156,7 +156,7 @@ function selecting(input) {
   return plan;
 }
 
-test("a select: the input its setting names passed on, the other wired into nothing that goes on; a block's ways in by name", () => {
+test("a select: the input its setting names passed on, the other taken in nowhere, nothing made for it; a block's ways in by name", () => {
   for (const [input, passed, held] of [
     ['a', 0, 1],
     ['b', 1, 0],
@@ -166,8 +166,8 @@ test("a select: the input its setting names passed on, the other wired into noth
     const gains = made('gain');
     const [out] = into(context, context.destination);
     assert.deepEqual(into(context, out), [gains[passed]], `${input}: its input passed on`);
-    const [nowhere] = outOf(context, gains[held]);
-    assert.deepEqual(outOf(context, nowhere), [], `${input}: the other into a node that goes nowhere`);
+    assert.deepEqual(outOf(context, gains[held]), [], `${input}: the other wired into nothing`);
+    assert.equal(gains.length, 3, `${input}: the two before it and its way out, nothing for the other`);
   }
 });
 
@@ -241,4 +241,32 @@ test("a sound fed into a node's input by its address, as a phrase into a bus; a 
   what.feed(['limit'], fed);
   assert.deepEqual(outOf(context, fed), [outOf(context, bus)[0]], "into its way in, a limiter's drive, not out of it");
   assert.throws(() => what.feed(['nowhere'], phrase), /nowhere: not built/);
+});
+
+test("a way of its own into a node's input by its address: a gain at 1, made by the builder, fed into it", () => {
+  const { context, builder, made } = builderOn();
+  const what = builder.build(chainOf(block('bus', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const [bus] = made('gain');
+  const way = what.wayInto(['bus']);
+  assert.equal(way.kind, 'gain');
+  assert.deepEqual(outOf(context, way), [bus]);
+  assert.throws(() => what.wayInto(['nowhere']), /nowhere: not built/);
+});
+
+test("what a node is built as, by its address, for who names it or listens to it: its jacks' nodes; every node built under it", () => {
+  const { context, builder, made } = builderOn();
+  const what = builder.build(chainOf(block('bus', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const [bus] = made('gain');
+  assert.deepEqual(what.jacksOf(['bus']), { inputs: { in: [bus] }, outputs: { out: [bus] } }, "a block's: its node's");
+  const limiter = what.jacksOf(['limit']);
+  assert.notDeepEqual(limiter.inputs.in, limiter.outputs.out, 'a limiter: in at its drive, out of its makeup');
+  const under = what.nodesUnder(['limit']);
+  assert.ok(under.includes(limiter.inputs.in[0]) && under.includes(limiter.outputs.out[0]), 'every node of it');
+  assert.ok(
+    under.some((node) => node.kind === 'compressor'),
+    'its compressor among them',
+  );
+  assert.ok(!under.includes(bus), 'none of another');
+  assert.deepEqual(what.nodesUnder([]).length >= under.length + 1, true, "the top's: all of them");
+  assert.throws(() => what.jacksOf(['nowhere']), /nowhere: not built/);
 });

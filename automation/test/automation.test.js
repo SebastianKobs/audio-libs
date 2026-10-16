@@ -104,6 +104,11 @@ test("a value handed on now, from a time or gliding, as a value at a time: now t
   assert.deepEqual(timedAt(1, {}, 10), { value: 1, t: 10 }, 'now');
   assert.deepEqual(timedAt(1, { at: 12 }, 10), { value: 1, t: 12 }, 'from a time');
   assert.deepEqual(timedAt(1, { glide: 0.08 }, 10), { value: 1, t: 10, glide: 0.08 }, 'gliding there from now');
+  assert.deepEqual(
+    timedAt(1, { at: 12, glide: 0.08 }, 10),
+    { value: 1, t: 12, glide: 0.08 },
+    'gliding there from a time',
+  );
 });
 
 test('a change as an automation event: a jump set at its time; a glide a target by its time constant; a glide of 0 a jump', () => {

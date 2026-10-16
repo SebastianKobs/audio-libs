@@ -9,10 +9,13 @@
 //     that changes a setting built again with it;
 //   - its placeholders, by address; taken apart, its sources stopped, its nodes disconnected.
 // What a studio needs of it besides, Web Audio's own, not every builder's:
-//   - a sound fed into a node's input by its address: a bus's, a copy's;
+//   - a sound fed into a node's input by its address: a bus's, a copy's; or a way of its
+//     own in, a gain it makes; each fed into what's built anew, as its inputs are;
 //   - a meter on a node's output by its address, or at a point inside a block;
 //     made at its first read;
-//   - what a block says of itself, by name: a limiter's reduction.
+//   - what a block says of itself, by name: a limiter's reduction;
+//   - what a node is built as, for who names it or listens to it: its jacks' nodes; every
+//     node under it.
 // Times are the context's.
 import { eventOf, timedAt, type Automation, type When } from '../../automation/index.ts';
 import { choiceIndex } from '../../params/index.ts';
@@ -39,6 +42,12 @@ import { BuiltParts, type PoolHolder } from './parts.ts';
 import { disconnectFrom, fadedThrough, RING_OUT } from './rebuild.ts';
 import { connectInto, wireInside, type Jacks } from './wiring.ts';
 
+// a sound fed into a node's input, by the node's address and the input's name, to feed it again
+interface Fed {
+  readonly address: Address;
+  readonly input: string;
+  readonly source: AudioNode;
+}
 // a copy as added: its parts, the composite it's in, its name there, its pool and number, to add it again
 interface Copy {
   readonly parts: BuiltParts;
@@ -68,6 +77,8 @@ export class WebAudioBuilt implements Built {
   readonly #building: Building;
   readonly #told = new Map<string, number | string>(); // each value set, by its address as text, to tell again
   readonly #meters = new Map<string, Map<string, PeakMeter>>(); // by a node's address as text, then its point, '' its output
+  readonly #fed: Fed[] = []; // each sound fed in, to feed what's built anew
+  readonly #ways: AudioNode[] = []; // the ways in it made, taken apart with it
   #now: Generation;
 
   constructor(plan: Plan, building: Building) {
@@ -150,9 +161,16 @@ export class WebAudioBuilt implements Built {
   //   - a bus's, as a phrase plays into it;
   //   - a copy's, as a track's instrument plays into its channel.
   feed(address: Address, source: AudioNode, input = 'in'): void {
-    for (const destination of this.#jacksAt(address).inputs[input] ?? []) {
-      connectInto(source, destination);
-    }
+    this.#feedNow({ address, input, source });
+    this.#fed.push({ address, input, source });
+  }
+  // A way of its own into a node's input by its address: a gain at 1, made here, fed into it.
+  // What plays into the node plays into it: a bus's phrases, a track's instrument.
+  wayInto(address: Address, input = 'in'): GainNode {
+    const way = this.#context().createGain();
+    this.feed(address, way, input);
+    this.#ways.push(way);
+    return way;
   }
   // A peak, as a meter reads it, the loudest sample of its last window:
   //   - on a node's main output, by its address: a channel's, after its fader and its pan;
@@ -172,12 +190,37 @@ export class WebAudioBuilt implements Built {
     }
     return reading();
   }
+  // A node's jacks as built, by its address: the Web Audio nodes each input goes into and
+  // each output comes out of, a param's left out.
+  jacksOf(address: Address): {
+    inputs: Record<string, readonly AudioNode[]>;
+    outputs: Record<string, readonly AudioNode[]>;
+  } {
+    const jacks = this.#jacksAt(address);
+    const inputs = Object.entries(jacks.inputs).map(([name, at]): [string, AudioNode[]] => [
+      name,
+      at.filter((one): one is AudioNode => 'connect' in one), // a param's left out
+    ]);
+    return { inputs: Object.fromEntries(inputs), outputs: Object.fromEntries(Object.entries(jacks.outputs)) };
+  }
+  // Every Web Audio node built under an address: each of its blocks' nodes, as its maker
+  // made them.
+  nodesUnder(address: Address): AudioNode[] {
+    const text = addressText(address);
+    const under = [...this.#now.parts.made].filter(([at]) => !text || at === text || at.startsWith(`${text}/`));
+    return [...new Set(under.flatMap(([, nodes]) => nodes))];
+  }
   // a copy let go: its sources stopped, its nodes disconnected, its address no longer set, what it was told forgotten
   letGo(copy: Address): void {
     const text = addressText(copy);
     const added = this.#now.copies.get(text);
     if (!added) {
       throw new Error(`${text}: not added`);
+    }
+    for (const { input, source } of this.#fed.filter(({ address }) => addressText(address) === text)) {
+      (this.#now.parts.jacks.get(text)?.inputs[input] ?? []).forEach((destination) =>
+        disconnectFrom(source, destination),
+      );
     }
     added.parts.takeApart();
     this.#now.parts.giveBack(added.parts);
@@ -188,6 +231,9 @@ export class WebAudioBuilt implements Built {
     }
     for (const metered of [...this.#meters.keys()].filter((key) => key === text || key.startsWith(`${text}/`))) {
       this.#meters.delete(metered); // on what's gone
+    }
+    for (const fed of this.#fed.filter(({ address }) => addressText(address) === text)) {
+      this.#fed.splice(this.#fed.indexOf(fed), 1); // into what's gone
     }
   }
   // Built again from a plan, the new beside the old:
@@ -200,6 +246,11 @@ export class WebAudioBuilt implements Built {
     for (const [name, source] of Object.entries(this.#building.from)) {
       (old.top.inputs[name] ?? []).forEach((destination) => disconnectFrom(source, destination));
     }
+    for (const { address, input, source } of this.#fed) {
+      (old.parts.jacks.get(addressText(address))?.inputs[input] ?? []).forEach((destination) =>
+        disconnectFrom(source, destination),
+      );
+    }
     this.#now = this.#generationOf(plan);
     this.#meters.clear(); // on the old: made again on the new as they're read
     if (makesSound(old)) {
@@ -209,6 +260,7 @@ export class WebAudioBuilt implements Built {
     for (const { pool, number } of old.copies.values()) {
       this.add(pool, number);
     }
+    this.#fed.forEach((fed) => this.#feedNow(fed));
     for (const [text, value] of this.#told) {
       this.set(addressOf(text), value);
     }
@@ -216,6 +268,7 @@ export class WebAudioBuilt implements Built {
   }
   dispose(): void {
     takeApart(this.#now);
+    this.#ways.forEach((way) => way.disconnect());
   }
 
   // a plan built into a generation: fed from where its inputs come from, its main output into where it goes
@@ -238,6 +291,12 @@ export class WebAudioBuilt implements Built {
   }
   #context(): BaseAudioContext {
     return this.#building.context;
+  }
+  // a sound fed into a node's input, as built now
+  #feedNow({ address, input, source }: Fed): void {
+    for (const destination of this.#jacksAt(address).inputs[input] ?? []) {
+      connectInto(source, destination);
+    }
   }
   // a node's jacks as built, by its address; one not built refused
   #jacksAt(address: Address): Jacks {

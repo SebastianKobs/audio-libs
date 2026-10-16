@@ -10,7 +10,7 @@ export interface TimedValue {
 // when a value lands, by a caller that knows no clock:
 //   - neither: now, the caller's now;
 //   - at: from a time of the caller's, at once;
-//   - glide: gliding there from now, by this time constant.
+//   - glide: gliding there, from now or from at, by this time constant.
 export interface When {
   at?: number | undefined;
   glide?: number | undefined;
@@ -23,12 +23,10 @@ export function timedValue(value: number, t: number, glide?: number): TimedValue
   }
   return { value, t, glide };
 }
-// a value handed on when asked, as a value at a time, now the caller's
+// a value handed on when asked, as a value at a time, now the caller's:
+// at its time, or now; gliding there from then where it says
 export function timedAt(value: number, { at, glide }: When, now: number): TimedValue {
-  if (glide !== undefined) {
-    return { value, t: now, glide };
-  }
-  return { value, t: at ?? now };
+  return timedValue(value, at ?? now, glide);
 }
 // Changes in time order as automation:
 //   1. The first set at its time: nothing before it to glide from.

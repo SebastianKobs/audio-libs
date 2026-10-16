@@ -22,11 +22,14 @@ export class BuiltParts {
   readonly tempoFollowers: TempoFollower[] = [];
   readonly poolHolders = new Map<string, PoolHolder>(); // by its address as text
   readonly jacks = new Map<string, Jacks>(); // each node's, by its address as text
+  // each block's nodes, as its maker made them, by its address as text
+  readonly made = new Map<string, AudioNode[]>();
 
   // a copy's parts taken in among these: its blocks, jacks and placeholders, its tempo's followers
   takeIn(copy: BuiltParts): void {
     copy.blocks.forEach((built, at) => this.blocks.set(at, built));
     copy.jacks.forEach((jacks, at) => this.jacks.set(at, jacks));
+    copy.made.forEach((nodes, at) => this.made.set(at, nodes));
     this.placeholders.push(...copy.placeholders);
     this.tempoFollowers.push(...copy.tempoFollowers);
   }
@@ -34,6 +37,7 @@ export class BuiltParts {
   giveBack(copy: BuiltParts): void {
     copy.blocks.forEach((_, at) => this.blocks.delete(at));
     copy.jacks.forEach((_, at) => this.jacks.delete(at));
+    copy.made.forEach((_, at) => this.made.delete(at));
     removeAll(this.placeholders, copy.placeholders);
     removeAll(this.tempoFollowers, copy.tempoFollowers);
   }

@@ -2,7 +2,8 @@
 // A plan's node is one of Web Audio's (BuiltNode.of()), or one the engine builds from
 // several (a limiter, blocks/limiter.ts). Either way it has:
 //   - input, output: where its sound comes in and goes out; a Web Audio node is both;
-//   - inputs: a way in by an input's name, where its inputs go in apart (a select's two); else its input;
+//   - inputs: a way in by an input's name, where its inputs go in apart (a select's two), none
+//     for one it takes in nowhere (a select's other); else its input;
 //   - its params by the plan's names; one built from several has them in the plan's units
 //     (param-in-units.ts), so a sound can't be cabled into them;
 //   - points a meter reads inside it, by name, and readings of what it says of itself
@@ -28,7 +29,7 @@ export class BuiltNode {
   readonly node: WebAudioNode | null;
   readonly kind: string; // what it is, for an error's message
   readonly #params: Readonly<Record<string, unknown>>;
-  readonly #inputs: Readonly<Record<string, AudioNode>>;
+  readonly #inputs: Readonly<Record<string, AudioNode | null>>;
   readonly #cables: Readonly<Record<string, readonly AudioParam[]>>;
 
   // one of Web Audio's: its own way in and out, its params its own
@@ -50,7 +51,7 @@ export class BuiltNode {
     input: AudioNode;
     output: AudioNode;
     params: Readonly<Record<string, unknown>>;
-    inputs?: Readonly<Record<string, AudioNode>>;
+    inputs?: Readonly<Record<string, AudioNode | null>>;
     cables?: Readonly<Record<string, readonly AudioParam[]>>;
     points?: Record<string, AudioNode>;
     readings?: Record<string, () => number>;
@@ -67,9 +68,14 @@ export class BuiltNode {
     this.node = node;
     this.kind = kind;
   }
-  // where an input's sound goes in, by the input's name: its own way in, or the one way in it has
-  inputOf(name: string): AudioNode {
-    return this.#inputs[name] ?? this.input;
+  // Where an input's sound goes in, by the input's name: its own way in, or the one way in
+  // it has; nowhere for an input it takes in nowhere (a select's other).
+  inputsOf(name: string): readonly AudioNode[] {
+    const own = this.#inputs[name];
+    if (own === null) {
+      return [];
+    }
+    return [own ?? this.input];
   }
   // A param by the plan's name.
   // None where it has no such param: a panner made a gain, where the context can't pan.

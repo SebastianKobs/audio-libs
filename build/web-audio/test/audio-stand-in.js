@@ -13,6 +13,7 @@ const PARAMS = {
   biquad: { frequency: 350, Q: 1, gain: 0, detune: 0 },
   panner: { pan: 0 },
   buffer: { playbackRate: 1, detune: 0 },
+  constant: { offset: 1 },
   delay: { delayTime: 0 },
   compressor: { threshold: -24, knee: 30, ratio: 12, attack: 0.003, release: 0.25 },
   convolver: {},
@@ -180,6 +181,9 @@ export class StandInContext {
   }
   createBufferSource() {
     return new StandInNode(this, 'buffer');
+  }
+  createConstantSource() {
+    return new StandInNode(this, 'constant');
   }
   createConvolver() {
     return new StandInNode(this, 'convolver');

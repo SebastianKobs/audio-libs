@@ -147,3 +147,16 @@ test('a meter on what was built before a rebuild made again on the new as it is 
   const [, onTheNew] = splitters();
   assert.notDeepEqual(into(context, onTheNew), into(context, splitters()[0]), 'on the new output, not the old');
 });
+
+test("what's fed into what's built, and its ways in, fed into what's built anew: the old let go of, the new fed", () => {
+  const { context, what, made } = built(UTILITY);
+  const fed = context.createGain();
+  what.feed([], fed);
+  const way = what.wayInto([]);
+  const [gainBefore] = made('gain').filter((node) => node !== fed && node !== way);
+  assert.deepEqual(outOf(context, fed), [gainBefore], 'fed into the Utility');
+  what.rebuild(UTILITY);
+  const gainAfter = made('gain').filter((node) => node !== fed && node !== way && node !== gainBefore)[0];
+  assert.deepEqual(outOf(context, fed), [gainAfter], 'into the new, not the old');
+  assert.deepEqual(outOf(context, way), [gainAfter], 'its way in too');
+});

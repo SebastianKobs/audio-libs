@@ -20,7 +20,7 @@ levels.at(1.5);                                            // 1 − 1/e: a time 
 | `levelAt(automation, t)` | a param's level at a time as Web Audio plays it: set at once; a ramp, straight or exponential, from where the event before left it, an exponential one from or to nothing holding, then jumping at its end; a target approached from its start by its time constant (`level-at.ts`) |
 | `Levels` | the same at rising times, its automation walked once, as a line is drawn: `at(t)`, every event by then done; `before(t)`, coming up to a time, a jump there not yet made, its foot (`level-at.ts`) |
 | `TimedValue`, `timedValue(value, t, glide)` | one change: a value at a time, jumping there, or gliding there from its time by a time constant, as an automation point's curve; MIDI's controllers, a lane's points and the desk's changes are one (`timed-value.ts`) |
-| `When`, `timedAt(value, when, now)` | when a value lands, by a caller that knows no clock: now, `{ at }` from a time of the caller's, or `{ glide }` gliding there from now; made a value at a time by the caller's now (`timed-value.ts`) |
+| `When`, `timedAt(value, when, now)` | when a value lands, by a caller that knows no clock: now, `{ at }` from a time of the caller's, or `{ glide }` gliding there from now, or from `at` with both; made a value at a time by the caller's now (`timed-value.ts`) |
 | `eventOf(change)`, `automationOf(changes)` | a change as an automation event, a jump set at its time, a glide a target, a glide of 0 a jump; changes in time order as automation, the first set at its time, nothing before it to glide from (`timed-value.ts`) |
 
 Tested in node, in its `test/` folder (`test/automation.test.js`); the lanes' values by the MIDI sequencer's tests, their lines by the arrangement's.

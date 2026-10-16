@@ -4,6 +4,8 @@
 //   - faded out quickly, to pause: switching the audio off once it's quiet is its owner's;
 //   - faded in again, from where the fade got to, or from silence once the audio was off.
 // The volume is the master's fader's, not the output's: this only fades.
+// Kept awake: a silent source runs into it from the start. Firefox skips a glide on a gain
+// nothing has gone through yet, so the first sound to come came at full volume.
 import { restartAt } from '../../automation/index.ts';
 import { automate } from './automation.ts';
 
@@ -19,6 +21,10 @@ export class Output {
     this.node = context.createGain();
     this.node.gain.value = 0;
     this.node.connect(into);
+    const awake = context.createConstantSource();
+    awake.offset.value = 0;
+    awake.connect(this.node);
+    awake.start();
     this.fadeIn();
   }
   fadeOut(): void {

@@ -80,8 +80,10 @@ export class WebAudioBuilder implements Builder<AudioNode> {
     if (!make) {
       parts.placeholders.push(at);
     }
+    const before = { nodes: parts.nodes.length, sources: parts.sources.length };
     const built = make ? make(node, making) : placeholder(making);
     parts.blocks.set(addressText(at), built);
+    parts.made.set(addressText(at), [...parts.nodes.slice(before.nodes), ...parts.sources.slice(before.sources)]);
     return blockJacks(node, built);
   }
   // what a block's maker is handed, what it makes kept among these parts

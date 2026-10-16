@@ -14,6 +14,9 @@ export interface Muting {
   readonly soloed: ReadonlySet<string>;
 }
 
+// a cut's time constant, a mute's: at once, with no click
+export const MUTE_GLIDE = 0.01; // s
+
 // The channels silent, by name.
 export function silenced(desk: Pick<Inside, 'children' | 'wires'>, { muted, soloed }: Muting): Set<string> {
   const roles = new Map(desk.children.map(({ name, role }) => [name, role]));

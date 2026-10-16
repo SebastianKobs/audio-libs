@@ -29,7 +29,7 @@ interface Collected {
 // a block's jacks: each input its built node's way in by its name, each output its way out
 export function blockJacks(node: Node, built: BuiltNode): Jacks {
   return {
-    inputs: Object.fromEntries(node.inputs.map(({ name }) => [name, [built.inputOf(name)]])),
+    inputs: Object.fromEntries(node.inputs.map(({ name }) => [name, built.inputsOf(name)])),
     outputs: Object.fromEntries(node.outputs.map(({ name }) => [name, [built.output]])),
     paramsOf: (name) => built.cablesOf(name),
   };

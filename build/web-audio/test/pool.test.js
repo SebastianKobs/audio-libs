@@ -140,6 +140,8 @@ test("a copy's way in by its address: a sound fed into it, as a track's instrume
   what.feed(copy, instrument);
   assert.deepEqual(outOf(context, instrument), [replay], "into the copy's way in");
   assert.throws(() => what.feed(['replay 2'], instrument), /replay 2: not built/);
+  what.letGo(copy);
+  assert.deepEqual(outOf(context, instrument), [], 'let go of with the copy');
 });
 
 test("a copy's meter forgotten as it's let go: the copy added again, its meter made again on it", () => {

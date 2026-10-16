@@ -18,7 +18,7 @@ export { CHANNEL_FORM } from './channel-form.ts';
 export { DESK_FORM, type DeskRole } from './desk-form.ts';
 export type { Channel, ChannelParts, Insert, Tap } from './channel.ts';
 export { deskTemplates, type Desk, type DeskChannel, type DeskPool } from './desk.ts';
-export { silenced, type Muting } from './mute-solo.ts';
+export { MUTE_GLIDE, silenced, type Muting } from './mute-solo.ts';
 export { channelOf, deskOf } from './shape.ts';
 
 // the desk's forms, to hand the planner beside the effect's
