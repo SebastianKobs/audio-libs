@@ -2,7 +2,8 @@
 // Data read from a file, YAML's, is unknown until it's checked. A light check, before the planner's:
 //   - its kind a word; its form and the template it extends words, where it names them;
 //   - each list it writes a list, each item an object with what that item needs:
-//     a jack its name, a child its name and its kind or a preset, a wire its two ends, a macro its targets,
+//     a jack its name, a child its name and its kind or a preset, a wire its two ends,
+//     a macro its targets,
 //     a pool its child and its wires.
 // Presets by name, as a theme writes them: each an object, a template's kind, its values and
 // settings, where it writes them, by address, each a number or a word.
@@ -35,7 +36,7 @@ export function presetsOf(data: unknown, source: string): Readonly<Record<string
   const problems =
     isObject(data) ?
       Object.entries(data).flatMap(([name, preset]) => presetProblems(name, preset))
-    : [`not an object: ${valueOf(data)}`];
+    : [notAnObject(data)];
   if (problems.length) {
     throw new Error([`${source}: not of the shape of presets:`, ...problems].join('\n  '));
   }
@@ -45,7 +46,7 @@ export function presetsOf(data: unknown, source: string): Readonly<Record<string
 // what keeps data from a template's shape
 function shapeProblems(data: unknown): string[] {
   if (!isObject(data)) {
-    return [`not an object: ${valueOf(data)}`];
+    return [notAnObject(data)];
   }
   const problems: string[] = [];
   if (typeof data['kind'] !== 'string') {
@@ -61,8 +62,10 @@ function shapeProblems(data: unknown): string[] {
   }
   return problems;
 }
-// a list's problems: not a list; an item not an object, or without what it needs
-function listProblems(list: string, items: unknown, needs: readonly (string | readonly string[])[]): string[] {
+// A list's problems, a list of data's shape checked, its name in each line:
+//   - not a list; an item not an object;
+//   - an item without what it needs: each a field, or one of a list of fields.
+export function listProblems(list: string, items: unknown, needs: readonly (string | readonly string[])[]): string[] {
   if (items === undefined) {
     return [];
   }
@@ -101,10 +104,15 @@ function presetProblems(name: string, preset: unknown): string[] {
 function isByAddress(data: unknown): boolean {
   return isObject(data) && Object.values(data).every((value) => typeof value === 'number' || typeof value === 'string');
 }
+// data that isn't an object, said: none, or a value of its type
+export function notAnObject(data: unknown): string {
+  return `not an object: ${valueOf(data)}`;
+}
 // what data is where it's not an object: none, or a value of its type
 function valueOf(data: unknown): string {
   return data === null || data === undefined ? 'none' : `a ${typeof data}`;
 }
-function isObject(data: unknown): data is Record<string, unknown> {
+// an object, not a list
+export function isObject(data: unknown): data is Record<string, unknown> {
   return typeof data === 'object' && data !== null && !Array.isArray(data);
 }

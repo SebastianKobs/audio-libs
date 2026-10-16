@@ -7,7 +7,7 @@
 //   - silenced(): which channels a mute or a solo silences, as Ableton's, over a plan's wires.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DESK_FORMS, deskTemplates, silenced } from '../index.ts';
+import { DESK_FORMS, channelOf, deskOf, deskTemplates, silenced } from '../index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../../params/index.ts';
 import { Planner } from '../../planner/index.ts';
 import { EFFECT_FORM, EFFECT_TEMPLATES } from '../../effects/index.ts';
@@ -288,4 +288,40 @@ test("silenced(): which channels a mute or a solo silences, as Ableton's, over a
     ['ambient', 'background 1', 'replay tap 1', 'replay vine 1', 'sings'],
     "a pool's copy, wired by its pool's rule: feeding a soloed bus, heard",
   );
+});
+
+test("a desk and a channel read from data, as YAML's are: their shape checked, each failure said, naming where they were read from", () => {
+  assert.equal(deskOf(STUDIO, 'studio.yaml'), STUDIO, 'one of the shape, as it is');
+  assert.equal(channelOf(TOWER, 'tower.yaml'), TOWER);
+  const bent = {
+    kind: 3,
+    channels: [
+      { name: 'a' },
+      { name: 'b', role: 'bass', taps: { reverb: 'early' } },
+      { name: 'c', role: 'bus', inserts: [{ name: 'eq' }], pan: 'yes' },
+    ],
+    pools: [{ out: 'a' }],
+  };
+  assert.throws(() => deskOf(bent, 'bent.yaml'), {
+    message: [
+      'bent.yaml: not of the shape of a desk:',
+      '  its kind not a word',
+      '  channels 1: no role',
+      '  pools 1: no name',
+      '  channels 2: its role bass, not channel, bus, return or master',
+      '  channels 2: its tap for reverb early, not pre or post',
+      '  channels 3 inserts 1: no kind or preset',
+      '  channels 3: its pan not true or false',
+    ].join('\n'),
+  });
+  assert.throws(() => deskOf({ kind: 'Empty' }, 'empty.yaml'), {
+    message: 'empty.yaml: not of the shape of a desk:\n  no channels',
+  });
+  assert.throws(() => channelOf({ kind: 'Odd', volume: 'loud', tap: 'late' }, 'odd.yaml'), {
+    message: [
+      'odd.yaml: not of the shape of a channel:',
+      '  its volume not a number',
+      '  its tap late, not pre or post',
+    ].join('\n'),
+  });
 });

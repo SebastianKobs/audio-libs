@@ -20,5 +20,5 @@ export type {
   TemplatePool,
   WrittenTemplate,
 } from './template.ts';
-export { presetsOf, templateOf } from './shape.ts';
+export { isObject, listProblems, notAnObject, presetsOf, templateOf } from './shape.ts';
 export type { Form, FormFrom, FormRole, FormRule, FormTo, FormWire } from './form.ts';
