@@ -1,6 +1,6 @@
 // A small desk written out as a plan, as the desk's planner would hand it out: the strips' and the
 // mixer's tests' data.
-//   reverb: a return, its Utility at 0.6.
+//   reverb: a return, its Utility at 0.6, a Utility a level and a pan, its pan's law a setting.
 //   you: a bus, shown as my playing, a send to the reverb; tap: a bus into it, shown as my tap.
 //   ambient: a bus, shown as background; the master, its limiter, its volume alone.
 //   my tap: a pool of channels into tap, each a send to the reverb.
@@ -38,12 +38,19 @@ function composite(name, kind, { role, label, children = [], macros = [], wires 
     pools,
   };
 }
-// a Utility insert, its level
+// a Utility insert, its level and its pan, its pan's law a setting
 function utility(level) {
+  const pan = block('pan', 'pan', [[{ name: 'pan', range: [-1, 1, 0.01] }, 0]]);
   return composite('utility', 'Utility', {
     role: 'insert',
-    children: [block('gain', 'gain', [[{ ...GAIN, name: 'gain' }, level]])],
-    macros: [[{ ...GAIN, name: 'level' }, level, 'How loud it comes out.']],
+    children: [
+      block('gain', 'gain', [[{ ...GAIN, name: 'gain' }, level]]),
+      { ...pan, settings: [{ spec: { name: 'law', choices: ['stereo', 'pan pot'] }, value: 'stereo' }] },
+    ],
+    macros: [
+      [{ ...GAIN, name: 'level' }, level, 'How loud it comes out.'],
+      [{ name: 'pan', range: [-1, 1, 0.01] }, 0],
+    ],
   });
 }
 // A channel of the channel's form: its inserts, its cut, its fader, its pan, its sends; its

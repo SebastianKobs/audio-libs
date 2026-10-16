@@ -12,6 +12,15 @@ wires:
   - { from: { input: in }, to: { node: filter, input: in } }
   - { from: { node: filter, output: out }, to: { output: out } }
 macros:
-  - { name: cutoff, maps: [{ to: [filter, frequency], factor: 1, offset: 0 }] }
+  - name: cutoff
+    hint: >-
+      Its cutoff, in hertz: above it the sound is taken away. The air makes a far sound duller, and a
+      tower's dullness its replays.
+    maps: [{ to: [filter, frequency], factor: 1, offset: 0 }]
   # a small bump at the cutoff, as it was when Web Audio read 0.707 in dB
-  - { name: q, value: 1.085, maps: [{ to: [filter, resonance], factor: 1, offset: 0 }] }
+  - name: q
+    value: 1.085
+    hint: >-
+      Resonance: how much it rings at its cutoff, as an EQ's Q: 0.707 flat, more a bump there. The air's
+      1.085 and a tower's dullness, 1.059, a small bump.
+    maps: [{ to: [filter, resonance], factor: 1, offset: 0 }]

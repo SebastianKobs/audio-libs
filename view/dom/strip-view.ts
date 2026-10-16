@@ -53,7 +53,7 @@ export function muteSoloHtml(key: string, muted: boolean, soloed: boolean): Html
 // its sends, its pan, its fader, its level bar, its value, its mute and solo
 function mixHtml(strip: Strip, look: StripLook, key: string): Html {
   const empty = look.empty ?? false;
-  const sends = strip.sends.map((send) => knobHtml(look.sendLabel(send.name), send, empty));
+  const sends = strip.sends.map((send) => knobHtml(look.sendLabel(send.name), send, { empty }));
   const pan = strip.pan ? knobHtml('pan', strip.pan) : stillPanHtml();
   const muteSolo = strip.mute && strip.solo ? muteSoloHtml(key, on(strip.mute), on(strip.solo)) : '';
   const value = empty ? EMPTY : `${strip.volume.text} dB`;

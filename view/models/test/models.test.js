@@ -62,7 +62,7 @@ function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
 
 test("a composite as a device: its name and kind, its macros as knobs in its template's order, then its settings within, each by its address; its words the template's", () => {
   const device = builderOn(UTILITY).views.device([]);
-  assert.deepEqual([device.name, device.kind], ['utility', 'Utility']);
+  assert.deepEqual([device.name, device.kind, device.address], ['utility', 'Utility', []]);
   assert.deepEqual(
     device.controls.map(({ address, kind }) => [addressText(address), kind]),
     [

@@ -20,12 +20,20 @@ const FINER = 10;
 // a value nothing sets now, as a knob or a fader shows it
 export const EMPTY = '—';
 
-// A knob drawn: its label, its bar, its text; a live one marked with its address, for a drag.
-// Empty, where nothing sets it now: its bar at the bottom, a dash for its text.
-export function knobHtml(label: string, knob: Knob, empty = false): Html {
+// A knob drawn: its label, its bar, its text, marked with its address (refreshKnobs()).
+//   - live: marked so, for a drag, its hint how to drag it unless it's given one;
+//   - read-only: marked by how it's set, automated or fixed;
+//   - empty, where nothing sets it now: its bar at the bottom, a dash for its text.
+export function knobHtml(
+  label: string,
+  knob: Knob,
+  { empty = false, title }: { empty?: boolean; title?: string } = {},
+): Html {
   const unity = knob.isPan ? '' : `;--unity:${positionOf(knob.spec, 1)}`;
   const at = empty ? 0 : knob.position;
-  return html`<div class="knob"${liveMark(knob)}><span>${label}</span><i class="${knob.isPan ? 'pan' : ''}" style="--v:${at}${unity}"></i><b>${empty ? EMPTY : knob.text}</b></div>`;
+  const role = knob.live ? '' : ` ${knob.role.by}`;
+  const mark = html` data-knob="${addressText(knob.address)}"${liveMark(knob, title)}`;
+  return html`<div class="knob${role}"${mark}><span>${label}</span><i class="${knob.isPan ? 'pan' : ''}" style="--v:${at}${unity}"></i><b>${empty ? EMPTY : knob.text}</b></div>`;
 }
 // A pan that does nothing, at its middle: on a strip whose channel has none.
 export function stillPanHtml(): Html {
@@ -36,12 +44,29 @@ export function faderHtml(knob: Knob, empty = false): Html {
   return html`<div class="fader" style="--unity:${positionOf(knob.spec, 1)}"${liveMark(knob)}><i style="--v:${empty ? 0 : knob.position}"></i></div>`;
 }
 
-// A live knob's mark: its address, which a drag finds it by, and the hint of what it does.
-function liveMark(knob: Knob): Html {
+// A knob's mark: live, its address, which a drag finds it by; its hint, the one given, else
+// a live one's how to drag it.
+function liveMark(knob: Knob, title?: string): Html {
+  const hint = title === undefined ? html`` : html` title="${title}"`;
   if (!knob.live) {
-    return html``;
+    return hint;
   }
-  return html` data-set="${addressText(knob.address)}" title="${LIVE}"`;
+  return html` data-set="${addressText(knob.address)}"${title === undefined ? html` title="${LIVE}"` : hint}`;
+}
+// The knobs drawn within an element brought up to date, each by its address: its bar and its
+// text, as it plays now, its notes moving it.
+export function refreshKnobs(within: Element, knobOf: (address: Address) => unknown): void {
+  for (const element of within.querySelectorAll<HTMLElement>('.knob[data-knob]')) {
+    const knob = knobOf(addressOf(element.dataset.knob!)); // marked with it
+    if (!(knob instanceof Knob)) {
+      continue;
+    }
+    element.querySelector<HTMLElement>('i')?.style.setProperty('--v', String(knob.position));
+    const text = element.querySelector('b');
+    if (text) {
+      text.textContent = knob.text;
+    }
+  }
 }
 
 // The knobs drawn within an element, dragged and set back, listened for from when it's made.

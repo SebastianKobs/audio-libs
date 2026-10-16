@@ -38,7 +38,7 @@ export class ViewBuilder {
     }
     const controls = controlsOf(node).map((name) => this.control([...address, ...name])!); // found there
     const label = node.label ?? node.kind;
-    return { name: node.name, kind: node.kind, label, slot: this.#model.slotOf(address), controls };
+    return { address, name: node.name, kind: node.kind, label, slot: this.#model.slotOf(address), controls };
   }
   // A channel as a strip, by its address, a pool's copy among them; none where nothing's there.
   strip(address: Address): Strip | undefined {

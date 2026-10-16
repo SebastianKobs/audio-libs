@@ -38,7 +38,7 @@ test("a channel as a strip, by its form: its name as shown, its label's, else it
   );
   assert.deepEqual(
     tap.inserts[0].controls.map(({ address }) => addressText(address)),
-    ['tap/utility/level'],
+    ['tap/utility/level', 'tap/utility/pan', 'tap/utility/pan/law'],
   );
   assert.deepEqual(
     tap.sends.map(({ name, address }) => [name, addressText(address)]),

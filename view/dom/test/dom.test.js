@@ -7,7 +7,7 @@
 //   - every value escaped as it's made.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { faderHtml, html, knobHtml, meterHtml, stillPanHtml, stripHtml } from '../index.ts';
+import { deviceHtml, faderHtml, html, knobHtml, meterHtml, stillPanHtml, stripHtml } from '../index.ts';
 import { ViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { positionOf } from '../../../params/index.ts';
@@ -35,7 +35,7 @@ test('a knob drawn: its label, its bar by its taper, a gain its unity marked, it
   const unity = positionOf(send.spec, 1);
   assert.equal(
     knobHtml('rev', send).text,
-    `<div class="knob" data-set="you/send/reverb" title="drag up or down to set it, with shift for finer steps; double-click: back to where it started"><span>rev</span><i class="" style="--v:${unity};--unity:${unity}"></i><b>0.0</b></div>`,
+    `<div class="knob" data-knob="you/send/reverb" data-set="you/send/reverb" title="drag up or down to set it, with shift for finer steps; double-click: back to where it started"><span>rev</span><i class="" style="--v:${unity};--unity:${unity}"></i><b>0.0</b></div>`,
   );
   assert.match(knobHtml('pan', views.control(['you', 'pan'])).text, /<i class="pan" style="--v:0.25"><\/i><b>L25<\/b>/);
   const automated = viewsOn({ roles: { 'you/pan': { by: 'automated' } } }).control(['you', 'pan']);
@@ -107,6 +107,60 @@ test('a strip whose track plays nothing drawn empty: its sends and fader at the 
   );
   assert.match(text, /<b class="val">—<\/b>/);
   assert.match(text, /data-mute="my tap\/1"/);
+});
+
+test("a device drawn: its bar, its status and its reset; its knobs by their names and units, each marked with its address, read-only ones marked by how they're set; a view of its own first; settings not live left out", () => {
+  const views = viewsOn({
+    values: { 'tap/utility/level': 0.5 },
+    roles: { 'tap/utility/pan': { by: 'automated', source: 'distance' } },
+  });
+  const device = views.device(['tap', 'utility']);
+  const text = deviceHtml(device, {
+    status: 'Utility: its level',
+    reset: 'reset this Utility',
+    own: html`<canvas class="history"></canvas>`,
+    hintOf: (control) => `${control.name}!`,
+  }).text;
+  assert.match(
+    text,
+    /^<div class="device flowless" data-device="tap\/utility"><div class="bar"><div class="status" title="Utility: its level">Utility: its level<\/div><button class="reset" data-reset="tap\/utility">reset this Utility<\/button><\/div>/,
+  );
+  assert.match(
+    text,
+    /<div class="controls"><canvas class="history"><\/canvas><div class="knob" data-knob="tap\/utility\/level" data-set="tap\/utility\/level" title="level!"><span>level \(dB\)<\/span>/,
+  );
+  assert.match(text, /<div class="knob automated" data-knob="tap\/utility\/pan" title="pan!"><span>pan<\/span>/);
+  assert.doesNotMatch(text, /law/, "its pan's law, fixed, left out");
+  const plain = deviceHtml(views.device(['reverb', 'utility']), { status: 'x', hintOf: () => '' }).text;
+  assert.doesNotMatch(plain, /data-reset/, 'no reset where it says none');
+});
+
+test("a setting with a range shown as a knob only where it's live: a room's length a live one's, a delay's longest time a fixed one's left out", () => {
+  const room = {
+    version: 1,
+    node: {
+      name: 'room',
+      kind: 'reverb',
+      inputs: [],
+      outputs: [],
+      params: [],
+      settings: [{ spec: { name: 'length', unit: 's', range: [0.2, 8, 0.1] }, value: 3.5 }],
+    },
+  };
+  const devicesOn = (by) =>
+    new ViewBuilder({
+      plan: room,
+      valueOf: () => undefined,
+      startOf: () => undefined,
+      roleOf: () => ({ by }),
+      peakOf: () => 0,
+      copiesOf: () => [],
+      slotOf: () => undefined,
+      send: () => {},
+    }).device([]);
+  const look = { status: 'room', hintOf: () => '' };
+  assert.match(deviceHtml(devicesOn('live'), look).text, /<span>length \(s\)<\/span>/);
+  assert.doesNotMatch(deviceHtml(devicesOn('fixed'), look).text, /length/);
 });
 
 test('every value escaped as it is made', () => {

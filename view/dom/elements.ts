@@ -42,3 +42,8 @@ export function setHtml(element: Element, made: Html): void {
   // oxlint-disable-next-line no-unsanitized/property -- made by html``, every value escaped as it was made
   element.innerHTML = made.text;
 }
+// and what html`` made added after what's there, as a row grows by a device
+export function appendHtml(element: Element, made: Html): void {
+  // oxlint-disable-next-line no-unsanitized/method -- made by html``, every value escaped as it was made
+  element.insertAdjacentHTML('beforeend', made.text);
+}

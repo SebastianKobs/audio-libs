@@ -77,3 +77,22 @@ test("each effect's label, the name a device shows it by, where it isn't its kin
     [undefined, 'LP filter', undefined, undefined, 'Tape delay', undefined],
   );
 });
+
+test("each insert's macros carry their words, the hints a device shows, from its template: the Utility's, the Filter's, the Limiter's (LAY12e1)", () => {
+  const hints = (kind) =>
+    planner.plan(kind).node.macros.map(({ spec, hint }) => [spec.name, typeof hint === 'string' && hint.length > 20]);
+  assert.deepEqual(hints('Utility'), [
+    ['level', true],
+    ['pan', true],
+  ]);
+  assert.deepEqual(hints('Filter'), [
+    ['cutoff', true],
+    ['q', true],
+  ]);
+  assert.deepEqual(hints('Limiter'), [
+    ['gain', true],
+    ['ceiling', true],
+    ['release', true],
+  ]);
+  assert.match(planner.plan('Limiter').node.macros[1].hint, /^The limiter: where it acts, in dBFS/);
+});

@@ -14,5 +14,11 @@ wires:
   - { from: { node: gain, output: out }, to: { node: pan, input: in } }
   - { from: { node: pan, output: out }, to: { output: out } }
 macros:
-  - { name: level, maps: [{ to: [gain, gain], factor: 1, offset: 0 }] }
-  - { name: pan, maps: [{ to: [pan, pan], factor: 1, offset: 0 }] }
+  - name: level
+    hint: >-
+      Its gain, in dB, as Ableton's Utility's. A desk strip's is the level the desk gives it, before a
+      channel's fader, after an FX channel's chain: its fader at unity plays at it.
+    maps: [{ to: [gain, gain], factor: 1, offset: 0 }]
+  - name: pan
+    hint: Where it sits, left −1 to right 1, as Ableton's Utility's balance.
+    maps: [{ to: [pan, pan], factor: 1, offset: 0 }]

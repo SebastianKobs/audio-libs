@@ -7,11 +7,12 @@ import type { Address } from '../../plan/format/index.ts';
 import type { Found, Model, Role, Slot } from './model.ts';
 
 // A node as a device:
-//   - its name, its kind, its label as shown, its node's, else its kind;
+//   - its address, its name, its kind, its label as shown, its node's, else its kind;
 //   - what it does in its slot and what sets it there, where the tool says;
 //   - its controls: a composite's macros, in its template's order, then the settings within
 //     it; a block's params, then its settings.
 export interface Device {
+  readonly address: Address;
   readonly name: string;
   readonly kind: string;
   readonly label: string;
