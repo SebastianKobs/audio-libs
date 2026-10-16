@@ -371,7 +371,7 @@ test("route(): a strip's output moved while it plays, to the master or a bus, an
   assert.throws(() => m.route('x', 'w'), /a loop: w feeds x/, 'through a send too');
 });
 
-test("a channel with inserts: its input through each insert in order, then its fader; a send taken at an insert's way in", () => {
+test("a channel with inserts: its input through each insert in order, then its fader; a send taken before its fader, after the inserts, or after it; none at an insert's way in", () => {
   const e = engine();
   const m = new Mixer(e);
   const r = m.fx('reverb');
@@ -388,7 +388,7 @@ test("a channel with inserts: its input through each insert in order, then its f
     ],
     sends: [
       { to: 'reverb', amount: 0.5 },
-      { to: 'delay', amount: 0.3, from: 'distance' },
+      { to: 'delay', amount: 0.3, from: 'pre' },
     ],
   });
   assert.deepEqual(into(e.audioContext, dull), [t.input], 'its input into the first insert');
@@ -401,7 +401,12 @@ test("a channel with inserts: its input through each insert in order, then its f
   );
   assert.deepEqual(t.fader.gain.events, [['value', 0.8]]);
   assert.deepEqual(into(e.audioContext, t.sends.reverb), [t.fader], 'a send after the fader');
-  assert.deepEqual(into(e.audioContext, t.sends.delay), [lp], "a send from the insert's way in");
+  assert.deepEqual(into(e.audioContext, t.sends.delay), [lvl], 'a send before the fader: after the last insert');
+  assert.throws(
+    () => m.channel('track 2', { sends: [{ to: 'delay', from: 'distance' }] }),
+    /a send is taken pre or post, not from distance: track 2/,
+    "none at an insert's way in",
+  );
   assert.deepEqual([t.sends.reverb.gain.events, t.sends.delay.gain.events], [[['value', 0.5]], [['value', 0.3]]]);
   assert.deepEqual([into(e.audioContext, r.input), into(e.audioContext, d.input)], [[t.sends.reverb], [t.sends.delay]]);
   time = 11;
@@ -420,10 +425,6 @@ test("a channel with inserts: its input through each insert in order, then its f
       ['set', 0.1, 12],
     ],
     "set at a note's time through them",
-  );
-  assert.throws(
-    () => m.channel('x', { inserts: [{ name: 'a', input: lp, output: lvl }], sends: [{ to: 'reverb', from: 'b' }] }),
-    /no insert b on x/,
   );
 });
 

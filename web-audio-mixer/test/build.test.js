@@ -15,13 +15,13 @@ const DESK = [
   { bus: 'sings' },
   { fx: 'delay', chain: [{ effect: 'echo' }], sends: ['reverb'], out: 'sings' },
 ];
-// a track's strip into the bus, two slots: a send by name, one before its fader, one at its second slot's way in
+// a track's strip into the bus, two slots: a send by name, after its fader, and one before it
 const TRACK = {
   inserts: [
     { slot: 'air', device: 'filter', start: { cutoff: 2000 } },
     { slot: 'utility', device: 'utility', start: { level: 0.5 } },
   ],
-  sends: ['reverb', { to: 'delay', from: 'pre' }, { to: 'reverb', from: 'utility' }],
+  sends: ['reverb', { to: 'delay', from: 'pre' }],
   out: 'sings',
 };
 
@@ -45,19 +45,12 @@ test("a strip from its data: each slot's device out of the registry, in order, a
   );
 });
 
-test("a strip's sends from its data: by name after its fader and pan, at the amount handed over, 0 where none; before its fader; at a slot's way in", () => {
+test("a strip's sends from its data: by name after its fader and pan, at the amount handed over, 0 where none; before its fader", () => {
   const { on, ac } = desk();
-  const { strip } = buildChannel(
-    on,
-    'track 2',
-    { ...TRACK, sends: TRACK.sends.slice(0, 2) },
-    { amounts: { reverb: 0.3 } },
-  );
+  const { strip } = buildChannel(on, 'track 2', TRACK, { amounts: { reverb: 0.3 } });
   assert.deepEqual([strip.sends.reverb.gain.value, strip.sends.delay.gain.value], [0.3, 0], 'at the amounts');
   assert.deepEqual(into(ac, strip.sends.reverb), [strip.tail], 'after its fader and pan');
   assert.deepEqual(into(ac, strip.sends.delay), [strip.inserts[1].output], 'before its fader, after its inserts');
-  const { strip: tapped } = buildChannel(on, 'track 3', { ...TRACK, sends: [TRACK.sends[2]] });
-  assert.deepEqual(into(ac, tapped.sends.reverb), [tapped.inserts[1].input], "at its Utility's way in");
 });
 
 test('an FX channel from its data: its slots after its chain, its sends by name at the amounts handed over, its way out', () => {

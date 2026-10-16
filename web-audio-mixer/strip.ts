@@ -11,9 +11,9 @@ export interface Insert {
 }
 // A send, in a strip's setup:
 //   - by a return's name: at 1, from its tail, with no gain of its own;
-//   - with an amount: a gain of its own, taken from its tail, before its volume ('pre',
-//     after the inserts), or at an insert's way in (the insert's name).
-export type Send = string | { to: string; amount?: number; from?: string };
+//   - with an amount: a gain of its own, taken from its tail, or before its volume ('pre',
+//     after the inserts).
+export type Send = string | { to: string; amount?: number; from?: 'pre' };
 type SendWithAmount = Exclude<Send, string>;
 // An option given as undefined is one not given: the caller's settings may have none yet.
 export interface StripOptions {
@@ -95,7 +95,7 @@ export abstract class ChannelStrip {
         continue;
       }
       this.#listed.add(send.to);
-      const source = sendSource(send, { strip: this.name, inserts: this.inserts, preFader, tail: this.tail });
+      const source = sendSource(send, { strip: this.name, preFader, tail: this.tail });
       this.#addSend(send.to, source, send.amount ?? 1);
     }
   }
@@ -125,23 +125,19 @@ export function chained(inserts: readonly Insert[]): void {
     inserts[index - 1]!.output.connect(inserts[index]!.input);
   }
 }
-// Where a send with an amount is taken:
+// Where a send with an amount is taken, as a console's:
 //   'pre': before its volume, after the inserts;
-//   an insert's name: its way in;
 //   none: its tail.
+// Nowhere else: a send from JavaScript naming any other is refused.
 function sendSource(
   send: SendWithAmount,
-  { strip, inserts, preFader, tail }: { strip: string; inserts: Insert[]; preFader: AudioNode; tail: AudioNode },
+  { strip, preFader, tail }: { strip: string; preFader: AudioNode; tail: AudioNode },
 ): AudioNode {
   if (send.from === 'pre') {
     return preFader;
   }
-  if (!send.from) {
-    return tail;
+  if (send.from !== undefined) {
+    throw new Error(`a send is taken pre or post, not from ${String(send.from)}: ${strip}`);
   }
-  const insert = inserts.find((candidate) => candidate.name === send.from);
-  if (!insert) {
-    throw new Error(`no insert ${send.from} on ${strip}`);
-  }
-  return insert.input;
+  return tail;
 }

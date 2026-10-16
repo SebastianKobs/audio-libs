@@ -22,9 +22,8 @@ export interface SlotEntry<Named extends Names = Names> {
   start?: Readonly<Record<string, number>>;
 }
 // A send: by its return's name, after the fader and the pan; or taken before the fader
-// ('pre', after the inserts) or at an insert slot's way in. Its amount the strip's owner's.
-export type SendEntry<Named extends Names = Names> =
-  Named['return'] | { to: Named['return']; from: 'pre' | Named['slot'] };
+// ('pre', after the inserts). Its amount the strip's owner's.
+export type SendEntry<Named extends Names = Names> = Named['return'] | { to: Named['return']; from: 'pre' };
 // A strip as data: its insert slots in the order the sound goes through them, its sends
 // and its way out.
 export interface StripEntry<Named extends Names = Names> {

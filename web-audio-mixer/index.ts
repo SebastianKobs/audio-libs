@@ -7,7 +7,7 @@
 // today. The master starts at 0 and fades in to its volume: never at full volume. On the desk, as on a mixing desk:
 // - channel(name, { volume, pan, sends, out, inserts }): a fader, sent after the fader to the FX channels it names, at 1, or by
 //   amount; with a pan, after the fader, its sends and its way out after it. Out to the master, or a bus. With inserts, they come
-//   before the fader, and a send can be taken before the fader or at an insert's way in (strip.ts). Every pan on the desk is stereo,
+//   before the fader, and a send can be taken before the fader, after them (strip.ts). Every pan on the desk is stereo,
 //   so a mono sound is as loud in the middle
 // - bus(name, { volume, pan, sends, out, inserts }): a submix, a channel whose input takes what's routed into it: channels, FX channels, phrases.
 //   With sends, a group, as Ableton's: its tracks into it, through its fader, sent after it
