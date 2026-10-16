@@ -1,6 +1,9 @@
 // ---------- plan/blocks/envelope: an envelope generator ----------
 // As a modular's: no input, its signal out, wired into the params it moves.
 // Its gate, opened and closed by the note; its stages' times; its sustain; its amount.
+// Its curve a setting: each stage to its target, as an analog's, or in a line.
+// Its mode a setting, as Ableton's: the gate's, released as the note ends; or a trigger's,
+// running on past the note-off, a struck sound ringing out.
 import { SWITCH, type ParamSpecs } from '../../params/index.ts';
 import type { Block } from './block.ts';
 
@@ -19,11 +22,25 @@ export const ENVELOPE_SPECS = {
 } as const satisfies ParamSpecs;
 
 const { amount, delay, attack, hold, decay, sustain, release } = ENVELOPE_SPECS;
+// an envelope's release to start, its mode the gate's: short, no click
+const RELEASE = 0.1;
 
 export default {
   kind: 'envelope',
   inputs: [],
   outputs: [{ name: 'out', channels: 1 }],
-  params: [{ ...SWITCH, name: 'gate', default: 0 }, delay, attack, hold, decay, sustain, release, amount],
-  settings: [],
+  params: [
+    { ...SWITCH, name: 'gate', default: 0 },
+    delay,
+    attack,
+    hold,
+    decay,
+    sustain,
+    { ...release, default: RELEASE },
+    amount,
+  ],
+  settings: [
+    { name: 'curve', choices: ['target', 'linear'], default: 'target' },
+    { name: 'mode', choices: ['gate', 'trigger'], default: 'gate' },
+  ],
 } as const satisfies Block;

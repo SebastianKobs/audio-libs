@@ -2,6 +2,9 @@
 // Its frequency, by octaves, wide open to start, and its resonance; its type a setting.
 // The three types the themes use; another added when a sound asks for it.
 // Its slope a setting: 12 dB an octave, or 24.
+// Its detune, in cents, moving its cutoff as a pitch moves: a sweep in semitones, a cutoff
+// following the keys at an offset.
+import { TUNE_DETUNE } from './oscillator.ts';
 import type { Block } from './block.ts';
 
 // what a builder that builds a filter from biquads needs of it: its type, its resonance where it has one, its slope
@@ -44,6 +47,7 @@ export default {
   params: [
     { name: 'frequency', unit: 'Hz', range: [20, 24000, 1], default: 24000, taper: 'octaves' },
     { ...RESONANCE, default: 0.707 },
+    TUNE_DETUNE,
   ],
   settings: [{ name: 'type', choices: ['lowpass', 'highpass', 'bandpass'], default: 'lowpass' }, FILTER_SLOPE],
 } as const satisfies Block;

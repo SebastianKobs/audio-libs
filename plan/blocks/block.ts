@@ -18,3 +18,7 @@ export interface Block {
   readonly params: readonly ParamSpec[];
   readonly settings: readonly ParamSpec[];
 }
+
+// A source's stop, in s from the note's start: an oscillator's, a noise's.
+// At 0, none, as it starts: it plays until its voice is let go.
+export const STOP = { name: 'stop', unit: 's', range: [0, 10, 0.01], default: 0 } as const satisfies ParamSpec;

@@ -4,6 +4,7 @@ import delay from './delay.ts';
 import envelope from './envelope.ts';
 import filter from './filter.ts';
 import gain from './gain.ts';
+import lfo from './lfo.ts';
 import limiter from './limiter.ts';
 import noise from './noise.ts';
 import oscillator from './oscillator.ts';
@@ -19,6 +20,7 @@ export type BlockKind = keyof typeof BLOCKS;
 // every block by its kind, frozen all the way down, the specs it shares too
 export const BLOCKS = frozen({
   oscillator,
+  lfo,
   gain,
   filter,
   pan,

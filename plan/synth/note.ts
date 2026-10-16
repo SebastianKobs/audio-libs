@@ -1,0 +1,34 @@
+// ---------- plan/synth/note: a note's sources into a voice, as a voice card's CV ----------
+// As a MIDI-to-CV module hands a voice card its note:
+//   - its frequency, its pitch in Hz; its gate, open while the note is held; its velocity;
+//   - its bend, in semitones, where it slides in from;
+//   - its per-note controllers, by MIDI's names where it has them: its vibrato's depth and
+//     rate, its breath, its decay time; its rise, how long a drone swells.
+// Each set on a voice by the macro of its name, as the note starts.
+// One a note sends none of: at its default, moving nothing.
+// The note's settings: how fast its pitch glides to a later pitch, its shortest, its longest.
+import { SWITCH, type ParamSpecs } from '../../params/index.ts';
+
+// a note's source, by its name
+export type NoteSource = keyof typeof NOTE_SOURCES;
+
+// the note's sources, by their names
+export const NOTE_SOURCES = {
+  frequency: { name: 'frequency', unit: 'Hz', range: [20, 20000, 0.01], default: 440, taper: 'octaves' },
+  gate: { ...SWITCH, name: 'gate', default: 0 },
+  velocity: { name: 'velocity', range: [0, 1, 0.01], default: 1 },
+  bend: { name: 'bend', unit: 'semitones', range: [-24, 24, 0.01], default: 0 },
+  'vibrato depth': { name: 'vibrato depth', unit: 'cents', range: [0, 100, 0.1], default: 0 },
+  'vibrato rate': { name: 'vibrato rate', unit: 'Hz', range: [0.1, 20, 0.01], default: 5 },
+  breath: { name: 'breath', range: [0, 1, 0.01], default: 0 },
+  'decay time': { name: 'decay time', unit: 's', range: [0, 10, 0.001], default: 0.1 },
+  rise: { name: 'rise', unit: 's', range: [0, 30, 0.01], default: 1 },
+} as const satisfies ParamSpecs;
+// the note's settings:
+//   glide: the time constant a later pitch is glided to by, 0 at once;
+//   shortest: a release before it waits for it; longest: a note with no end let go then
+export const NOTE_SETTINGS = {
+  glide: { name: 'glide', unit: 's', range: [0, 1, 0.001], default: 0 },
+  shortest: { name: 'shortest', unit: 's', range: [0, 1, 0.01], default: 0 },
+  longest: { name: 'longest', unit: 's', range: [0.1, 10, 0.01], default: 10 },
+} as const satisfies ParamSpecs;

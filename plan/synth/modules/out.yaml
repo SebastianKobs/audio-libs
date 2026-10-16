@@ -1,0 +1,14 @@
+# A voice card's one output: where the chain and what's sent straight out meet, its volume.
+kind: Out
+form: output
+inputs: [{ name: in }]
+outputs: [{ name: out }]
+children:
+  - { name: volume, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: volume, input: in } }
+  - { from: { node: volume, output: out }, to: { output: out } }
+macros:
+  - name: volume
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [volume, gain], factor: 1, offset: 0 }]

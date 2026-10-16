@@ -1,0 +1,26 @@
+# A noise through a filter of its own, then its level, a source.
+# Its filter following the keys, where the voice card's frequency is wired into its cutoff, at an
+# offset in semitones, its tune onto the filter's detune.
+# Looped or not; where in its buffer it starts, up to its offset, drawn as its voice starts; its stop.
+kind: Noise
+form: source
+outputs: [{ name: out, channels: 1 }]
+children:
+  - { name: noise, kind: noise }
+  - { name: filter, kind: filter }
+  - { name: level, kind: gain }
+wires:
+  - { from: { node: noise, output: out }, to: { node: filter, input: in } }
+  - { from: { node: filter, output: out }, to: { node: level, input: in } }
+  - { from: { node: level, output: out }, to: { output: out } }
+macros:
+  - name: level
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [level, gain], factor: 1, offset: 0 }]
+  - { name: cutoff, maps: [{ to: [filter, frequency], factor: 1, offset: 0 }] }
+  - { name: resonance, maps: [{ to: [filter, resonance], factor: 1, offset: 0 }] }
+  - name: tune
+    spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
+    maps: [{ to: [filter, detune], factor: 100, offset: 0 }]
+  - { name: offset, maps: [{ to: [noise, offset], factor: 1, offset: 0 }] }
+  - { name: stop, maps: [{ to: [noise, stop], factor: 1, offset: 0 }] }

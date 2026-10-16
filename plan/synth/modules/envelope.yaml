@@ -1,0 +1,25 @@
+# An envelope, then a gain its note's velocity sets, a modulator.
+# Its gate the note's; its stages, its curve and its mode its block's.
+# Its amount in the units of the param it's wired into: a gain's share, semitones for a tune.
+# Its velocity 1, moving it the same at any velocity, or the note's wired in.
+kind: Envelope
+form: modulator
+outputs: [{ name: out, channels: 1 }]
+children:
+  - { name: envelope, kind: envelope }
+  - { name: velocity, kind: gain }
+wires:
+  - { from: { node: envelope, output: out }, to: { node: velocity, input: in } }
+  - { from: { node: velocity, output: out }, to: { output: out } }
+macros:
+  - { name: gate, maps: [{ to: [envelope, gate], factor: 1, offset: 0 }] }
+  - { name: delay, maps: [{ to: [envelope, delay], factor: 1, offset: 0 }] }
+  - { name: attack, maps: [{ to: [envelope, attack], factor: 1, offset: 0 }] }
+  - { name: hold, maps: [{ to: [envelope, hold], factor: 1, offset: 0 }] }
+  - { name: decay, maps: [{ to: [envelope, decay], factor: 1, offset: 0 }] }
+  - { name: sustain, maps: [{ to: [envelope, sustain], factor: 1, offset: 0 }] }
+  - { name: release, maps: [{ to: [envelope, release], factor: 1, offset: 0 }] }
+  - { name: amount, maps: [{ to: [envelope, amount], factor: 1, offset: 0 }] }
+  - name: velocity
+    spec: { range: [0, 1, 0.01], default: 1 }
+    maps: [{ to: [velocity, gain], factor: 1, offset: 0 }]

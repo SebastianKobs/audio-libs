@@ -1,0 +1,20 @@
+# A ring modulator: the sound sent into it, its gain at 0 an oscillator moves, so the two
+# multiply, a stage.
+# Its oscillator's frequency the note's, its tune its ratio to the note in semitones; its stop.
+kind: Ring
+form: stage
+inputs: [{ name: in }]
+outputs: [{ name: out }]
+children:
+  - { name: ring, kind: gain, values: { gain: 0 } }
+  - { name: osc, kind: oscillator }
+wires:
+  - { from: { input: in }, to: { node: ring, input: in } }
+  - { from: { node: osc, output: out }, to: { node: ring, param: gain } }
+  - { from: { node: ring, output: out }, to: { output: out } }
+macros:
+  - { name: frequency, maps: [{ to: [osc, frequency], factor: 1, offset: 0 }] }
+  - name: tune
+    spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
+    maps: [{ to: [osc, detune], factor: 100, offset: 0 }]
+  - { name: stop, maps: [{ to: [osc, stop], factor: 1, offset: 0 }] }

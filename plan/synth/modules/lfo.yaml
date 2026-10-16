@@ -1,0 +1,27 @@
+# An LFO: its wave at its rate, then its depth, then a scale, a modulator.
+# Its rate a time with a sync switch, as the delay's: synced, a note value; free, in Hz.
+# Its depth in the units of the param it's wired into: cents, Hz, a gain's share.
+# Its scale 1, or a value of the note's wired in, its depth then a share of it: a vibrato as a
+# share of the note's frequency.
+# Its delay and fade-in an envelope on its depth.
+kind: LFO
+form: modulator
+outputs: [{ name: out, channels: 1 }]
+children:
+  - { name: lfo, kind: lfo }
+  - { name: depth, kind: gain }
+  - { name: scale, kind: gain }
+wires:
+  - { from: { node: lfo, output: out }, to: { node: depth, input: in } }
+  - { from: { node: depth, output: out }, to: { node: scale, input: in } }
+  - { from: { node: scale, output: out }, to: { output: out } }
+macros:
+  - { name: sync, maps: [{ to: [lfo, sync], factor: 1, offset: 0 }] }
+  - { name: note, maps: [{ to: [lfo, note], factor: 1, offset: 0 }] }
+  - { name: hz, maps: [{ to: [lfo, hz], factor: 1, offset: 0 }] }
+  - name: depth
+    spec: { range: [0, 1000, 0.0001], default: 0 }
+    maps: [{ to: [depth, gain], factor: 1, offset: 0 }]
+  - name: scale
+    spec: { range: [0, 20000, 0.01], default: 1 }
+    maps: [{ to: [scale, gain], factor: 1, offset: 0 }]

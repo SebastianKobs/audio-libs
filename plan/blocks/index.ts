@@ -4,10 +4,11 @@
 // Its parts:
 //   - block.ts: a block, its inputs and outputs, its params' and settings' specs;
 //   - blocks.ts: every block by its kind;
-//   - one file each: oscillator, gain, filter, pan, delay, reverb, noise, limiter, envelope, select,
-//     with the specs other code shares (a delay's time, a limiter's, an envelope's);
+//   - one file each: oscillator, lfo, gain, filter, pan, delay, reverb, noise, limiter,
+//     envelope, select, with the specs other code shares (a delay's time, an LFO's rate, a
+//     limiter's, an envelope's, a source's stop);
 //   - envelope-curve.ts: how an envelope moves, stage by stage from its gate, as automation.
-export type { Block, Jack } from './block.ts';
+export { STOP, type Block, type Jack } from './block.ts';
 export { BLOCKS, type BlockKind } from './blocks.ts';
 export { DELAY_TIME } from './delay.ts';
 export { ENVELOPE_SPECS } from './envelope.ts';
@@ -19,6 +20,7 @@ export {
   type EnvelopeTimes,
 } from './envelope-curve.ts';
 export { biquadQs, FILTER_SLOPE, RESONANCE, type FilterStages } from './filter.ts';
+export { LFO_RATE } from './lfo.ts';
 export { LIMITER_SPECS } from './limiter.ts';
 export { NOISE_SECONDS } from './noise.ts';
 export { DETUNE, WAVE } from './oscillator.ts';
