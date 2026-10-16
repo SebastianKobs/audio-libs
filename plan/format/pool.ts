@@ -2,23 +2,23 @@
 // Its child ready, named as the pool is (my tap). Each copy under it, named by its number
 // from 1, so its address is the pool's name and its number (my tap/3). Its wires the rule each
 // copy is wired by, written with the pool's name. A pool of voices holds the addresses its
-// notes set.
+// notes set, and, as a drum rack's pad, the key that plays it.
 import { addressText, type Address } from './address.ts';
 import type { Composite } from './node.ts';
 import type { Node } from './node.ts';
 import { renamedEnd, type Wire } from './wire.ts';
 
-// the params a note sets in a voice, by their addresses within it, as CV sets a voice card's
-export interface NoteAddresses {
-  readonly pitch: readonly Address[];
-  readonly velocity: readonly Address[];
-  readonly gate: readonly Address[];
-}
-// a pool: its child ready, the wires a copy is wired by; a voice's, the addresses its notes set
+// The params a note sets in a voice, as CV sets a voice card's: by the note's sources' names,
+// as the instrument names them (frequency, gate), each into its addresses within the voice.
+export type NoteAddresses = Readonly<Record<string, readonly Address[]>>;
+// A pool: its child ready, the wires a copy is wired by.
+// A voice's: the addresses its notes set; the key that plays it, a drum rack's pad's, none
+// every key.
 export interface Pool {
   readonly child: Node;
   readonly wires: readonly Wire[];
   readonly note?: NoteAddresses;
+  readonly key?: number;
 }
 
 // a copy's name under its pool: a whole number from 1, no leading 0

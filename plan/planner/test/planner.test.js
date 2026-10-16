@@ -115,6 +115,27 @@ test("a pool's child ready: its template planned, under its name, its wires and 
   assert.equal(paramAt(plan, ['voice', '1', 'envelope', 'decay']).value, 0, 'its default');
 });
 
+test("a drum rack's pools, each played by its key, as a pad; a note's addresses by its sources' names, whatever the instrument names them; one into no param refused", () => {
+  const pad = (key) => ({
+    child: { name: `pad ${key}`, kind: 'Voice' },
+    key,
+    wires: [{ from: { node: `pad ${key}`, output: 'out' }, to: { output: 'out' } }],
+    note: { gate: [['envelope', 'gate']], 'vibrato depth': [] },
+  });
+  const drums = { kind: 'Drums', outputs: [{ name: 'out', channels: 1 }], pools: [pad(38), pad(40)] };
+  const plan = new Planner([VOICE, drums]).plan('Drums');
+  assert.deepEqual(
+    plan.node.pools.map(({ child, key }) => [child.name, key]),
+    [
+      ['pad 38', 38],
+      ['pad 40', 40],
+    ],
+  );
+  assert.deepEqual(plan.node.pools[0].note['vibrato depth'], [], 'a source of its own name');
+  const astray = { ...drums, kind: 'Astray', pools: [{ ...pad(38), note: { breath: [['envelope', 'breath']] } }] };
+  assert.throws(() => new Planner([VOICE, astray]), /pool pad 38: its note's breath into envelope\/breath, no param/);
+});
+
 test("a jack's channels as they come, where its block doesn't fix them: those wired into it, a node's outputs its inputs'; through a loop; mono where nothing comes", () => {
   const channels = (plan, name) => {
     const node = plan.node.children.find((child) => child.name === name);

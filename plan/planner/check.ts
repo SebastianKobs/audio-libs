@@ -15,8 +15,6 @@ import { formProblems } from './form-check.ts';
 import type { Catalog } from './catalog.ts';
 import type { Template, TemplateChild } from './template.ts';
 
-// what a note sets in a voice
-const NOTE_SOURCES = ['pitch', 'velocity', 'gate'] as const;
 // a name that's a number alone: under a pool, a copy's, so no child or macro is named so
 const NUMBER_ALONE = /^\d+$/;
 
@@ -176,11 +174,12 @@ function choiceProblems(template: Template, catalog: Catalog): string[] {
 function sameChoices(one: readonly string[], other: readonly string[]): boolean {
   return one.length === other.length && one.every((choice, index) => choice === other[index]);
 }
-// a voice's note's addresses params inside its pool's child
+// a voice's note's addresses params inside its pool's child, by its sources' names, the
+// instrument's
 function noteProblems(template: Template, catalog: Catalog): string[] {
   return (template.pools ?? []).flatMap(({ child, note }) =>
-    NOTE_SOURCES.flatMap((source) =>
-      (note?.[source] ?? [])
+    Object.entries(note ?? {}).flatMap(([source, addresses]) =>
+      addresses
         .filter((address) => !catalog.paramIn(child.kind, address))
         .map((address) => `pool ${child.name}: its note's ${source} into ${addressText(address)}, no param`),
     ),

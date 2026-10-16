@@ -8,6 +8,7 @@
 // A module's form by its job:
 //   - a source: its sound out; a modulator: its signal out, into a param;
 //   - a stage: a sound in and out; the output: a sound in, and out of the card.
+// An instrument's form: its voices, each of a voice card's form, each into its one output.
 import type { Form, FormWire } from '../planner/index.ts';
 import { frozen } from '../../util/index.ts';
 
@@ -40,8 +41,17 @@ export const ARCHITECTURE_FORM: Form = frozen<Form>({
   rules: [{ rule: 'no loops' }, { rule: 'ends in', role: 'out' }],
 });
 
-// the synth's forms: the architecture's, then its modules'
+export const INSTRUMENT_FORM: Form = frozen<Form>({
+  name: 'instrument',
+  inputs: [],
+  outputs: ['out'],
+  roles: [{ role: 'voice', form: ARCHITECTURE_FORM.name, least: 1 }],
+  wires: [{ from: { role: 'voice', output: 'out' }, to: { parent: 'out' } }],
+});
+
+// the synth's forms: the instrument's, the architecture's, then its modules'
 export const SYNTH_FORMS: readonly Form[] = frozen([
+  INSTRUMENT_FORM,
   ARCHITECTURE_FORM,
   SOURCE_FORM,
   MODULATOR_FORM,

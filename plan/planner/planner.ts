@@ -118,10 +118,11 @@ export class Planner {
       wires: template.wires ?? [],
       inputs: template.inputs ?? [],
     });
-    const pools = (template.pools ?? []).map(({ child: pooled, wires, note }) => ({
+    const pools = (template.pools ?? []).map(({ child: pooled, wires, note, key }) => ({
       child: planned(pooled),
       wires,
       ...(note && { note }),
+      ...(key !== undefined && { key }),
     }));
     return {
       ...named(child, template.label),

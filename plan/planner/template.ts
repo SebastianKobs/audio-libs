@@ -43,11 +43,13 @@ export interface TemplateMacro {
   readonly hint?: string;
   readonly maps: readonly MacroTarget[];
 }
-// a pool as a template writes it: its child, the wires each copy is wired by, a voice's note
+// a pool as a template writes it: its child, the wires each copy is wired by; a voice's note,
+// and its key, a drum rack's pad's
 export interface TemplatePool {
   readonly child: TemplateChild;
   readonly wires: readonly Wire[];
   readonly note?: NoteAddresses;
+  readonly key?: number;
 }
 // A template, by its kind, the name other templates give it; a list it doesn't write, none.
 // Built on another where it names one (extends): its base's whole, then its own (extend.ts).

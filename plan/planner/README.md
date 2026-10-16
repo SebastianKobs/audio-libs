@@ -23,7 +23,7 @@ How a plan is made:
 2. a child's template planned into it, its values by their addresses within it;
 3. a macro's spec its own, or its first target's under its name where it writes none; its value given, written, or its spec's default; onto its targets, a choice by its index, written there as the choice: a param a macro moves is the macro's, whatever else is given for it;
 4. a jack's channels as they come, where its block doesn't fix them: an input the most of what's wired into it, an output the most of its node's inputs, worked out again until a loop settles, mono where nothing comes;
-5. a pool's child ready, as each copy will be, its wires and its note's addresses kept.
+5. a pool's child ready, as each copy will be, its wires, its note's addresses and its key kept; a note's addresses checked under whatever names its sources have (LAY13b).
 
 No note: a voice's note sets its params as it plays.
 

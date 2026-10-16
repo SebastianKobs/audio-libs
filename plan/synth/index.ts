@@ -3,7 +3,11 @@
 // sources its macros, set as each note starts.
 // Its parts:
 //   - note.ts: a note's sources into a voice, as a voice card's CV, and the note's settings;
-//   - architecture-form.ts: what a voice card is, and its modules' forms by their jobs;
+//   - architecture-form.ts: what a voice card is, its modules' forms by their jobs, an
+//     instrument's;
+//   - instrument.ts: an instrument, a pool of voices, or a drum rack, a pool for each pad;
+//   - preset.ts: a preset changed, each value and setting that differs, by its address;
+//   - bank.ts: patches by name, a program change picking one;
 //   - modules/: the modules, VCO, Noise source, LFO, FM, Envelope generator, VCA, VCF, Tremolo,
 //     Ring, Out; none named as a block is.
 // Each read as it loads, its shape checked, every failure said, naming its file.
@@ -22,8 +26,12 @@ import vcf from './modules/vcf.yaml';
 import vco from './modules/vco.yaml';
 
 export { NOTE_SETTINGS, NOTE_SOURCES, type NoteSource } from './note.ts';
+export { Bank } from './bank.ts';
+export { instrumentOf, type Chain } from './instrument.ts';
+export { changesFrom, type Changes } from './preset.ts';
 export {
   ARCHITECTURE_FORM,
+  INSTRUMENT_FORM,
   MODULATOR_FORM,
   OUTPUT_FORM,
   SOURCE_FORM,

@@ -82,7 +82,7 @@ export const SYNTH = {
     {
       child: { name: 'voice', kind: 'Voice' },
       wires: [{ from: { node: 'voice', output: 'out' }, to: { output: 'out' } }],
-      note: { pitch: [['oscillator', 'frequency']], velocity: [], gate: [['envelope', 'gate']] },
+      note: { frequency: [['oscillator', 'frequency']], velocity: [], gate: [['envelope', 'gate']] },
     },
   ],
 };

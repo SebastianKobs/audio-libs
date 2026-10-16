@@ -1,0 +1,43 @@
+// ---------- plan/synth/preset: a preset changed ----------
+// A patch is a preset on an architecture: its values and settings by address (the planner's
+// Preset). Changed on a playing instrument:
+//   - each value that differs set by its address, glided there;
+//   - each setting that differs, what's built built again with it.
+// A value or a setting a preset lets go of goes back to its architecture's start.
+import { addressOf, paramAt, settingAt, type Address, type Plan, type ValuesByAddress } from '../format/index.ts';
+import type { Preset } from '../planner/index.ts';
+
+// what a preset's change sets: its values and its settings, by address
+export interface Changes {
+  readonly values: ValuesByAddress;
+  readonly settings: ValuesByAddress;
+}
+
+// A preset's change, from one to another on the same architecture.
+// architecture: the architecture planned with no preset, its own starting values.
+export function changesFrom(before: Preset, after: Preset, architecture: Plan): Changes {
+  if (after.kind !== before.kind) {
+    throw new Error(`another architecture, ${after.kind} for ${before.kind}: another instrument`);
+  }
+  return {
+    values: differing(before.values, after.values, (address) => paramAt(architecture, address)?.value),
+    settings: differing(before.settings, after.settings, (address) => settingAt(architecture, address)?.value),
+  };
+}
+
+// each value by address that differs after, one let go its start's
+function differing(
+  before: ValuesByAddress = {},
+  after: ValuesByAddress = {},
+  startOf: (address: Address) => number | string | undefined,
+): Record<string, number | string> {
+  const changed: Record<string, number | string> = {};
+  for (const text of new Set([...Object.keys(before), ...Object.keys(after)])) {
+    const start = startOf(addressOf(text));
+    const now = after[text] ?? start;
+    if (now !== undefined && now !== (before[text] ?? start)) {
+      changed[text] = now;
+    }
+  }
+  return changed;
+}
