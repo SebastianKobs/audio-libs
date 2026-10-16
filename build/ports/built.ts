@@ -10,6 +10,8 @@
 //     (my tap/3), its sources started at a time, now unless given; let go once it has rung out,
 //     as its owner says: an instrument's voice, a desk's channel;
 //   - rebuild(): built again from a plan, a setting or its structure changed, the old ringing out;
+//   - faded(): when what a block makes has faded for good, by its address: an envelope's, so its
+//     owner knows when a voice has rung out;
 //   - placeholders: what it couldn't build, by address: a block's sound passed straight through,
 //     a source silent; said, so it's seen, not only heard missing;
 //   - dispose(): taken apart, its sound stopped.
@@ -25,6 +27,7 @@ export interface Built {
   add(copy: Address, at?: number): void;
   letGo(copy: Address): void;
   rebuild(plan: Plan): void;
+  faded(address: Address): number;
   readonly placeholders: readonly Address[];
   dispose(): void;
 }

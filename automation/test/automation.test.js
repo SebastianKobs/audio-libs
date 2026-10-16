@@ -4,7 +4,8 @@
 //   - an event's time, a param restarted;
 //   - a value at a time, when a value lands, and changes as automation;
 //   - automation later by a time; one continued as another from a time, from where it plays;
-//   - automation as Web Audio holds it, told more.
+//   - automation as Web Audio holds it, told more;
+//   - when it has faded for good, within a floor.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -13,6 +14,7 @@ import {
   automationOf,
   continuedAs,
   eventOf,
+  fadedFrom,
   eventTime,
   levelAt,
   restartAt,
@@ -238,4 +240,72 @@ test('automation as Web Audio holds it, told more: a cancel dropping what was pl
       ['set', 2, 2],
     ],
   );
+});
+
+test('when automation has faded for good, within a floor: its last event where that leaves it there; a target once it comes within; never where it ends above it; from the start where nothing moves it', () => {
+  const floor = 1e-4;
+  assert.equal(
+    fadedFrom(
+      [
+        ['set', 1, 0],
+        ['exp', floor, 2],
+      ],
+      floor,
+    ),
+    2,
+  );
+  assert.equal(
+    fadedFrom(
+      [
+        ['set', 1, 0],
+        ['linear', 0, 2],
+      ],
+      floor,
+    ),
+    2,
+  );
+  assert.equal(
+    fadedFrom(
+      [
+        ['set', 1, 0],
+        ['linear', 0.5, 2],
+      ],
+      floor,
+    ),
+    Infinity,
+    'held above it',
+  );
+  near(
+    fadedFrom(
+      [
+        ['set', 1, 0],
+        ['target', 0, 1, 0.5],
+      ],
+      floor,
+    ),
+    1 + 0.5 * Math.log(1 / floor),
+  );
+  assert.equal(
+    fadedFrom(
+      [
+        ['set', 1, 0],
+        ['target', 0.5, 1, 0.5],
+      ],
+      floor,
+    ),
+    Infinity,
+    'approaching a level above it',
+  );
+  assert.equal(
+    fadedFrom(
+      [
+        ['set', 0, 0],
+        ['target', 0, 1, 0.5],
+      ],
+      floor,
+    ),
+    1,
+    'within it already',
+  );
+  assert.deepEqual([fadedFrom([], floor), fadedFrom([['value', 0]], floor)], [-Infinity, -Infinity]);
 });

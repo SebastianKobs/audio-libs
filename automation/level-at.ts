@@ -21,6 +21,30 @@ export function levelAt(automation: readonly Automation[], t: number): number {
   return new Levels(automation).at(t);
 }
 
+// When a param's level falls within a floor for good, as Web Audio plays its automation:
+//   - its last event's time, where that leaves it within it; its value as it's made, from the start;
+//   - a target's, once it comes within it, approaching a level within it;
+//   - never where it ends above it.
+// Automation as Web Audio holds it (scheduled()): no cancel left in it.
+export function fadedFrom(automation: readonly Automation[], floor: number): number {
+  const last = automation.at(-1);
+  if (!last || last[0] === 'cancel') {
+    return -Infinity;
+  }
+  if (Math.abs(last[1]) > floor) {
+    return Infinity;
+  }
+  if (last[0] === 'value') {
+    return -Infinity;
+  }
+  if (last[0] !== 'target') {
+    return last[2];
+  }
+  const [, value, at, timeConstant] = last;
+  const distance = Math.abs(levelAt(automation.slice(0, -1), at) - value);
+  const room = floor - Math.abs(value);
+  return distance <= room ? at : at + timeConstant * Math.log(distance / room);
+}
 // A param's levels at rising times, its automation walked once: a line drawn, sampled along it.
 // Times asked for never go back; the same time may be asked again.
 export class Levels {

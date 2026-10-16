@@ -4,7 +4,9 @@
 //   - closed: a gate's released from where it is then; a trigger's running on;
 //   - a stage, its sustain or its amount changed as it sounds: drawn again from where it is
 //     then; before its gate opens, kept for it;
-//   - opened again: drawn from 0 again.
+//   - opened again: drawn from 0 again;
+//   - closed sooner than it was told: released from then;
+//   - when it has faded for good, what's built says by its address.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
@@ -27,6 +29,11 @@ function envelopeOn(values = PLUCK, settings = {}) {
   const [source] = context.rec.nodes.filter((node) => node.kind === 'constant');
   const told = (from) => source.offset.events.slice(from);
   return { context, what, source, told };
+}
+// what's built of a plan at 4 s on a stand-in context
+function built(plan) {
+  const context = new StandInContext(() => 4);
+  return { what: new WebAudioBuilder({ context, beat: () => 0.5 }).build(plan, { into: context.destination }) };
 }
 // what its level is told as its gate opens at 5 s, a pluck's in a line
 const OPENED = [
@@ -109,4 +116,31 @@ test('opened again: drawn from 0 again', () => {
     ['linear', 2, 7.25],
     ['linear', 1, 7.75],
   ]);
+});
+
+test('closed sooner than it was told, a note with no end closed at its longest and let go before it: released from then; told later, passed by', () => {
+  const { what, told } = envelopeOn();
+  what.set(['gate'], 1, { at: 5 });
+  what.set(['gate'], 0, { at: 8 });
+  what.set(['gate'], 0, { at: 6 });
+  assert.deepEqual(told(8), [
+    ['cancel', 6],
+    ['set', 1, 6],
+    ['linear', 0, 6.25],
+  ]);
+  what.set(['gate'], 0, { at: 7 });
+  assert.equal(told(11).length, 0, 'closed already');
+});
+
+test("when it has faded for good, what's built says by its address: from the start before its gate opens; never while it holds a level; its release's end; a trigger's at its stages' end where they reach nothing", () => {
+  const { what } = envelopeOn();
+  assert.equal(what.faded([]), -Infinity);
+  what.set(['gate'], 1, { at: 5 });
+  assert.equal(what.faded([]), Infinity, 'held at its sustain');
+  what.set(['gate'], 0, { at: 6 });
+  assert.equal(what.faded([]), 6.25);
+  const struck = envelopeOn({ ...PLUCK, sustain: 0 }, { mode: 'trigger' });
+  struck.what.set(['gate'], 1, { at: 5 });
+  assert.equal(struck.what.faded([]), 5.75, 'its decay done');
+  assert.throws(() => built(oneBlockPlan('gain')).what.faded([]), /no reading faded/);
 });

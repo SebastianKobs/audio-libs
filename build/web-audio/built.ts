@@ -189,6 +189,10 @@ export class WebAudioBuilt implements Built {
     const meter = entryOf(meters, point, () => meterOn(this.#context(), this.#listenedAt(address, point)));
     return meter.peak();
   }
+  // when what a block makes has faded for good, as it says of itself: an envelope's
+  faded(address: Address): number {
+    return this.reading(address, 'faded');
+  }
   // what a block says of itself, by name, now: a limiter's reduction, in dB
   reading(address: Address, name: string): number {
     const reading = this.#blockAt(address).readings[name];

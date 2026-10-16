@@ -2,10 +2,12 @@
 // A constant source, its level following the envelope's curve from its gate. Wired into the
 // params it moves, its level adds to theirs, as CV into a VCA's.
 //   1. Its gate opened at a time: its curve drawn from 0 there.
-//   2. Closed, a gate's: its release from where it is then. A trigger's runs on.
+//   2. Closed, a gate's: its release from where it is then; sooner than it was told, from then.
+//      A trigger's runs on.
 //   3. A stage, its sustain or its amount changed as it sounds: its curve drawn again from
 //      where it is then, a held level glided to; before its gate opens, kept for it.
-import { continuedAs, scheduled, type Automation } from '../../../automation/index.ts';
+import { continuedAs, fadedFrom, scheduled, type Automation } from '../../../automation/index.ts';
+import { SILENCE } from '../../../params/index.ts';
 import { envelopeCurve, envelopeTarget, type EnvelopeCurve } from '../../../plan/blocks/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
 import { automate } from '../automation.ts';
@@ -30,7 +32,13 @@ export function envelope(node: Node, making: Making): BuiltNode {
   });
   making.started(made);
   const params = Object.fromEntries(['gate', ...STAGES].map((name) => [name, curve.param(name)]));
-  return new BuiltNode({ input: made, output: made, params, kind: 'an envelope' });
+  return new BuiltNode({
+    input: made,
+    output: made,
+    params,
+    readings: { faded: () => curve.faded() },
+    kind: 'an envelope',
+  });
 }
 
 // An envelope's curve as its level is told it: drawn from its gate, drawn again as it changes.
@@ -56,6 +64,14 @@ class EnvelopeCurveAsBuilt {
     this.#trigger = trigger;
     this.#now = now;
   }
+  // When it has faded for good, within the floor of silence: from the start before its gate
+  // opens; never while it holds a level.
+  faded(): number {
+    if (this.#opened === undefined) {
+      return -Infinity;
+    }
+    return fadedFrom(this.#drawn, SILENCE);
+  }
   // its gate, or a stage, its sustain, its release or its amount, as a param is automated
   param(name: string): ReturnType<typeof toldParam> {
     if (name === 'gate') {
@@ -80,7 +96,7 @@ class EnvelopeCurveAsBuilt {
       this.#draw([['cancel', at], ...this.#wanted()]);
       return;
     }
-    if (this.#trigger || this.#opened === undefined || this.#closed !== undefined) {
+    if (this.#trigger || this.#opened === undefined || (this.#closed !== undefined && this.#closed <= at)) {
       return;
     }
     this.#closed = at;

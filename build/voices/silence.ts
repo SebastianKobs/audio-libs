@@ -1,0 +1,182 @@
+// ---------- build/voices/silence: when a voice has rung out ----------
+// Worked out from its voice card's plan, as a synth stops a note's sources:
+//   1. A gain resting at nothing, opened only by envelopes, closes once they have all faded.
+//   2. A block is silent from where a gain it is closes, or as late as the latest of where its
+//      sound goes; the voice's own output never, a block whose sound goes nowhere at once.
+//   3. A source nothing closes is silent as its note's last release fades.
+//   4. The voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO
+//      or FM with the sound it moves.
+// Its blocks' sound followed across its composites, through their macros.
+import { SILENCE } from '../../params/index.ts';
+import {
+  addressOf,
+  addressText,
+  isComposite,
+  type Address,
+  type Composite,
+  type Node,
+} from '../../plan/format/index.ts';
+import type { Wire } from '../../plan/format/index.ts';
+
+// where a block's sound goes: another block's input, or one of its params; out of the voice, none
+interface Into {
+  readonly block: string;
+  readonly param: string | undefined;
+}
+// a block's sound into where it goes, by their addresses within the voice card as text
+interface Edge {
+  readonly from: string;
+  readonly into: Into | null;
+}
+
+export class Silence {
+  readonly #blocks = new Map<string, Node>(); // by its address within the voice card, as text
+  readonly #edges: Edge[] = [];
+
+  constructor(card: Composite) {
+    this.#collect(card, [], true);
+  }
+  // When a voice of this card is silent for good: each of its envelopes' faded times by their
+  // addresses within it, its note's end where it has one.
+  silentFrom(faded: (address: Address) => number, end: number | undefined): number {
+    const fadedAt = (block: string): number => faded(addressOf(block));
+    const released = [...this.#blocks].filter(([, node]) => isGateEnvelope(node)).map(([block]) => fadedAt(block));
+    const lastRelease = end === undefined ? Infinity : Math.max(end, ...released);
+    const sources = [...this.#blocks].filter(([, node]) => !node.inputs.length).map(([block]) => block);
+    return Math.max(
+      -Infinity,
+      ...sources.map((source) => Math.min(this.#silent(source, fadedAt, new Set()), lastRelease)),
+    );
+  }
+
+  // a composite's blocks, by their addresses, and its wires' edges, those of the composites inside it too
+  #collect(node: Composite, at: Address, isCard: boolean): void {
+    for (const child of node.children) {
+      const address = [...at, child.name];
+      if (isComposite(child)) {
+        this.#collect(child, address, false);
+      } else {
+        this.#blocks.set(addressText(address), child);
+      }
+    }
+    for (const { from, to } of node.wires) {
+      for (const block of soundsFrom(node, from, at)) {
+        for (const into of soundsInto(node, to, at, isCard)) {
+          this.#edges.push({ from: block, into });
+        }
+      }
+    }
+  }
+  // from when a block is silent for good: where a gain it is closes, or as late as where its sound goes
+  #silent(block: string, fadedAt: (block: string) => number, visiting: Set<string>): number {
+    if (visiting.has(block)) {
+      return Infinity; // a loop, never silent of itself
+    }
+    visiting.add(block);
+    const onward = this.#edges.filter((edge) => edge.from === block);
+    const latest = Math.max(
+      ...onward.map(({ into }) => (into === null ? Infinity : this.#silent(into.block, fadedAt, visiting))),
+    );
+    visiting.delete(block);
+    return Math.min(this.#closed(block, fadedAt), latest);
+  }
+  // when a gain resting at nothing closes, opened only by envelopes: once they have all faded; never else
+  #closed(block: string, fadedAt: (block: string) => number): number {
+    const node = this.#blocks.get(block)!; // one of its blocks
+    const level = node.params.find((param) => param.spec.name === 'gain')?.value;
+    if (node.kind !== 'gain' || typeof level !== 'number' || level > SILENCE) {
+      return Infinity;
+    }
+    const envelopes = this.#openedBy(block, 'gain', new Set());
+    if (!envelopes) {
+      return Infinity;
+    }
+    return Math.max(-Infinity, ...envelopes.map(fadedAt));
+  }
+  // The envelopes whose sound reaches a block's param, or its inputs where none is named, back
+  // through what passes their sound on; none where another source reaches it.
+  #openedBy(block: string, param: string | undefined, visiting: Set<string>): string[] | null {
+    const found: string[] = [];
+    const feeding = this.#edges.filter(({ into }) => into?.block === block && into.param === param);
+    for (const { from } of feeding) {
+      const node = this.#blocks.get(from)!; // one of its blocks
+      const inner = this.#feedersOf(from, node, visiting);
+      if (!inner) {
+        return null;
+      }
+      found.push(...inner);
+    }
+    return found;
+  }
+  // an envelope itself; another source, none; else what reaches its inputs
+  #feedersOf(block: string, node: Node, visiting: Set<string>): string[] | null {
+    if (node.kind === 'envelope') {
+      return [block];
+    }
+    if (!node.inputs.length || visiting.has(block)) {
+      return null;
+    }
+    visiting.add(block);
+    return this.#openedBy(block, undefined, visiting);
+  }
+}
+
+// an envelope its gate releases, not a trigger's
+function isGateEnvelope(node: Node): boolean {
+  return node.kind === 'envelope' && node.settings.find((setting) => setting.spec.name === 'mode')?.value !== 'trigger';
+}
+// The blocks whose sound a wire's start carries in a composite: a child block's; a child
+// composite's output's, followed inside; none for its own input, led in from outside.
+function soundsFrom(node: Composite, from: Wire['from'], at: Address): string[] {
+  if (!('node' in from)) {
+    return [];
+  }
+  const child = childOf(node, from.node);
+  const address = [...at, child.name];
+  if (!isComposite(child)) {
+    return [addressText(address)];
+  }
+  return child.wires
+    .filter(({ to }) => !('node' in to) && to.output === from.output)
+    .flatMap((wire) => soundsFrom(child, wire.from, address));
+}
+// Where a wire's end in a composite takes a sound: a child block's input or param; a child
+// composite's input or macro, followed inside; its own output out of the voice, where it's the
+// voice card, else led on from outside.
+function soundsInto(node: Composite, to: Wire['to'], at: Address, isCard: boolean): (Into | null)[] {
+  if (!('node' in to)) {
+    return isCard ? [null] : [];
+  }
+  const child = childOf(node, to.node);
+  const address = [...at, child.name];
+  if (!isComposite(child)) {
+    return [{ block: addressText(address), param: 'param' in to ? to.param : undefined }];
+  }
+  if ('param' in to) {
+    return macroInto(child, to.param, address);
+  }
+  return child.wires
+    .filter(({ from }) => !('node' in from) && from.input === to.input)
+    .flatMap((wire) => soundsInto(child, wire.to, address, false));
+}
+// where a sound into a composite's macro goes: each of its maps' targets, followed down
+function macroInto(node: Composite, name: string, at: Address): Into[] {
+  const maps = node.macros.find((macro) => macro.spec.name === name)?.maps ?? [];
+  return maps.flatMap(({ to }) => paramInto(node, to, at));
+}
+// a param by its address within a composite: a child block's own; a child composite's macro, followed down
+function paramInto(node: Composite, [name, ...rest]: Address, at: Address): Into[] {
+  const child = childOf(node, name!); // a well-formed plan's
+  const address = [...at, child.name];
+  if (rest.length > 1 && isComposite(child)) {
+    return paramInto(child, rest, address);
+  }
+  if (!isComposite(child)) {
+    return [{ block: addressText(address), param: rest[0] }];
+  }
+  return macroInto(child, rest[0]!, address);
+}
+// a composite's child by its name, a well-formed plan's
+function childOf(node: Composite, name: string): Node {
+  return node.children.find((child) => child.name === name)!;
+}
