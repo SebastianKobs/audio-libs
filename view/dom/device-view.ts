@@ -2,17 +2,21 @@
 // As Ableton shows a device:
 //   1. its bar: its status, what it is and what it does, and what sets it; a reset for what's
 //      live on it, where the view gives one;
-//   2. its controls: a view of its own first, where it has one; then each knob, by its name
-//      and unit, read-only where it isn't live, marked by how it's set.
+//   2. its controls: a view of its own first, where it has one; then each, by its name and
+//      unit, a knob, a switch or a choice, read-only where it isn't live, marked by how it's
+//      set.
 // A setting shown only where it's live: one fixed as built isn't the device's to change.
+// A time with a sync switch shows its note while synced, its free time while not.
+import { timeParamsIn } from '../../params/index.ts';
 import { addressText } from '../../plan/format/index.ts';
-import { Knob, type Control, type Device } from '../models/index.ts';
+import { Choice, type Control, type Device, type Knob } from '../models/index.ts';
+import { choiceHtml, switchHtml } from './choice-view.ts';
 import { html, type Html } from './elements.ts';
 import { knobHtml } from './knob-view.ts';
 
 // How a view shows a device beside the device itself:
 //   - status: its bar's line; reset: its reset button's label, none for no reset;
-//   - own: a view of its own, drawn before its knobs;
+//   - own: a view of its own, drawn before its controls;
 //   - hintOf(): a control's hint.
 export interface DeviceLook {
   readonly status: string;
@@ -26,15 +30,33 @@ export function deviceHtml(device: Device, look: DeviceLook): Html {
   const key = addressText(device.address);
   const reset =
     look.reset === undefined ? html`` : html`<button class="reset" data-reset="${key}">${look.reset}</button>`;
-  const knobs = device.controls
-    .filter(shown)
-    .map((knob) => knobHtml(labelOf(knob), knob, { title: look.hintOf(knob) }));
-  return html`<div class="device flowless" data-device="${key}"><div class="bar"><div class="status" title="${look.status}">${look.status}</div>${reset}</div><div class="body"><div class="controls">${look.own ?? ''}${knobs}</div></div></div>`;
+  const controls = shownOf(device.controls).map((control) => controlHtml(control, look.hintOf(control)));
+  return html`<div class="device flowless" data-device="${key}"><div class="bar"><div class="status" title="${look.status}">${look.status}</div>${reset}</div><div class="body"><div class="controls">${look.own ?? ''}${controls}</div></div></div>`;
 }
 
-// whether a control is shown as a knob: a param with a range, or a setting with one that's live
-function shown(control: Control): control is Knob {
-  return control instanceof Knob && (control.kind === 'param' || control.live);
+// Its controls shown, in order:
+//   - a param, or a setting where it's live;
+//   - of a time with a sync switch, the note while synced, the free time while not.
+function shownOf(controls: readonly Control[]): Control[] {
+  const shown = controls.filter(({ kind, live }) => kind === 'param' || live);
+  const time = timeParamsIn(shown.map(({ name }) => name));
+  if (!time) {
+    return shown;
+  }
+  const sync = shown.find(({ name }) => name === time.sync) as Knob; // found by its name, a switch
+  const hidden = sync.value > 0 ? time.free : time.note;
+  return shown.filter(({ name }) => name !== hidden);
+}
+// a control drawn: a choice as a list, a switch, any other a knob
+function controlHtml(control: Control, title: string): Html {
+  if (control instanceof Choice) {
+    return choiceHtml(control.name, control, title);
+  }
+  const knob = control as Knob; // not a choice: a knob
+  if (knob.isSwitch) {
+    return switchHtml(knob.name, knob, title);
+  }
+  return knobHtml(labelOf(knob), knob, { title });
 }
 // a knob's label: its name, its unit after it
 function labelOf(knob: Knob): string {

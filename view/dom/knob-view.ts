@@ -6,6 +6,7 @@
 // A live one dragged and set back (KnobDrag):
 //   - up or down, its whole travel in 200 px, a tenth of that with shift, each move from the
 //     last, so shift can come and go;
+//   - a setting set once, as the drag ends: each change a rebuild;
 //   - a double-click sets it back to its start.
 import { positionOf } from '../../params/index.ts';
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
@@ -89,9 +90,7 @@ export class KnobDrag {
     this.#moved = moved;
     within.addEventListener('pointerdown', (event) => this.#start(event));
     window.addEventListener('pointermove', (event) => this.#move(event));
-    window.addEventListener('pointerup', () => {
-      this.#drag = null;
-    });
+    window.addEventListener('pointerup', () => this.#end());
     within.addEventListener('dblclick', (event) => this.#reset(event));
   }
   // a press on a live knob starts its drag, from where its value lies on it
@@ -111,8 +110,19 @@ export class KnobDrag {
     const travel = (this.#drag.pointerY - event.clientY) / (event.shiftKey ? TRAVEL * FINER : TRAVEL);
     this.#drag.pointerY = event.clientY;
     this.#drag.position = clamp01(this.#drag.position + travel);
-    this.#drag.knob.turnTo(this.#drag.position);
-    this.#moved();
+    if (this.#drag.knob.kind === 'param') {
+      this.#drag.knob.turnTo(this.#drag.position);
+      this.#moved();
+    }
+  }
+  // the drag ended: a setting set where it was left
+  #end(): void {
+    const drag = this.#drag;
+    this.#drag = null;
+    if (drag?.knob.kind === 'setting') {
+      drag.knob.turnTo(drag.position);
+      this.#moved();
+    }
   }
   #reset(event: Event): void {
     const knob = this.#knobAt(event);

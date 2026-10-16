@@ -112,7 +112,7 @@ test('a strip whose track plays nothing drawn empty: its sends and fader at the 
 test("a device drawn: its bar, its status and its reset; its knobs by their names and units, each marked with its address, read-only ones marked by how they're set; a view of its own first; settings not live left out", () => {
   const views = viewsOn({
     values: { 'tap/utility/level': 0.5 },
-    roles: { 'tap/utility/pan': { by: 'automated', source: 'distance' } },
+    roles: { 'tap/utility/pan': { by: 'automated', source: 'distance' }, 'tap/utility/pan/law': { by: 'fixed' } },
   });
   const device = views.device(['tap', 'utility']);
   const text = deviceHtml(device, {
@@ -161,6 +161,63 @@ test("a setting with a range shown as a knob only where it's live: a room's leng
   const look = { status: 'room', hintOf: () => '' };
   assert.match(deviceHtml(devicesOn('live'), look).text, /<span>length \(s\)<\/span>/);
   assert.doesNotMatch(deviceHtml(devicesOn('fixed'), look).text, /length/);
+});
+
+// a delay's own, as the Delay's macros: its sync switch, its note, its ms, its feedback
+const ECHO = {
+  version: 1,
+  node: {
+    name: 'delay',
+    kind: 'Delay',
+    inputs: [],
+    outputs: [],
+    params: [],
+    settings: [],
+    children: [],
+    wires: [],
+    macros: [
+      { spec: { name: 'sync', range: [0, 1, 1] }, value: 1, maps: [] },
+      { spec: { name: 'note', choices: ['1/8', '1/4'] }, value: '1/8', maps: [] },
+      { spec: { name: 'ms', unit: 'ms', range: [1, 2000, 1], taper: 'octaves' }, value: 250, maps: [] },
+      { spec: { name: 'feedback', range: [0, 0.95, 0.01] }, value: 0.45, maps: [] },
+    ],
+    pools: [],
+  },
+};
+// the delay's device, its values by address
+function echoOn(values = {}) {
+  return new ViewBuilder({
+    plan: ECHO,
+    valueOf: (address) => values[addressText(address)],
+    startOf: () => undefined,
+    roleOf: () => ({ by: 'live' }),
+    peakOf: () => 0,
+    copiesOf: () => [],
+    slotOf: () => undefined,
+    send: () => {},
+  }).device([]);
+}
+
+test("a device's switch drawn on or off, marked for a click; a choice as a list of its options, the one it is chosen; its time by its sync, the note while synced, the ms while free", () => {
+  const look = { status: 'Delay', hintOf: (control) => `${control.name}!` };
+  const synced = deviceHtml(echoOn(), look).text;
+  assert.match(
+    synced,
+    /<div class="switch on" data-knob="sync" data-toggle="sync" title="sync!"><span>sync<\/span><b>on<\/b><\/div>/,
+  );
+  assert.match(
+    synced,
+    /<label class="choice" title="note!"><span>note<\/span><select data-choose="note"><option selected>1\/8<\/option><option>1\/4<\/option><\/select><\/label>/,
+  );
+  assert.doesNotMatch(synced, /<span>ms/, 'synced: no ms');
+  assert.match(synced, /<span>feedback<\/span>/);
+  const free = deviceHtml(echoOn({ sync: 0, note: '1/4' }), look).text;
+  assert.match(
+    free,
+    /<div class="switch" data-knob="sync" data-toggle="sync" title="sync!"><span>sync<\/span><b>off<\/b><\/div>/,
+  );
+  assert.match(free, /<span>ms \(ms\)<\/span>/, 'free: its ms');
+  assert.doesNotMatch(free, /data-choose="note"/, 'free: no note');
 });
 
 test('every value escaped as it is made', () => {
