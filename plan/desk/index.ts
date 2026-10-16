@@ -16,7 +16,7 @@ import { frozen } from '../../util/index.ts';
 
 export { CHANNEL_FORM } from './channel-form.ts';
 export { DESK_FORM, type DeskRole } from './desk-form.ts';
-export { SEND, type Channel, type ChannelParts, type Insert, type Tap } from './channel.ts';
+export { SEND, type Channel, type ChannelMix, type ChannelParts, type Insert, type Tap } from './channel.ts';
 export { deskTemplates, type Desk, type DeskChannel, type DeskPool } from './desk.ts';
 export { MUTE_GLIDE, silenced, type Muting } from './mute-solo.ts';
 export { channelOf, deskOf } from './shape.ts';

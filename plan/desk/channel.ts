@@ -28,6 +28,15 @@ export interface ChannelParts {
   readonly volume?: number;
   readonly tap?: Tap;
 }
+// A channel's mix, as the session view keeps it (settings.mix):
+//   - its fader's volume and its pan;
+//   - each send's amount, by its return.
+// Kept by channel until the mix is kept by address, as every other value.
+export interface ChannelMix {
+  volume: number;
+  pan: number;
+  sends?: Record<string, number>;
+}
 // a channel written apart, by its kind, on another where it says
 export interface Channel extends ChannelParts {
   readonly kind: string;
