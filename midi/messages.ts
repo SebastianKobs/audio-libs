@@ -25,11 +25,22 @@ export interface NoteOff {
 }
 // a note's per-note controllers, each in its own units, not MIDI's numbers. MIDI 2.0's registered ones (M2-104-UM, Appendix A, Table 11):
 // those a note is heard by, #7 Volume a gain, #10 Pan from -1 to 1, #74 Brightness a lowpass's cutoff in Hz, #91 Effects 1 Depth its
-// reverb send's gain; #77 Vibrato Depth in cents; #3 Pitch 7.25, a MIDI note number, which the spec gives a sender that controls a note's
-// pitch all its life, its glides too (4.2.14). And assignable ones, by name, a note's own values: its rise, in seconds, how long a drone
-// swells (G0c); its bend, in semitones, where it slides in from (G0d2)
+// reverb send's gain; how it's played, #77 Vibrato Depth in cents, #76 Vibrato Rate in Hz, #2 Breath from 0 to 1, #75 Decay Time in
+// seconds (LAY14a3); #3 Pitch 7.25, a MIDI note number, which the spec gives a sender that controls a note's pitch all its life, its
+// glides too (4.2.14). And assignable ones, by name, a note's own values: its rise, in seconds, how long a drone swells (G0c); its
+// bend, in semitones, where it slides in from (G0d2)
 export type PerNoteControllerName =
-  'volume' | 'pan' | 'brightness' | 'effects 1 depth' | 'vibrato depth' | 'pitch' | 'rise' | 'bend';
+  | 'volume'
+  | 'pan'
+  | 'brightness'
+  | 'effects 1 depth'
+  | 'vibrato depth'
+  | 'vibrato rate'
+  | 'breath'
+  | 'decay time'
+  | 'pitch'
+  | 'rise'
+  | 'bend';
 // a note's per-note controllers' values, by name
 export type PerNoteValues = Partial<Record<PerNoteControllerName, number>>;
 // one of a note's per-note controllers: sent with its note on, its value as it starts; sent later, a change
