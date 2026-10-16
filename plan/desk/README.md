@@ -1,0 +1,28 @@
+# plan/desk
+
+The desk's forms, a desk written short, its mute and solo: a package of its own since LAY10b2. A desk is a template, planned as any (`libs/plan/planner/`); this library says what a valid one is, makes one from a desk written short, and says which channels a mute or a solo silences. Nothing plays from it until LAY11, which builds the studio's desk from its plan.
+
+```ts
+import { DESK_FORMS, deskTemplates } from './index.ts';
+import { EFFECT_FORM, EFFECT_TEMPLATES } from '../effects/index.ts';
+import { Planner } from '../planner/index.ts';
+const templates = [...EFFECT_TEMPLATES, ...deskTemplates(desk, channels)];
+const plan = new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], presets).plan(desk.kind);
+```
+
+**A channel** is a console's, its parts in one order: its inserts, effects, any number; its mute (`cut`), a gain, after the inserts, as a console's cut; its fader; its pan, where it has one; its sends, one child (`send`). Its own params are a strip's, `libs/params/`'s `STRIP_PARAMS`: `volume`, `pan`, `mute` and `solo`; mute and solo are switches wired to nothing, what they silence the desk's rule's (`silenced()`), set on each channel's `cut` by its address.
+
+**A send** goes to a return: one on each channel for each return before it on the desk, none that feeds it, as a desk's knobs; a pool's channel has one for every return. Each is a select between its two taps, then a gain, its amount a param by the return's name (`you/send/reverb`). Its tap is a setting of its select (`you/send/reverb tap/input`): post (`a`), after the fader and the pan, to start, or pre (`b`), after the mute, before the fader, as a console's PRE button.
+
+**The master** is the last bus: its inserts and its fader alone, its volume the Output's (`master/volume`); no pan, mute, solo or sends.
+
+**A desk written short**, as a studio's YAML writes it: its channels in order, each by its name and role (a channel, fed from outside; a bus; a return; the master), written there or on a channel written apart (`channel`), its own parts over that one's; each one's way out (`out`), a bus, the master where it names none; a send's tap by its return (`taps`), where it isn't its channel's own; its pools, channels that come and go, each copy wired as its pool's channel. A channel written apart has its inserts, a pan or none (`pan: false`), its fader's start (`volume`), its sends' tap (`tap`), and the channel it's built on (`extends`), whose inserts come first.
+
+| | |
+|---|---|
+| `CHANNEL_FORM`, `DESK_FORM`, `DESK_FORMS`, `DeskRole` | what every channel and every desk is, as forms: a channel's roles in order, the wires between them; a desk's channels by role, at least one channel, a pool of them one, exactly one master, a way out into a bus or the master, a send into a return, no loops, every way out ending in the master (`channel-form.ts`, `desk-form.ts`) |
+| `deskTemplates(desk, channels)`, `Desk`, `DeskChannel`, `DeskPool` | a desk written short made into templates: the desk's, of the desk's form, its own inputs into its channels and buses, and each channel's and its sends', a pool's among them; refused where it's written wrong, every failure said: a channel not handed in, or built in a loop; a way out into no bus; a tap for a return it has no send to (`desk.ts`) |
+| `Channel`, `ChannelParts`, `Insert`, `Tap` | a channel written short, apart or on a desk; made into a template of the channel's form, its stages and sends filled in and wired (`channel.ts`) |
+| `silenced(inside, { muted, soloed })`, `Muting` | which channels a mute or a solo silences, as Ableton's, over a desk plan's wires: those muted; with any soloed, every one but what a soloed one needs to be heard, its way out to the master and what feeds it; a return never by a solo, the master never; a pool's copies where the caller adds them (`mute-solo.ts`) |
+
+Tested in node, in its `test/` folder, on small desks (`test/desks.js`): a channel of the channel's form, its own params; its wires, its sends taken pre and post; the master's; a send for each return before a channel, none that feeds it, a pool's for every one, each tap post unless said; the desk's own inputs, ways out, sends and pools; a channel built on another; a desk written wrong refused; mute and solo as today's routing had them, a pool's copy among them (`test/desk.test.js`). Built by the Web Audio builder on the stand-in, every block made, in `mockup/test/unit/desk-templates.test.js`.

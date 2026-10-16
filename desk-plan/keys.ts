@@ -7,8 +7,7 @@
 // Strip, slot and param names hold no slash.
 // A controller sent to a strip's track names the key without its strip, the track's:
 // `volume`, `send/reverb`, `utility/level`.
-import { isParamSpec, type ParamSpec, type ParamSpecs } from '../params/index.ts';
-import { SEND_PARAM, STRIP_PARAMS } from './params.ts';
+import { isParamSpec, SEND_PARAM, STRIP_PARAMS, type ParamSpec, type ParamSpecs } from '../params/index.ts';
 
 // a parameter's key: its strip, its slot where it's a send's or a device's, and its param
 export interface ParamKey {
