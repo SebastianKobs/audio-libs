@@ -17,6 +17,11 @@ export interface TemplateChild {
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
 }
+// A child written with a preset, by its name: the preset's kind, values and settings, its own over them
+// (presets.ts).
+export interface PresetChild extends Omit<TemplateChild, 'kind'> {
+  readonly preset: string;
+}
 // A preset on a template, as a theme writes one: the template's kind, and the values and settings
 // it changes, by their addresses within it.
 export interface Preset {
@@ -51,4 +56,8 @@ export interface Template {
   readonly wires?: readonly Wire[];
   readonly macros?: readonly TemplateMacro[];
   readonly pools?: readonly TemplatePool[];
+}
+// A template as written, read from data or handed to the planner: each child by its kind or by a preset.
+export interface WrittenTemplate extends Omit<Template, 'children'> {
+  readonly children?: readonly (TemplateChild | PresetChild)[];
 }

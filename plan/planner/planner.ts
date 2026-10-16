@@ -25,9 +25,10 @@ import type { ParamSpec } from '../../params/index.ts';
 import { withChannels, type LooseJack } from './channels.ts';
 import { problemsInAll } from './check.ts';
 import { extendedAll } from './extend.ts';
+import { withPresets } from './presets.ts';
 import type { Form } from './form.ts';
 import { Kinds } from './kinds.ts';
-import type { Template, TemplateChild, TemplateMacro } from './template.ts';
+import type { Preset, Template, TemplateChild, TemplateMacro, WrittenTemplate } from './template.ts';
 
 // what a plan is asked with: its top node's name, its kind's unless given; values and settings
 // changed by their addresses, a preset's
@@ -48,10 +49,21 @@ interface Given {
 export class Planner {
   readonly #kinds: Kinds;
 
-  // The templates, each merged with the one it's built on, then checked well-formed and held to
-  // its form, then its macros onto choices; every failure said at once.
-  constructor(templates: readonly Template[], forms: readonly Form[] = []) {
-    const merged = extendedAll(templates);
+  // The templates, as each is written:
+  //   1. each child written with a preset given its kind, from the presets handed in (a theme's);
+  //   2. each merged with the one it's built on;
+  //   3. checked well-formed and held to its form, then its macros onto choices.
+  // Every failure said at once.
+  constructor(
+    templates: readonly WrittenTemplate[],
+    forms: readonly Form[] = [],
+    presets: Readonly<Record<string, Preset>> = {},
+  ) {
+    const resolved = withPresets(templates, presets);
+    if (resolved.problems.length) {
+      throw new Error(['templates not well-formed:', ...resolved.problems].join('\n'));
+    }
+    const merged = extendedAll(resolved.templates);
     this.#kinds = new Kinds(merged.templates);
     const byName = new Map(forms.map((form) => [form.name, form]));
     const problems = merged.problems.length ? merged.problems : problemsInAll(merged.templates, this.#kinds, byName);

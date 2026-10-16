@@ -9,6 +9,7 @@ import noise from './noise.ts';
 import oscillator from './oscillator.ts';
 import pan from './pan.ts';
 import reverb from './reverb.ts';
+import select from './select.ts';
 import { frozen } from '../../util/index.ts';
 import type { Block } from './block.ts';
 
@@ -26,4 +27,5 @@ export const BLOCKS = frozen({
   noise,
   limiter,
   envelope,
+  select,
 }) satisfies Readonly<Record<string, Block>>;

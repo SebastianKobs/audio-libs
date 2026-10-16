@@ -15,6 +15,7 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `noise` | | colour: noise, breath | none; out, mono |
 | `limiter` | gain (dB), ceiling (dBFS), release (s) | | in; out |
 | `envelope` | gate, a switch; delay, attack, hold, decay, release (s); sustain; amount | | none; out, mono |
+| `select` | | input: a, b, the one passed on, the other going nowhere, as a console's PRE button picks where a send is taken | a, b; out |
 
 An input's or an output's channels are given where the block fixes them; elsewhere they're as they come, the plan's node saying.
 
@@ -31,4 +32,4 @@ An input's or an output's channels are given where the block fixes them; elsewhe
 | `REVERB_LENGTH` | how long a reverb's tail is; the synth's reverb on it (`reverb.ts`) |
 | `envelopeStages(times, target, continuous)`, `envelopeRelease(release, target, { from, stages })`, `EnvelopeTimes`, `EnvelopeTarget`, `EnvelopeStage` | how an envelope moves, as automation, for a builder that builds it as a curve: its stages from its gate opening, after its delay up over its attack, held over its hold, down to its sustain over its decay, a stage with no time set at once, with no delay and no attack at its top at once; its release from its gate closing, from where its stages have it, a ramp running then cut there at the level it has reached, down to 0, and when it has faded; on numbers its caller resolved, its target saying what a point of the curve is there and the ramp each stage takes; the synth's stages on it (`envelope-curve.ts`, LAY6b) |
 
-Tested in node, in its `test/` folder: the nine blocks by their kinds; every param and setting on a control, a range or choices, a default declared inside it, its name one of a kind, an input's and an output's too; what each declares, in short standard terms, its channels where it fixes them; its settings' choices; a filter's stages' Qs at either slope (`test/blocks.test.js`); an envelope's curve, its stages, the short ways and its release (`test/envelope-curve.test.js`).
+Tested in node, in its `test/` folder: the ten blocks by their kinds; every param and setting on a control, a range or choices, a default declared inside it, its name one of a kind, an input's and an output's too; what each declares, in short standard terms, its channels where it fixes them; its settings' choices; a filter's stages' Qs at either slope (`test/blocks.test.js`); an envelope's curve, its stages, the short ways and its release (`test/envelope-curve.test.js`).

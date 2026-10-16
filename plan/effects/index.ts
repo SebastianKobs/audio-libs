@@ -4,7 +4,7 @@
 // Each read as it loads, its shape checked, every failure said, naming its file.
 // What every effect is, one input and one output, its form (form.ts).
 // Handed to the planner, with the form; a theme's or a desk's presets on them.
-import { templateOf, type Template } from '../planner/index.ts';
+import { templateOf, type WrittenTemplate } from '../planner/index.ts';
 import { frozen } from '../../util/index.ts';
 import delay from './delay.yaml';
 import filter from './filter.yaml';
@@ -16,7 +16,7 @@ import utility from './utility.yaml';
 export { EFFECT_FORM } from './form.ts';
 
 // the effects, in the order a device view lists them
-export const EFFECT_TEMPLATES: readonly Template[] = frozen([
+export const EFFECT_TEMPLATES: readonly WrittenTemplate[] = frozen([
   templateOf(utility, 'libs/plan/effects/utility.yaml'),
   templateOf(filter, 'libs/plan/effects/filter.yaml'),
   templateOf(limiter, 'libs/plan/effects/limiter.yaml'),

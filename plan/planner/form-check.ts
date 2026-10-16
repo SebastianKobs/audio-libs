@@ -19,7 +19,7 @@ export function formProblems(template: Template, form: Form, kinds: Kinds): stri
   const problems = [
     ...jackProblems(template, form),
     ...(form.roles ? [...children, ...pooled].flatMap((child) => roleProblems(child, roles, kinds)) : []),
-    ...roles.flatMap((role) => countProblems(role, children)),
+    ...roles.flatMap((role) => countProblems(role, [...children, ...pooled])), // a pool one of its role
     ...(form.ordered ? orderProblems(children, form) : []),
     ...wireProblems(template, form),
     ...(form.rules ?? []).flatMap((rule) => ruleProblems(rule, template)),
@@ -127,10 +127,11 @@ function endName(end: WireFrom | WireTo): string {
   }
   return 'input' in end ? `in ${end.input}` : `out ${end.output}`;
 }
-// a rule held: no loops through any child; every child's way out, by its main outputs, ending in the role, where there's one
+// a rule held: no loops through any child; every child's way out, by its main outputs, ending in the role, where there's one;
+// a pool's child among the children, its wires among the wires
 function ruleProblems(rule: FormRule, template: Template): string[] {
-  const children = template.children ?? [];
-  const inside = { wires: template.wires ?? [] };
+  const children = [...(template.children ?? []), ...(template.pools ?? []).map((pool) => pool.child)];
+  const inside = { wires: wiresOf(template) };
   if (rule.rule === 'no loops') {
     return children
       .filter((child) =>

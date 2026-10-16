@@ -272,7 +272,7 @@ test("a template read from data, as YAML's is: its shape checked, each failure s
       '  its kind not a word',
       '  its form not a word',
       '  its inputs not a list',
-      '  children 1: no kind',
+      '  children 1: no kind or preset',
       '  children 2: not an object',
       '  wires 1: no to',
       '  macros 1: no maps',
@@ -406,4 +406,86 @@ test("presets read from data, as a theme's YAML writes them, by name: each a tem
       '  room: not an object',
     ].join('\n'),
   });
+});
+
+// a rack of one child, written with a preset, wired between the rack's input and output
+function rackWith(child) {
+  return {
+    kind: 'Rack',
+    inputs: [{ name: 'in', channels: 2 }],
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [child],
+    wires: [
+      { from: { input: 'in' }, to: { node: child.name, input: 'in' } },
+      { from: { node: child.name, output: 'out' }, to: { output: 'out' } },
+    ],
+  };
+}
+
+test("a child written with a preset: its kind the preset's, the preset's values and settings, its own over them; a preset not handed in said", () => {
+  const presets = {
+    quiet: { kind: 'Utility', values: { level: 0.25, pan: -0.5 }, settings: { 'pan/law': 'pan pot' } },
+  };
+  const planned = new Planner(
+    [UTILITY, rackWith({ name: 'side', preset: 'quiet', values: { pan: 0.5 } })],
+    [],
+    presets,
+  );
+  const plan = planned.plan('Rack');
+  const [side] = plan.node.inside.children;
+  assert.equal(side.kind, 'Utility', "its kind the preset's");
+  assert.deepEqual(
+    [paramAt(plan, ['side', 'level']).value, paramAt(plan, ['side', 'pan']).value],
+    [0.25, 0.5],
+    "the preset's level, its own pan over the preset's",
+  );
+  assert.equal(settingAt(plan, ['side', 'pan', 'law']).value, 'pan pot', "the preset's setting");
+  assert.deepEqual(failuresOf([UTILITY, rackWith({ name: 'side', preset: 'loud' })], []), [
+    'Rack: side: no preset loud',
+  ]);
+  assert.equal(
+    templateOf(rackWith({ name: 'side', preset: 'quiet' }), 'rack.yaml').children[0].preset,
+    'quiet',
+    'read from data: a child by its name and its preset',
+  );
+  assert.throws(() => templateOf(rackWith({ name: 'side' }), 'rack.yaml'), /children 1: no kind or preset/);
+});
+
+test("a form's counts and rules over its pools too: a pool counting as one of its role; its wires held to the rules, a way out not ending in the master said", () => {
+  const pooled = {
+    ...DESK,
+    kind: 'Pooled',
+    children: DESK.children.filter((child) => child.role !== 'channel'),
+    wires: DESK.wires.filter(({ from }) => from.node !== 'my tap 1'),
+    pools: [
+      {
+        child: { name: 'my tap', kind: 'Strip', role: 'channel' },
+        wires: [{ from: { node: 'my tap', output: 'out' }, to: { node: 'my playing', input: 'in' } }],
+      },
+    ],
+  };
+  assert.deepEqual(
+    failuresOf([UTILITY, STRIP, pooled], [CHANNEL_FORM, DESK_FORM]),
+    [],
+    'a pool of channels: a channel',
+  );
+  const astray = {
+    ...pooled,
+    kind: 'Astray',
+    pools: [{ child: { name: 'stray', kind: 'Strip', role: 'channel' }, wires: [] }],
+  };
+  assert.deepEqual(failuresOf([UTILITY, STRIP, astray], [CHANNEL_FORM, DESK_FORM]), [
+    "Astray: form desk: stray: its way out doesn't end in the master",
+  ]);
+  const two = {
+    ...pooled,
+    kind: 'Two',
+    pools: [...pooled.pools, { child: { name: 'mains', kind: 'Strip', role: 'master' }, wires: [] }],
+  };
+  assert.ok(
+    failuresOf([UTILITY, STRIP, two], [CHANNEL_FORM, DESK_FORM]).includes(
+      'Two: form desk: role master: 2 children, at most 1',
+    ),
+    'a pool of masters: one more master',
+  );
 });

@@ -2,6 +2,7 @@
 // A plan's node is one of Web Audio's (BuiltNode.of()), or one the engine builds from
 // several (a limiter, blocks/limiter.ts). Either way it has:
 //   - input, output: where its sound comes in and goes out; a Web Audio node is both;
+//   - inputs: a way in by an input's name, where its inputs go in apart (a select's two); else its input;
 //   - its params by the plan's names; one built from several has them in the plan's units
 //     (param-in-units.ts), so a sound can't be cabled into them;
 //   - points a meter reads inside it, by name, and readings of what it says of itself
@@ -27,6 +28,7 @@ export class BuiltNode {
   readonly node: WebAudioNode | null;
   readonly kind: string; // what it is, for an error's message
   readonly #params: Readonly<Record<string, unknown>>;
+  readonly #inputs: Readonly<Record<string, AudioNode>>;
   readonly #cables: Readonly<Record<string, readonly AudioParam[]>>;
 
   // one of Web Audio's: its own way in and out, its params its own
@@ -38,6 +40,7 @@ export class BuiltNode {
     input,
     output,
     params,
+    inputs = {},
     cables = {},
     points = {},
     readings = {},
@@ -47,6 +50,7 @@ export class BuiltNode {
     input: AudioNode;
     output: AudioNode;
     params: Readonly<Record<string, unknown>>;
+    inputs?: Readonly<Record<string, AudioNode>>;
     cables?: Readonly<Record<string, readonly AudioParam[]>>;
     points?: Record<string, AudioNode>;
     readings?: Record<string, () => number>;
@@ -56,11 +60,16 @@ export class BuiltNode {
     this.input = input;
     this.output = output;
     this.#params = params;
+    this.#inputs = inputs;
     this.#cables = cables;
     this.points = points;
     this.readings = readings;
     this.node = node;
     this.kind = kind;
+  }
+  // where an input's sound goes in, by the input's name: its own way in, or the one way in it has
+  inputOf(name: string): AudioNode {
+    return this.#inputs[name] ?? this.input;
   }
   // A param by the plan's name.
   // None where it has no such param: a panner made a gain, where the context can't pan.

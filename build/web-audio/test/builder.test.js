@@ -145,6 +145,32 @@ test("a signal wired into a delay's time, by its ms: into its line's own time, m
   );
 });
 
+// a select between two gains: each wired into one of its inputs, the select into the plan's output
+function selecting(input) {
+  const plan = chainOf(block('pick', 'select', {}, { input }));
+  plan.node.inside.children.unshift(block('first', 'gain'), block('second', 'gain'));
+  plan.node.inside.wires.push(
+    { from: { node: 'first', output: 'out' }, to: { node: 'pick', input: 'a' } },
+    { from: { node: 'second', output: 'out' }, to: { node: 'pick', input: 'b' } },
+  );
+  return plan;
+}
+
+test("a select: the input its setting names passed on, the other wired into nothing that goes on; a block's ways in by name", () => {
+  for (const [input, passed, held] of [
+    ['a', 0, 1],
+    ['b', 1, 0],
+  ]) {
+    const { context, builder, made } = builderOn();
+    builder.build(selecting(input), { into: context.destination });
+    const gains = made('gain');
+    const [out] = into(context, context.destination);
+    assert.deepEqual(into(context, out), [gains[passed]], `${input}: its input passed on`);
+    const [nowhere] = outOf(context, gains[held]);
+    assert.deepEqual(outOf(context, nowhere), [], `${input}: the other into a node that goes nowhere`);
+  }
+});
+
 test('a noise, looping, started, its buffer by its colour; a source with nothing wired into it', () => {
   const { context, builder, made } = builderOn();
   builder.build(chainOf(block('hiss', 'noise', {}, { colour: 'breath' })), { into: context.destination });

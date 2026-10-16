@@ -2,31 +2,31 @@
 // Data read from a file, YAML's, is unknown until it's checked. A light check, before the planner's:
 //   - its kind a word; its form and the template it extends words, where it names them;
 //   - each list it writes a list, each item an object with what that item needs:
-//     a jack its name, a child its name and kind, a wire its two ends, a macro its targets,
+//     a jack its name, a child its name and its kind or a preset, a wire its two ends, a macro its targets,
 //     a pool its child and its wires.
 // Presets by name, as a theme writes them: each an object, a template's kind, its values and
 // settings, where it writes them, by address, each a number or a word.
 // What they hold is the planner's check (check.ts, plan()). Every failure said, naming the file.
-import type { Preset, Template } from './template.ts';
+import type { Preset, WrittenTemplate } from './template.ts';
 
-// what each item of a template's lists needs
-const ITEMS = {
+// what each item of a template's lists needs; a list of words, one of them
+const ITEMS: Readonly<Record<string, readonly (string | readonly string[])[]>> = {
   inputs: ['name'],
   outputs: ['name'],
-  children: ['name', 'kind'],
+  children: ['name', ['kind', 'preset']],
   wires: ['from', 'to'],
   macros: ['maps'],
   pools: ['child', 'wires'],
-} as const;
+};
 
 // A template read from data, as it is once its shape is a template's; refused, every failure
 // said, where it isn't.
-export function templateOf(data: unknown, source: string): Template {
+export function templateOf(data: unknown, source: string): WrittenTemplate {
   const problems = shapeProblems(data);
   if (problems.length) {
     throw new Error([`${source}: not of the shape of a template:`, ...problems].join('\n  '));
   }
-  return data as Template; // of its shape, as checked
+  return data as WrittenTemplate; // of its shape, as checked
 }
 
 // Presets by name read from data, as they are once their shape is presets'; refused, every
@@ -62,7 +62,7 @@ function shapeProblems(data: unknown): string[] {
   return problems;
 }
 // a list's problems: not a list; an item not an object, or without what it needs
-function listProblems(list: string, items: unknown, needs: readonly string[]): string[] {
+function listProblems(list: string, items: unknown, needs: readonly (string | readonly string[])[]): string[] {
   if (items === undefined) {
     return [];
   }
@@ -73,7 +73,10 @@ function listProblems(list: string, items: unknown, needs: readonly string[]): s
     if (!isObject(item)) {
       return [`${list} ${index + 1}: not an object`];
     }
-    return needs.filter((field) => item[field] === undefined).map((field) => `${list} ${index + 1}: no ${field}`);
+    return needs
+      .map((need) => (typeof need === 'string' ? [need] : need))
+      .filter((fields) => fields.every((field) => item[field] === undefined))
+      .map((fields) => `${list} ${index + 1}: no ${fields.join(' or ')}`);
   });
 }
 // what keeps one preset from a preset's shape, said by its name

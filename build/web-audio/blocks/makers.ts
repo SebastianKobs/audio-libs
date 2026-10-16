@@ -10,6 +10,7 @@ import { noise } from './noise.ts';
 import { oscillator } from './oscillator.ts';
 import { pan } from './pan.ts';
 import { reverb } from './reverb.ts';
+import { select } from './select.ts';
 
 // each block's maker by its kind
 export const MAKERS: Readonly<Partial<Record<BlockKind, Maker>>> = Object.freeze({
@@ -21,4 +22,5 @@ export const MAKERS: Readonly<Partial<Record<BlockKind, Maker>>> = Object.freeze
   reverb,
   noise,
   limiter,
+  select,
 });

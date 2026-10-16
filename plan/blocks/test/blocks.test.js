@@ -9,7 +9,7 @@ import { BLOCKS, biquadQs } from '../index.ts';
 import { near } from '../../../util/test/near.js';
 import { dBOf, FADER_GAIN, isSwitch, NOTE_VALUES } from '../../../params/index.ts';
 
-const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise', 'limiter', 'envelope'];
+const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise', 'limiter', 'envelope', 'select'];
 const MONO = 1;
 const STEREO = 2;
 
@@ -32,7 +32,7 @@ function onControl({ range, choices, dB }, value) {
   return shown >= range[0] && shown <= range[1];
 }
 
-test('the nine blocks, each declared by its kind, the contract every builder meets', () => {
+test('the ten blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -74,10 +74,11 @@ test('what each block declares, in short standard terms: its params, its setting
       inputs: [],
       outputs: [`out ${MONO}`],
     },
+    select: { params: [], settings: ['input'], inputs: ['a', 'b'], outputs: ['out'] },
   });
 });
 
-test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colours; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves; a gain the fader's", () => {
+test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colours, a select's inputs; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves; a gain the fader's", () => {
   const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   assert.deepEqual(setting('oscillator', 'wave').choices, ['sine', 'triangle', 'square', 'sawtooth']);
@@ -85,6 +86,11 @@ test("the blocks' choices: an oscillator's waves, a filter's three types, a pan'
   assert.deepEqual([setting('filter', 'slope').choices, setting('filter', 'slope').default], [['12', '24'], '12']);
   assert.deepEqual(setting('pan', 'law').choices, ['stereo', 'pan pot']);
   assert.deepEqual(setting('noise', 'colour').choices, ['noise', 'breath']);
+  assert.deepEqual(
+    [setting('select', 'input').choices, setting('select', 'input').default],
+    [['a', 'b'], 'a'],
+    'the input it passes on, by its name',
+  );
   assert.ok(isSwitch(param('delay', 'sync')));
   assert.deepEqual(param('delay', 'note').choices, NOTE_VALUES);
   assert.equal(param('delay', 'ms').unit, 'ms');
