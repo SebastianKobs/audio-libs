@@ -5,16 +5,19 @@
 //   3. its sends' knobs, its pan, its fader with its level bar and its value, its mute and
 //      solo.
 // Quiet, drawn so, where a mute or another's solo has it silent.
+// Empty, where its track plays nothing: its sends and its fader at the bottom, each value a
+// dash.
 import { addressText } from '../../plan/format/index.ts';
 import type { Device, Knob, Strip } from '../models/index.ts';
 import { html, type Html } from './elements.ts';
-import { faderHtml, knobHtml, stillPanHtml } from './knob-view.ts';
+import { EMPTY, faderHtml, knobHtml, stillPanHtml } from './knob-view.ts';
 import { meterHtml } from './meter-view.ts';
 
 // How a view shows a strip beside the strip itself:
 //   - name: as the view names it; route: where it goes, as shown; now: what plays on it;
 //   - opens: what a click on its name or a slot opens, as attributes; a slot's mark added;
-//   - sendLabel(): a send's knob's label, by its return; level: its bar's level now.
+//   - sendLabel(): a send's knob's label, by its return; level: its bar's level now;
+//   - empty: its track plays nothing now.
 export interface StripLook {
   readonly name: string;
   readonly route: string;
@@ -22,6 +25,7 @@ export interface StripLook {
   readonly opens?: Html;
   readonly sendLabel: (to: string) => string;
   readonly level: number;
+  readonly empty?: boolean;
 }
 
 // A strip drawn from its model.
@@ -48,11 +52,13 @@ export function muteSoloHtml(key: string, muted: boolean, soloed: boolean): Html
 
 // its sends, its pan, its fader, its level bar, its value, its mute and solo
 function mixHtml(strip: Strip, look: StripLook, key: string): Html {
-  const sends = strip.sends.map((send) => knobHtml(look.sendLabel(send.name), send));
+  const empty = look.empty ?? false;
+  const sends = strip.sends.map((send) => knobHtml(look.sendLabel(send.name), send, empty));
   const pan = strip.pan ? knobHtml('pan', strip.pan) : stillPanHtml();
   const muteSolo = strip.mute && strip.solo ? muteSoloHtml(key, on(strip.mute), on(strip.solo)) : '';
+  const value = empty ? EMPTY : `${strip.volume.text} dB`;
   return html`<div class="mix">${sends}${pan}
-  <div class="vol">${faderHtml(strip.volume)}${meterHtml(key, look.level)}<b class="val">${strip.volume.text} dB</b>${muteSolo}</div></div>`;
+  <div class="vol">${faderHtml(strip.volume, empty)}${meterHtml(key, look.level)}<b class="val">${value}</b>${muteSolo}</div></div>`;
 }
 // An insert's slot: its device's label, and what sets it, as the tool says; a live device
 // with a level its gain as it plays.

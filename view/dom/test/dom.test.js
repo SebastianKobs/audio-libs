@@ -97,6 +97,18 @@ test('a slot as the tool says what sets it; a strip quiet where its cut is at 0;
   assert.match(master, /<i class="pan" style="--v:0.5"><\/i><b>C<\/b>/);
 });
 
+test('a strip whose track plays nothing drawn empty: its sends and fader at the bottom, a dash for each value; its mute and solo still there', () => {
+  const views = viewsOn({ values: { 'my tap/1/send/reverb': 0.5, 'my tap/1/volume': 0.8 } });
+  const text = stripHtml(views.strip(['my tap', '1']), { ...LOOK, name: 'my tap 1', empty: true }).text;
+  assert.match(text, /<span>reverb!<\/span><i class="" style="--v:0;--unity:[\d.]+"><\/i><b>—<\/b>/);
+  assert.match(
+    text,
+    /<div class="fader" style="--unity:[\d.]+" data-set="my tap\/1\/volume"[^>]*><i style="--v:0"><\/i><\/div>/,
+  );
+  assert.match(text, /<b class="val">—<\/b>/);
+  assert.match(text, /data-mute="my tap\/1"/);
+});
+
 test('every value escaped as it is made', () => {
   const views = viewsOn();
   const text = stripHtml(views.strip(['ambient']), { ...LOOK, name: '<b>&"' }).text;

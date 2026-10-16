@@ -17,19 +17,23 @@ const LIVE = 'drag up or down to set it, with shift for finer steps; double-clic
 // a knob's whole travel in px, and how much finer it goes with shift
 const TRAVEL = 200;
 const FINER = 10;
+// a value nothing sets now, as a knob or a fader shows it
+export const EMPTY = '—';
 
 // A knob drawn: its label, its bar, its text; a live one marked with its address, for a drag.
-export function knobHtml(label: string, knob: Knob): Html {
+// Empty, where nothing sets it now: its bar at the bottom, a dash for its text.
+export function knobHtml(label: string, knob: Knob, empty = false): Html {
   const unity = knob.isPan ? '' : `;--unity:${positionOf(knob.spec, 1)}`;
-  return html`<div class="knob"${liveMark(knob)}><span>${label}</span><i class="${knob.isPan ? 'pan' : ''}" style="--v:${knob.position}${unity}"></i><b>${knob.text}</b></div>`;
+  const at = empty ? 0 : knob.position;
+  return html`<div class="knob"${liveMark(knob)}><span>${label}</span><i class="${knob.isPan ? 'pan' : ''}" style="--v:${at}${unity}"></i><b>${empty ? EMPTY : knob.text}</b></div>`;
 }
 // A pan that does nothing, at its middle: on a strip whose channel has none.
 export function stillPanHtml(): Html {
   return html`<div class="knob"><span>pan</span><i class="pan" style="--v:0.5"></i><b>C</b></div>`;
 }
-// A fader drawn: its bar by its taper, its unity marked.
-export function faderHtml(knob: Knob): Html {
-  return html`<div class="fader" style="--unity:${positionOf(knob.spec, 1)}"${liveMark(knob)}><i style="--v:${knob.position}"></i></div>`;
+// A fader drawn: its bar by its taper, its unity marked; empty, its bar at the bottom.
+export function faderHtml(knob: Knob, empty = false): Html {
+  return html`<div class="fader" style="--unity:${positionOf(knob.spec, 1)}"${liveMark(knob)}><i style="--v:${empty ? 0 : knob.position}"></i></div>`;
 }
 
 // A live knob's mark: its address, which a drag finds it by, and the hint of what it does.
