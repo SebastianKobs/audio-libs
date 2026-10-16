@@ -1,8 +1,8 @@
-# An envelope, then a gain its note's velocity sets, a modulator.
+# An envelope generator: an envelope, then a gain its note's velocity sets, a modulator.
 # Its gate the note's; its stages, its curve and its mode its block's.
 # Its amount in the units of the param it's wired into: a gain's share, semitones for a tune.
 # Its velocity 1, moving it the same at any velocity, or the note's wired in.
-kind: Envelope
+kind: Envelope generator
 form: modulator
 outputs: [{ name: out, channels: 1 }]
 children:

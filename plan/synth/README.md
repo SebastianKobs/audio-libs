@@ -1,6 +1,6 @@
 # plan/synth
 
-The synth's templates and forms, a package of its own since LAY13a: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons; the note's sources the voice card's macros. Handed to the planner (`libs/plan/planner/`) with its forms; a patch is a preset on an architecture (LAY13c).
+The synth's templates and forms, a package of its own since LAY13a: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons, a module named as it is on a synth's panel and never as a block is (LAY13a2); the note's sources the voice card's macros. Handed to the planner (`libs/plan/planner/`) with its forms; a patch is a preset on an architecture (LAY13c).
 
 ```ts
 import { MODULE_TEMPLATES, SYNTH_FORMS } from './index.ts';
@@ -14,10 +14,10 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 | Module | Its job | Inside | Its macros | Its settings |
 |---|---|---|---|---|
 | `VCO` | source | an oscillator into its level | frequency, the note's; tune (semitones, onto its detune); level; stop | `osc/wave` |
-| `Noise` | source | a noise through a filter into its level | level; cutoff, resonance; tune (onto the filter's detune, an offset from the keys); offset; stop | `noise/colour`, `noise/loop`, `filter/type`, `filter/slope` |
-| `LFO` | modulator | an LFO into its depth into a scale | sync, note, hz, its rate; depth, in its target's units; scale, 1, or the note's frequency | `lfo/wave`, `lfo/start` |
+| `Noise source` | source | a noise through a filter into its level | level; cutoff, resonance; tune (onto the filter's detune, an offset from the keys); offset; stop | `noise/colour`, `noise/loop`, `filter/type`, `filter/slope` |
+| `LFO` | modulator | an oscillator into its depth into a scale | sync, note, hz, its oscillator's rate; depth, in its target's units; scale, 1, or the note's frequency | `osc/wave`, `osc/phase` |
 | `FM` | modulator | an oscillator into a scale, the note's frequency, into its index | frequency; tune, its ratio; scale; index; stop | `osc/wave` |
-| `Envelope` | modulator | an envelope into a gain its note's velocity sets | gate, the note's; delay, attack, hold, decay, sustain, release; amount, in its target's units; velocity | `envelope/curve`, `envelope/mode` |
+| `Envelope generator` | modulator | an envelope into a gain its note's velocity sets | gate, the note's; delay, attack, hold, decay, sustain, release; amount, in its target's units; velocity | `envelope/curve`, `envelope/mode` |
 | `VCA` | stage | a gain an envelope moves into its level | gain, open at 1, at 0 where an envelope opens it; level | |
 | `VCF` | stage | a filter | cutoff, resonance; tune (onto its detune, a sweep in semitones, an offset from the keys) | `filter/type`, `filter/slope` |
 | `Tremolo` | stage | a gain an LFO moves | gain | |

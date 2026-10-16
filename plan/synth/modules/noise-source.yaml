@@ -1,8 +1,8 @@
-# A noise through a filter of its own, then its level, a source.
+# A noise source: a noise through a filter of its own, then its level, a source.
 # Its filter following the keys, where the voice card's frequency is wired into its cutoff, at an
 # offset in semitones, its tune onto the filter's detune.
 # Looped or not; where in its buffer it starts, up to its offset, drawn as its voice starts; its stop.
-kind: Noise
+kind: Noise source
 form: source
 outputs: [{ name: out, channels: 1 }]
 children:

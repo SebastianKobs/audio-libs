@@ -1,5 +1,5 @@
 // The blocks' unit tests (mockup/src/libs/plan/blocks): the contract every builder meets.
-//   - the eleven blocks, each declared by its kind;
+//   - the ten blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its settings' choices.
@@ -7,21 +7,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BLOCKS, biquadQs } from '../index.ts';
 import { near } from '../../../util/test/near.js';
-import { dBOf, FADER_GAIN, isSwitch, NOTE_VALUES } from '../../../params/index.ts';
+import { dBOf, FADER_GAIN, isSwitch, NOTE_VALUES, timeParamsIn } from '../../../params/index.ts';
 
-const KINDS = [
-  'oscillator',
-  'lfo',
-  'gain',
-  'filter',
-  'pan',
-  'delay',
-  'reverb',
-  'noise',
-  'limiter',
-  'envelope',
-  'select',
-];
+const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise', 'limiter', 'envelope', 'select'];
 const MONO = 1;
 const STEREO = 2;
 
@@ -44,7 +32,7 @@ function onControl({ range, choices, dB }, value) {
   return shown >= range[0] && shown <= range[1];
 }
 
-test('the eleven blocks, each declared by its kind, the contract every builder meets', () => {
+test('the ten blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -72,8 +60,12 @@ test("every block's params and settings on a control, a range or choices, a defa
 
 test('what each block declares, in short standard terms: its params, its settings, its inputs and outputs, mono or stereo where it fixes them', () => {
   assert.deepEqual(Object.fromEntries(Object.entries(BLOCKS).map(([kind, block]) => [kind, declared(block)])), {
-    oscillator: { params: ['frequency', 'detune', 'stop'], settings: ['wave'], inputs: [], outputs: [`out ${MONO}`] },
-    lfo: { params: ['sync', 'note', 'hz'], settings: ['wave', 'start'], inputs: [], outputs: [`out ${MONO}`] },
+    oscillator: {
+      params: ['sync', 'note', 'frequency', 'detune', 'stop'],
+      settings: ['wave', 'phase'],
+      inputs: [],
+      outputs: [`out ${MONO}`],
+    },
     gain: { params: ['gain'], settings: [], inputs: ['in'], outputs: ['out'] },
     filter: {
       params: ['frequency', 'resonance', 'detune'],
@@ -117,19 +109,29 @@ test("the blocks' choices: an oscillator's waves, a filter's three types, a pan'
   assert.deepEqual(param('gain', 'gain'), { ...FADER_GAIN, unit: 'dB', default: 1 }, "a gain the fader's, in dB, at 1");
 });
 
-test("a voice's blocks: an LFO's rate a time with a sync switch, free in Hz, starting with the note or running free; a source's stop, at 0 none, to play until it's let go; a noise looped or not, its offset into its buffer; an oscillator's detune and a filter's wide enough for a tune of four octaves; an envelope's curve to its target or in a line, its mode the gate's or a trigger's, running on past the note-off", () => {
+test("a voice's blocks: an oscillator's rate a time with a sync switch, free its frequency in Hz, down to an LFO's, its phase reset with each note or running free; a source's stop, at 0 none, to play until it's let go; a noise looped or not, its offset into its buffer; an oscillator's detune and a filter's wide enough for a tune of four octaves; an envelope's curve to its target or in a line, its mode the gate's or a trigger's, running on past the note-off", () => {
   const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
-  assert.ok(isSwitch(param('lfo', 'sync')));
-  assert.deepEqual(param('lfo', 'note').choices, NOTE_VALUES);
+  assert.ok(isSwitch(param('oscillator', 'sync')));
+  assert.deepEqual(param('oscillator', 'note').choices, NOTE_VALUES);
   assert.deepEqual(
-    [param('lfo', 'hz').unit, param('lfo', 'sync').default],
+    [param('oscillator', 'frequency').unit, param('oscillator', 'sync').default],
     ['Hz', 0],
-    'free to start, as every rate today',
+    'free to start, as every oscillator and LFO today',
   );
-  assert.ok(param('lfo', 'hz').range[0] <= 0.025, "the slowest today's, a quarter of a hertz's tenth");
-  assert.deepEqual(setting('lfo', 'wave').choices, setting('oscillator', 'wave').choices);
-  assert.deepEqual([setting('lfo', 'start').choices, setting('lfo', 'start').default], [['note', 'free'], 'note']);
+  assert.ok(
+    param('oscillator', 'frequency').range[0] <= 0.025,
+    "the slowest LFO today's, a quarter of a hertz's tenth",
+  );
+  assert.deepEqual(timeParamsIn(BLOCKS.oscillator.params.map(({ name }) => name)), {
+    sync: 'sync',
+    note: 'note',
+    free: 'frequency',
+  });
+  assert.deepEqual(
+    [setting('oscillator', 'phase').choices, setting('oscillator', 'phase').default],
+    [['reset', 'free'], 'reset'],
+  );
   for (const kind of ['oscillator', 'noise']) {
     assert.deepEqual(
       [param(kind, 'stop').unit, param(kind, 'stop').default],

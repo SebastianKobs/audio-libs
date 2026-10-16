@@ -30,8 +30,8 @@ export interface TimeParams {
   free: string;
 }
 
-// a time's free value by its unit's name, as its param is named
-const FREE_NAMES: readonly string[] = Object.freeze(['ms', 'hz']);
+// a time's free value as its param is named: by its unit's name, or an oscillator's frequency
+const FREE_NAMES: readonly string[] = Object.freeze(['ms', 'hz', 'frequency']);
 
 // the note values a synced time steps through, shortest first: a 16th triplet to a dotted half
 // By length, so a step up is always longer: a triplet comes before the dotted note a step shorter.

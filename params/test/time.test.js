@@ -38,13 +38,18 @@ test("a rate's free value in Hz, named hz; a time starting free has its switch o
   assert.equal(specs.hz.unit, 'Hz');
 });
 
-test("a time's three params among a part's keys, as a device declares them: its sync switch, its note and its free one, ms or hz; none without all three", () => {
+test("a time's three params among a part's keys, as a device declares them: its sync switch, its note and its free one, ms, hz or an oscillator's frequency; none without all three", () => {
   assert.deepEqual(timeParamsIn(['sync', 'note', 'ms', 'feedback', 'tone']), {
     sync: 'sync',
     note: 'note',
     free: 'ms',
   });
   assert.deepEqual(timeParamsIn(['rate', 'hz', 'note', 'sync']), { sync: 'sync', note: 'note', free: 'hz' });
+  assert.deepEqual(timeParamsIn(['sync', 'note', 'frequency', 'detune']), {
+    sync: 'sync',
+    note: 'note',
+    free: 'frequency',
+  });
   assert.equal(timeParamsIn(['note', 'ms', 'feedback']), undefined, 'no switch');
   assert.equal(timeParamsIn(['sync', 'ms']), undefined, 'no note');
   assert.equal(timeParamsIn(['sync', 'note']), undefined, 'no free one');

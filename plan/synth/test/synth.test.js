@@ -56,10 +56,10 @@ test('the modules, a YAML template each, of its form: the sources, the modulator
     MODULE_TEMPLATES.map(({ kind }) => [kind, planner.plan(kind).node.form]),
     [
       ['VCO', 'source'],
-      ['Noise', 'source'],
+      ['Noise source', 'source'],
       ['LFO', 'modulator'],
       ['FM', 'modulator'],
-      ['Envelope', 'modulator'],
+      ['Envelope generator', 'modulator'],
       ['VCA', 'stage'],
       ['VCF', 'stage'],
       ['Tremolo', 'stage'],
@@ -82,22 +82,28 @@ test('the modules, a YAML template each, of its form: the sources, the modulator
 test("each module's params, its macros by name, at their values as each starts", () => {
   assert.deepEqual(Object.fromEntries(MODULE_TEMPLATES.map(({ kind }) => [kind, Object.keys(paramsOf(kind))])), {
     VCO: ['frequency', 'tune', 'level', 'stop'],
-    Noise: ['level', 'cutoff', 'resonance', 'tune', 'offset', 'stop'],
+    'Noise source': ['level', 'cutoff', 'resonance', 'tune', 'offset', 'stop'],
     LFO: ['sync', 'note', 'hz', 'depth', 'scale'],
     FM: ['frequency', 'tune', 'scale', 'index', 'stop'],
-    Envelope: ['gate', 'delay', 'attack', 'hold', 'decay', 'sustain', 'release', 'amount', 'velocity'],
+    'Envelope generator': ['gate', 'delay', 'attack', 'hold', 'decay', 'sustain', 'release', 'amount', 'velocity'],
     VCA: ['gain', 'level'],
     VCF: ['cutoff', 'resonance', 'tune'],
     Tremolo: ['gain'],
     Ring: ['frequency', 'tune', 'stop'],
     Out: ['volume'],
   });
+  const lfo = planner.plan('LFO', { values: { sync: 1, note: '1/8', hz: 0.06 } });
+  assert.deepEqual(
+    ['sync', 'note', 'frequency'].map((name) => paramAt(lfo, ['osc', name]).value),
+    [1, '1/8', 0.06],
+    "an LFO's rate its oscillator's",
+  );
   assert.deepEqual(
     [paramsOf('VCO').tune, paramsOf('VCO').level, paramsOf('VCA').gain, paramsOf('Out').volume],
     [0, 1, 1, 1],
     'in tune, at unity, open',
   );
-  assert.deepEqual([paramsOf('FM').index, paramsOf('LFO').depth, paramsOf('Envelope').velocity], [0, 0, 1]);
+  assert.deepEqual([paramsOf('FM').index, paramsOf('LFO').depth, paramsOf('Envelope generator').velocity], [0, 0, 1]);
 });
 
 test("a module's params onto its blocks: a tune in semitones onto a detune in cents; a ring's gain at 0, its oscillator moving it; each module's settings its blocks'", () => {
@@ -117,11 +123,11 @@ test("a module's params onto its blocks: a tune in semitones onto a detune in ce
   assert.deepEqual(
     [
       settingAt(planner.plan('VCO'), ['osc', 'wave']).value,
-      settingAt(planner.plan('Noise'), ['noise', 'loop']).value,
-      settingAt(planner.plan('LFO'), ['lfo', 'start']).value,
-      settingAt(planner.plan('Envelope'), ['envelope', 'mode']).value,
+      settingAt(planner.plan('Noise source'), ['noise', 'loop']).value,
+      settingAt(planner.plan('LFO'), ['osc', 'phase']).value,
+      settingAt(planner.plan('Envelope generator'), ['envelope', 'mode']).value,
     ],
-    ['sine', 'off', 'note', 'gate'],
+    ['sine', 'off', 'reset', 'gate'],
   );
 });
 
@@ -133,7 +139,7 @@ const PLUCK = {
   outputs: [{ name: 'out' }],
   children: [
     { name: 'osc 1', kind: 'VCO', role: 'source' },
-    { name: 'amp', kind: 'Envelope', role: 'modulator', values: { attack: 0.005, decay: 0.4, sustain: 0 } },
+    { name: 'amp', kind: 'Envelope generator', role: 'modulator', values: { attack: 0.005, decay: 0.4, sustain: 0 } },
     { name: 'vca', kind: 'VCA', role: 'stage', values: { gain: 0 } },
     { name: 'out', kind: 'Out', role: 'out' },
   ],
