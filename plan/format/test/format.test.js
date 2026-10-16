@@ -3,6 +3,7 @@
 //   - a stored plan's version: this format's, or refused, naming what was found;
 //   - an address and its text; a node, a param or a setting found by its address;
 //   - a macro's value onto its targets; a pool's copies, their names and their wires;
+//   - an address split at the child it's in, a copy among them;
 //   - what feeds what over one inside's wires, and the loop check.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,6 +20,7 @@ import {
   poolNamed,
   reached,
   settingAt,
+  splitAtChild,
   under,
   versionOf,
   withSettings,
@@ -93,6 +95,19 @@ test("a pool's copies: its child named by the copy's number, from 1; its wires w
   assert.throws(() => copyOf(voices, 0), /from 1/);
   assert.equal(poolNamed(SYNTH.node, 'voice'), voices);
   assert.equal(poolNamed(SYNTH.node, 'voice 12'), undefined, 'no number split off a name');
+});
+
+test("an address split at the child it's in under the top: a child by its name, a copy by its pool's name and its number, a pool's child by the pool's name; the rest within it", () => {
+  assert.deepEqual(splitAtChild(['reverb', 'utility', 'level']), { child: ['reverb'], within: ['utility', 'level'] });
+  assert.deepEqual(
+    splitAtChild(['my tap', '3', 'air', 'cutoff']),
+    { child: ['my tap', '3'], within: ['air', 'cutoff'] },
+    'a copy: a number alone is never a written name',
+  );
+  assert.deepEqual(splitAtChild(['my tap', 'air', 'cutoff']), { child: ['my tap'], within: ['air', 'cutoff'] });
+  assert.deepEqual(splitAtChild(['my tap', '3']), { child: ['my tap', '3'], within: [] });
+  assert.deepEqual(splitAtChild(['master']), { child: ['master'], within: [] });
+  assert.deepEqual(splitAtChild([]), { child: [], within: [] });
 });
 
 test("what feeds what over one composite's wires: each name and what it reaches, by its outputs and its taps, a wire into a param too; the wires a filter lets through; the loop check", () => {

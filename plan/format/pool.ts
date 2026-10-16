@@ -46,3 +46,11 @@ export function poolNamed(composite: Pick<Composite, 'pools'>, name: string): Po
 export function isCopyNumber(name: string): boolean {
   return COPY_NUMBER.test(name);
 }
+// An address split at the child it's in, under the plan's top, and the rest within it:
+//   - a copy: its pool's name and its number (my tap/3), a written name never a number alone;
+//   - any other child, a pool's child among them: its name.
+export function splitAtChild(address: Address): { child: Address; within: Address } {
+  const [, second = ''] = address;
+  const length = isCopyNumber(second) ? 2 : 1;
+  return { child: address.slice(0, length), within: address.slice(length) };
+}

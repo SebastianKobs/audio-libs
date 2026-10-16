@@ -7,7 +7,8 @@
 //   - param.ts: a param and a setting, its spec, its value as it starts;
 //   - wire.ts: from an output into an input or a param, by names;
 //   - macro.ts: a composite's own param mapped onto its children's, its value onto theirs;
-//   - pool.ts: children that come and go, a copy, its name and its wiring, a voice's note;
+//   - pool.ts: children that come and go, a copy, its name and its wiring, a voice's note,
+//     an address split at the copy or the child it's in;
 //   - address.ts: where a param or a setting is, by names from the top, and as text;
 //   - param-at.ts: a node, a param or a setting found by its address; settings changed by it,
 //     a new plan;
@@ -20,7 +21,7 @@ export { isComposite, type BlockNode, type Composite, type Node } from './node.t
 export type { Param, Setting } from './param.ts';
 export { nodeAt, paramAt, settingAt, withSettings } from './param-at.ts';
 export type { Plan } from './plan.ts';
-export { copyOf, isCopyNumber, poolNamed, type NoteAddresses, type Pool } from './pool.ts';
+export { copyOf, isCopyNumber, poolNamed, splitAtChild, type NoteAddresses, type Pool } from './pool.ts';
 export { feeds, reached } from './routing.ts';
-export { renamedEnd, type Wire, type WireFrom, type WireTo } from './wire.ts';
+export type { Wire, WireFrom, WireTo } from './wire.ts';
 export { VERSION, versionOf } from './version.ts';
