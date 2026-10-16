@@ -1,5 +1,5 @@
-// ---------- plan/planner/channels: a jack's channels, as they come ----------
-// Where a block doesn't fix a jack's channels, they're what comes into it:
+// ---------- plan/planner/mono-stereo: whether a jack carries mono or stereo, as it comes ----------
+// Where a block doesn't fix a jack's channels, mono or stereo, they're what comes into it:
 //   - an input: the most of what's wired into it;
 //   - an output: the most of its node's inputs.
 // Worked out again until nothing changes, so a loop settles; mono where nothing comes.
@@ -12,8 +12,9 @@ export interface LooseJack {
   readonly name: string;
 }
 
-// The children with their loose jacks' channels worked out, over the parent's wires from its own inputs.
-export function withChannels(
+// The children with their loose jacks' channels worked out, mono or stereo, over the parent's
+// wires from its own inputs.
+export function monoOrStereo(
   children: readonly Node[],
   loose: readonly LooseJack[],
   { wires, inputs }: { wires: readonly Wire[]; inputs: readonly Input[] },

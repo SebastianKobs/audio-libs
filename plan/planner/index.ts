@@ -9,7 +9,7 @@
 //   - check.ts: a template checked well-formed as it's handed in, then held to its form, every failure said;
 //   - form.ts: the constraints a template has to fulfil, as data; form-check.ts, a template held to its form;
 //   - kinds.ts: the kinds a template names, blocks and templates, as seen from outside;
-//   - channels.ts: a jack's channels as they come, where its block doesn't fix them.
+//   - mono-stereo.ts: whether a jack carries mono or stereo, as it comes, where its block doesn't fix it.
 export { Planner, type Asked } from './planner.ts';
 export {
   presetsOf,

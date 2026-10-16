@@ -22,7 +22,7 @@ import {
 } from '../format/index.ts';
 import type { Block } from '../blocks/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
-import { withChannels, type LooseJack } from './channels.ts';
+import { monoOrStereo, type LooseJack } from './mono-stereo.ts';
 import { problemsInAll } from './check.ts';
 import { extendedAll } from './extend.ts';
 import { withPresets } from './presets.ts';
@@ -114,7 +114,7 @@ export class Planner {
         settings: under(settings, each.name),
         at: [...at, each.name],
       });
-    const children = withChannels((template.children ?? []).map(planned), this.#loose(template), {
+    const children = monoOrStereo((template.children ?? []).map(planned), this.#loose(template), {
       wires: template.wires ?? [],
       inputs: template.inputs ?? [],
     });

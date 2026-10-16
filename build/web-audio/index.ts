@@ -25,3 +25,4 @@ export { panOf, type PanLaw } from './blocks/pan.ts';
 export { meterOn, type PeakMeter } from './meters.ts';
 export { FADE_IN, FADE_OUT, Output } from './output.ts';
 export { HeldChanges, type Change, type Ticking } from './changes.ts';
+export { Copies, type Editable } from './copies.ts';

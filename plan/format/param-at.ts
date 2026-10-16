@@ -1,8 +1,10 @@
-// ---------- plan/format/param-at: a node, a param or a setting found by its address ----------
+// ---------- plan/format/param-at: a node, a param or a setting found by its address; settings changed by it ----------
 // Walked down from the plan's top by the address's names: each a child by its name,
 // or a pool's copy by its name and number. Its last name a param or a macro, or a setting.
 // None where nothing's there.
-import type { Address } from './address.ts';
+// Settings changed by address: a new plan, the old as it was. A pool's child's by a copy's
+// address: every copy of it, as they're built from it. A setting not there refused.
+import { addressOf, type Address, type ValuesByAddress } from './address.ts';
 import type { Node } from './node.ts';
 import type { Param, Setting } from './param.ts';
 import type { Plan } from './plan.ts';
@@ -50,4 +52,40 @@ function childNamed(node: Node, name: string): Node | undefined {
 // a param or a setting by its spec's name
 function named<Item extends Param>(items: readonly Item[], name: string): Item | undefined {
   return items.find((item) => item.spec.name === name);
+}
+// A plan with settings changed, each at its address.
+export function withSettings(plan: Plan, settings: ValuesByAddress): Plan {
+  let node = plan.node;
+  for (const [text, value] of Object.entries(settings)) {
+    node = settingChanged(node, addressOf(text), value, text);
+  }
+  return { ...plan, node };
+}
+
+// a node with one setting changed, down its address: its own where the address names it, else a child's
+function settingChanged(node: Node, [name, ...rest]: Address, value: number | string, whole: string): Node {
+  if (name === undefined) {
+    throw new Error(`${whole}: no setting`);
+  }
+  if (!rest.length) {
+    if (!node.settings.some((setting) => setting.spec.name === name)) {
+      throw new Error(`${whole}: no setting`);
+    }
+    const settings = node.settings.map((setting) => (setting.spec.name === name ? { ...setting, value } : setting));
+    return { ...node, settings };
+  }
+  const inside = node.inside;
+  const child = inside?.children.find((each) => each.name === name);
+  if (inside && child) {
+    const children = inside.children.map((each) => (each === child ? settingChanged(each, rest, value, whole) : each));
+    return { ...node, inside: { ...inside, children } };
+  }
+  const pool = inside && poolOfCopy(inside, name);
+  if (!inside || !pool) {
+    throw new Error(`${whole}: no setting`);
+  }
+  const pools = inside.pools.map((each) =>
+    each === pool ? { ...each, child: settingChanged(each.child, rest, value, whole) } : each,
+  );
+  return { ...node, inside: { ...inside, pools } };
 }
