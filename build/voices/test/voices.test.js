@@ -37,7 +37,7 @@ function voicesOn(plan = SYNTH) {
 }
 const played = (voices, note, index = 1) => voices.receive(noteMessages(note, index));
 
-test("a note on: a voice added at its time from the instrument's pool, its frequency and velocity set by the pool's addresses, its gate opened last; each note its own voice", () => {
+test("a note on: a voice added at its time from the instrument's pool, its frequency and velocity set by the pool's addresses as it's added, before it sounds, as a voice is built at them; its gate opened last, at its time; each note its own voice", () => {
   const { built, voices } = voicesOn(synthWith({ note: { velocity: [['vca', 'gain']] } }));
   played(voices, { pitch: 69, velocity: 0.8, t: 5 });
   played(voices, { pitch: 81, velocity: 0.5, t: 6 }, 2);
@@ -46,11 +46,11 @@ test("a note on: a voice added at its time from the instrument's pool, its frequ
     ['voice/2', 6],
   ]);
   assert.deepEqual(built.told.slice(0, 3), [
-    ['voice/1/oscillator/frequency', 440, { at: 5 }],
-    ['voice/1/vca/gain', 0.8, { at: 5 }],
+    ['voice/1/oscillator/frequency', 440, {}],
+    ['voice/1/vca/gain', 0.8, {}],
     ['voice/1/envelope/gate', 1, { at: 5 }],
   ]);
-  assert.deepEqual(built.told[4], ['voice/2/oscillator/frequency', 880, { at: 6 }]);
+  assert.deepEqual(built.told[4], ['voice/2/oscillator/frequency', 880, {}]);
 });
 
 test('a note off: its gate closed at its time, no sooner than its shortest; a note with no end closed at its longest, 10 s unless its voice card says', () => {
@@ -78,8 +78,8 @@ test("per-note controllers: those sent with its note set as it starts, by the po
   played(voices, { pitch: 69, velocity: 1, t: 5, controllers: { bend: -0.6, pan: 0.5 }, glides: [[5.5, 81]] });
   voices.receive([{ type: 'per-note controller', index: 1, controller: 'bend', value: 0.5, t: 6, glide: 0.1 }]);
   assert.deepEqual(built.told, [
-    ['voice/1/oscillator/frequency', 440, { at: 5 }],
-    ['voice/1/oscillator/detune', -0.6, { at: 5 }],
+    ['voice/1/oscillator/frequency', 440, {}],
+    ['voice/1/oscillator/detune', -0.6, {}],
     ['voice/1/envelope/gate', 1, { at: 5 }],
     ['voice/1/oscillator/frequency', mtof(81), { at: 5.5, glide: 0.03 }],
     ['voice/1/envelope/gate', 0, { at: 15 }],

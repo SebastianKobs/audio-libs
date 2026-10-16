@@ -1,8 +1,9 @@
 // ---------- build/voices/voices: MIDI's notes played into an instrument ----------
 // What MIDI's notes are played into (a Receiver): an instrument's voices juggled on what's built.
 //   1. A note on: a copy of its pool's voice card added at its time, a drum rack's pad's by its key;
-//      its note's sources set by the pool's addresses, its frequency, its velocity, the per-note
-//      controllers sent with it; its gate opened last; its glides by its voice card's glide.
+//      its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is
+//      built at them: its frequency, its velocity, the per-note controllers sent with it; its gate
+//      opened last, at its time; its glides by its voice card's glide.
 //   2. A note off: its gate closed, no sooner than its shortest; one with no end closed at its longest.
 //   3. A per-note controller sent later: a change at its time; its pitch glided.
 //   4. A voice let go once it has rung out, as the next messages come (silence.ts); at once where
@@ -99,7 +100,7 @@ export class Voices implements Receiver {
     for (const source of Object.keys(played.pool.note ?? {})) {
       const value = values[source];
       if (value !== undefined) {
-        this.#set(voice, source, value, { at: noteOn.t });
+        this.#set(voice, source, value, {}); // now: a fresh copy, silent until its time
       }
     }
     this.#set(voice, 'gate', 1, { at: noteOn.t });

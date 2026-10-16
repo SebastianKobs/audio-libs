@@ -61,6 +61,15 @@ test("a filter's frequency and resonance set on every stage, its resonance in We
   const [first, second] = made('biquad').map((biquad) => last(biquad.Q)[1]);
   near(first, 20 * Math.log10(0.5412), 'its first stage stays', 1e-3);
   near(second, 20 * Math.log10(2.6131), 'its second moved by the resonance', 1e-3);
+  what.set(['detune'], 1200);
+  assert.deepEqual(
+    made('biquad').map((biquad) => last(biquad.detune)),
+    [
+      ['set', 1200, 4],
+      ['set', 1200, 4],
+    ],
+    'its detune on every stage, as a cutoff in cents follows an envelope',
+  );
 });
 
 test("a delay's time: its note while synced, its ms while free, its switch between them; a new tempo followed while synced, gliding", () => {

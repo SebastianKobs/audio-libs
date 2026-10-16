@@ -84,6 +84,11 @@ test('a noise looped where it says, its buffer by its colour; started drawn into
   const { made } = built(oneBlockPlan('noise', { offset: 1.5 }, { loop: 'on', colour: 'breath' }));
   const [hiss] = made('buffer');
   assert.deepEqual([hiss.loop, hiss.buffer.duration, hiss.starts], [true, 0.2, [[4, 0.75]]]);
+  const context = new StandInContext(() => 4);
+  const draws = new WebAudioBuilder({ context, beat: () => 0.5, random: () => 0.5, draws: () => 0.25 });
+  draws.build(oneBlockPlan('noise', { offset: 1.5 }), { into: context.destination });
+  const [drawn] = context.rec.nodes.filter((node) => node.kind === 'buffer');
+  assert.deepEqual(drawn.starts, [[4, 0.375]], 'its draws from a generator of their own, given');
   const once = built(oneBlockPlan('noise'));
   assert.deepEqual([once.made('buffer')[0].loop, once.made('buffer')[0].starts], [false, [[]]]);
 });

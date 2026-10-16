@@ -25,7 +25,8 @@ export function biquadOf(biquad: BiquadFilterNode, type: unknown): BuiltNode {
 }
 
 // A filter block made: its biquads in series, its sound in at the first and out of the last;
-// its frequency and its resonance each one param moving every stage, its frequency cabled into each.
+// its frequency, its detune and its resonance each one param moving every stage, its frequency
+// and its detune cabled into each: a cutoff in cents follows an envelope.
 export function filter(node: Node, making: Making): BuiltNode {
   const type = String(settingOf(node, 'type'));
   const slope = String(settingOf(node, 'slope'));
@@ -43,9 +44,10 @@ export function filter(node: Node, making: Making): BuiltNode {
     output: stages.at(-1)!,
     params: {
       frequency: new ParamInUnits(stages.map((stage) => [stage.frequency, (hz) => hz])),
+      detune: new ParamInUnits(stages.map((stage) => [stage.detune, (cents) => cents])),
       resonance: new ParamInUnits(stages.map((stage, index) => [stage.Q, (q) => qIn(type, stagesAt(q)[index] ?? q)])),
     },
-    cables: { frequency: stages.map((stage) => stage.frequency) },
+    cables: { frequency: stages.map((stage) => stage.frequency), detune: stages.map((stage) => stage.detune) },
     kind: `a filter, ${stages.length} biquads`,
   });
   return atValues(built, node);

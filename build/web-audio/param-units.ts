@@ -26,10 +26,13 @@ export class ParamInUnits implements Automatable {
   get value(): number {
     return this.#value;
   }
+  // set as it's built: each param behind it told where it isn't already, a filter's detune at 0 left
   set value(value: number) {
     this.#value = value;
     for (const [param, from] of this.#behind) {
-      param.value = from(value);
+      if (param.value !== from(value)) {
+        param.value = from(value);
+      }
     }
   }
   setValueAtTime(value: number, at: number): this {

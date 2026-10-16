@@ -85,7 +85,7 @@ test("an envelope's attack lengthened while it rises: its rise taken on from whe
   assert.equal(vca.id, idOf(before, 'vca', 'gain'));
   assert.deepEqual(vca.events, [
     ['cancel', 0.5],
-    ['set', levelAt(before.nodes[vca.id].params.gain, 0.5), 0.5],
+    ['linear', levelAt(before.nodes[vca.id].params.gain, 0.5), 0.5], // its rise cut where it is, so it runs up to there
     ['linear', 1, 2],
     ['exp', 0.5, 2.5],
   ]);
@@ -124,7 +124,7 @@ test("a note with a length, its release lengthened before it's let go: its fall 
   const vca = ops.find((op) => op.id === idOf(before, 'vca', 'gain'));
   assert.deepEqual(vca.events, [
     ['cancel', 0.5],
-    ['set', levelAt(before.nodes[vca.id].params.gain, 0.5), 0.5],
+    ['linear', levelAt(before.nodes[vca.id].params.gain, 0.5), 0.5], // its rise cut where it is, so it runs up to there
     ['linear', 1, 1],
     ['exp', 1, 1],
     ['exp', 0.0005, 1.6],

@@ -87,7 +87,7 @@ test('a stage, its sustain or its amount changed as it sounds: drawn again from 
   longer.what.set(['attack'], 0.5, { at: 5.125 });
   assert.deepEqual(longer.told(5), [
     ['cancel', 5.125],
-    ['set', 1, 5.125],
+    ['linear', 1, 5.125],
     ['linear', 2, 5.5],
     ['linear', 1, 6],
   ]);

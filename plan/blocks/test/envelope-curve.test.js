@@ -100,3 +100,23 @@ test('its whole curve from its gate opening at a time: its stages from then; rel
     ['exp', 0, 10.75],
   ]);
 });
+
+test('its exponential curve, once down to its floor, silent there, as a source stops once whatever gates it has faded: its decay to nothing, its release', () => {
+  const target = envelopeTarget('exponential', 1);
+  const stages = envelopeStages({ ...NONE, attack: 0.25, decay: 0.5, sustain: 0 }, target, false);
+  assert.deepEqual(stages.slice(-2), [
+    ['exp', SILENCE, 0.75],
+    ['set', 0, 0.75],
+  ]);
+  const held = envelopeStages({ ...NONE, decay: 0.5, sustain: 0.5 }, target, false);
+  assert.deepEqual(held.at(-1), ['exp', 0.5, 0.5], 'held at its sustain, not silent');
+  assert.deepEqual(envelopeRelease(0.3, target, { from: 2, stages: held }).automation.slice(-2), [
+    ['exp', SILENCE, 2.3],
+    ['set', 0, 2.3],
+  ]);
+  assert.deepEqual(
+    envelopeStages({ ...NONE, decay: 0.5, sustain: 0 }, TARGET, false).at(-1),
+    ['exp', 0, 0.5],
+    "a caller's own target as it is",
+  );
+});

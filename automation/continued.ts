@@ -1,10 +1,10 @@
 // ---------- automation/continued: automation continued as another from a time ----------
 // As a knob turned while a param plays: from where it is at a time, on to the other.
-//   1. What was planned from then cancelled, set where it is.
+//   1. What was planned from then cancelled, cut where it is (cutAt()).
 //   2. On its way: a ramp coming takes it on to its end by itself; a target the other
 //      approaches approached from there; else the value the other holds, glided to.
 //   3. The other's events after then.
-import { eventTime, restartAt, type Automation } from './automation.ts';
+import { eventTime, type Automation } from './automation.ts';
 import { levelAt } from './level-at.ts';
 
 // s: the time constant a held value glides to a new one by, as a plugin smooths a knob
@@ -19,7 +19,19 @@ export function continuedAs(
   smoothing = SMOOTHING,
 ): Automation[] {
   const coming = eventsAfter(wanted, at);
-  return [...restartAt(levelAt(playing, at), at), ...onTheWay(wanted, at, coming, smoothing), ...coming];
+  return [['cancel', at], cutAt(playing, at), ...onTheWay(wanted, at, coming, smoothing), ...coming];
+}
+// Where an automation has its param at a time, as its events from then are cancelled:
+//   - a ramp running then: cut there, at the level it has reached, so it still runs up to it;
+//     Web Audio drops a ramp whose end is cancelled, leaving the level where the event before it did;
+//   - else set there.
+export function cutAt(automation: readonly Automation[], at: number): Automation {
+  const level = levelAt(automation, at);
+  const running = eventsAfter(automation, at)[0];
+  if (running?.[0] === 'linear' || running?.[0] === 'exp') {
+    return [running[0], level, at];
+  }
+  return ['set', level, at];
 }
 // its events after a time
 export function eventsAfter(automation: readonly Automation[], at: number): Automation[] {

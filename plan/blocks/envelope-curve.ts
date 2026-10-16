@@ -6,7 +6,7 @@
 // A stage with no time is set at once; with no delay and no attack it starts at 1.
 // Its target says what a point of the curve is there, and the ramp each stage takes:
 // its curve's (envelopeTarget()), or a caller's own.
-import { eventTime, levelAt, shiftedBy, type Automation } from '../../automation/index.ts';
+import { cutAt, eventTime, shiftedBy, type Automation } from '../../automation/index.ts';
 import { SILENCE } from '../../params/index.ts';
 import type { EnvelopeCurve } from './envelope.ts';
 
@@ -14,9 +14,12 @@ import type { EnvelopeCurve } from './envelope.ts';
 export type EnvelopeStage = 'attack' | 'decay' | 'release';
 // What the curve moves: a point of it, 0 to 1, as a value there, and the ramp a stage takes there.
 // A target's ramp approaches its point by the stage's time as a time constant.
+// silentAtFloor: down to nothing by an exponential, silent once at its floor, as a source stops
+// once whatever gates it has faded; the exponential curve's (envelopeTarget()).
 export interface EnvelopeTarget {
   valueAt: (point: number) => number;
   rampOf: (stage: EnvelopeStage) => 'linear' | 'exp' | 'target';
+  silentAtFloor?: boolean;
 }
 // its stages' times, in seconds, and its sustain, a share of its top
 export interface EnvelopeTimes {
@@ -40,14 +43,14 @@ export function envelopeStages(
   if (rises) {
     automation.push(
       ...held(target, 'attack', { level: target.valueAt(0), until: delay, length: attack }),
-      stage(target, 'attack', 1, { start: delay, length: attack }),
+      ...stage(target, 'attack', 1, { start: delay, length: attack }),
     );
   }
   if (decay > 0 || sustain !== 1) {
     const start = delay + attack + hold;
     automation.push(
       ...held(target, 'decay', { level: target.valueAt(1), until: hold > 0 ? start : 0, length: decay }),
-      stage(target, 'decay', sustain, { start, length: decay }),
+      ...stage(target, 'decay', sustain, { start, length: decay }),
     );
   }
   return automation;
@@ -60,7 +63,7 @@ export function envelopeRelease(
   { from, stages }: { from: number; stages: Automation[] },
 ): { automation: Automation[]; faded: number } {
   return {
-    automation: [cutAt(stages, from), stage(target, 'release', 0, { start: from, length: release })],
+    automation: [cutAt(stages, from), ...stage(target, 'release', 0, { start: from, length: release })],
     faded: from + release,
   };
 }
@@ -80,7 +83,8 @@ export function envelopeCurve(
   return [...before, ...envelopeRelease(release, target, { from: closed, stages }).automation];
 }
 // What its curve makes of its amount: a point's value, and the ramp each stage takes.
-//   - exponential: up in a line, down straight in dB, never nearer 0 than the floor of silence;
+//   - exponential: up in a line, down straight in dB, never nearer 0 than the floor of silence,
+//     silent once down to it;
 //   - target: each stage approaching its point by its time as a time constant, as an analog's;
 //   - linear: every stage in a line.
 export function envelopeTarget(curve: EnvelopeCurve, amount: number): EnvelopeTarget {
@@ -88,24 +92,13 @@ export function envelopeTarget(curve: EnvelopeCurve, amount: number): EnvelopeTa
     return {
       valueAt: (point) => floored(amount * point, amount),
       rampOf: (stage) => (stage === 'attack' ? 'linear' : 'exp'),
+      silentAtFloor: true,
     };
   }
   const ramp = curve === 'target' ? 'target' : 'linear';
   return { valueAt: (point) => amount * point, rampOf: () => ramp };
 }
 
-// Where its stages have it as its gate closes:
-//   - a ramp running then: cut there, at the level it has reached, so it still runs up to it;
-//     a Web Audio ramp runs from the event before it, so dropped it would leave the level there;
-//   - else set there.
-function cutAt(stages: Automation[], from: number): Automation {
-  const level = levelAt(stages, from);
-  const running = stages.find((event) => eventTime(event) > from);
-  if (running?.[0] === 'linear' || running?.[0] === 'exp') {
-    return [running[0], level, from];
-  }
-  return ['set', level, from];
-}
 // A level held until a stage starts: set again there, as a ramp runs from the event before it.
 // None where nothing is held, the stage is set at once, or it approaches from where it is.
 function held(
@@ -124,16 +117,23 @@ function stage(
   name: EnvelopeStage,
   point: number,
   { start, length }: { start: number; length: number },
-): Automation {
+): Automation[] {
   const value = target.valueAt(point);
   if (length === 0) {
-    return ['set', value, start];
+    return [['set', value, start]];
   }
   const ramp = target.rampOf(name);
   if (ramp === 'target') {
-    return ['target', value, start, length];
+    return [['target', value, start, length]];
   }
-  return [ramp, value, start + length];
+  const end = start + length;
+  if (ramp === 'exp' && point === 0 && target.silentAtFloor) {
+    return [
+      [ramp, value, end],
+      ['set', 0, end],
+    ];
+  }
+  return [[ramp, value, end]];
 }
 // a value never nearer 0 than the floor of silence, on its amount's side: an exponential ramp's
 // ends, which can't reach 0 or cross it

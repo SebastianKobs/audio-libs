@@ -10,7 +10,7 @@ voices.rebuild(changed); // a change of structure while notes sound
 ```
 
 How it plays a note:
-1. a note on: a copy of its pool's voice card added at its time (`Built.add(copy, at)`), a drum rack's pad's by its key, none where no pool plays it; its note's sources set by the pool's addresses, its frequency, its velocity and the per-note controllers sent with it, its gate opened last; its glides glided by its voice card's `glide`, a jump with none; with no end yet, closed at its `longest`, 10 s unless its voice card says;
+1. a note on: a copy of its pool's voice card added at its time (`Built.add(copy, at)`), a drum rack's pad's by its key, none where no pool plays it; its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is built at them (LAY14a5a: set at its time, a biquad took a cutoff at its block's edge, a voice's first milliseconds through another), its frequency, its velocity and the per-note controllers sent with it, its gate opened last; its glides glided by its voice card's `glide`, a jump with none; with no end yet, closed at its `longest`, 10 s unless its voice card says;
 2. a note off: its gate closed at its time, no sooner than its `shortest`; a per-note controller sent later a change at its time, gliding as it says, its pitch glided;
 3. a voice let go once it has rung out, as the next messages come; at once where its sender detaches its note.
 

@@ -5,6 +5,6 @@
 //   - timed-value.ts: a value at a time, when a value lands, and changes as automation;
 //   - continued.ts: automation continued as another from a time, from where it plays.
 export { eventTime, restartAt, scheduled, shiftedBy, type Automation } from './automation.ts';
-export { SMOOTHING, approachAt, continuedAs, eventsAfter, onTheWay } from './continued.ts';
+export { SMOOTHING, approachAt, continuedAs, cutAt, eventsAfter, onTheWay } from './continued.ts';
 export { Levels, fadedFrom, levelAt } from './level-at.ts';
 export { automationOf, eventOf, timedAt, timedValue, type TimedValue, type When } from './timed-value.ts';

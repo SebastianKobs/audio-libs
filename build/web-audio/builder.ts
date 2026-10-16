@@ -17,11 +17,13 @@ import { BuiltParts } from './parts.ts';
 import { placeholder } from './placeholder.ts';
 import { blockJacks, compositeJacks, type Jacks, type OwnJacks } from './wiring.ts';
 
-// what the builder is made with: the context, the beat's length now, the random its noise is drawn from
+// What the builder is made with: the context, the beat's length now, the random its noise is drawn
+// from, and the draws its sources make as they start (a noise's offset), the same unless given.
 export interface WebAudioOptions {
   readonly context: BaseAudioContext;
   readonly beat: () => number;
   readonly random?: () => number;
+  readonly draws?: () => number;
 }
 // where a plan's sound goes, and where each of its inputs comes from, by name
 export interface WebAudioWhere {
@@ -33,13 +35,13 @@ export class WebAudioBuilder implements Builder<AudioNode> {
   readonly #context: BaseAudioContext;
   readonly #beat: () => number;
   readonly #buffers: Buffers;
-  readonly #random: () => number;
+  readonly #draws: () => number;
 
-  constructor({ context, beat, random = Math.random }: WebAudioOptions) {
+  constructor({ context, beat, random = Math.random, draws = random }: WebAudioOptions) {
     this.#context = context;
     this.#beat = beat;
     this.#buffers = new Buffers(context, random);
-    this.#random = random;
+    this.#draws = draws;
   }
   // a plan built, fed from where its inputs come from, its output into where it goes
   build(plan: Plan, { into, from = {} }: WebAudioWhere): WebAudioBuilt {
@@ -96,7 +98,7 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       buffers: this.#buffers,
       beat: this.#beat,
       canPan: typeof this.#context.createStereoPanner === 'function',
-      random: this.#random,
+      random: this.#draws,
       kept: (made) => parts.keep(made),
       started: (source, startAt) => parts.keepSource(source, startAt),
       followsTempo: (follower) => parts.tempoFollowers.push(follower),

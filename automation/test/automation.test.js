@@ -160,7 +160,7 @@ test('automation later by a time: each event but a value as the node is made, a 
   assert.deepEqual(shiftedBy([['cancel', 1]], 2), [['cancel', 3]]);
 });
 
-test('automation continued as another from a time, from where it plays: a ramp coming taken on from there; a target approached from there; a value held glided to by the smoothing', () => {
+test('automation continued as another from a time, from where it plays: a ramp running then cut there, at the level it has reached, as Web Audio drops a ramp whose end is cancelled; a ramp coming taken on from there; a target approached from there; a value held glided to by the smoothing', () => {
   const rising = [
     ['set', 0, 0],
     ['linear', 1, 2],
@@ -176,9 +176,26 @@ test('automation continued as another from a time, from where it plays: a ramp c
     ),
     [
       ['cancel', 1],
-      ['set', 0.5, 1],
+      ['linear', 0.5, 1],
       ['linear', 2, 4],
     ],
+    'the running ramp cut where it is, so it runs up to there',
+  );
+  const decaying = [
+    ['set', 1, 0],
+    ['exp', 0.01, 2],
+  ];
+  assert.deepEqual(
+    continuedAs(
+      decaying,
+      [
+        ['set', 1, 0],
+        ['exp', 0.01, 2],
+        ['exp', 0.001, 3],
+      ],
+      1,
+    )[1],
+    ['exp', 0.1, 1],
   );
   const held = [['set', 1, 0]];
   assert.deepEqual(
