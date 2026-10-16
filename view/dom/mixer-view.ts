@@ -4,14 +4,21 @@
 //   2. the buses, the desk's, a bus with the buses that go into it in a box;
 //   3. the FX busses, the desk's returns;
 //   4. the master.
-// A strip's name and its slots open its devices, by its address (data-open).
+// Its clicks, its own:
+//   - a strip's name or slot: told to whoever listens, by the strip's address (onOpen());
+//   - M mutes, S solos it alone, with shift adds it or lets it go;
+//   - a group's header folds it to its first track, with shift every group;
+//   - a knob dragged, set back by a double-click (KnobDrag).
+// After each, the view is told to draw it again (changed()).
 // A send's knob is labelled by its return's short label.
 // Level bars: each falls as a peak meter's, drawn on every frame.
 // Lights: a folded section's, and a group's dot, while a hidden strip sounds; what the strips
 // heard feed counted too.
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
+import { Events } from '../../util/index.ts';
 import { shortName, type BusGroup, type Strip, type ViewBuilder } from '../models/index.ts';
 import { html, makeElement, setHtml, type Html } from './elements.ts';
+import { KnobDrag } from './knob-view.ts';
 import { Levels, meterPosition } from './meter-view.ts';
 import { SectionView } from './section-view.ts';
 import { stripHtml, type StripLook } from './strip-view.ts';
@@ -42,6 +49,9 @@ export interface MixerLook {
 }
 // a strip's level bar's level, by the key it's read by
 type LevelOf = (key: string) => number;
+// What a click on a strip's name or slot opens: the strip, by its address; the name it's shown
+// by; the slot marked, -1 for its name.
+type Opened = [address: Address, title: string, slot: number];
 
 // what a click on a group's header does, and what its dot says
 const FOLD_GROUP =
@@ -53,21 +63,42 @@ export class MixerView {
   readonly sections: readonly SectionView[];
   readonly #models: ViewBuilder;
   readonly #look: MixerLook;
+  readonly #changed: () => void;
+  readonly #events = new Events<{ open: Opened }>();
   readonly #levels = new Levels();
   readonly #tracks: SectionView;
   readonly #buses: SectionView;
   readonly #returns: SectionView;
   readonly #master: SectionView;
 
-  constructor({ within, models, look }: { within: HTMLElement; models: ViewBuilder; look: MixerLook }) {
+  // changed(): told after a click or a drag changed what it draws
+  constructor({
+    within,
+    models,
+    look,
+    changed,
+  }: {
+    within: HTMLElement;
+    models: ViewBuilder;
+    look: MixerLook;
+    changed: () => void;
+  }) {
     this.#models = models;
     this.#look = look;
-    this.#tracks = new SectionView(within, look.labels.tracks);
-    this.#buses = new SectionView(within, look.labels.buses);
-    this.#returns = new SectionView(within, look.labels.returns);
+    this.#changed = changed;
+    const folded = changed;
+    this.#tracks = new SectionView(within, look.labels.tracks, { folded });
+    this.#buses = new SectionView(within, look.labels.buses, { folded });
+    this.#returns = new SectionView(within, look.labels.returns, { folded });
     this.#master = new SectionView(within, look.labels.master, { folds: false });
     this.sections = [this.#tracks, this.#buses, this.#returns, this.#master];
+    for (const section of this.sections) {
+      section.row.addEventListener('click', (event) => this.#clicked(event));
+    }
+    new KnobDrag({ within, knobOf: (address) => models.control(address), moved: changed });
   }
+  // what a click on a strip's name or slot opens, to whoever listens
+  readonly onOpen = (listener: (...opened: Opened) => void): (() => void) => this.#events.on('open', listener);
   // Drawn: the groups of tracks handed in, then the desk's own channels.
   draw(groups: readonly MixerGroup[]): void {
     const levelOf: LevelOf = (key) => this.#levels.of(key);
@@ -95,6 +126,45 @@ export class MixerView {
     for (const section of this.sections) {
       section.light(fed);
     }
+  }
+  // A click on a strip's name or slot, its mute or solo, or a group's header.
+  #clicked(event: MouseEvent): void {
+    const target = event.target as Element;
+    const opener = target.closest<HTMLElement>('[data-open]');
+    if (opener) {
+      const { open = '', title = '', mark = '-1' } = opener.dataset;
+      this.#events.emit('open', addressOf(open), title, Number(mark));
+      return;
+    }
+    const header = target.closest<HTMLElement>('[data-subfold]');
+    const button = target.closest<HTMLElement>('[data-mute], [data-solo]');
+    if (header) {
+      this.#foldGroup(header.parentElement!, event.shiftKey); // its group
+    } else if (button) {
+      this.#muteOrSolo(button, event.shiftKey);
+    } else {
+      return;
+    }
+    this.#changed();
+  }
+  // A group folded to its first track, or unfolded; with shift every group, as this one goes.
+  #foldGroup(group: Element, all: boolean): void {
+    const folded = group.classList.toggle('folded');
+    if (!all) {
+      return;
+    }
+    for (const other of this.#tracks.row.querySelectorAll('.group')) {
+      other.classList.toggle('folded', folded);
+    }
+  }
+  // M mutes or unmutes. S solos the strip alone; with shift, adds it or lets it go.
+  #muteOrSolo(button: HTMLElement, adding: boolean): void {
+    const { mute, solo } = button.dataset;
+    if (mute !== undefined) {
+      this.#models.strip(addressOf(mute))?.mute?.toggle();
+      return;
+    }
+    this.#models.mixer().soloClick(addressOf(solo!), adding); // not a mute, so a solo
   }
   // Each group in its box, the boxes kept across drawings, so a box stays where it was
   // scrolled to, and its scrollbar doesn't flicker on every drawing:
@@ -154,7 +224,7 @@ function lookOf(models: ViewBuilder, strip: Strip, name: string, levelOf: LevelO
   return {
     name,
     route: strip.out === undefined ? 'out' : `to ${strip.out}`,
-    opens: html` data-open="strip:${key}" data-title="${name}"`,
+    opens: html` data-open="${key}" data-title="${name}"`,
     sendLabel: (to) => shortName(models.plan, [to]),
     level: levelOf(key),
   };
@@ -177,7 +247,7 @@ function sendUp(models: ViewBuilder, from: string, to: string): boolean {
   return (send?.value ?? 0) > 0;
 }
 // A group, new: its header, the group's name with a dot as a section's, and its box.
-// Folded at first, to its first track; a click on its header folds and unfolds it.
+// Folded at first, to its first track; a click on its header folds and unfolds it (#clicked()).
 // Scrolled, its dot shows at once whether tracks are out of sight.
 function newGroup(key: string, name: string): HTMLElement {
   const group = makeElement('div', 'group folded');

@@ -1,7 +1,8 @@
 // ---------- view/dom/section-view: a section of a view, its strips in a row ----------
 // As a mixer's sections stand side by side: a label, then its strips in a row.
 // A section that folds: a click on its label folds it to its first strip, and back.
-// Folded, its light shows while a hidden strip sounds.
+//   - With shift: every section beside it that folds, as this one goes.
+//   - Folded, its light shows while a hidden strip sounds.
 import { makeElement } from './elements.ts';
 
 // what a click on a folding section's label does, as its hint says
@@ -15,8 +16,14 @@ export class SectionView {
   readonly row = makeElement('div', 'row');
   readonly #dot: HTMLElement | null = null;
 
-  // label: as the view names it; folds: whether a click on it folds it, an arrow after it
-  constructor(within: HTMLElement, label: string, { folds = true }: { folds?: boolean } = {}) {
+  // label: as the view names it;
+  // folds: whether a click on it folds it, an arrow after it;
+  // folded(): told after a click folded it or the sections beside it.
+  constructor(
+    within: HTMLElement,
+    label: string,
+    { folds = true, folded = () => {} }: { folds?: boolean; folded?: () => void } = {},
+  ) {
     const head = makeElement('div', 'seclabel', folds ? `${label} →` : label);
     this.element.append(head, this.row);
     within.appendChild(this.element);
@@ -26,6 +33,10 @@ export class SectionView {
     this.#dot = makeElement('i', 'dot');
     head.append(this.#dot);
     Object.assign(head.dataset, { fold: '', title: FOLD });
+    head.addEventListener('click', (event) => {
+      fold(this.element, within, event.shiftKey);
+      folded();
+    });
   }
   // Its light: on while a strip after its first sounds, by what it sounds as.
   light(heard: ReadonlySet<string>): void {
@@ -37,5 +48,17 @@ export class SectionView {
       'lit',
       strips.some((strip) => heard.has(strip.dataset.sounds!)), // selected by it
     );
+  }
+}
+
+// A section folded to its first strip, or unfolded; with every section beside it that folds,
+// as this one goes.
+function fold(section: HTMLElement, within: HTMLElement, all: boolean): void {
+  const folded = section.classList.toggle('folded');
+  if (!all) {
+    return;
+  }
+  for (const head of within.querySelectorAll(':scope > .sec > [data-fold]')) {
+    head.parentElement!.classList.toggle('folded', folded); // a label's section
   }
 }

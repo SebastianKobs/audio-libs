@@ -32,22 +32,19 @@ test("the desk's own channels drawn: its buses, a bus with those that go into it
   const { buses, returns, master } = deskHtml(viewsOn(), NO_LEVEL);
   assert.match(
     buses.text,
-    /^<div class="kind you"><div class="track"[^>]*><div class="name" data-open="strip:you" data-title="my playing">my playing<\/div>/,
+    /^<div class="kind you"><div class="track"[^>]*><div class="name" data-open="you" data-title="my playing">my playing<\/div>/,
   );
+  assert.match(buses.text, /data-open="tap" data-title="my tap">my tap<\/div><div class="route">to my playing<\/div>/);
   assert.match(
     buses.text,
-    /data-open="strip:tap" data-title="my tap">my tap<\/div><div class="route">to my playing<\/div>/,
-  );
-  assert.match(
-    buses.text,
-    /<\/div><div class="track"[^>]*><div class="name" data-open="strip:ambient" data-title="background">/,
+    /<\/div><div class="track"[^>]*><div class="name" data-open="ambient" data-title="background">/,
     'background alone, no box',
   );
   assert.match(
     returns.text,
-    /^<div class="track"[^>]*><div class="name" data-open="strip:reverb" data-title="reverb">reverb<\/div><div class="route">to master<\/div>/,
+    /^<div class="track"[^>]*><div class="name" data-open="reverb" data-title="reverb">reverb<\/div><div class="route">to master<\/div>/,
   );
-  assert.match(master.text, /data-open="strip:master" data-title="master">master<\/div><div class="route">out<\/div>/);
+  assert.match(master.text, /data-open="master" data-title="master">master<\/div><div class="route">out<\/div>/);
 });
 
 test("a send's knob labelled by its return's short label; each strip's level bar at its level", () => {
@@ -64,7 +61,7 @@ test("a track's strip drawn: the name it's handed, what plays on it; empty while
   const playing = trackHtml(views, { ...track, playing: true }, NO_LEVEL).text;
   assert.match(
     playing,
-    /data-open="strip:my tap\/1" data-title="flowers 1">flowers 1<\/div><div class="route">to my tap<\/div><div class="cell">flower 3<\/div>/,
+    /data-open="my tap\/1" data-title="flowers 1">flowers 1<\/div><div class="route">to my tap<\/div><div class="cell">flower 3<\/div>/,
   );
   assert.doesNotMatch(playing, /—/, 'its values shown');
   assert.match(trackHtml(views, { ...track, playing: false }, NO_LEVEL).text, /<b class="val">—<\/b>/, 'empty');
