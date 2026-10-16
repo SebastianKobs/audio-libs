@@ -5,9 +5,8 @@
 //   2. Closed, a gate's: its release from where it is then. A trigger's runs on.
 //   3. A stage, its sustain or its amount changed as it sounds: its curve drawn again from
 //      where it is then, a held level glided to; before its gate opens, kept for it.
-// What a plan leaves out at the block's declared default.
 import { continuedAs, scheduled, type Automation } from '../../../automation/index.ts';
-import { BLOCKS, envelopeCurve, envelopeTarget, type EnvelopeCurve } from '../../../plan/blocks/index.ts';
+import { envelopeCurve, envelopeTarget, type EnvelopeCurve } from '../../../plan/blocks/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
 import { automate } from '../automation.ts';
 import { BuiltNode } from '../built-node.ts';
@@ -22,25 +21,16 @@ const STAGES = ['delay', 'attack', 'hold', 'decay', 'sustain', 'release', 'amoun
 export function envelope(node: Node, making: Making): BuiltNode {
   const made = making.kept(making.context.createConstantSource());
   made.offset.value = 0;
-  const held = Object.fromEntries(STAGES.map((name) => [name, Number(declared(node, name))])) as Held;
+  const held = Object.fromEntries(STAGES.map((name) => [name, Number(valueOf(node, name))])) as Held;
   const curve = new EnvelopeCurveAsBuilt(made.offset, {
     held,
-    curve: String(settingOf(node, 'curve') ?? declaredSetting('curve')) as EnvelopeCurve, // one of its choices
-    trigger: (settingOf(node, 'mode') ?? declaredSetting('mode')) === 'trigger',
+    curve: settingOf(node, 'curve') as EnvelopeCurve, // one of its choices
+    trigger: settingOf(node, 'mode') === 'trigger',
     now: () => making.context.currentTime,
   });
   making.started(made);
   const params = Object.fromEntries(['gate', ...STAGES].map((name) => [name, curve.param(name)]));
   return new BuiltNode({ input: made, output: made, params, kind: 'an envelope' });
-}
-
-// a param's value as a plan has it, or as the block declares it where a plan leaves it out
-function declared(node: Node, name: string): number | string | undefined {
-  return valueOf(node, name) ?? BLOCKS.envelope.params.find((spec) => spec.name === name)?.default;
-}
-// a setting's choice as the block declares it
-function declaredSetting(name: string): string | undefined {
-  return BLOCKS.envelope.settings.find((spec) => spec.name === name)?.default;
 }
 
 // An envelope's curve as its level is told it: drawn from its gate, drawn again as it changes.

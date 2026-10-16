@@ -34,7 +34,7 @@ export class BuiltNode {
 
   // one of Web Audio's: its own way in and out, its params its own
   static of(made: AudioNode): BuiltNode {
-    const node = made as WebAudioNode; // its props and params read by the plan's names
+    const node = webAudioNode(made);
     return new BuiltNode({ input: node, output: node, params: node, node, kind: `a ${node.constructor.name}` });
   }
   constructor({
@@ -108,4 +108,8 @@ export class BuiltNode {
 // A Web Audio AudioParam, a stand-in's, or one in the plan's units.
 function isParam(value: unknown): value is Automatable {
   return typeof value === 'object' && value !== null && 'setTargetAtTime' in value;
+}
+// one of Web Audio's nodes, its props and params read by the plan's names
+export function webAudioNode(made: AudioNode): WebAudioNode {
+  return made as WebAudioNode;
 }

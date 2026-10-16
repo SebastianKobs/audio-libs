@@ -33,11 +33,13 @@ export class WebAudioBuilder implements Builder<AudioNode> {
   readonly #context: BaseAudioContext;
   readonly #beat: () => number;
   readonly #buffers: Buffers;
+  readonly #random: () => number;
 
   constructor({ context, beat, random = Math.random }: WebAudioOptions) {
     this.#context = context;
     this.#beat = beat;
     this.#buffers = new Buffers(context, random);
+    this.#random = random;
   }
   // a plan built, fed from where its inputs come from, its output into where it goes
   build(plan: Plan, { into, from = {} }: WebAudioWhere): WebAudioBuilt {
@@ -93,8 +95,9 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       buffers: this.#buffers,
       beat: this.#beat,
       canPan: typeof this.#context.createStereoPanner === 'function',
+      random: this.#random,
       kept: (made) => parts.keep(made),
-      started: (source) => parts.start(source),
+      started: (source, startAt) => parts.keepSource(source, startAt),
       followsTempo: (follower) => parts.tempoFollowers.push(follower),
     };
   }

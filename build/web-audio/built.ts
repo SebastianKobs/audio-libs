@@ -4,7 +4,7 @@
 //     its targets; a choice by its index, as its block's param holds it; a placeholder's left alone;
 //   - a preset's values set together; a new tempo told what follows it;
 //   - a pool's copy added by its own address, its pool's name and its number (my tap/3), wired by
-//     its rule; let go;
+//     its rule, its sources started at its time, now unless given; let go;
 //   - built again: the new beside the old, its inputs moved over, the values told and the copies
 //     added kept, the old ringing out, faded where it makes sound of its own (rebuild.ts); a preset
 //     that changes a setting built again with it;
@@ -137,8 +137,9 @@ export class WebAudioBuilt implements Built {
     }
   }
   // A pool's copy added by its own address, its pool's name and its number from 1 (my tap/3):
-  // built from the pool's child, wired by its rule, set by its address.
-  add(copy: Address): void {
+  // built from the pool's child, wired by its rule, set by its address; its sources started at a
+  // time, now unless given.
+  add(copy: Address, at?: number): void {
     const pool = copy.slice(0, -1); // its pool's address: the pool's parent's, and its name
     const number = copy.at(-1) ?? '';
     const holder = this.#now.parts.poolHolders.get(addressText(pool.slice(0, -1)));
@@ -161,6 +162,7 @@ export class WebAudioBuilt implements Built {
     }
     this.#now.parts.takeIn(parts);
     this.#now.copies.set(addressText(copy), { parts, holder, name, address: copy });
+    parts.startSources(at);
   }
   // A sound fed into a node's input by its address, its main one unless named:
   //   - a bus's, as a phrase plays into it;
@@ -286,6 +288,7 @@ export class WebAudioBuilt implements Built {
     for (const output of top.outputs.out ?? []) {
       output.connect(into);
     }
+    parts.startSources();
     return { plan, parts, top, copies: new Map() };
   }
   // a generation's main output faded from one level to another, through a fade it keeps
