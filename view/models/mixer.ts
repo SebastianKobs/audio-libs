@@ -9,8 +9,8 @@
 import {
   addressOf,
   addressText,
-  copyOf,
   reached,
+  withCopies,
   type Address,
   type Composite,
   type Wire,
@@ -79,20 +79,17 @@ export class Mixer {
     return desk.children.flatMap(({ name }) => this.#strip([name]) ?? []);
   }
   // the desk's wires as they are: its own, and each copy's added, by its pool's rule
-  #wires(): Wire[] {
-    const desk = this.#model.plan.node as Composite; // a desk is a composite
-    const copies = desk.pools.flatMap((pool) =>
-      this.#model.copiesOf([pool.child.name]).flatMap(([, number]) => copyOf(pool, Number(number)).wires),
-    );
-    return [...desk.wires, ...copies];
+  #wires(): readonly Wire[] {
+    return withCopies(this.#model.plan.node as Composite, this.#copies()).wires; // a desk is a composite
   }
   // every strip on the desk now: its own, then each pool's copies added so far
   #all(): Strip[] {
+    return [...this.#own(), ...this.#copies().flatMap((copy) => this.#strip(copy) ?? [])];
+  }
+  // each pool's copies added so far, pool by pool
+  #copies(): Address[] {
     const desk = this.#model.plan.node as Composite; // a desk is a composite
-    const copies = desk.pools.flatMap(({ child }) =>
-      this.#model.copiesOf([child.name]).flatMap((copy) => this.#strip(copy) ?? []),
-    );
-    return [...this.#own(), ...copies];
+    return desk.pools.flatMap(({ child }) => this.#model.copiesOf([child.name]));
   }
 }
 

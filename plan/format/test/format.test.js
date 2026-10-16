@@ -24,6 +24,7 @@ import {
   under,
   versionOf,
   wayOut,
+  withCopies,
   withSettings,
 } from '../index.ts';
 import { DESK, SYNTH, UTILITY } from './plans.ts';
@@ -96,6 +97,23 @@ test("a pool's copies: its child named by the copy's number, from 1; its wires w
   assert.throws(() => copyOf(voices, 0), /from 1/);
   assert.equal(poolNamed(SYNTH.node, 'voice'), voices);
   assert.equal(poolNamed(SYNTH.node, 'voice 12'), undefined, 'no number split off a name');
+});
+
+test("a composite with copies added: each a child named by its address, as its wires name it, wired by its pool's rule, after its own; a copy of no pool refused", () => {
+  const { children, wires } = withCopies(SYNTH.node, [
+    ['voice', '2'],
+    ['voice', '1'],
+  ]);
+  const own = SYNTH.node.children.map(({ name }) => name);
+  assert.deepEqual(
+    children.map(({ name }) => name),
+    [...own, 'voice/2', 'voice/1'],
+  );
+  assert.deepEqual(wires.slice(SYNTH.node.wires.length), [
+    { from: { node: 'voice/2', output: 'out' }, to: { output: 'out' } },
+    { from: { node: 'voice/1', output: 'out' }, to: { output: 'out' } },
+  ]);
+  assert.throws(() => withCopies(SYNTH.node, [['nowhere', '1']]), /no pool nowhere/);
 });
 
 test("an address split at the child it's in under the top: a child by its name, a copy by its pool's name and its number, a pool's child by the pool's name; the rest within it", () => {

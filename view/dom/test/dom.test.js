@@ -87,12 +87,12 @@ test('a slot as the tool says what sets it; a strip quiet where its cut is at 0;
   const master = stripHtml(views.strip(['master']), {
     ...LOOK,
     name: 'master',
-    opens: html` data-open="master:"`,
+    opens: html` data-open="strip:master"`,
   }).text;
-  assert.match(master, /^<div class="track"><div class="name" data-open="master:">master<\/div>/);
+  assert.match(master, /^<div class="track"><div class="name" data-open="strip:master">master<\/div>/);
   assert.match(
     master,
-    /<div class="slot" data-open="master:" data-mark="0">Limiter<small>gain, ceiling<\/small><\/div>/,
+    /<div class="slot" data-open="strip:master" data-mark="0">Limiter<small>gain, ceiling<\/small><\/div>/,
   );
   assert.doesNotMatch(master, /data-mute|data-solo/);
   assert.match(master, /<i class="pan" style="--v:0.5"><\/i><b>C<\/b>/);

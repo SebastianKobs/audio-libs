@@ -38,6 +38,27 @@ export function copyOf(pool: Pool, number: number): { node: Node; wires: Wire[] 
   }));
   return { node: { ...pool.child, name }, wires };
 }
+// A composite's children and wires with copies of its pools added, after its own:
+//   - each copy a child named by its address (my tap/3), as its wires name it;
+//   - wired by its pool's rule.
+export function withCopies(
+  composite: Pick<Composite, 'children' | 'wires' | 'pools'>,
+  copies: readonly Address[],
+): Pick<Composite, 'children' | 'wires'> {
+  const added = copies.map((address) => {
+    const [pool = '', number = ''] = address;
+    const named = poolNamed(composite, pool);
+    if (!named) {
+      throw new Error(`no pool ${pool} to copy`);
+    }
+    const { node, wires } = copyOf(named, Number(number));
+    return { node: { ...node, name: addressText(address) }, wires };
+  });
+  return {
+    children: [...composite.children, ...added.map(({ node }) => node)],
+    wires: [...composite.wires, ...added.flatMap(({ wires }) => wires)],
+  };
+}
 // A pool by its name, its child's.
 export function poolNamed(composite: Pick<Composite, 'pools'>, name: string): Pool | undefined {
   return composite.pools.find((pool) => pool.child.name === name);
