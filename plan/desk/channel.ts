@@ -52,6 +52,8 @@ export interface OnDesk {
   readonly sends: readonly Send[];
 }
 
+// the sends' child's name: a send's address on a channel is under it (send/reverb)
+export const SEND = 'send';
 const STEREO = 2;
 const PLAIN = { factor: 1, offset: 0 } as const; // a macro onto its target as it is
 // a send's select: post its first input, pre its second
@@ -99,7 +101,7 @@ function channelTemplate(parts: Parts, { kind, master, sends }: OnDesk): Written
     children: [
       ...parts.inserts.map((insert) => ({ ...insert, role: 'insert' })),
       ...stages,
-      ...(sends.length ? [{ name: 'send', kind: `${kind} sends`, role: 'sends' }] : []),
+      ...(sends.length ? [{ name: SEND, kind: `${kind} sends`, role: 'sends' }] : []),
     ],
     wires: [...rowWires(row), ...sendWires(last, sends)],
     macros: stripMacros(parts, { master, panned }),
@@ -121,9 +123,9 @@ function sendWires(last: string, sends: readonly Send[]): Wire[] {
     return [];
   }
   return [
-    { from: { node: 'cut', output: 'out' }, to: { node: 'send', input: 'pre' } },
-    { from: { node: last, output: 'out' }, to: { node: 'send', input: 'post' } },
-    ...sends.map(({ to }) => ({ from: { node: 'send', output: to }, to: { output: to } })),
+    { from: { node: 'cut', output: 'out' }, to: { node: SEND, input: 'pre' } },
+    { from: { node: last, output: 'out' }, to: { node: SEND, input: 'post' } },
+    ...sends.map(({ to }) => ({ from: { node: SEND, output: to }, to: { output: to } })),
   ];
 }
 // a strip's own params:
