@@ -90,6 +90,16 @@ test("a failing assertion on a node prints the node alone, not the graph it's in
   assert.equal(param.includes('kind:'), false, 'its node left out');
   assert.equal(param.includes("name: 'gain'"), true, 'the param shown');
 });
+
+// A buffer's samples printed one a line: two seconds of noise is 96,000 lines a channel.
+// The assertion's diff ran on them to 14 GB and took the machine down (2026-10-16).
+test('a failing assertion on a buffer prints its shape, not its samples', () => {
+  const noise = new StandInContext(() => 0).createBuffer(2, 4800, 48000);
+  noise.getChannelData(0).fill(0.25);
+  const printed = failureOf(() => assert.equal(noise, undefined, 'no noise here'));
+  assert.equal(printed.includes('0.25'), false, 'its samples left out');
+  assert.equal(printed.includes('length: 4800'), true, 'its shape shown');
+});
 // the message a failing assertion prints
 function failureOf(assertion) {
   try {

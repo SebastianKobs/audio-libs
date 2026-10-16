@@ -29,8 +29,10 @@ const PROPS = {
 };
 
 // The links back, a param's node and a node's context, are private, read by a getter.
+// A buffer's samples too, read by getChannelData().
 // A failing assertion prints its values in full, but not those, so it prints a param or a node alone:
-// with them, it printed the whole graph, every way through it, and ran out of memory (2026-10-13).
+// with them, it printed the whole graph, every way through it, and ran out of memory (2026-10-13);
+// a buffer printed every sample, and the assertion's diff ran out of memory on them (2026-10-16).
 class StandInParam {
   #node;
   constructor(node, name, value) {
@@ -71,17 +73,18 @@ class StandInParam {
   }
 }
 class StandInBuffer {
+  #samples;
   constructor(channels, length, sampleRate) {
     this.numberOfChannels = channels;
     this.length = length;
     this.sampleRate = sampleRate;
-    this.data = Array.from({ length: channels }, () => new Float32Array(length));
+    this.#samples = Array.from({ length: channels }, () => new Float32Array(length));
   }
   get duration() {
     return this.length / this.sampleRate;
   }
   getChannelData(c) {
-    return this.data[c];
+    return this.#samples[c];
   }
 }
 class StandInNode {
@@ -264,7 +267,8 @@ function bufferInfo(b) {
     return null;
   }
   let sum = 0;
-  for (const d of b.data) {
+  for (let c = 0; c < b.numberOfChannels; c++) {
+    const d = b.getChannelData(c);
     for (let i = 0; i < d.length; i++) {
       sum += Math.abs(d[i]);
     }
