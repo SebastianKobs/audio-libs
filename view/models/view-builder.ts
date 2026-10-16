@@ -1,12 +1,15 @@
 // ---------- view/models/view-builder: view models for whatever part of a plan is asked ----------
 // Built from the plan by its nodes, the values read through the model's port.
 //   - a param or a setting: a knob where it has a range, a choice where it has choices;
-//   - a node: a device, its controls in the plan's order.
+//   - a node: a device, its controls in the plan's order;
+//   - a channel: a strip, by its form; a desk: a mixer, its strips by role.
 import { nodeAt, under, type Address, type Node } from '../../plan/format/index.ts';
 import { Choice } from './choice.ts';
 import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';
+import { Mixer } from './mixer.ts';
 import { Model, type ModelPort } from './model.ts';
+import { Strip } from './strip.ts';
 
 // The view models of a plan, read and set through the tool's port.
 export class ViewBuilder {
@@ -35,6 +38,18 @@ export class ViewBuilder {
     }
     const controls = controlsOf(node).map((name) => this.control([...address, ...name])!); // found there
     return { name: node.name, kind: node.kind, controls };
+  }
+  // A channel as a strip, by its address, a pool's copy among them; none where nothing's there.
+  strip(address: Address): Strip | undefined {
+    const node = nodeAt(this.#model.plan, address);
+    if (!node) {
+      return undefined;
+    }
+    return new Strip(this.#model, this, address, node);
+  }
+  // the plan's desk as a mixer
+  mixer(): Mixer {
+    return new Mixer(this.#model, (address) => this.strip(address));
   }
 }
 

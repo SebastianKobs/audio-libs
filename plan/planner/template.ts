@@ -4,7 +4,8 @@
 //     it changes, by their addresses within it;
 //   - its own inputs, outputs, wires and pools as the plan has them;
 //   - a macro by its name, its spec its first target's where it writes none;
-//   - its child's role in it, and the form it fulfils, where it has one.
+//   - its child's role in it, and the form it fulfils, where it has one;
+//   - a child's label, the name a view shows it by, where it has one.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
@@ -15,6 +16,7 @@ export interface TemplateChild {
   readonly name: string;
   readonly kind: string;
   readonly role?: string;
+  readonly label?: string;
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
 }

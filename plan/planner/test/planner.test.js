@@ -46,6 +46,26 @@ test("a template of templates: a child's template planned into it, its role kept
   assert.equal(paramAt(plan, ['utility', 'gain', 'gain']).value, 0.5, 'and on onto its gain');
 });
 
+test("a child's words, its label, the name a view shows it by: carried into its node where its template writes one, a pool's child's too; none where it writes none", () => {
+  const labelled = new Planner(
+    [
+      {
+        kind: 'Pair',
+        children: [
+          { name: 'first', kind: 'gain', label: 'the first' },
+          { name: 'second', kind: 'gain' },
+        ],
+        pools: [{ child: { name: 'copy', kind: 'gain', label: 'a copy' }, wires: [] }],
+      },
+    ],
+    [],
+  );
+  const { node } = labelled.plan('Pair');
+  assert.equal(node.children[0].label, 'the first');
+  assert.equal('label' in node.children[1], false, 'none where it writes none');
+  assert.equal(node.pools[0].child.label, 'a copy');
+});
+
 test("a pool's child ready: its template planned, under its name, its wires and its note's addresses kept; its values by the pool's name, a copy's under it by its number", () => {
   const plan = planner.plan('Synth');
   const [pool] = plan.node.pools;

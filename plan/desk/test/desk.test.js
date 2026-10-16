@@ -215,6 +215,26 @@ test("a channel built on another: its base's inserts, then its own; its pan, vol
   );
 });
 
+test("a channel's words on a desk, its label, the name a view shows it by: on its node, a pool's on its child; read from data, its shape checked", () => {
+  const labelled = {
+    ...STUDIO,
+    channels: STUDIO.channels.map((channel) =>
+      channel.name === 'you' ? { ...channel, label: 'my playing' } : channel,
+    ),
+    pools: [{ ...STUDIO.pools[0], label: 'my taps' }, STUDIO.pools[1]],
+  };
+  const plan = planned(labelled);
+  assert.deepEqual(
+    [nodeAt(plan, ['you']).label, nodeAt(plan, ['my tap']).label, nodeAt(plan, ['tap']).label],
+    ['my playing', 'my taps', undefined],
+  );
+  assert.equal(deskOf(labelled, 'desks.js').channels[3].label, 'my playing');
+  assert.throws(
+    () => deskOf({ kind: 'Studio', channels: [{ name: 'you', role: 'bus', label: 3 }] }, 'desks.js'),
+    /label/,
+  );
+});
+
 test('a desk written short refused where it is wrong, every failure said: a channel not handed in, or built in a loop; a way out into no bus on the desk; a tap for a return it has no send to', () => {
   const bent = {
     kind: 'Bent',

@@ -12,7 +12,7 @@
 //   - address.ts: where a param or a setting is, by names from the top, and as text;
 //   - param-at.ts: a node, a param or a setting found by its address; settings changed by it,
 //     a new plan;
-//   - routing.ts: what feeds what over one composite's wires, the loop check;
+//   - routing.ts: what feeds what over one composite's wires, the loop check, a node's way out;
 //   - version.ts: a stored plan's version.
 export { addressOf, addressText, under, type Address, type ValuesByAddress } from './address.ts';
 export type { Channels, Input, Output } from './input-output.ts';
@@ -22,6 +22,6 @@ export type { Param, Setting } from './param.ts';
 export { nodeAt, paramAt, settingAt, withSettings } from './param-at.ts';
 export type { Plan } from './plan.ts';
 export { copyOf, isCopyNumber, poolNamed, splitAtChild, type NoteAddresses, type Pool } from './pool.ts';
-export { feeds, reached } from './routing.ts';
+export { feeds, reached, wayOut } from './routing.ts';
 export type { Wire, WireFrom, WireTo } from './wire.ts';
 export { VERSION, versionOf } from './version.ts';

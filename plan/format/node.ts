@@ -6,6 +6,7 @@
 //     its macros.
 // The form it fulfils beside its kind (channel), and its role in its parent where the
 // parent's form gives one (insert, fader).
+// Its label: the name a view shows it by, where its template gives one (my playing).
 import type { Input, Output } from './input-output.ts';
 import type { Macro } from './macro.ts';
 import type { Param, Setting } from './param.ts';
@@ -18,6 +19,7 @@ interface Face {
   readonly kind: string;
   readonly form?: string;
   readonly role?: string;
+  readonly label?: string;
   readonly inputs: readonly Input[];
   readonly outputs: readonly Output[];
   readonly params: readonly Param[];

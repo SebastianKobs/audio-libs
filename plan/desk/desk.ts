@@ -27,9 +27,10 @@ import {
 } from './channel.ts';
 import { DESK_ROLES, type DeskRole } from './desk-form.ts';
 
-// a channel on a desk, written short
+// a channel on a desk, written short; its label the name a view shows it by
 export interface DeskChannel extends ChannelParts {
   readonly name: string;
+  readonly label?: string;
   readonly role: DeskRole;
   readonly channel?: string;
   readonly out?: string;
@@ -53,10 +54,11 @@ interface Placed {
 
 const STEREO = 2;
 const FED_FROM_OUTSIDE: readonly DeskRole[] = ['channel', 'bus']; // a track or a phrase played into it
-// A channel's shape on a desk, as read from data: its name, its role, the channel it's on,
-// where it goes; its parts; its taps by return, each pre or post.
+// A channel's shape on a desk, as read from data: its name, its label, its role, the channel
+// it's on, where it goes; its parts; its taps by return, each pre or post.
 const ON_DESK_FIELDS: Readonly<Record<string, Shape>> = {
   name: 'word',
+  label: 'word',
   role: { oneOf: DESK_ROLES },
   channel: 'word',
   out: 'word',
@@ -103,10 +105,10 @@ export function deskTemplates(desk: Desk, channels: readonly Channel[] = []): Wr
         .filter(({ role }) => FED_FROM_OUTSIDE.includes(role))
         .map(({ written }) => ({ name: written.name, channels: STEREO })),
       outputs: [{ name: 'out', channels: STEREO }],
-      children: fixed.map(({ written, role }) => ({ name: written.name, kind: kindOf(written.name), role })),
+      children: fixed.map(({ written, role }) => ({ ...childOf(written, kindOf), role })),
       wires: fixed.flatMap((each) => wiresOf(each, outs)),
       pools: pooled.map((each) => ({
-        child: { name: each.written.name, kind: kindOf(each.written.name), role: each.role },
+        child: { ...childOf(each.written, kindOf), role: each.role },
         wires: wiresOf(each, outs).filter(({ from }) => 'node' in from), // fed by its copy's own input, as it's added
       })),
     },
@@ -116,6 +118,14 @@ export function deskTemplates(desk: Desk, channels: readonly Channel[] = []): Wr
   ];
 }
 
+// A channel as the desk's template's child: its name, its kind on the desk, its label where
+// it's written with one.
+function childOf(
+  { name, label }: DeskPool,
+  kindOf: (name: string) => string,
+): { name: string; kind: string; label?: string } {
+  return { name, kind: kindOf(name), ...(label !== undefined && { label }) };
+}
 // each channel's parts, a pool's after the desk's: its base's, then its own
 function partsOn(desk: Desk, byKind: ReadonlyMap<string, Channel>, problems: string[]): Parts[] {
   return [...desk.channels, ...(desk.pools ?? [])].map((written) => {

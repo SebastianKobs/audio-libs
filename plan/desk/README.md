@@ -16,7 +16,7 @@ const plan = new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], presets).plan(
 
 **The master** is the last bus: its inserts and its fader alone, its volume the Output's (`master/volume`); no pan, mute, solo or sends.
 
-**A desk written short**, as a studio's YAML writes it: its channels in order, each by its name and role (a channel, fed from outside; a bus; a return; the master), written there or on a channel written apart (`channel`), its own parts over that one's; each one's way out (`out`), a bus, the master where it names none; a send's tap by its return (`taps`), where it isn't its channel's own; its pools, channels that come and go, each copy wired as its pool's channel. A channel written apart has its inserts, a pan or none (`pan: false`), its fader's start (`volume`), its sends' tap (`tap`), and the channel it's built on (`extends`), whose inserts come first.
+**A desk written short**, as a studio's YAML writes it: its channels in order, each by its name and role (a channel, fed from outside; a bus; a return; the master), its label where a view shows it by another name (LAY12c), written there or on a channel written apart (`channel`), its own parts over that one's; each one's way out (`out`), a bus, the master where it names none; a send's tap by its return (`taps`), where it isn't its channel's own; its pools, channels that come and go, each copy wired as its pool's channel. A channel written apart has its inserts, a pan or none (`pan: false`), its fader's start (`volume`), its sends' tap (`tap`), and the channel it's built on (`extends`), whose inserts come first.
 
 | | |
 |---|---|

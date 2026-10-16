@@ -23,6 +23,7 @@ import {
   splitAtChild,
   under,
   versionOf,
+  wayOut,
   withSettings,
 } from '../index.ts';
 import { DESK, SYNTH, UTILITY } from './plans.ts';
@@ -126,6 +127,15 @@ test("what feeds what over one composite's wires: each name and what it reaches,
   assert.equal(feeds(desk, 'master', 'my tap 1'), false, 'a wire from the master back would be a loop');
   assert.equal(feeds(desk, 'reverb', 'my playing'), false);
   assert.equal(feeds(desk, 'reverb', 'reverb'), true, 'itself: a wire into it would loop');
+});
+
+test("where a node's way out goes, over one composite's wires: the node its main output feeds; none where it goes out of the composite, or has no way out", () => {
+  const { wires } = DESK.node;
+  const [out, tap] = wires;
+  assert.equal(wayOut([tap, out], 'my tap 1'), 'my playing', 'its main output, not its tap');
+  assert.equal(wayOut(wires, 'master'), undefined, "out of the desk's own output");
+  assert.equal(wayOut(wires, 'nowhere'), undefined);
+  assert.equal(wayOut(SYNTH.node.pools[0].wires, 'voice'), undefined, "a pool's rule into the instrument's output");
 });
 
 test("a plan's settings changed by address, a new plan, the old as it was: a child's, a pool's child's by the pool's name, every copy's; a copy's, or a setting not there, refused", () => {

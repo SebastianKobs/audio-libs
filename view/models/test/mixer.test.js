@@ -1,0 +1,112 @@
+// The strips and the mixer (mockup/src/libs/view/models), in node, on a small desk (test/desk.js) and a port
+// of the tests' own:
+//   - a channel as a strip, by its form: its shown name, where it goes, its inserts as devices, its sends'
+//     knobs, its fader, pan, mute and solo, its level; quiet where its cut is at 0; a pool's copy too;
+//   - a desk as a mixer: its buses, each with the buses that go into it, its returns, its master, in the
+//     plan's order;
+//   - a solo click: that strip alone, or added with shift, each change a command on its strip.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { ViewBuilder } from '../index.ts';
+import { addressText } from '../../../plan/format/index.ts';
+import { STUDIO } from './desk.js';
+
+// The desk's view models on a port of the tests' own: values and peaks by address, the copies
+// each pool has, every control live; what's sent kept.
+function mixerOn({ values = {}, peaks = {}, copies = {} } = {}) {
+  const sent = [];
+  const port = {
+    plan: STUDIO,
+    valueOf: (address) => values[addressText(address)],
+    startOf: () => undefined,
+    roleOf: () => ({ by: 'live' }),
+    peakOf: (address) => peaks[addressText(address)] ?? 0,
+    copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
+    send: (command) => sent.push(command),
+  };
+  return { views: new ViewBuilder(port), sent };
+}
+
+test("a channel as a strip, by its form: its name as shown, its label's, else its own; where it goes; its inserts as devices; its sends' knobs by return; its fader, pan, mute and solo", () => {
+  const { views } = mixerOn();
+  const tap = views.strip(['tap']);
+  assert.deepEqual([tap.name, tap.out, tap.role], ['my tap', 'my playing', 'bus']);
+  assert.deepEqual(
+    tap.inserts.map(({ name, kind }) => [name, kind]),
+    [['utility', 'Utility']],
+  );
+  assert.deepEqual(
+    tap.inserts[0].controls.map(({ address }) => addressText(address)),
+    ['tap/utility/level'],
+  );
+  assert.deepEqual(
+    tap.sends.map(({ name, address }) => [name, addressText(address)]),
+    [['reverb', 'tap/send/reverb']],
+  );
+  assert.deepEqual(
+    [tap.volume, tap.pan, tap.mute, tap.solo].map(({ address }) => addressText(address)),
+    ['tap/volume', 'tap/pan', 'tap/mute', 'tap/solo'],
+  );
+  assert.deepEqual([views.strip(['reverb']).name, views.strip(['reverb']).out], ['reverb', 'master']);
+});
+
+test("the master: its inserts and its volume alone, going nowhere on the desk; no strip where there's no channel", () => {
+  const master = mixerOn().views.strip(['master']);
+  assert.deepEqual(
+    [master.inserts.map(({ name }) => name), master.sends, master.pan, master.mute, master.solo, master.out],
+    [['limiter'], [], undefined, undefined, undefined, undefined],
+  );
+  assert.equal(master.volume.text, '0.0');
+  assert.equal(mixerOn().views.strip(['nowhere']), undefined);
+});
+
+test("a pool's copy as a strip: its pool's channel, under its address, named by its pool and its number, going where its pool's rule wires it", () => {
+  const copy = mixerOn({ values: { 'my tap/2/send/reverb': 0.5 } }).views.strip(['my tap', '2']);
+  assert.deepEqual([copy.name, copy.out, copy.role], ['my tap 2', 'my tap', 'channel']);
+  assert.deepEqual(
+    copy.sends.map(({ address, value }) => [addressText(address), value]),
+    [['my tap/2/send/reverb', 0.5]],
+  );
+});
+
+test("a strip's level, its peak as the port hears it; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
+  const { views } = mixerOn({ peaks: { you: 0.4 }, values: { 'tap/cut/gain': 0 } });
+  assert.equal(views.strip(['you']).level, 0.4);
+  assert.deepEqual(
+    [views.strip(['tap']).quiet, views.strip(['you']).quiet, views.strip(['master']).quiet],
+    [true, false, false],
+  );
+});
+
+test("a desk as a mixer, in the plan's order: its buses, each with the buses that go into it; its returns; its master", () => {
+  const mixer = mixerOn().views.mixer();
+  assert.deepEqual(
+    mixer.buses.map(({ bus, members }) => [bus.name, members.map(({ name }) => name)]),
+    [
+      ['my playing', ['my tap']],
+      ['background', []],
+    ],
+  );
+  assert.deepEqual(
+    mixer.returns.map(({ name }) => name),
+    ['reverb'],
+  );
+  assert.equal(mixer.master.name, 'master');
+});
+
+test("a solo click: that strip alone, the others let go first; again, none; with shift, added or let go; a pool's copy among them; each change a command on its strip's solo", () => {
+  const clicked = (values, address, add) => {
+    const { views, sent } = mixerOn({ values, copies: { 'my tap': [1] } });
+    views.mixer().soloClick(address, add);
+    return sent.map(({ address: at, value }) => `${addressText(at)} ${value}`);
+  };
+  assert.deepEqual(clicked({ 'you/solo': 1, 'my tap/1/solo': 1 }, ['tap']), [
+    'you/solo 0',
+    'my tap/1/solo 0',
+    'tap/solo 1',
+  ]);
+  assert.deepEqual(clicked({ 'tap/solo': 1 }, ['tap']), ['tap/solo 0'], 'again: none');
+  assert.deepEqual(clicked({ 'tap/solo': 1 }, ['ambient'], true), ['ambient/solo 1'], 'with shift, added');
+  assert.deepEqual(clicked({ 'tap/solo': 1, 'you/solo': 1 }, ['tap'], true), ['tap/solo 0'], 'with shift, let go');
+  assert.deepEqual(clicked({}, ['my tap', '1']), ['my tap/1/solo 1'], "a pool's copy");
+});

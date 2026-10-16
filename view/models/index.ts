@@ -6,6 +6,8 @@
 //   - knob.ts: a param with a range as a control, its text as shown;
 //   - choice.ts: a param or a setting with choices;
 //   - device.ts: a node as a device, its controls in order, what every control has;
+//   - strip.ts: a channel as a strip, by its form, its name as shown;
+//   - mixer.ts: a desk as a mixer, its strips by role, a solo click;
 //   - command.ts: what's done in a view, by address;
 //   - custom.ts: a view of its own, registered by kind.
 export { Choice } from './choice.ts';
@@ -13,5 +15,7 @@ export type { Command } from './command.ts';
 export { CustomViews } from './custom.ts';
 export { Control, type Device } from './device.ts';
 export { Knob, textOf } from './knob.ts';
+export { Mixer, type BusGroup } from './mixer.ts';
 export type { ModelPort, Role } from './model.ts';
+export { Strip, shownName } from './strip.ts';
 export { ViewBuilder } from './view-builder.ts';

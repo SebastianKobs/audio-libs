@@ -3,6 +3,8 @@
 //   - each value as it plays, worked out from what it was told; the plan's where none was;
 //   - each value's start, which a reset brings back;
 //   - how each is set: live here, automated by what its track plays, or fixed as built;
+//   - a node's level as the implementation hears it, the only one that hears the sound;
+//   - a pool's copies added so far;
 //   - what's done, sent as a command.
 import { paramAt, settingAt, type Address, type Param, type Plan } from '../../plan/format/index.ts';
 import type { Command } from './command.ts';
@@ -21,6 +23,8 @@ export interface ModelPort {
   valueOf(address: Address): number | string | undefined;
   startOf(address: Address): number | string | undefined;
   roleOf(address: Address): Role;
+  peakOf(address: Address): number;
+  copiesOf(pool: Address): readonly Address[];
   send(command: Command): void;
 }
 // a param or a setting found by its address, and which of the two
@@ -58,6 +62,12 @@ export class Model {
   }
   roleOf(address: Address): Role {
     return this.#port.roleOf(address);
+  }
+  peakOf(address: Address): number {
+    return this.#port.peakOf(address);
+  }
+  copiesOf(pool: Address): readonly Address[] {
+    return this.#port.copiesOf(pool);
   }
   send(command: Command): void {
     this.#port.send(command);

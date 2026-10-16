@@ -52,6 +52,8 @@ function builderOn(plan, { values = {}, roles = {} } = {}) {
     valueOf: (address) => values[addressText(address)],
     startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
     roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
+    peakOf: () => 0,
+    copiesOf: () => [],
     send: (command) => sent.push(command),
   };
   return { views: new ViewBuilder(port), sent };
