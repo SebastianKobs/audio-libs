@@ -13,7 +13,10 @@
 // Each failure said at once, naming the desk.
 import { feeds, type Wire } from '../format/index.ts';
 import type { WrittenTemplate } from '../planner/index.ts';
+import { fromData, type Shape } from '../../util/index.ts';
 import {
+  PARTS_FIELDS,
+  TAPS,
   channelTemplates,
   layered,
   type Channel,
@@ -22,7 +25,7 @@ import {
   type Send,
   type Tap,
 } from './channel.ts';
-import type { DeskRole } from './desk-form.ts';
+import { DESK_ROLES, type DeskRole } from './desk-form.ts';
 
 // a channel on a desk, written short
 export interface DeskChannel extends ChannelParts {
@@ -50,6 +53,30 @@ interface Placed {
 
 const STEREO = 2;
 const FED_FROM_OUTSIDE: readonly DeskRole[] = ['channel', 'bus']; // a track or a phrase played into it
+// A channel's shape on a desk, as read from data: its name, its role, the channel it's on,
+// where it goes; its parts; its taps by return, each pre or post.
+const ON_DESK_FIELDS: Readonly<Record<string, Shape>> = {
+  name: 'word',
+  role: { oneOf: DESK_ROLES },
+  channel: 'word',
+  out: 'word',
+  ...PARTS_FIELDS,
+  taps: { byName: { oneOf: TAPS } },
+};
+// a desk's shape: its kind; its channels, each its name and its role; its pools, each its name
+const DESK_SHAPE: Shape = {
+  fields: {
+    kind: 'word',
+    channels: { listOf: { fields: ON_DESK_FIELDS, needs: ['name', 'role'] } },
+    pools: { listOf: { fields: ON_DESK_FIELDS, needs: ['name'] } },
+  },
+  needs: ['kind', 'channels'],
+};
+
+// A desk read from data, as it is once it's of a desk's shape; refused where it isn't.
+export function deskOf(data: unknown, source: string): Desk {
+  return fromData(data, DESK_SHAPE, { source, what: 'a desk' });
+}
 
 // The templates a desk written short makes:
 //   - the desk's;

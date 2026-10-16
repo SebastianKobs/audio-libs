@@ -307,11 +307,11 @@ test("a desk and a channel read from data, as YAML's are: their shape checked, e
       'bent.yaml: not of the shape of a desk:',
       '  its kind not a word',
       '  channels 1: no role',
-      '  pools 1: no name',
       '  channels 2: its role bass, not channel, bus, return or master',
-      '  channels 2: its tap for reverb early, not pre or post',
+      '  channels 2: its taps reverb early, not pre or post',
       '  channels 3 inserts 1: no kind or preset',
       '  channels 3: its pan not true or false',
+      '  pools 1: no name',
     ].join('\n'),
   });
   assert.throws(() => deskOf({ kind: 'Empty' }, 'empty.yaml'), {

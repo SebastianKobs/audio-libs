@@ -402,7 +402,7 @@ test("presets read from data, as a theme's YAML writes them, by name: each a tem
     message: [
       'bent.yaml: not of the shape of presets:',
       '  delay: no kind',
-      '  delay: its values not by address',
+      '  delay: its values not an object',
       '  room: not an object',
     ].join('\n'),
   });

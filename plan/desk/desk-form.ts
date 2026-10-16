@@ -11,8 +11,10 @@ import type { Form } from '../planner/index.ts';
 import { frozen } from '../../util/index.ts';
 
 // what a channel is on a desk, by what feeds it and where it goes
-export type DeskRole = 'channel' | 'bus' | 'return' | 'master';
+export type DeskRole = (typeof DESK_ROLES)[number];
 
+// the roles a channel can have on a desk
+export const DESK_ROLES = ['channel', 'bus', 'return', 'master'] as const;
 // the roles a way out or a send leaves from: every one but the master
 const LEAVING: readonly DeskRole[] = ['channel', 'bus', 'return'];
 

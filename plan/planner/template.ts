@@ -8,6 +8,7 @@
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
+import { fromData, type Shape } from '../../util/index.ts';
 
 // a child as a template writes it
 export interface TemplateChild {
@@ -60,4 +61,39 @@ export interface Template {
 // A template as written, read from data or handed to the planner: each child by its kind or by a preset.
 export interface WrittenTemplate extends Omit<Template, 'children'> {
   readonly children?: readonly (TemplateChild | PresetChild)[];
+}
+
+// A template's shape, as read from data: its kind; its form and its base, words;
+// what its lists' items need: a jack its name, a child its name and its kind or a preset,
+// a wire its two ends, a macro its targets, a pool its child and its wires.
+const TEMPLATE_SHAPE: Shape = {
+  fields: {
+    kind: 'word',
+    form: 'word',
+    extends: 'word',
+    inputs: { listOf: { needs: ['name'] } },
+    outputs: { listOf: { needs: ['name'] } },
+    children: { listOf: { needs: ['name', ['kind', 'preset']] } },
+    wires: { listOf: { needs: ['from', 'to'] } },
+    macros: { listOf: { needs: ['maps'] } },
+    pools: { listOf: { needs: ['child', 'wires'] } },
+  },
+  needs: ['kind'],
+};
+// Presets by name, as a theme writes them: each a template's kind, its values and settings
+// by address, each a number or a word.
+const PRESETS_SHAPE: Shape = {
+  byName: {
+    fields: { kind: 'word', values: { byName: 'word or number' }, settings: { byName: 'word or number' } },
+    needs: ['kind'],
+  },
+};
+
+// A template read from data, as it is once it's of a template's shape; refused where it isn't.
+export function templateOf(data: unknown, source: string): WrittenTemplate {
+  return fromData(data, TEMPLATE_SHAPE, { source, what: 'a template' });
+}
+// Presets by name read from data, as they are once they're of presets' shape; refused where they aren't.
+export function presetsOf(data: unknown, source: string): Readonly<Record<string, Preset>> {
+  return fromData(data, PRESETS_SHAPE, { source, what: 'presets' });
 }

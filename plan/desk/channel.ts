@@ -16,9 +16,10 @@
 import type { Wire } from '../format/index.ts';
 import type { PresetChild, Template, TemplateChild, TemplateMacro, WrittenTemplate } from '../planner/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../params/index.ts';
+import { fromData, type Shape } from '../../util/index.ts';
 
 // where a send is taken: after the mute, before the fader (pre); or after the pan (post)
-export type Tap = 'pre' | 'post';
+export type Tap = (typeof TAPS)[number];
 // an insert: an effect, by its kind or a preset, under its slot's name
 export type Insert = TemplateChild | PresetChild;
 // what a channel is written with, apart or on a desk
@@ -63,11 +64,27 @@ export interface OnDesk {
 
 // the sends' child's name: a send's address on a channel is under it (send/reverb)
 export const SEND = 'send';
+// where a send can be taken
+export const TAPS = ['pre', 'post'] as const;
+// A channel's parts' shape, as read from data, apart or on a desk: its inserts, each its name and
+// its kind or a preset; its pan, true or false; its volume, a number; its tap, pre or post.
+export const PARTS_FIELDS: Readonly<Record<string, Shape>> = {
+  inserts: { listOf: { needs: ['name', ['kind', 'preset']] } },
+  pan: 'switch',
+  volume: 'number',
+  tap: { oneOf: TAPS },
+};
+// a channel written apart: its kind, the channel it's built on, its parts
+const CHANNEL_SHAPE: Shape = { fields: { kind: 'word', extends: 'word', ...PARTS_FIELDS }, needs: ['kind'] };
 const STEREO = 2;
 const PLAIN = { factor: 1, offset: 0 } as const; // a macro onto its target as it is
 // a send's select: post its first input, pre its second
 const TAP_INPUT: Readonly<Record<Tap, string>> = { post: 'a', pre: 'b' };
 
+// A channel read from data, as it is once it's of a channel's shape; refused where it isn't.
+export function channelOf(data: unknown, source: string): Channel {
+  return fromData(data, CHANNEL_SHAPE, { source, what: 'a channel' });
+}
 // Parts layered, the base first:
 //   - inserts one after the other;
 //   - a pan, a volume and a tap: the last that says.

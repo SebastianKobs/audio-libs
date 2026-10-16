@@ -11,5 +11,6 @@ export { firstAfter, lastAtOrBefore } from './search.ts';
 export { DueQueue } from './due.ts';
 export { Events } from './events.ts';
 export { entryOf, frozen, toggleIn, updateInPlace } from './objects.ts';
+export { fromData, type Shape } from './from-data.ts';
 export { keptDraws, pickFrom, seeded } from './random.ts';
 export { LiveCopies } from './live-copies.ts';
