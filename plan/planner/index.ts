@@ -13,6 +13,7 @@
 export { Planner, type Asked } from './planner.ts';
 export {
   presetsOf,
+  presetsShape,
   templateOf,
   type Preset,
   type PresetChild,

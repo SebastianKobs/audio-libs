@@ -10,7 +10,7 @@
 // the file hasn't refused. An instrument a patch plays is the planner's to find, another file's
 // among them.
 import { fromData, type Shape } from '../../util/index.ts';
-import { templateOf, type Preset, type WrittenTemplate } from '../planner/index.ts';
+import { presetsOf, presetsShape, templateOf, type Preset, type WrittenTemplate } from '../planner/index.ts';
 import { ARCHITECTURE_FORM } from './architecture-form.ts';
 
 // a rack's pad: its key, and the patch it plays, by its name
@@ -27,12 +27,15 @@ export interface Instruments {
 // the file as it's written
 interface Written {
   readonly instruments?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
-  readonly patches?: Readonly<Record<string, Omit<Preset, 'kind'> & { readonly instrument: string }>>;
+  readonly patches?: unknown;
   readonly racks?: Readonly<Record<string, readonly RackPad[]>>;
 }
 
-// The file's shape: its instruments, each a voice card's lists, checked as a template is; its
-// patches, each the instrument it plays; its racks, each pad a key and a patch.
+// The file's shape:
+//   - its instruments, each a voice card's lists, checked as a template is;
+//   - its patches, every preset file's shape, each the instrument it plays;
+//   - its racks, each pad a key and a patch.
+// The patches checked with the file, so every failure is said at once.
 const FILE_SHAPE: Shape = {
   fields: {
     instruments: {
@@ -41,12 +44,7 @@ const FILE_SHAPE: Shape = {
         needs: ['children'],
       },
     },
-    patches: {
-      byName: {
-        fields: { instrument: 'word', values: { byName: 'word or number' }, settings: { byName: 'word or number' } },
-        needs: ['instrument'],
-      },
-    },
+    patches: presetsShape('instrument'),
     racks: { byName: { listOf: { fields: { key: 'number', patch: 'word' }, needs: ['key', 'patch'] } } },
   },
 };
@@ -54,12 +52,7 @@ const FILE_SHAPE: Shape = {
 // A file of instruments read, as it is once it's of its shape; refused where it isn't.
 export function instrumentsOf(data: unknown, source: string): Instruments {
   const file = fromData<Written>(data, FILE_SHAPE, { source, what: 'instruments' });
-  const patches = Object.fromEntries(
-    Object.entries(file.patches ?? {}).map(([name, { instrument, ...preset }]) => [
-      name,
-      { kind: instrument, ...preset },
-    ]),
-  );
+  const patches = presetsOf(file.patches ?? {}, source, 'instrument');
   const racks = file.racks ?? {};
   refusedPads(racks, patches, source);
   return {

@@ -474,16 +474,20 @@ test("a value or a setting asked for at an address the template doesn't have, re
   );
 });
 
-test("presets read from data, as a theme's YAML writes them, by name: each a template's kind, its values and settings by address; their shape checked", () => {
-  const read = {
-    delay: { kind: 'Delay', values: { feedback: 0.45 } },
-    room: { kind: 'Reverb', settings: { 'room/length': 3.5 } },
+test("presets read from data, as a theme's YAML writes them: each by a name of its own, what it's on by that thing's word (an effect, a desk), made a template's kind; its values and settings by address; their shape checked", () => {
+  const written = {
+    delay: { effect: 'Delay', values: { feedback: 0.45 } },
+    rtlprnf: { effect: 'Reverb', settings: { 'room/length': 3.5 } },
   };
-  assert.equal(presetsOf(read, 'effects.yaml'), read, 'of the shape, as they are');
-  assert.throws(() => presetsOf({ delay: { values: [] }, room: 'Reverb' }, 'bent.yaml'), {
+  assert.deepEqual(presetsOf(written, 'effects.yaml', 'effect'), {
+    delay: { kind: 'Delay', values: { feedback: 0.45 } },
+    rtlprnf: { kind: 'Reverb', settings: { 'room/length': 3.5 } },
+  });
+  assert.deepEqual(presetsOf({ studio: { desk: 'Studio' } }, 'desk.yaml', 'desk'), { studio: { kind: 'Studio' } });
+  assert.throws(() => presetsOf({ delay: { kind: 'Delay', values: [] }, room: 'Reverb' }, 'bent.yaml', 'effect'), {
     message: [
       'bent.yaml: not of the shape of presets:',
-      '  delay: no kind',
+      '  delay: no effect',
       '  delay: its values not an object',
       '  room: not an object',
     ].join('\n'),

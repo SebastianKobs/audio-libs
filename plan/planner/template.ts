@@ -88,20 +88,31 @@ const TEMPLATE_SHAPE: Shape = {
   },
   needs: ['kind'],
 };
-// Presets by name, as a theme writes them: each a template's kind, its values and settings
-// by address, each a number or a word.
-const PRESETS_SHAPE: Shape = {
-  byName: {
-    fields: { kind: 'word', values: { byName: 'word or number' }, settings: { byName: 'word or number' } },
-    needs: ['kind'],
-  },
-};
 
 // A template read from data, as it is once it's of a template's shape; refused where it isn't.
 export function templateOf(data: unknown, source: string): WrittenTemplate {
   return fromData(data, TEMPLATE_SHAPE, { source, what: 'a template' });
 }
-// Presets by name read from data, as they are once they're of presets' shape; refused where they aren't.
-export function presetsOf(data: unknown, source: string): Readonly<Record<string, Preset>> {
-  return fromData(data, PRESETS_SHAPE, { source, what: 'presets' });
+// Presets read from data, as a theme writes them:
+//   - each by a name of its own;
+//   - what it's on by that thing's word (on: effect, desk, instrument), made its template's kind;
+//   - its values and settings by address, each a number or a word.
+// Refused where they aren't of presets' shape.
+export function presetsOf(data: unknown, source: string, on: string): Readonly<Record<string, Preset>> {
+  const written = fromData<Readonly<Record<string, Readonly<Record<string, unknown>>>>>(data, presetsShape(on), {
+    source,
+    what: 'presets',
+  });
+  return Object.fromEntries(
+    Object.entries(written).map(([name, { [on]: kind, ...preset }]) => [name, { kind, ...preset } as Preset]),
+  );
+}
+// Presets' shape, what they're on by that thing's word: for a file that holds them among more.
+export function presetsShape(on: string): Shape {
+  return {
+    byName: {
+      fields: { [on]: 'word', values: { byName: 'word or number' }, settings: { byName: 'word or number' } },
+      needs: [on],
+    },
+  };
 }
