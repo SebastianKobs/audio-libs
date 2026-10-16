@@ -29,7 +29,10 @@ function composite(name, children) {
     outputs: [],
     params: [],
     settings: [],
-    inside: { children, wires: [], macros: [], pools: [] },
+    children,
+    wires: [],
+    macros: [],
+    pools: [],
   };
 }
 // a desk of three rooms, each a level and a reverb, and a channel with neither; an owner recording what it's told

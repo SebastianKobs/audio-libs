@@ -48,12 +48,10 @@ function chainOf(...children) {
       outputs: [{ name: 'out', channels: 2 }],
       params: [],
       settings: [],
-      inside: {
-        children,
-        wires: [...wires, { from: { node: children.at(-1).name, output: 'out' }, to: { output: 'out' } }],
-        macros: [],
-        pools: [],
-      },
+      children,
+      wires: [...wires, { from: { node: children.at(-1).name, output: 'out' }, to: { output: 'out' } }],
+      macros: [],
+      pools: [],
     },
   };
 }
@@ -124,11 +122,8 @@ test('each block made by its kind, at its values and settings: an oscillator and
 test("a signal wired into a delay's time, by its ms: into its line's own time, moving it in seconds, as Web Audio's does; into its note, refused", () => {
   const wobbled = (param) => {
     const plan = chainOf(block('line', 'delay'));
-    plan.node.inside.children.push(
-      block('wobble', 'oscillator', { frequency: 0.5 }),
-      block('depth', 'gain', { gain: 0.004 }),
-    );
-    plan.node.inside.wires.push(
+    plan.node.children.push(block('wobble', 'oscillator', { frequency: 0.5 }), block('depth', 'gain', { gain: 0.004 }));
+    plan.node.wires.push(
       { from: { node: 'wobble', output: 'out' }, to: { node: 'depth', input: 'in' } },
       { from: { node: 'depth', output: 'out' }, to: { node: 'line', param } },
     );
@@ -148,8 +143,8 @@ test("a signal wired into a delay's time, by its ms: into its line's own time, m
 // a select between two gains: each wired into one of its inputs, the select into the plan's output
 function selecting(input) {
   const plan = chainOf(block('pick', 'select', {}, { input }));
-  plan.node.inside.children.unshift(block('first', 'gain'), block('second', 'gain'));
-  plan.node.inside.wires.push(
+  plan.node.children.unshift(block('first', 'gain'), block('second', 'gain'));
+  plan.node.wires.push(
     { from: { node: 'first', output: 'out' }, to: { node: 'pick', input: 'a' } },
     { from: { node: 'second', output: 'out' }, to: { node: 'pick', input: 'b' } },
   );
@@ -188,7 +183,7 @@ test("a placeholder for a block it can't make, said by its address: its sound pa
   assert.deepEqual(
     desk.placeholders,
     [['my tap 1'], ['my playing'], ['reverb'], ['master']],
-    'channels with no inside, as the format writes them',
+    'channels with no children, as the format writes them',
   );
   const [tap, bus, reverb, master] = context.rec.nodes.slice(-4);
   assert.deepEqual(outOf(context, tap), [bus, reverb], 'its way out and its tap, straight through');

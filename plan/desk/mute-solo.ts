@@ -6,7 +6,7 @@
 //   - a return never silenced by a solo; the master never silenced at all.
 // Ways out by the channels' main outputs.
 // A pool's copies are among the children where the caller adds them.
-import type { Inside } from '../format/index.ts';
+import type { Composite } from '../format/index.ts';
 
 // which channels are muted and which soloed, by name
 export interface Muting {
@@ -18,7 +18,7 @@ export interface Muting {
 export const MUTE_GLIDE = 0.01; // s
 
 // The channels silent, by name.
-export function silenced(desk: Pick<Inside, 'children' | 'wires'>, { muted, soloed }: Muting): Set<string> {
+export function silenced(desk: Pick<Composite, 'children' | 'wires'>, { muted, soloed }: Muting): Set<string> {
   const roles = new Map(desk.children.map(({ name, role }) => [name, role]));
   const silenceable = (name: string): boolean => roles.has(name) && roles.get(name) !== 'master';
   const quiet = new Set([...muted].filter(silenceable));
@@ -42,7 +42,7 @@ export function silenced(desk: Pick<Inside, 'children' | 'wires'>, { muted, solo
 }
 
 // a channel's way out: the channel, then each its main output goes into, to the master
-function waysOut({ wires }: Pick<Inside, 'wires'>): (name: string) => string[] {
+function waysOut({ wires }: Pick<Composite, 'wires'>): (name: string) => string[] {
   const next = new Map<string, string>();
   for (const { from, to } of wires) {
     if ('node' in from && from.output === 'out' && 'node' in to) {

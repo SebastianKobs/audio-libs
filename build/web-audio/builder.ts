@@ -6,7 +6,7 @@
 //      where it holds a pool, a copy added and let go later;
 //   4. its inputs fed from where they come from, its output into where it goes.
 // It knows no planner, channel, desk, effect or instrument: only the plan's format and its blocks.
-import { addressText, type Address, type Node, type Plan } from '../../plan/format/index.ts';
+import { addressText, isComposite, type Address, type Node, type Plan } from '../../plan/format/index.ts';
 import type { BlockKind } from '../../plan/blocks/index.ts';
 import type { Builder } from '../ports/index.ts';
 import { MAKERS } from './blocks/makers.ts';
@@ -65,11 +65,11 @@ export class WebAudioBuilder implements Builder<AudioNode> {
   // a node built into its parts, as #jacksOf() has it
   #built(node: Node, at: Address, parts: BuiltParts): Jacks {
     const making = this.#making(parts);
-    if (node.inside) {
+    if (isComposite(node)) {
       const children = new Map(
-        node.inside.children.map((child) => [child.name, this.#jacksOf(child, [...at, child.name], parts)]),
+        node.children.map((child) => [child.name, this.#jacksOf(child, [...at, child.name], parts)]),
       );
-      if (!node.inside.pools.length) {
+      if (!node.pools.length) {
         return compositeJacks(node, children);
       }
       const own = ownJacks(node, making);

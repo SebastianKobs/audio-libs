@@ -5,7 +5,7 @@
 // Settings changed by address: a new plan, the old as it was. A pool's child's by a copy's
 // address: every copy of it, as they're built from it. A setting not there refused.
 import { addressOf, type Address, type ValuesByAddress } from './address.ts';
-import type { Node } from './node.ts';
+import { isComposite, type Node } from './node.ts';
 import type { Param, Setting } from './param.ts';
 import type { Plan } from './plan.ts';
 import { poolOfCopy } from './pool.ts';
@@ -29,7 +29,7 @@ export function paramAt(plan: Plan, address: Address): Param | undefined {
   if (!node || name === undefined) {
     return undefined;
   }
-  return named(node.params, name) ?? named(node.inside?.macros ?? [], name);
+  return named(node.params, name) ?? named(node.macros ?? [], name);
 }
 // A setting by its address.
 export function settingAt(plan: Plan, address: Address): Setting | undefined {
@@ -43,11 +43,10 @@ export function settingAt(plan: Plan, address: Address): Setting | undefined {
 
 // a node's child by its name, or its pool's copy by its name and number, the pool's child standing for it
 function childNamed(node: Node, name: string): Node | undefined {
-  const inside = node.inside;
-  if (!inside) {
+  if (!isComposite(node)) {
     return undefined;
   }
-  return inside.children.find((child) => child.name === name) ?? poolOfCopy(inside, name)?.child;
+  return node.children.find((child) => child.name === name) ?? poolOfCopy(node, name)?.child;
 }
 // a param or a setting by its spec's name
 function named<Item extends Param>(items: readonly Item[], name: string): Item | undefined {
@@ -74,18 +73,20 @@ function settingChanged(node: Node, [name, ...rest]: Address, value: number | st
     const settings = node.settings.map((setting) => (setting.spec.name === name ? { ...setting, value } : setting));
     return { ...node, settings };
   }
-  const inside = node.inside;
-  const child = inside?.children.find((each) => each.name === name);
-  if (inside && child) {
-    const children = inside.children.map((each) => (each === child ? settingChanged(each, rest, value, whole) : each));
-    return { ...node, inside: { ...inside, children } };
-  }
-  const pool = inside && poolOfCopy(inside, name);
-  if (!inside || !pool) {
+  if (!isComposite(node)) {
     throw new Error(`${whole}: no setting`);
   }
-  const pools = inside.pools.map((each) =>
+  const child = node.children.find((each) => each.name === name);
+  if (child) {
+    const children = node.children.map((each) => (each === child ? settingChanged(each, rest, value, whole) : each));
+    return { ...node, children };
+  }
+  const pool = poolOfCopy(node, name);
+  if (!pool) {
+    throw new Error(`${whole}: no setting`);
+  }
+  const pools = node.pools.map((each) =>
     each === pool ? { ...each, child: settingChanged(each.child, rest, value, whole) } : each,
   );
-  return { ...node, inside: { ...inside, pools } };
+  return { ...node, pools };
 }

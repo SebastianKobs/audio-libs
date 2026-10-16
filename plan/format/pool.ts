@@ -3,7 +3,7 @@
 // from 1 (replay tower 3). Its wires the rule each copy is wired by, written with the
 // pool's name. A pool of voices holds the addresses its notes set.
 import type { Address } from './address.ts';
-import type { Inside } from './inside.ts';
+import type { Composite } from './node.ts';
 import type { Node } from './node.ts';
 import type { Wire, WireFrom, WireTo } from './wire.ts';
 
@@ -37,8 +37,8 @@ export function copyOf(pool: Pool, number: number): { node: Node; wires: Wire[] 
   return { node: { ...pool.child, name }, wires };
 }
 // The pool a copy is of, by the copy's name: its pool's name and a number from 1.
-export function poolOfCopy(inside: Inside, name: string): Pool | undefined {
-  return inside.pools.find((pool) => {
+export function poolOfCopy(composite: Pick<Composite, 'pools'>, name: string): Pool | undefined {
+  return composite.pools.find((pool) => {
     const prefix = `${pool.child.name} `;
     return name.startsWith(prefix) && COPY_NUMBER.test(name.slice(prefix.length));
   });

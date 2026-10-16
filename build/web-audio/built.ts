@@ -100,7 +100,7 @@ export class WebAudioBuilt implements Built {
     this.#paramNamed(address);
     const node = nodeAt(this.#now.plan, address.slice(0, -1))!; // a param's: its node is there
     const name = address.at(-1)!;
-    const macro = node.inside?.macros.find((each) => each.spec.name === name);
+    const macro = node.macros?.find((each) => each.spec.name === name);
     if (macro) {
       for (const target of macro.maps) {
         const mapped = automation.map((event) => mappedEvent(event, (value) => mapOnto(target, value)));
@@ -139,7 +139,7 @@ export class WebAudioBuilt implements Built {
   // wired by its rule, set by its own address; its address handed back.
   add(pool: Address, number: number): Address {
     const holder = this.#now.parts.poolHolders.get(addressText(pool.slice(0, -1)));
-    const kept = holder?.node.inside?.pools.find((each) => each.child.name === pool.at(-1));
+    const kept = holder?.node.pools?.find((each) => each.child.name === pool.at(-1));
     if (!holder || !kept) {
       throw new Error(`${addressText(pool)}: no pool`);
     }

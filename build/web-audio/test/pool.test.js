@@ -43,23 +43,21 @@ const DESK = {
     outputs: [{ name: 'out', channels: 2 }],
     params: [],
     settings: [],
-    inside: {
-      children: [gainBlock('bus'), gainBlock('master')],
-      wires: [
-        { from: { node: 'bus', output: 'out' }, to: { node: 'master', input: 'in' } },
-        { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
-      ],
-      macros: [],
-      pools: [
-        {
-          child: gainBlock('replay'),
-          wires: [
-            { from: { input: 'in' }, to: { node: 'replay', input: 'in' } },
-            { from: { node: 'replay', output: 'out' }, to: { node: 'bus', input: 'in' } },
-          ],
-        },
-      ],
-    },
+    children: [gainBlock('bus'), gainBlock('master')],
+    wires: [
+      { from: { node: 'bus', output: 'out' }, to: { node: 'master', input: 'in' } },
+      { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: [],
+    pools: [
+      {
+        child: gainBlock('replay'),
+        wires: [
+          { from: { input: 'in' }, to: { node: 'replay', input: 'in' } },
+          { from: { node: 'replay', output: 'out' }, to: { node: 'bus', input: 'in' } },
+        ],
+      },
+    ],
   },
 };
 

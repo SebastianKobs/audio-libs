@@ -13,7 +13,7 @@ const planner = new Planner(EFFECT_TEMPLATES, [EFFECT_FORM]);
 
 // a planned effect's macros by name, each its value
 function macrosOf(kind, asked) {
-  const { macros } = planner.plan(kind, asked).node.inside;
+  const { macros } = planner.plan(kind, asked).node;
   return Object.fromEntries(macros.map((macro) => [macro.spec.name, macro.value]));
 }
 
@@ -30,7 +30,7 @@ test("the six effects, each of the effect's form, one input and one output, each
     ],
   );
   assert.deepEqual(EFFECT_FORM, { name: 'effect', inputs: ['in'], outputs: ['out'] });
-  const tape = planner.plan('TapeDelay').node.inside;
+  const tape = planner.plan('TapeDelay').node;
   assert.deepEqual(
     tape.children.map((child) => child.name),
     ['line', 'lowpass', 'loop', 'wobble', 'depth'],

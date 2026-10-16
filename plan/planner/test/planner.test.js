@@ -31,7 +31,7 @@ test("values and settings changed by address, a preset's: a macro's value onto i
 test("a template of templates: a child's template planned into it, its role kept; a value it changes written in the template, or given by its address; a macro onto a child's macro", () => {
   const plan = planner.plan('Strip', { name: 'my tap 1', values: { 'lowpass/resonance': 2 } });
   assert.deepEqual(
-    plan.node.inside.children.map(({ name, kind, role }) => [name, kind, role]),
+    plan.node.children.map(({ name, kind, role }) => [name, kind, role]),
     [
       ['utility', 'Utility', 'insert'],
       ['lowpass', 'filter', 'insert'],
@@ -48,7 +48,7 @@ test("a template of templates: a child's template planned into it, its role kept
 
 test("a pool's child ready: its template planned, under its name, its wires and its note's addresses kept; a copy's values by its address", () => {
   const plan = planner.plan('Synth');
-  const [pool] = plan.node.inside.pools;
+  const [pool] = plan.node.pools;
   assert.equal(pool.child.name, 'voice');
   assert.deepEqual(pool.note.gate, [['envelope', 'gate']]);
   assert.equal(settingAt(plan, ['voice 2', 'oscillator', 'wave']).value, 'triangle');
@@ -58,7 +58,7 @@ test("a pool's child ready: its template planned, under its name, its wires and 
 
 test("a jack's channels as they come, where its block doesn't fix them: those wired into it, a node's outputs its inputs'; through a loop; mono where nothing comes", () => {
   const channels = (plan, name) => {
-    const node = plan.node.inside.children.find((child) => child.name === name);
+    const node = plan.node.children.find((child) => child.name === name);
     return [...node.inputs, ...node.outputs].map((jack) => jack.channels);
   };
   const utility = planner.plan('Utility');
@@ -80,7 +80,7 @@ test('a value a block needs and has no default for refused, naming it; a templat
         kind: 'Loud',
         children: [{ name: 'limiter', kind: 'limiter', values: { gain: 6, ceiling: -1, release: 0.3 } }],
       },
-    ]).plan('Loud').node.inside.children[0].params[0].value,
+    ]).plan('Loud').node.children[0].params[0].value,
     6,
   );
   assert.throws(() => planner.plan('Choir'), /no template Choir/);
@@ -136,7 +136,7 @@ test('every template checked well-formed as it is handed in, every failure said 
 test("a template that fulfils its form planned: a desk of channels, each of the channel's form, its roles kept", () => {
   const plan = planner.plan('Desk');
   assert.deepEqual(
-    plan.node.inside.children.map(({ name, role, form }) => [name, role, form]),
+    plan.node.children.map(({ name, role, form }) => [name, role, form]),
     [
       ['my tap 1', 'channel', 'channel'],
       ['my playing', 'bus', 'channel'],
@@ -245,7 +245,7 @@ test("a form's jacks: an effect's one input and one output, its children free of
 
 test("a macro with no spec of its own its first target's, under its name, its value its default unless written; one with no name refused", () => {
   const planned = new Planner([LEVEL], [EFFECT_FORM]).plan('Level');
-  const [level] = planned.node.inside.macros;
+  const [level] = planned.node.macros;
   assert.deepEqual(
     [level.spec, level.value],
     [{ ...BLOCKS.gain.params[0], name: 'level' }, BLOCKS.gain.params[0].default],
@@ -351,13 +351,13 @@ test("a template built on another: its base's jacks, form, children, wires, macr
     ['Wobbled', 'effect', LEVEL.inputs, LEVEL.outputs],
   );
   assert.deepEqual(
-    node.inside.children.map((child) => child.name),
+    node.children.map((child) => child.name),
     ['gain', 'wobble'],
     "its base's first",
   );
-  assert.equal(node.inside.wires.length, 3);
+  assert.equal(node.wires.length, 3);
   assert.deepEqual(
-    node.inside.macros.map((macro) => macro.spec.name),
+    node.macros.map((macro) => macro.spec.name),
     ['level', 'rate'],
   );
   assert.equal(paramAt(plan, ['wobble', 'frequency']).value, 0.5);
@@ -432,7 +432,7 @@ test("a child written with a preset: its kind the preset's, the preset's values 
     presets,
   );
   const plan = planned.plan('Rack');
-  const [side] = plan.node.inside.children;
+  const [side] = plan.node.children;
   assert.equal(side.kind, 'Utility', "its kind the preset's");
   assert.deepEqual(
     [paramAt(plan, ['side', 'level']).value, paramAt(plan, ['side', 'pan']).value],

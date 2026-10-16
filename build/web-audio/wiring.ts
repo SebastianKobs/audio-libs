@@ -37,7 +37,7 @@ export function blockJacks(node: Node, built: BuiltNode): Jacks {
 // A composite's jacks, its wires made: its own nodes where it has them (own), else what its wires lead through it.
 export function compositeJacks(node: Node, children: ReadonlyMap<string, Jacks>, own?: OwnJacks): Jacks {
   const collected: Collected = { inputs: {}, outputs: {} };
-  for (const wire of node.inside?.wires ?? []) {
+  for (const wire of node.wires ?? []) {
     wireInside(node, wire, { children, own, collected });
   }
   const paramsOf = (name: string): never => {

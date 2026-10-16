@@ -30,18 +30,16 @@ const TONE = {
     outputs: [{ name: 'out', channels: 1 }],
     params: [],
     settings: [],
-    inside: {
-      children: [
-        { ...block('oscillator'), name: 'osc' },
-        { ...block('gain'), name: 'level' },
-      ],
-      wires: [
-        { from: { node: 'osc', output: 'out' }, to: { node: 'level', input: 'in' } },
-        { from: { node: 'level', output: 'out' }, to: { output: 'out' } },
-      ],
-      macros: [],
-      pools: [],
-    },
+    children: [
+      { ...block('oscillator'), name: 'osc' },
+      { ...block('gain'), name: 'level' },
+    ],
+    wires: [
+      { from: { node: 'osc', output: 'out' }, to: { node: 'level', input: 'in' } },
+      { from: { node: 'level', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: [],
+    pools: [],
   },
 };
 // a block as a plan has it, at its declared defaults

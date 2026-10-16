@@ -42,7 +42,7 @@ const last = (param) => param.events.at(-1);
 // the Utility, its level a macro twice its gain
 function doubled() {
   const plan = structuredClone(UTILITY);
-  plan.node.inside.macros[0].maps[0].factor = 2;
+  plan.node.macros[0].maps[0].factor = 2;
   return plan;
 }
 

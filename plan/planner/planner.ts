@@ -131,7 +131,10 @@ export class Planner {
       outputs: template.outputs ?? [],
       params: [],
       settings: [],
-      inside: { children, wires: template.wires ?? [], macros, pools },
+      children,
+      wires: template.wires ?? [],
+      macros,
+      pools,
     };
   }
   // a macro planned: its spec, its own or its first target's; its value given, or written, or its default
