@@ -27,10 +27,12 @@ import {
 } from './channel.ts';
 import { DESK_ROLES, type DeskRole } from './desk-form.ts';
 
-// a channel on a desk, written short; its label the name a view shows it by
+// a channel on a desk, written short; its label the name a view shows it by, its short label
+// the name in little room
 export interface DeskChannel extends ChannelParts {
   readonly name: string;
   readonly label?: string;
+  readonly short?: string;
   readonly role: DeskRole;
   readonly channel?: string;
   readonly out?: string;
@@ -54,11 +56,12 @@ interface Placed {
 
 const STEREO = 2;
 const FED_FROM_OUTSIDE: readonly DeskRole[] = ['channel', 'bus']; // a track or a phrase played into it
-// A channel's shape on a desk, as read from data: its name, its label, its role, the channel
+// A channel's shape on a desk, as read from data: its name, its labels, its role, the channel
 // it's on, where it goes; its parts; its taps by return, each pre or post.
 const ON_DESK_FIELDS: Readonly<Record<string, Shape>> = {
   name: 'word',
   label: 'word',
+  short: 'word',
   role: { oneOf: DESK_ROLES },
   channel: 'word',
   out: 'word',
@@ -118,13 +121,18 @@ export function deskTemplates(desk: Desk, channels: readonly Channel[] = []): Wr
   ];
 }
 
-// A channel as the desk's template's child: its name, its kind on the desk, its label where
-// it's written with one.
+// A channel as the desk's template's child: its name, its kind on the desk, its labels where
+// it's written with them.
 function childOf(
-  { name, label }: DeskPool,
+  { name, label, short }: DeskPool,
   kindOf: (name: string) => string,
-): { name: string; kind: string; label?: string } {
-  return { name, kind: kindOf(name), ...(label !== undefined && { label }) };
+): { name: string; kind: string; label?: string; short?: string } {
+  return {
+    name,
+    kind: kindOf(name),
+    ...(label !== undefined && { label }),
+    ...(short !== undefined && { short }),
+  };
 }
 // each channel's parts, a pool's after the desk's: its base's, then its own
 function partsOn(desk: Desk, byKind: ReadonlyMap<string, Channel>, problems: string[]): Parts[] {

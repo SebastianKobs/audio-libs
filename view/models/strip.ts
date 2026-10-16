@@ -86,6 +86,11 @@ export function shownName(plan: Plan, address: Address): string {
   }
   return shown;
 }
+// A channel's name in little room, as a send's knob shows it: its short label, else its label,
+// else its own.
+export function shortName(plan: Plan, address: Address): string {
+  return nodeAt(plan, address)?.short ?? shownName(plan, address);
+}
 // The channel a channel's way out goes into, by its name; none where it goes out of the desk.
 // A pool's copy goes where its pool's rule wires it.
 function wayOutOf(plan: Plan, address: Address): string | undefined {

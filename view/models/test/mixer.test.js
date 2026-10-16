@@ -7,7 +7,7 @@
 //   - a solo click: that strip alone, or added with shift, each change a command on its strip.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ViewBuilder } from '../index.ts';
+import { ViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from './desk.js';
 
@@ -50,6 +50,13 @@ test("a channel as a strip, by its form: its name as shown, its label's, else it
     ['tap/volume', 'tap/pan', 'tap/mute', 'tap/solo'],
   );
   assert.deepEqual([views.strip(['reverb']).name, views.strip(['reverb']).out], ['reverb', 'master']);
+});
+
+test("a channel's name in little room, as a send's knob shows it: its short label, else its label, else its own", () => {
+  assert.deepEqual(
+    [['reverb'], ['you'], ['master']].map((address) => shortName(STUDIO, address)),
+    ['rev', 'my playing', 'master'],
+  );
 });
 
 test("the master: its inserts and its volume alone, going nowhere on the desk; no strip where there's no channel", () => {

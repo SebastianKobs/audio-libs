@@ -3,7 +3,7 @@
 //   - a param or a setting: a knob where it has a range, a choice where it has choices;
 //   - a node: a device, its controls in the plan's order;
 //   - a channel: a strip, by its form; a desk: a mixer, its strips by role.
-import { nodeAt, under, type Address, type Node } from '../../plan/format/index.ts';
+import { nodeAt, under, type Address, type Node, type Plan } from '../../plan/format/index.ts';
 import { Choice } from './choice.ts';
 import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';
@@ -17,6 +17,10 @@ export class ViewBuilder {
 
   constructor(port: ModelPort) {
     this.#model = new Model(port);
+  }
+  // the plan the models are built from, as the port hands it now
+  get plan(): Plan {
+    return this.#model.plan;
   }
   // A param or a setting as a control: a choice where it has choices, else a knob; none where
   // nothing's there.

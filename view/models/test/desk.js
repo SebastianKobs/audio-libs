@@ -1,6 +1,7 @@
 // A small desk written out as a plan, as the desk's planner would hand it out: the strips' and the
 // mixer's tests' data.
-//   reverb: a return, its Utility at 0.6, a Utility a level and a pan, its pan's law a setting.
+//   reverb: a return, shown as rev in little room, its Utility at 0.6, a Utility a level and a
+//     pan, its pan's law a setting.
 //   you: a bus, shown as my playing, a send to the reverb; tap: a bus into it, shown as my tap.
 //   ambient: a bus, shown as background; the master, its limiter, its volume alone.
 //   my tap: a pool of channels into tap, each a send to the reverb.
@@ -22,12 +23,13 @@ function block(name, kind, params = [], role) {
   };
 }
 // a composite: its children, its macros
-function composite(name, kind, { role, label, children = [], macros = [], wires = [], pools = [] } = {}) {
+function composite(name, kind, { role, label, short, children = [], macros = [], wires = [], pools = [] } = {}) {
   return {
     name,
     kind,
     ...(role && { role }),
     ...(label && { label }),
+    ...(short && { short }),
     inputs: STEREO,
     outputs: OUT,
     params: [],
@@ -55,7 +57,7 @@ function utility(level) {
 }
 // A channel of the channel's form: its inserts, its cut, its fader, its pan, its sends; its
 // volume, pan, mute and solo; the master its inserts, its fader and its volume alone.
-function channel(name, { role, label, inserts = [], sends = [], master = false } = {}) {
+function channel(name, { role, label, short, inserts = [], sends = [], master = false } = {}) {
   const children = [
     ...inserts,
     ...(master ? [] : [block('cut', 'gain', [[{ ...GAIN, name: 'gain' }, 1]], 'mute')]),
@@ -75,7 +77,7 @@ function channel(name, { role, label, inserts = [], sends = [], master = false }
         [{ ...SWITCH, name: 'solo' }, 0],
       ]),
   ];
-  return composite(name, `Studio: ${name}`, { role, label, children, macros });
+  return composite(name, `Studio: ${name}`, { role, label, short, children, macros });
 }
 // a wire from a channel's way out into another's way in
 function into(from, to) {
@@ -86,7 +88,7 @@ export const STUDIO = {
   version: 1,
   node: composite('studio', 'Studio', {
     children: [
-      channel('reverb', { role: 'return', inserts: [utility(0.6)] }),
+      channel('reverb', { role: 'return', short: 'rev', inserts: [utility(0.6)] }),
       channel('you', { role: 'bus', label: 'my playing', sends: ['reverb'] }),
       channel('tap', { role: 'bus', label: 'my tap', inserts: [utility(0.7)], sends: ['reverb'] }),
       channel('ambient', { role: 'bus', label: 'background' }),

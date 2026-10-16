@@ -66,6 +66,23 @@ test("a child's words, its label, the name a view shows it by: carried into its 
   assert.equal(node.pools[0].child.label, 'a copy');
 });
 
+test("a child's short label, the name a view shows it by in little room: carried into its node where its template writes one; none where it writes none", () => {
+  const { node } = new Planner(
+    [
+      {
+        kind: 'Pair',
+        children: [
+          { name: 'first', kind: 'gain', label: 'the first', short: '1st' },
+          { name: 'second', kind: 'gain' },
+        ],
+      },
+    ],
+    [],
+  ).plan('Pair');
+  assert.equal(node.children[0].short, '1st');
+  assert.equal('short' in node.children[1], false, 'none where it writes none');
+});
+
 test("a template's own label, the name a view shows what's made of it by: its node's, a child's own label over it", () => {
   const labelled = new Planner(
     [

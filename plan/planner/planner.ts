@@ -186,11 +186,19 @@ function valued(spec: ParamSpec, given: number | string | undefined, at: Address
   }
   return { spec, value: choice };
 }
-// A child's name, and its role and its label where it has them, its own label over its
-// template's.
-function named({ name, role, label }: TemplateChild, templateLabel?: string): Pick<Node, 'name' | 'role' | 'label'> {
+// A child's name, and its role, its label and its short label where it has them, its own
+// label over its template's.
+function named(
+  { name, role, label, short }: TemplateChild,
+  templateLabel?: string,
+): Pick<Node, 'name' | 'role' | 'label' | 'short'> {
   const shown = label ?? templateLabel;
-  return { name, ...(role !== undefined && { role }), ...(shown !== undefined && { label: shown }) };
+  return {
+    name,
+    ...(role !== undefined && { role }),
+    ...(shown !== undefined && { label: shown }),
+    ...(short !== undefined && { short }),
+  };
 }
 // the values under a child's name, by their addresses within it
 function under(values: ValuesByAddress, name: string): ValuesByAddress {

@@ -19,3 +19,19 @@ export function meterPosition(level: number): number {
 export function meterHtml(name: string, level: number): Html {
   return html`<i class="meter${level >= 1 ? ' over' : ''}" data-meter="${name}" style="--m:${meterPosition(level)}"></i>`;
 }
+
+// Each level bar's level, by the key its level is read by, falling as meterFall() has it.
+export class Levels {
+  readonly #levels = new Map<string, number>();
+
+  // a bar's level now; 0 for one never heard
+  of(key: string): number {
+    return this.#levels.get(key) ?? 0;
+  }
+  // a bar's level after dt s, its peak heard now: kept, and handed back
+  fall(key: string, peak: number, dt: number): number {
+    const level = meterFall(this.of(key), peak, dt);
+    this.#levels.set(key, level);
+    return level;
+  }
+}

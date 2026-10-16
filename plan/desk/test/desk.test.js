@@ -235,6 +235,19 @@ test("a channel's words on a desk, its label, the name a view shows it by: on it
   );
 });
 
+test("a channel's short label on a desk, the name a view shows it by in little room (a send's knob): on its node; read from data, its shape checked", () => {
+  const shortened = {
+    ...STUDIO,
+    channels: STUDIO.channels.map((channel) => (channel.name === 'reverb' ? { ...channel, short: 'rev' } : channel)),
+  };
+  const plan = planned(shortened);
+  assert.deepEqual([nodeAt(plan, ['reverb']).short, nodeAt(plan, ['you']).short], ['rev', undefined]);
+  assert.throws(
+    () => deskOf({ kind: 'Studio', channels: [{ name: 'reverb', role: 'return', short: 3 }] }, 'desks.js'),
+    /short/,
+  );
+});
+
 test('a desk written short refused where it is wrong, every failure said: a channel not handed in, or built in a loop; a way out into no bus on the desk; a tap for a return it has no send to', () => {
   const bent = {
     kind: 'Bent',

@@ -6,7 +6,7 @@
 //   - a macro by its name, its spec its first target's where it writes none;
 //   - its child's role in it, and the form it fulfils, where it has one;
 //   - its label and a child's, the name a view shows what's made of it by, where it has one,
-//     a child's over its template's.
+//     a child's over its template's; a child's short label, the name in little room.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
@@ -18,6 +18,7 @@ export interface TemplateChild {
   readonly kind: string;
   readonly role?: string;
   readonly label?: string;
+  readonly short?: string;
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
 }
