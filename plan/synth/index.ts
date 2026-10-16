@@ -8,6 +8,7 @@
 //   - instrument.ts: an instrument, a pool of voices, or a drum rack, a pool for each pad;
 //   - preset.ts: a preset changed, each value and setting that differs, by its address;
 //   - bank.ts: patches by name, a program change picking one;
+//   - instruments-file.ts: a file of instruments, patches and racks, as a person writes it, read;
 //   - modules/: the modules, VCO, Noise source, LFO, FM, Envelope generator, VCA, VCF, Tremolo,
 //     Ring, Out; none named as a block is.
 // Each read as it loads, its shape checked, every failure said, naming its file.
@@ -28,6 +29,7 @@ import vco from './modules/vco.yaml';
 export { NOTE_SETTINGS, NOTE_SOURCES, type NoteSource } from './note.ts';
 export { Bank } from './bank.ts';
 export { instrumentOf, type Chain } from './instrument.ts';
+export { instrumentsOf, type Instruments, type RackPad } from './instruments-file.ts';
 export { changesFrom, type Changes } from './preset.ts';
 export {
   ARCHITECTURE_FORM,
