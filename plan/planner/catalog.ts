@@ -1,4 +1,4 @@
-// ---------- plan/planner/kinds: the kinds a template names, blocks and templates ----------
+// ---------- plan/planner/catalog: every kind the planner knows, blocks and templates ----------
 // What a node of a kind shows from outside, as a template's wires and values name it:
 //   - a block's: its jacks, its params, its settings, as declared;
 //   - a template's: its jacks, its macros as its params, no settings of its own.
@@ -17,7 +17,7 @@ export interface Outside {
 }
 
 // the kinds the planner knows: every block, and the templates it's handed
-export class Kinds {
+export class Catalog {
   readonly #templates: ReadonlyMap<string, Template>;
 
   constructor(templates: readonly Template[]) {

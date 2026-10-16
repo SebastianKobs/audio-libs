@@ -27,7 +27,7 @@ import { problemsInAll } from './check.ts';
 import { extendedAll } from './extend.ts';
 import { withPresets } from './presets.ts';
 import type { Form } from './form.ts';
-import { Kinds } from './kinds.ts';
+import { Catalog } from './catalog.ts';
 import type { Preset, Template, TemplateChild, TemplateMacro, WrittenTemplate } from './template.ts';
 
 // what a plan is asked with: its top node's name, its kind's unless given; values and settings
@@ -47,7 +47,7 @@ interface Given {
 
 // the planner: templates made into plans
 export class Planner {
-  readonly #kinds: Kinds;
+  readonly #catalog: Catalog;
 
   // The templates, as each is written:
   //   1. each child written with a preset given its kind, from the presets handed in (a theme's);
@@ -64,9 +64,9 @@ export class Planner {
       throw new Error(['templates not well-formed:', ...resolved.problems].join('\n'));
     }
     const merged = extendedAll(resolved.templates);
-    this.#kinds = new Kinds(merged.templates);
+    this.#catalog = new Catalog(merged.templates);
     const byName = new Map(forms.map((form) => [form.name, form]));
-    const problems = merged.problems.length ? merged.problems : problemsInAll(merged.templates, this.#kinds, byName);
+    const problems = merged.problems.length ? merged.problems : problemsInAll(merged.templates, this.#catalog, byName);
     if (problems.length) {
       throw new Error(['templates not well-formed:', ...problems].join('\n'));
     }
@@ -74,15 +74,15 @@ export class Planner {
   // a plan for a template, its top node named as asked
   // a plan for a template, its top node named as asked; what it's asked for at an address it hasn't refused
   plan(kind: string, { name = kind, values = {}, settings = {} }: Asked = {}): Plan {
-    if (!this.#kinds.template(kind)) {
+    if (!this.#catalog.template(kind)) {
       throw new Error(`no template ${kind}`);
     }
     const missing = [
       ...Object.keys(values)
-        .filter((key) => !this.#kinds.paramIn(kind, addressOf(key)))
+        .filter((key) => !this.#catalog.paramIn(kind, addressOf(key)))
         .map((key) => `no param ${key}`),
       ...Object.keys(settings)
-        .filter((key) => !this.#kinds.settingIn(kind, addressOf(key)))
+        .filter((key) => !this.#catalog.settingIn(kind, addressOf(key)))
         .map((key) => `no setting ${key}`),
     ];
     if (missing.length) {
@@ -95,11 +95,11 @@ export class Planner {
   #node(child: TemplateChild, given: Given): Node {
     const values = { ...child.values, ...given.values };
     const settings = { ...child.settings, ...given.settings };
-    const block = this.#kinds.block(child.kind);
+    const block = this.#catalog.block(child.kind);
     if (block) {
       return blockNode(child, block, { values, settings, at: given.at });
     }
-    return this.#composite(child, this.#kinds.template(child.kind)!, { values, settings, at: given.at }); // a kind the check found
+    return this.#composite(child, this.#catalog.template(child.kind)!, { values, settings, at: given.at }); // a kind the check found
   }
   // a template planned: its macros at their values, onto their targets; its children, its pools
   #composite(child: TemplateChild, template: Template, { values, settings, at }: Given): Node {
@@ -136,14 +136,14 @@ export class Planner {
   }
   // a macro planned: its spec, its own or its first target's; its value given, or written, or its default
   #macro(template: Template, macro: TemplateMacro, { values, at }: Given): Macro {
-    const spec = this.#kinds.macroSpec(template, macro)!; // a spec or a target, as the check found
+    const spec = this.#catalog.macroSpec(template, macro)!; // a spec or a target, as the check found
     const { value } = valued(spec, values[macro.name] ?? macro.value, [...at, macro.name]);
     return { spec, value, ...(macro.hint !== undefined && { hint: macro.hint }), maps: macro.maps };
   }
   // the jacks of a template's block children whose channels their blocks don't fix
   #loose(template: Template): LooseJack[] {
     return (template.children ?? []).flatMap(({ name, kind }) => {
-      const block = this.#kinds.block(kind);
+      const block = this.#catalog.block(kind);
       if (!block) {
         return [];
       }

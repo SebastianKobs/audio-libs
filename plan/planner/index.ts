@@ -8,7 +8,7 @@
 //   - planner.ts: the planner, handed the templates once, a plan for any of them;
 //   - check.ts: a template checked well-formed as it's handed in, then held to its form, every failure said;
 //   - form.ts: the constraints a template has to fulfil, as data; form-check.ts, a template held to its form;
-//   - kinds.ts: the kinds a template names, blocks and templates, as seen from outside;
+//   - catalog.ts: every kind the planner knows, blocks and templates, as seen from outside;
 //   - mono-stereo.ts: whether a jack carries mono or stereo, as it comes, where its block doesn't fix it.
 export { Planner, type Asked } from './planner.ts';
 export {

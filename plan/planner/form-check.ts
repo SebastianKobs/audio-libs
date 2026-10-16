@@ -8,17 +8,17 @@
 //   6. its rules: no loops; every way out ending in a role.
 import { feeds, reached, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
 import type { Form, FormFrom, FormRole, FormRule, FormTo } from './form.ts';
-import type { Kinds } from './kinds.ts';
+import type { Catalog } from './catalog.ts';
 import type { Template, TemplateChild } from './template.ts';
 
 // What's wrong with a template, held to its form; none where it fulfils it.
-export function formProblems(template: Template, form: Form, kinds: Kinds): string[] {
+export function formProblems(template: Template, form: Form, catalog: Catalog): string[] {
   const children = template.children ?? [];
   const pooled = (template.pools ?? []).map((pool) => pool.child);
   const roles = form.roles ?? [];
   const problems = [
     ...jackProblems(template, form),
-    ...(form.roles ? [...children, ...pooled].flatMap((child) => roleProblems(child, roles, kinds)) : []),
+    ...(form.roles ? [...children, ...pooled].flatMap((child) => roleProblems(child, roles, catalog)) : []),
     ...roles.flatMap((role) => countProblems(role, [...children, ...pooled])), // a pool one of its role
     ...(form.ordered ? orderProblems(children, form) : []),
     ...wireProblems(template, form),
@@ -39,7 +39,7 @@ function jackProblems(template: Template, form: Form): string[] {
   });
 }
 // a child's role there, one of the form's, its kind or form the role's
-function roleProblems(child: TemplateChild, roles: readonly FormRole[], kinds: Kinds): string[] {
+function roleProblems(child: TemplateChild, roles: readonly FormRole[], catalog: Catalog): string[] {
   if (child.role === undefined) {
     return [`${child.name}: no role`];
   }
@@ -50,7 +50,7 @@ function roleProblems(child: TemplateChild, roles: readonly FormRole[], kinds: K
   if (role.kind !== undefined && child.kind !== role.kind) {
     return [`${child.name}: a ${child.kind}, not a ${role.kind}`];
   }
-  if (role.form !== undefined && kinds.template(child.kind)?.form !== role.form) {
+  if (role.form !== undefined && catalog.template(child.kind)?.form !== role.form) {
     return [`${child.name}: a ${child.kind}, not of form ${role.form}`];
   }
   return [];
