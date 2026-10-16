@@ -12,6 +12,8 @@ planner.plan('Utility', { name: 'utility', settings: { 'pan/law': 'pan pot' } })
 
 Each effect's params are macros by the names a desk keys them (`utility/level`, `delay/note`), so the recorded lanes keep their names. A macro writes no spec where its target has one: it takes its first target's under its own name.
 
+A device shows an effect by its label where it isn't its kind (LAY12d1): the Filter as `LP filter`, the Tape delay as `Tape delay`, its own over the Delay's none.
+
 | Effect | Inside | Its macros | Its settings |
 |---|---|---|---|
 | `Utility` | a gain into a pan | level, the gain's, the fader's in dB; pan | `pan/law`: stereo, or a pan pot |

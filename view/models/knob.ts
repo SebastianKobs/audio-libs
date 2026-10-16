@@ -21,6 +21,10 @@ export class Knob extends Control {
     }
     return this.spec.unit;
   }
+  // a pan, drawn from its middle
+  get isPan(): boolean {
+    return isPan(this.spec);
+  }
   get isSwitch(): boolean {
     return isSwitch(this.spec);
   }
@@ -67,10 +71,14 @@ export function textOf(spec: ParamSpec, value: number): string {
   if (spec.dB) {
     return dBText(value);
   }
-  if (spec.name === 'pan') {
+  if (isPan(spec)) {
     return sideText(value);
   }
   return value.toFixed(decimalsOf(spec.range?.[2] ?? 1));
+}
+// whether a param is a pan, left to right, centred at 0: by its name, as every pan's spec has it
+function isPan({ name }: ParamSpec): boolean {
+  return name === 'pan';
 }
 // A gain in dB, to a tenth: 0.0 at unity, -∞ all the way down, a sign above unity.
 function dBText(gain: number): string {

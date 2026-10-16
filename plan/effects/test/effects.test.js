@@ -70,3 +70,10 @@ test("the Delay's note a choice through its macro, onto its line; the Utility's 
   assert.equal(settingAt(utility, ['pan', 'law']).value, 'pan pot');
   assert.equal(settingAt(planner.plan('Reverb'), ['room', 'length']).value, 3.5);
 });
+
+test("each effect's label, the name a device shows it by, where it isn't its kind: the Filter a lowpass, the Tape delay its own over the Delay's none (LAY12d1)", () => {
+  assert.deepEqual(
+    ['Utility', 'Filter', 'Limiter', 'Delay', 'TapeDelay', 'Reverb'].map((kind) => planner.plan(kind).node.label),
+    [undefined, 'LP filter', undefined, undefined, 'Tape delay', undefined],
+  );
+});

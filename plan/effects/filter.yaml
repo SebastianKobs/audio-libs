@@ -2,6 +2,7 @@
 # Its cutoff and its q macros onto the filter's frequency and resonance, their specs theirs.
 # Its slope a setting (filter/slope), 12 dB an octave unless a preset says 24.
 kind: Filter
+label: LP filter
 form: effect
 inputs: [{ name: in, channels: 2 }]
 outputs: [{ name: out, channels: 2 }]

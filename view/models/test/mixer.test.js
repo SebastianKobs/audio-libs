@@ -22,6 +22,7 @@ function mixerOn({ values = {}, peaks = {}, copies = {} } = {}) {
     roleOf: () => ({ by: 'live' }),
     peakOf: (address) => peaks[addressText(address)] ?? 0,
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
+    slotOf: () => undefined,
     send: (command) => sent.push(command),
   };
   return { views: new ViewBuilder(port), sent };

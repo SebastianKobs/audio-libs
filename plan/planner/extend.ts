@@ -1,6 +1,6 @@
 // ---------- plan/planner/extend: a template built on another ----------
 // A template names the one it's built on (extends), as a rack is saved on another:
-//   - its base's jacks and form, where it writes none of its own;
+//   - its base's jacks, form and label, where it writes none of its own;
 //   - its base's children, wires, macros and pools first, then its own.
 // A base built on another is merged first, down to one built on none.
 // Merged before the planner's checks, so the checks see one template and a plan comes out flat.
@@ -47,8 +47,10 @@ function extended(template: Template, byKind: ReadonlyMap<string, Template>): Te
   }
   const base = extended(byKind.get(template.extends)!, byKind); // handed in, no loop: as checked
   const form = template.form ?? base.form;
+  const label = template.label ?? base.label;
   return {
     kind: template.kind,
+    ...(label !== undefined && { label }),
     ...(form !== undefined && { form }),
     inputs: template.inputs ?? base.inputs ?? [],
     outputs: template.outputs ?? base.outputs ?? [],

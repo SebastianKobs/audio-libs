@@ -45,7 +45,7 @@ const DELAY = {
 
 // A view builder on a port of the tests' own: values told by address, roles by address, every
 // one live unless said; what's sent kept.
-function builderOn(plan, { values = {}, roles = {} } = {}) {
+function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
   const sent = [];
   const port = {
     plan,
@@ -54,6 +54,7 @@ function builderOn(plan, { values = {}, roles = {} } = {}) {
     roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
     peakOf: () => 0,
     copiesOf: () => [],
+    slotOf: (address) => slots[addressText(address)],
     send: (command) => sent.push(command),
   };
   return { views: new ViewBuilder(port), sent };
@@ -78,6 +79,16 @@ test("a composite as a device: its name and kind, its macros as knobs in its tem
       ['law', undefined],
     ],
   );
+});
+
+test("a device's label, its node's, else its kind; what it does in its slot and what sets it there, the tool's; none where the tool says nothing", () => {
+  const labelled = { ...UTILITY, node: { ...UTILITY.node, label: 'level and pan' } };
+  const slots = { '': { job: 'the level the desk gives it' }, gain: { job: 'its gain', setBy: 'distance' } };
+  const { views } = builderOn(labelled, { slots });
+  assert.deepEqual([views.device([]).label, views.device(['gain']).label], ['level and pan', 'gain']);
+  assert.deepEqual(views.device([]).slot, { job: 'the level the desk gives it' });
+  assert.deepEqual(views.device(['gain']).slot, { job: 'its gain', setBy: 'distance' });
+  assert.equal(builderOn(UTILITY).views.device([]).slot, undefined);
 });
 
 test("a block as a device, its params as knobs; a device under its parent's address; none where nothing's there", () => {
@@ -105,6 +116,7 @@ test("a knob: its value as it plays, the plan's where none's told; where it lies
   assert.deepEqual(texts([{ level: 0 }, { level: 1 }, { level: 2 }]), ['-∞', '0.0', '+6.0']);
   const pans = [0, 0.5].map((pan) => builderOn(UTILITY, { values: { pan } }).views.control(['pan']).text);
   assert.deepEqual(pans, ['C', 'R25']);
+  assert.deepEqual([utility.control(['pan']).isPan, level.isPan], [true, false], 'a pan drawn from its middle');
 });
 
 test('a knob turned: a command by its address, its value at that place by its taper, a gain to a hundredth, any other to its step; set; back to its start', () => {

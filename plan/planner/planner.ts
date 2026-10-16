@@ -124,7 +124,7 @@ export class Planner {
       ...(note && { note }),
     }));
     return {
-      ...named(child),
+      ...named(child, template.label),
       kind: template.kind,
       ...(template.form !== undefined && { form: template.form }),
       inputs: template.inputs ?? [],
@@ -186,9 +186,11 @@ function valued(spec: ParamSpec, given: number | string | undefined, at: Address
   }
   return { spec, value: choice };
 }
-// a child's name, and its role and its label where it has them
-function named({ name, role, label }: TemplateChild): Pick<Node, 'name' | 'role' | 'label'> {
-  return { name, ...(role !== undefined && { role }), ...(label !== undefined && { label }) };
+// A child's name, and its role and its label where it has them, its own label over its
+// template's.
+function named({ name, role, label }: TemplateChild, templateLabel?: string): Pick<Node, 'name' | 'role' | 'label'> {
+  const shown = label ?? templateLabel;
+  return { name, ...(role !== undefined && { role }), ...(shown !== undefined && { label: shown }) };
 }
 // the values under a child's name, by their addresses within it
 function under(values: ValuesByAddress, name: string): ValuesByAddress {

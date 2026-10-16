@@ -66,6 +66,27 @@ test("a child's words, its label, the name a view shows it by: carried into its 
   assert.equal(node.pools[0].child.label, 'a copy');
 });
 
+test("a template's own label, the name a view shows what's made of it by: its node's, a child's own label over it", () => {
+  const labelled = new Planner(
+    [
+      { kind: 'Lowpass', label: 'LP filter', children: [{ name: 'filter', kind: 'filter' }] },
+      {
+        kind: 'Two',
+        children: [
+          { name: 'air', kind: 'Lowpass' },
+          { name: 'dull', kind: 'Lowpass', label: 'dullness' },
+        ],
+      },
+    ],
+    [],
+  );
+  assert.equal(labelled.plan('Lowpass').node.label, 'LP filter');
+  assert.deepEqual(
+    labelled.plan('Two').node.children.map(({ label }) => label),
+    ['LP filter', 'dullness'],
+  );
+});
+
 test("a pool's child ready: its template planned, under its name, its wires and its note's addresses kept; its values by the pool's name, a copy's under it by its number", () => {
   const plan = planner.plan('Synth');
   const [pool] = plan.node.pools;

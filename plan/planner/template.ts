@@ -5,7 +5,8 @@
 //   - its own inputs, outputs, wires and pools as the plan has them;
 //   - a macro by its name, its spec its first target's where it writes none;
 //   - its child's role in it, and the form it fulfils, where it has one;
-//   - a child's label, the name a view shows it by, where it has one.
+//   - its label and a child's, the name a view shows what's made of it by, where it has one,
+//     a child's over its template's.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
@@ -51,6 +52,7 @@ export interface TemplatePool {
 // Built on another where it names one (extends): its base's whole, then its own (extend.ts).
 export interface Template {
   readonly kind: string;
+  readonly label?: string;
   readonly extends?: string;
   readonly form?: string;
   readonly inputs?: readonly Input[];
@@ -71,6 +73,7 @@ export interface WrittenTemplate extends Omit<Template, 'children'> {
 const TEMPLATE_SHAPE: Shape = {
   fields: {
     kind: 'word',
+    label: 'word',
     form: 'word',
     extends: 'word',
     inputs: { listOf: { needs: ['name'] } },

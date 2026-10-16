@@ -16,6 +16,6 @@ export { CustomViews } from './custom.ts';
 export { Control, type Device } from './device.ts';
 export { Knob, textOf } from './knob.ts';
 export { Mixer, type BusGroup } from './mixer.ts';
-export type { ModelPort, Role } from './model.ts';
+export type { ModelPort, Role, Slot } from './model.ts';
 export { Strip, shownName } from './strip.ts';
 export { ViewBuilder } from './view-builder.ts';

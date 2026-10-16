@@ -5,6 +5,7 @@
 //   - how each is set: live here, automated by what its track plays, or fixed as built;
 //   - a node's level as the implementation hears it, the only one that hears the sound;
 //   - a pool's copies added so far;
+//   - what a node does in its slot and what sets it there, the tool's words;
 //   - what's done, sent as a command.
 import { paramAt, settingAt, type Address, type Param, type Plan } from '../../plan/format/index.ts';
 import type { Command } from './command.ts';
@@ -17,6 +18,12 @@ export interface Role {
   readonly by: 'live' | 'automated' | 'fixed';
   readonly source?: string;
 }
+// What a device does in its slot (job), and what sets it there, where its notes or the
+// tool do (setBy), as the tool says.
+export interface Slot {
+  readonly job: string;
+  readonly setBy?: string;
+}
 // What the views read and send through, the tool's.
 export interface ModelPort {
   readonly plan: Plan;
@@ -25,6 +32,7 @@ export interface ModelPort {
   roleOf(address: Address): Role;
   peakOf(address: Address): number;
   copiesOf(pool: Address): readonly Address[];
+  slotOf(address: Address): Slot | undefined;
   send(command: Command): void;
 }
 // a param or a setting found by its address, and which of the two
@@ -68,6 +76,9 @@ export class Model {
   }
   copiesOf(pool: Address): readonly Address[] {
     return this.#port.copiesOf(pool);
+  }
+  slotOf(address: Address): Slot | undefined {
+    return this.#port.slotOf(address);
   }
   send(command: Command): void {
     this.#port.send(command);

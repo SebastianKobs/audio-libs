@@ -7,6 +7,7 @@
 # A signal into a delay's time moves its line in seconds, as Web Audio's does:
 # a depth of 0.004 moves it 4 ms either way, though the wire names its ms.
 kind: TapeDelay
+label: Tape delay
 extends: Delay
 children:
   - { name: wobble, kind: oscillator }

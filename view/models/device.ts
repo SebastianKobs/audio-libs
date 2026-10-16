@@ -4,14 +4,18 @@
 // its words, and how it's set.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Address } from '../../plan/format/index.ts';
-import type { Found, Model, Role } from './model.ts';
+import type { Found, Model, Role, Slot } from './model.ts';
 
 // A node as a device:
-//   - a composite: its macros, in its template's order, then the settings within it;
-//   - a block: its params, then its settings.
+//   - its name, its kind, its label as shown, its node's, else its kind;
+//   - what it does in its slot and what sets it there, where the tool says;
+//   - its controls: a composite's macros, in its template's order, then the settings within
+//     it; a block's params, then its settings.
 export interface Device {
   readonly name: string;
   readonly kind: string;
+  readonly label: string;
+  readonly slot: Slot | undefined;
   readonly controls: readonly Control[];
 }
 
