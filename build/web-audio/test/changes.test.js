@@ -1,4 +1,4 @@
-// Changes held until their time (mockup/src/libs/build/web-audio/changes.ts; libs/desk-plan/'s until LAY11a): a change by its param's
+// Changes held until their time (mockup/src/libs/build/web-audio/changes.ts): a change by its param's
 // address, its value and its time, set at once once its time has come, else kept until the clock's tick brings it, those kept set in their time's order;
 // on a clock of the test's own, its now and its ticks
 import { test } from 'node:test';
