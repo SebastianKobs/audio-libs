@@ -13,14 +13,15 @@ import { STUDIO } from './desk.js';
 
 // The desk's view models on a port of the tests' own: values and peaks by address, the copies
 // each pool has, every control live; what's sent kept.
-function mixerOn({ values = {}, peaks = {}, copies = {} } = {}) {
+function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
   const sent = [];
   const port = {
     plan: STUDIO,
     valueOf: (address) => values[addressText(address)],
     startOf: () => undefined,
     roleOf: () => ({ by: 'live' }),
-    peakOf: (address) => peaks[addressText(address)] ?? 0,
+    peakOf: (address, point) => peaks[[addressText(address), point].filter(Boolean).join(' ')] ?? 0,
+    readingOf: (address, reading) => readings[`${addressText(address)} ${reading}`] ?? 0,
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
     slotOf: () => undefined,
     send: (command) => sent.push(command),
@@ -110,4 +111,40 @@ test("a solo click: that strip alone, the others let go first; again, none; with
   assert.deepEqual(clicked({ 'tap/solo': 1 }, ['ambient'], true), ['ambient/solo 1'], 'with shift, added');
   assert.deepEqual(clicked({ 'tap/solo': 1, 'you/solo': 1 }, ['tap'], true), ['tap/solo 0'], 'with shift, let go');
   assert.deepEqual(clicked({}, ['my tap', '1']), ['my tap/1/solo 1'], "a pool's copy");
+});
+
+test("what strips feed, for a view's lights: each through its way out, and the sends said to be up, a pool's copies added among them; a name not on the desk kept, not followed (Z3, LAY12f)", () => {
+  const mixer = mixerOn({ copies: { 'my tap': [1] } }).views.mixer();
+  const sorted = (names) => [...names].sort();
+  assert.deepEqual(
+    sorted(mixer.reached(['tap'], () => false)),
+    ['tap', 'you'],
+    'into your bus, which goes out to the master',
+  );
+  assert.deepEqual(
+    sorted(mixer.reached(['tap'], (from, to) => from === 'you' && to === 'reverb')),
+    ['reverb', 'tap', 'you'],
+    "your bus's reverb send up",
+  );
+  assert.deepEqual(
+    sorted(mixer.reached(['my tap/1'], () => false)),
+    ['my tap/1', 'tap', 'you'],
+    "a pool's copy, by its pool's rule",
+  );
+  assert.deepEqual(sorted(mixer.reached(['clips tap'], () => true)), ['clips tap'], 'a clip track, not a strip');
+});
+
+test("a meter's level and a reading by address, as the implementation hears them: a strip's peak, a block's at a point, what a limiter takes away (LAY12f)", () => {
+  const { views } = mixerOn({
+    peaks: { you: 0.4, 'master/limiter in': 0.9 },
+    readings: { 'master/limiter reduction': 3 },
+  });
+  assert.deepEqual(
+    [
+      views.peakOf(['you']),
+      views.peakOf(['master', 'limiter'], 'in'),
+      views.readingOf(['master', 'limiter'], 'reduction'),
+    ],
+    [0.4, 0.9, 3],
+  );
 });

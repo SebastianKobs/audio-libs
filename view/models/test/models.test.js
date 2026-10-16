@@ -53,6 +53,7 @@ function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
     startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
     roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
     peakOf: () => 0,
+    readingOf: () => 0,
     copiesOf: () => [],
     slotOf: (address) => slots[addressText(address)],
     send: (command) => sent.push(command),

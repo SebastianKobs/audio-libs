@@ -5,7 +5,16 @@
 //   - its master.
 // A solo click, as Ableton's: that strip alone, the others let go; again, none; with shift,
 // added or let go. A pool's copies among them, as they're added.
-import { addressOf, addressText, type Address, type Composite } from '../../plan/format/index.ts';
+// What strips feed, for a view's lights: each through its way out, the sends said to be up.
+import {
+  addressOf,
+  addressText,
+  copyOf,
+  reached,
+  type Address,
+  type Composite,
+  type Wire,
+} from '../../plan/format/index.ts';
 import type { Model } from './model.ts';
 import type { Strip } from './strip.ts';
 
@@ -51,10 +60,31 @@ export class Mixer {
     }
   }
 
+  // Everything the named strips feed, they among it: each through its way out, and its sends
+  // sendsUp() says are up; over the desk's wires, its pools' copies added so far among them.
+  // The master left out, where every way ends.
+  reached(names: Iterable<string>, sendsUp: (from: string, to: string) => boolean): Set<string> {
+    const through = ({ from, to }: Wire): boolean =>
+      !('node' in from) || from.output === 'out' || !('node' in to) || sendsUp(from.node, to.node);
+    const fed = reached({ wires: this.#wires() }, names, through);
+    if (this.master) {
+      fed.delete(addressText(this.master.address));
+    }
+    return fed;
+  }
+
   // the desk's own channels as strips, in the plan's order
   #own(): Strip[] {
     const desk = this.#model.plan.node as Composite; // a desk is a composite
     return desk.children.flatMap(({ name }) => this.#strip([name]) ?? []);
+  }
+  // the desk's wires as they are: its own, and each copy's added, by its pool's rule
+  #wires(): Wire[] {
+    const desk = this.#model.plan.node as Composite; // a desk is a composite
+    const copies = desk.pools.flatMap((pool) =>
+      this.#model.copiesOf([pool.child.name]).flatMap(([, number]) => copyOf(pool, Number(number)).wires),
+    );
+    return [...desk.wires, ...copies];
   }
   // every strip on the desk now: its own, then each pool's copies added so far
   #all(): Strip[] {

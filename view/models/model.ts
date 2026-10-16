@@ -3,7 +3,8 @@
 //   - each value as it plays, worked out from what it was told; the plan's where none was;
 //   - each value's start, which a reset brings back;
 //   - how each is set: live here, automated by what its track plays, or fixed as built;
-//   - a node's level as the implementation hears it, the only one that hears the sound;
+//   - a node's level as the implementation hears it, the only one that hears the sound, at
+//     one of its points where it has several; a reading, a limiter's reduction;
 //   - a pool's copies added so far;
 //   - what a node does in its slot and what sets it there, the tool's words;
 //   - what's done, sent as a command.
@@ -30,7 +31,8 @@ export interface ModelPort {
   valueOf(address: Address): number | string | undefined;
   startOf(address: Address): number | string | undefined;
   roleOf(address: Address): Role;
-  peakOf(address: Address): number;
+  peakOf(address: Address, point?: string): number;
+  readingOf(address: Address, reading: string): number;
   copiesOf(pool: Address): readonly Address[];
   slotOf(address: Address): Slot | undefined;
   send(command: Command): void;
@@ -71,8 +73,11 @@ export class Model {
   roleOf(address: Address): Role {
     return this.#port.roleOf(address);
   }
-  peakOf(address: Address): number {
-    return this.#port.peakOf(address);
+  peakOf(address: Address, point?: string): number {
+    return this.#port.peakOf(address, point);
+  }
+  readingOf(address: Address, reading: string): number {
+    return this.#port.readingOf(address, reading);
   }
   copiesOf(pool: Address): readonly Address[] {
     return this.#port.copiesOf(pool);

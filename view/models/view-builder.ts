@@ -48,6 +48,14 @@ export class ViewBuilder {
     }
     return new Strip(this.#model, this, address, node);
   }
+  // a node's level as the implementation hears it, at one of its points where it has several
+  peakOf(address: Address, point?: string): number {
+    return this.#model.peakOf(address, point);
+  }
+  // what the implementation reads of a node, a limiter's reduction
+  readingOf(address: Address, reading: string): number {
+    return this.#model.readingOf(address, reading);
+  }
   // the plan's desk as a mixer
   mixer(): Mixer {
     return new Mixer(this.#model, (address) => this.strip(address));
