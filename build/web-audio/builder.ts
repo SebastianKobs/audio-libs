@@ -53,9 +53,17 @@ export class WebAudioBuilder implements Builder<AudioNode> {
     });
   }
 
-  // a node's jacks as built into its parts: a composite's children built and wired, a node at each of
-  // its own jacks where it holds a pool; a block made, or a placeholder in its place
+  // A node's jacks as built into its parts, kept by its address:
+  //   - a composite's children built and wired;
+  //     a node at each of its own jacks where it holds a pool;
+  //   - a block made, or a placeholder in its place.
   #jacksOf(node: Node, at: Address, parts: BuiltParts): Jacks {
+    const jacks = this.#built(node, at, parts);
+    parts.jacks.set(addressText(at), jacks);
+    return jacks;
+  }
+  // a node built into its parts, as #jacksOf() has it
+  #built(node: Node, at: Address, parts: BuiltParts): Jacks {
     const making = this.#making(parts);
     if (node.inside) {
       const children = new Map(

@@ -1,4 +1,4 @@
-// ---------- libs/web-audio-engine/meters: a meter on a node, its peak read from Web Audio's analysers ----------
+// ---------- build/web-audio/meters: a meter on a node, its peak read from Web Audio's analysers ----------
 
 // a meter on a node: its peak, the loudest sample of its last window, left or right
 export interface PeakMeter {

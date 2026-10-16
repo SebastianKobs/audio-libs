@@ -130,3 +130,28 @@ test('refused: a copy added twice, a pool not there, a copy numbered from 0, one
   assert.throws(() => what.add(['voice'], 0), /from 1/);
   assert.throws(() => what.letGo(['voice 9']), /voice 9: not added/);
 });
+
+test("a copy's way in by its address: a sound fed into it, as a track's instrument into its channel; a copy not added refused", () => {
+  const { context, what, made } = built(DESK);
+  const before = made('gain').length;
+  const copy = what.add(['replay'], 1);
+  const [replay] = made('gain').slice(before);
+  const instrument = context.createGain();
+  what.feed(copy, instrument);
+  assert.deepEqual(outOf(context, instrument), [replay], "into the copy's way in");
+  assert.throws(() => what.feed(['replay 2'], instrument), /replay 2: not built/);
+});
+
+test("a copy's meter forgotten as it's let go: the copy added again, its meter made again on it", () => {
+  const { context, what, made } = built(DESK);
+  what.add(['replay'], 1);
+  what.peak(['replay 1']);
+  what.letGo(['replay 1']);
+  const before = made('gain').length;
+  what.add(['replay'], 1);
+  const [again] = made('gain').slice(before);
+  what.peak(['replay 1']);
+  const splitters = made('splitter');
+  assert.equal(splitters.length, 2, 'made again');
+  assert.deepEqual(into(context, splitters[1]), [again], 'on the copy as it is now');
+});

@@ -16,7 +16,7 @@
 
 import { buildNode, connectEdge, nodeOf, paramOf, type Building } from './build.ts';
 import { automate, Buffers, type BuiltNode } from '../build/web-audio/index.ts';
-import { meterOn, type PeakMeter } from './meters.ts';
+import { meterOn, type PeakMeter } from '../build/web-audio/index.ts';
 import { nodeMakers } from './nodes.ts';
 import type { AudioPlan, BufferSpec, Operation } from '../audio-plan/index.ts';
 export { paramOf } from './build.ts';

@@ -204,3 +204,41 @@ test("what's built taken apart: its sources stopped, its nodes disconnected", ()
   assert.equal(made('oscillator')[0].stops.length, 1);
   assert.ok(made('gain').every((node) => context.rec.disconnects.includes(node)));
 });
+
+test("a meter on a node's main output by its address, made as it's first read; a block's points and readings by name, the limiter's in and its reduction; a node not built, or a point it hasn't, refused", () => {
+  const { context, builder, made } = builderOn();
+  const what = builder.build(chainOf(block('level', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const [level] = made('gain');
+  assert.equal(made('analyser').length, 0, 'no meter until one is read');
+  assert.equal(what.peak(['level']), 0, 'silence');
+  const [split] = made('splitter');
+  assert.deepEqual(into(context, split), [level], 'on its output: a splitter, an analyser on each side');
+  assert.equal(made('analyser').length, 2);
+  made('analyser')[1].samples = [0.25, -0.5];
+  assert.equal(what.peak(['level']), 0.5, 'its peak, either side; the meter made once');
+  assert.equal(made('analyser').length, 2);
+  what.peak(['limit'], 'in');
+  assert.deepEqual(
+    into(context, made('splitter')[1]),
+    [outOf(context, level)[0]],
+    "the limiter's in: its drive, after its way in",
+  );
+  assert.equal(typeof what.reading(['limit'], 'reduction'), 'number', 'what it takes away, as it says');
+  assert.throws(() => what.peak(['nowhere']), /nowhere: not built/);
+  assert.throws(() => what.peak(['limit'], 'side'), /limit: no point side/);
+  assert.throws(() => what.reading(['level'], 'reduction'), /level: no reading reduction/);
+  assert.equal(what.peak([]), 0, "the top's output too, by no address at all");
+});
+
+test("a sound fed into a node's input by its address, as a phrase into a bus; a node not built refused", () => {
+  const { context, builder, made } = builderOn();
+  const what = builder.build(chainOf(block('bus', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const [bus] = made('gain');
+  const phrase = context.createGain();
+  what.feed(['bus'], phrase);
+  assert.deepEqual(outOf(context, phrase), [bus]);
+  const fed = context.createGain();
+  what.feed(['limit'], fed);
+  assert.deepEqual(outOf(context, fed), [outOf(context, bus)[0]], "into its way in, a limiter's drive, not out of it");
+  assert.throws(() => what.feed(['nowhere'], phrase), /nowhere: not built/);
+});

@@ -136,3 +136,14 @@ test('a preset that changes a setting: built again with it, its values set on th
   what.preset({}, { 'pan/law': 'pan pot' });
   assert.equal(made('panner').length, 2, 'kept: not built again');
 });
+
+test('a meter on what was built before a rebuild made again on the new as it is read, the old one forgotten', () => {
+  const { context, what } = built(UTILITY);
+  const splitters = () => context.rec.nodes.filter((node) => node.kind === 'splitter');
+  what.peak([]);
+  what.rebuild(UTILITY);
+  what.peak([]);
+  assert.equal(splitters().length, 2, 'a meter on the new');
+  const [, onTheNew] = splitters();
+  assert.notDeepEqual(into(context, onTheNew), into(context, splitters()[0]), 'on the new output, not the old');
+});

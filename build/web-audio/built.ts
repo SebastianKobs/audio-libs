@@ -8,9 +8,15 @@
 //     added kept, the old ringing out, faded where it makes sound of its own (rebuild.ts); a preset
 //     that changes a setting built again with it;
 //   - its placeholders, by address; taken apart, its sources stopped, its nodes disconnected.
+// What a studio needs of it besides, Web Audio's own, not every builder's:
+//   - a sound fed into a node's input by its address: a bus's, a copy's;
+//   - a meter on a node's output by its address, or at a point inside a block;
+//     made at its first read;
+//   - what a block says of itself, by name: a limiter's reduction.
 // Times are the context's.
 import { eventOf, timedAt, type Automation, type When } from '../../automation/index.ts';
 import { choiceIndex } from '../../params/index.ts';
+import { entryOf } from '../../util/index.ts';
 import {
   addressOf,
   addressText,
@@ -27,6 +33,8 @@ import {
 } from '../../plan/format/index.ts';
 import type { Built } from '../ports/index.ts';
 import { automate } from './automation.ts';
+import type { BuiltNode } from './built-node.ts';
+import { meterOn, type PeakMeter } from './meters.ts';
 import { BuiltParts, type PoolHolder } from './parts.ts';
 import { disconnectFrom, fadedThrough, RING_OUT } from './rebuild.ts';
 import { connectInto, wireInside, type Jacks } from './wiring.ts';
@@ -59,6 +67,7 @@ export interface Building {
 export class WebAudioBuilt implements Built {
   readonly #building: Building;
   readonly #told = new Map<string, number | string>(); // each value set, by its address as text, to tell again
+  readonly #meters = new Map<string, Map<string, PeakMeter>>(); // by a node's address as text, then its point, '' its output
   #now: Generation;
 
   constructor(plan: Plan, building: Building) {
@@ -137,6 +146,32 @@ export class WebAudioBuilt implements Built {
     this.#now.copies.set(addressText(at), { parts, holder, name: node.name, pool, number });
     return at;
   }
+  // A sound fed into a node's input by its address, its main one unless named:
+  //   - a bus's, as a phrase plays into it;
+  //   - a copy's, as a track's instrument plays into its channel.
+  feed(address: Address, source: AudioNode, input = 'in'): void {
+    for (const destination of this.#jacksAt(address).inputs[input] ?? []) {
+      connectInto(source, destination);
+    }
+  }
+  // A peak, as a meter reads it, the loudest sample of its last window:
+  //   - on a node's main output, by its address: a channel's, after its fader and its pan;
+  //   - at a point inside a block there, by name: a limiter's in and out.
+  // Its meter made at its first read, so what nobody looks at has none.
+  peak(address: Address, point = ''): number {
+    const text = addressText(address);
+    const meters = entryOf(this.#meters, text, () => new Map<string, PeakMeter>());
+    const meter = entryOf(meters, point, () => meterOn(this.#context(), this.#listenedAt(address, point)));
+    return meter.peak();
+  }
+  // what a block says of itself, by name, now: a limiter's reduction, in dB
+  reading(address: Address, name: string): number {
+    const reading = this.#blockAt(address).readings[name];
+    if (!reading) {
+      throw new Error(`${addressText(address)}: no reading ${name}`);
+    }
+    return reading();
+  }
   // a copy let go: its sources stopped, its nodes disconnected, its address no longer set, what it was told forgotten
   letGo(copy: Address): void {
     const text = addressText(copy);
@@ -151,6 +186,9 @@ export class WebAudioBuilt implements Built {
     for (const told of [...this.#told.keys()].filter((key) => key.startsWith(`${text}/`))) {
       this.#told.delete(told);
     }
+    for (const metered of [...this.#meters.keys()].filter((key) => key === text || key.startsWith(`${text}/`))) {
+      this.#meters.delete(metered); // on what's gone
+    }
   }
   // Built again from a plan, the new beside the old:
   //   1. its inputs moved over to the new;
@@ -163,6 +201,7 @@ export class WebAudioBuilt implements Built {
       (old.top.inputs[name] ?? []).forEach((destination) => disconnectFrom(source, destination));
     }
     this.#now = this.#generationOf(plan);
+    this.#meters.clear(); // on the old: made again on the new as they're read
     if (makesSound(old)) {
       this.#faded(old, [1, 0]);
       this.#faded(this.#now, [0, 1]);
@@ -199,6 +238,40 @@ export class WebAudioBuilt implements Built {
   }
   #context(): BaseAudioContext {
     return this.#building.context;
+  }
+  // a node's jacks as built, by its address; one not built refused
+  #jacksAt(address: Address): Jacks {
+    const jacks = this.#now.parts.jacks.get(addressText(address));
+    if (!jacks) {
+      throw new Error(`${addressText(address)}: not built`);
+    }
+    return jacks;
+  }
+  // a block as built, by its address; one not built refused
+  #blockAt(address: Address): BuiltNode {
+    const built = this.#now.parts.blocks.get(addressText(address));
+    if (!built) {
+      throw new Error(`${addressText(address)}: not built`);
+    }
+    return built;
+  }
+  // where a meter listens: at a block's point, by name;
+  // else at a node's main output, what it comes out of summed
+  #listenedAt(address: Address, point: string): AudioNode {
+    if (point) {
+      const node = this.#blockAt(address).points[point];
+      if (!node) {
+        throw new Error(`${addressText(address)}: no point ${point}`);
+      }
+      return node;
+    }
+    const outputs = this.#jacksAt(address).outputs['out'] ?? [];
+    if (outputs.length === 1) {
+      return outputs[0]!;
+    }
+    const sum = this.#now.parts.keep(this.#context().createGain());
+    outputs.forEach((output) => output.connect(sum));
+    return sum;
   }
   // a param's spec by its address; a setting's or nothing's refused
   #paramNamed(address: Address): void {

@@ -1,6 +1,7 @@
 // ---------- build/web-audio/parts: the parts of what's built ----------
 // Every node made, every source started, each block by its address, the placeholders put in, what
 // follows a new tempo: what's built is taken apart by them, set by its blocks' addresses, told a tempo.
+// Each node's jacks by its address too: where a sound is fed in, where a meter listens.
 import type { Address, Node } from '../../plan/format/index.ts';
 import type { BuiltNode } from './built-node.ts';
 import type { TempoFollower } from './making.ts';
@@ -20,16 +21,19 @@ export class BuiltParts {
   readonly placeholders: Address[] = [];
   readonly tempoFollowers: TempoFollower[] = [];
   readonly poolHolders = new Map<string, PoolHolder>(); // by its address as text
+  readonly jacks = new Map<string, Jacks>(); // each node's, by its address as text
 
-  // a copy's parts taken in among these: its blocks, its placeholders, what follows a new tempo
+  // a copy's parts taken in among these: its blocks, jacks and placeholders, its tempo's followers
   takeIn(copy: BuiltParts): void {
     copy.blocks.forEach((built, at) => this.blocks.set(at, built));
+    copy.jacks.forEach((jacks, at) => this.jacks.set(at, jacks));
     this.placeholders.push(...copy.placeholders);
     this.tempoFollowers.push(...copy.tempoFollowers);
   }
   // and given back as it's let go
   giveBack(copy: BuiltParts): void {
     copy.blocks.forEach((_, at) => this.blocks.delete(at));
+    copy.jacks.forEach((_, at) => this.jacks.delete(at));
     removeAll(this.placeholders, copy.placeholders);
     removeAll(this.tempoFollowers, copy.tempoFollowers);
   }

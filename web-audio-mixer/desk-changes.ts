@@ -7,13 +7,13 @@
 //   1. a strip's own volume or pan, and a send by its return: on the live mix;
 //   2. a mute or a solo: the live mix's switches, on above 0;
 //   3. a slot's param: on its device, among the device params.
-// When, each held (libs/desk-plan/'s HeldChanges), its state changing then:
+// When, each held (libs/build/web-audio/'s HeldChanges), its state changing then:
 //   - one that can glide: until its lead ahead of its time, then set on the audio at its time
 //     (target.ts's timingOf()), as a clock hands its 16ths out ahead;
 //   - a switch, and a param that plans its device again: until its time.
 import type { DeviceParams, Timing } from '../web-audio-fx/index.ts';
+import { HeldChanges, type Ticking } from '../build/web-audio/index.ts';
 import {
-  HeldChanges,
   SEND,
   STRIP_PARAMS,
   controllerOf,
@@ -22,7 +22,6 @@ import {
   type Change,
   type DeskEntry,
   type ParamKey,
-  type Ticking,
 } from '../desk-plan/index.ts';
 import { MASTER } from '../mixer/index.ts';
 import { timingOf } from './target.ts';
@@ -45,8 +44,8 @@ export class DeskChanges {
   readonly #returns: ReadonlySet<string>; // the desk's returns, a send is named by
   readonly #clock: Ticking;
   readonly #at: (t: number) => number;
-  readonly #ahead: HeldChanges; // those that can glide, set their lead ahead
-  readonly #due: HeldChanges; // switches and params with no port, set at their time
+  readonly #ahead: HeldChanges<Change>; // those that can glide, set their lead ahead
+  readonly #due: HeldChanges<Change>; // switches and params with no port, set at their time
 
   // desk: its strips as data, which names its returns; clock: its time now and its ticks;
   // at(): a time on it on the audio's clock; lead: how far ahead one that can glide is set

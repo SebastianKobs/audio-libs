@@ -9,6 +9,8 @@
 //   - built-node.ts: a node built, one of Web Audio's or one made of several, in one shape;
 //   - param-units.ts: a param in a plan's units, moving the Web Audio params behind it;
 //   - buffers.ts: the buffers a noise or a reverb plays, each made once;
+//   - meters.ts: a meter on a node, its peak; output.ts, the output after what's built, faded in and out;
+//   - changes.ts: changes held until their time, a lead ahead where Web Audio can schedule them;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
 export { WebAudioBuilt, type Building } from './built.ts';
@@ -20,3 +22,6 @@ export { Buffers, impulse, noise } from './buffers.ts';
 export { biquadOf } from './blocks/filter.ts';
 export { limiterNodes, makeupOf } from './blocks/limiter.ts';
 export { panOf, type PanLaw } from './blocks/pan.ts';
+export { meterOn, type PeakMeter } from './meters.ts';
+export { FADE_IN, FADE_OUT, Output } from './output.ts';
+export { HeldChanges, type Change, type Ticking } from './changes.ts';
