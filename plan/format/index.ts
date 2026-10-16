@@ -20,7 +20,7 @@ export { isComposite, type BlockNode, type Composite, type Node } from './node.t
 export type { Param, Setting } from './param.ts';
 export { nodeAt, paramAt, settingAt, withSettings } from './param-at.ts';
 export type { Plan } from './plan.ts';
-export { copyOf, poolOfCopy, type NoteAddresses, type Pool } from './pool.ts';
+export { copyOf, isCopyNumber, poolNamed, type NoteAddresses, type Pool } from './pool.ts';
 export { feeds, reached } from './routing.ts';
-export type { Wire, WireFrom, WireTo } from './wire.ts';
+export { renamedEnd, type Wire, type WireFrom, type WireTo } from './wire.ts';
 export { VERSION, versionOf } from './version.ts';

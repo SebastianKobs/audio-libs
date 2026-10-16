@@ -16,7 +16,7 @@ import {
   mapOnto,
   nodeAt,
   paramAt,
-  poolOfCopy,
+  poolNamed,
   reached,
   settingAt,
   under,
@@ -52,16 +52,23 @@ test("an address as text, its names joined by slashes, and back; a parent's name
   assert.throws(() => under('a/b', ['level']), /a\/b/);
 });
 
-test("found by its address from the plan's top: a child's param, a composite's macro, a setting, a node; a pool's copy by its name and number; none where nothing's there", () => {
+test("found by its address from the plan's top: a child's param, a composite's macro, a setting, a node; a pool's child by the pool's name, a copy under it by its number; none where nothing's there", () => {
   assert.equal(paramAt(UTILITY, ['gain', 'gain'])?.value, 1, "a child's param");
   assert.equal(paramAt(UTILITY, ['level'])?.hint, 'How loud it comes out.', "the composite's macro");
   assert.equal(settingAt(UTILITY, ['pan', 'law'])?.value, 'stereo', 'a setting');
   assert.equal(paramAt(UTILITY, ['pan', 'law']), undefined, 'a setting is no param');
   assert.equal(nodeAt(UTILITY, ['pan'])?.kind, 'pan');
   assert.equal(nodeAt(UTILITY, [])?.name, 'utility', 'the top');
-  assert.equal(paramAt(SYNTH, ['voice 3', 'oscillator', 'frequency'])?.value, 440, "a pool's third copy");
-  assert.equal(paramAt(SYNTH, ['voice', 'oscillator', 'frequency']), undefined, 'no copy without its number');
-  assert.equal(paramAt(SYNTH, ['voice 0', 'oscillator', 'frequency']), undefined, 'copies from 1');
+  assert.equal(
+    paramAt(SYNTH, ['voice', 'oscillator', 'frequency'])?.value,
+    440,
+    "the pool's child, by the pool's name",
+  );
+  assert.equal(paramAt(SYNTH, ['voice', '3', 'oscillator', 'frequency'])?.value, 440, "a pool's third copy, under it");
+  assert.equal(nodeAt(SYNTH, ['voice', '3'])?.name, '3', 'a copy named by its number');
+  assert.equal(paramAt(SYNTH, ['voice 3', 'oscillator', 'frequency']), undefined, 'no copy by a joined name');
+  assert.equal(paramAt(SYNTH, ['voice', '0', 'oscillator', 'frequency']), undefined, 'copies from 1');
+  assert.equal(paramAt(SYNTH, ['voice', '03', 'oscillator', 'frequency']), undefined, 'a number with no leading 0');
   assert.equal(paramAt(UTILITY, ['gain', 'cutoff']), undefined);
   assert.equal(paramAt(UTILITY, ['delay', 'time']), undefined);
 });
@@ -77,16 +84,15 @@ test("a macro's value onto its targets: each times its factor, held in its range
   near(mapOnto({ factor: 2, offset: 0 }, -3), -6, 'no range: as it comes');
 });
 
-test("a pool's copies: its child under the copy's name, its name and a number from 1; its wires with the copy's name for the pool's; a copy's pool found by its name", () => {
+test("a pool's copies: its child named by the copy's number, from 1; its wires with the copy's address for the pool's name; a pool found by its name", () => {
   const [voices] = SYNTH.node.pools;
   const { node, wires } = copyOf(voices, 2);
-  assert.equal(node.name, 'voice 2');
+  assert.equal(node.name, '2', 'named by its number, under its pool');
   assert.equal(node.children, voices.child.children, 'the same children');
-  assert.deepEqual(wires, [{ from: { node: 'voice 2', output: 'out' }, to: { output: 'out' } }]);
+  assert.deepEqual(wires, [{ from: { node: 'voice/2', output: 'out' }, to: { output: 'out' } }], 'by its address');
   assert.throws(() => copyOf(voices, 0), /from 1/);
-  assert.equal(poolOfCopy(SYNTH.node, 'voice 12'), voices);
-  assert.equal(poolOfCopy(SYNTH.node, 'voice'), undefined);
-  assert.equal(poolOfCopy(SYNTH.node, 'voice 1b'), undefined);
+  assert.equal(poolNamed(SYNTH.node, 'voice'), voices);
+  assert.equal(poolNamed(SYNTH.node, 'voice 12'), undefined, 'no number split off a name');
 });
 
 test("what feeds what over one composite's wires: each name and what it reaches, by its outputs and its taps, a wire into a param too; the wires a filter lets through; the loop check", () => {
@@ -107,12 +113,14 @@ test("what feeds what over one composite's wires: each name and what it reaches,
   assert.equal(feeds(desk, 'reverb', 'reverb'), true, 'itself: a wire into it would loop');
 });
 
-test("a plan's settings changed by address, a new plan, the old as it was: a child's, a pool's child's by a copy's address; a setting not there refused", () => {
+test("a plan's settings changed by address, a new plan, the old as it was: a child's, a pool's child's by the pool's name, every copy's; a copy's, or a setting not there, refused", () => {
   const changed = withSettings(UTILITY, { 'pan/law': 'pan pot' });
   assert.equal(settingAt(changed, ['pan', 'law']).value, 'pan pot');
   assert.equal(settingAt(UTILITY, ['pan', 'law']).value, 'stereo', 'the old as it was');
   assert.equal(paramAt(changed, ['gain', 'gain']).value, 1, 'the rest as it was');
-  const waved = withSettings(SYNTH, { 'voice 2/oscillator/wave': 'square' });
-  assert.equal(settingAt(waved, ['voice 1', 'oscillator', 'wave']).value, 'square', "the pool's child, every copy");
+  const waved = withSettings(SYNTH, { 'voice/oscillator/wave': 'square' });
+  assert.equal(settingAt(waved, ['voice', 'oscillator', 'wave']).value, 'square', "the pool's child");
+  assert.equal(settingAt(waved, ['voice', '1', 'oscillator', 'wave']).value, 'square', 'every copy built from it');
+  assert.throws(() => withSettings(SYNTH, { 'voice/2/oscillator/wave': 'square' }), /a copy's settings are its pool's/);
   assert.throws(() => withSettings(UTILITY, { 'gain/law': 'x' }), /gain\/law: no setting/);
 });

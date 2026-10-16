@@ -6,8 +6,9 @@
 //   - automate(): a param told its automation, its events' times from a time;
 //   - preset(): a preset's values set together, at one time; a setting it changes, a rebuild;
 //   - tempo(): a new beat, each synced time following it;
-//   - add(), letGo(): a pool's copy added by its pool's address and its number, its address handed
-//     back; let go once it has rung out, as its owner says: an instrument's voice, a desk's channel;
+//   - add(), letGo(): a pool's copy added by its own address, its pool's name and its number
+//     (my tap/3); let go once it has rung out, as its owner says: an instrument's voice, a desk's
+//     channel;
 //   - rebuild(): built again from a plan, a setting or its structure changed, the old ringing out;
 //   - placeholders: what it couldn't build, by address: a block's sound passed straight through,
 //     a source silent; said, so it's seen, not only heard missing;
@@ -21,7 +22,7 @@ export interface Built {
   automate(address: Address, automation: readonly Automation[], from?: number): void;
   preset(values: ValuesByAddress, settings?: ValuesByAddress, when?: When): void;
   tempo(beat: number, when?: When): void;
-  add(pool: Address, number: number): Address;
+  add(copy: Address): void;
   letGo(copy: Address): void;
   rebuild(plan: Plan): void;
   readonly placeholders: readonly Address[];

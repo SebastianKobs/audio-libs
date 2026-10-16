@@ -14,3 +14,11 @@ export interface Wire {
   readonly from: WireFrom;
   readonly to: WireTo;
 }
+
+// A wire's end with a node's name renamed (a pool's name its copy's address); any other end as it is.
+export function renamedEnd<End extends WireFrom | WireTo>(end: End, from: string, to: string): End {
+  if (!('node' in end) || end.node !== from) {
+    return end;
+  }
+  return { ...end, node: to };
+}

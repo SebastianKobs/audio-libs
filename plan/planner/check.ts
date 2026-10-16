@@ -1,6 +1,7 @@
 // ---------- plan/planner/check: a template checked as the planner is handed it ----------
 // Held to its form where it names one (form-check.ts), once it's well-formed, every template alike:
-//   1. its children's names one of a kind, its macros' too, each child's kind known, none holding the template;
+//   1. its children's names one of a kind, its macros' too, none a number alone, which only a pool's copy is
+//      named; each child's kind known, none holding the template;
 //   2. the values and settings a child changes there inside it;
 //   3. each wire's ends there: an input, an output, a param;
 //   4. each macro named, its targets params inside, one at least where it has no spec of its own;
@@ -16,6 +17,8 @@ import type { Template, TemplateChild } from './template.ts';
 
 // what a note sets in a voice
 const NOTE_SOURCES = ['pitch', 'velocity', 'gate'] as const;
+// a name that's a number alone: under a pool, a copy's, so no child or macro is named so
+const NUMBER_ALONE = /^\d+$/;
 
 // What's wrong with the templates, each failure a line: each one's own; once there are none,
 // each macro onto a choice with other choices than the choice's.
@@ -52,6 +55,9 @@ function wellFormedProblems(template: Template, catalog: Catalog): string[] {
     ...namesTwice((template.macros ?? []).map((macro) => macro.name)).map(
       (name) => `macro ${name}: a name two macros have`,
     ),
+    ...[...children, ...(template.macros ?? [])]
+      .filter(({ name }) => NUMBER_ALONE.test(name))
+      .map(({ name }) => `${name}: a number alone, a name only a pool's copy has`),
     ...children.flatMap((child) => childProblems(child, template, catalog)),
     ...wiresOf(template).flatMap((wire) => wireProblems(wire, template, catalog)),
     ...macroProblems(template, catalog),

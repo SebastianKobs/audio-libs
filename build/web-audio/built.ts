@@ -3,7 +3,8 @@
 //   - a param set or automated by its address: a block's, on what's built of it; a macro's, onto
 //     its targets; a choice by its index, as its block's param holds it; a placeholder's left alone;
 //   - a preset's values set together; a new tempo told what follows it;
-//   - a pool's copy added by its pool's address and its number, wired by its rule; let go;
+//   - a pool's copy added by its own address, its pool's name and its number (my tap/3), wired by
+//     its rule; let go;
 //   - built again: the new beside the old, its inputs moved over, the values told and the copies
 //     added kept, the old ringing out, faded where it makes sound of its own (rebuild.ts); a preset
 //     that changes a setting built again with it;
@@ -24,6 +25,7 @@ import {
   addressOf,
   addressText,
   copyOf,
+  isCopyNumber,
   mapOnto,
   nodeAt,
   paramAt,
@@ -48,13 +50,12 @@ interface Fed {
   readonly input: string;
   readonly source: AudioNode;
 }
-// a copy as added: its parts, the composite it's in, its name there, its pool and number, to add it again
+// a copy as added: its parts, the composite it's in, its name there as its wires name it, its address, to add it again
 interface Copy {
   readonly parts: BuiltParts;
   readonly holder: PoolHolder;
   readonly name: string;
-  readonly pool: Address;
-  readonly number: number;
+  readonly address: Address;
 }
 // what's built of one plan: its plan, its parts, its jacks at the top, its copies by their addresses as text
 interface Generation {
@@ -135,27 +136,31 @@ export class WebAudioBuilt implements Built {
       follower(beat, when, this.#context().currentTime);
     }
   }
-  // A pool's copy added, by its pool's address and its number from 1: built from the pool's child,
-  // wired by its rule, set by its own address; its address handed back.
-  add(pool: Address, number: number): Address {
+  // A pool's copy added by its own address, its pool's name and its number from 1 (my tap/3):
+  // built from the pool's child, wired by its rule, set by its address.
+  add(copy: Address): void {
+    const pool = copy.slice(0, -1); // its pool's address: the pool's parent's, and its name
+    const number = copy.at(-1) ?? '';
     const holder = this.#now.parts.poolHolders.get(addressText(pool.slice(0, -1)));
     const kept = holder?.node.pools?.find((each) => each.child.name === pool.at(-1));
     if (!holder || !kept) {
       throw new Error(`${addressText(pool)}: no pool`);
     }
-    const { node, wires } = copyOf(kept, number);
-    const at = [...pool.slice(0, -1), node.name];
-    if (holder.children.has(node.name)) {
-      throw new Error(`${addressText(at)}: added already`);
+    if (!isCopyNumber(number)) {
+      throw new Error(`${addressText(copy)}: a copy is numbered from 1`);
+    }
+    const { node, wires } = copyOf(kept, Number(number));
+    const name = addressText([kept.child.name, node.name]); // as its wires name it, among the composite's children
+    if (holder.children.has(name)) {
+      throw new Error(`${addressText(copy)}: added already`);
     }
     const parts = new BuiltParts();
-    holder.children.set(node.name, this.#building.copied(node, at, parts));
+    holder.children.set(name, this.#building.copied(node, copy, parts));
     for (const wire of wires) {
       wireInside(holder.node, wire, { children: holder.children, own: holder.own });
     }
     this.#now.parts.takeIn(parts);
-    this.#now.copies.set(addressText(at), { parts, holder, name: node.name, pool, number });
-    return at;
+    this.#now.copies.set(addressText(copy), { parts, holder, name, address: copy });
   }
   // A sound fed into a node's input by its address, its main one unless named:
   //   - a bus's, as a phrase plays into it;
@@ -257,8 +262,8 @@ export class WebAudioBuilt implements Built {
       this.#faded(old, [1, 0]);
       this.#faded(this.#now, [0, 1]);
     }
-    for (const { pool, number } of old.copies.values()) {
-      this.add(pool, number);
+    for (const { address } of old.copies.values()) {
+      this.add(address);
     }
     this.#fed.forEach((fed) => this.#feedNow(fed));
     for (const [text, value] of this.#told) {

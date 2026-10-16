@@ -114,12 +114,12 @@ test('what was told kept as it was built again: the values set, a macro by its o
   effect.what.rebuild(UTILITY);
   assert.deepEqual(effect.made('gain').at(-1).gain.events.at(-1), ['set', 0.3, 4], "the level's, onto the new gain");
   const instrument = built(SYNTH);
-  instrument.what.add(['voice'], 2);
-  instrument.what.set(['voice 2', 'oscillator', 'frequency'], 330);
+  instrument.what.add(['voice', '2']);
+  instrument.what.set(['voice', '2', 'oscillator', 'frequency'], 330);
   instrument.what.rebuild(SYNTH);
   const [, newOsc] = instrument.made('oscillator');
   assert.deepEqual(newOsc.frequency.events.at(-1), ['set', 330, 4], 'voice 2 added again, its frequency as told');
-  instrument.what.letGo(['voice 2']);
+  instrument.what.letGo(['voice', '2']);
   instrument.what.rebuild(SYNTH);
   assert.equal(instrument.made('oscillator').length, 2, 'a voice let go not added again, what it was told forgotten');
 });

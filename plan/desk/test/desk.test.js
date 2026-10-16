@@ -77,7 +77,7 @@ test("a channel's wires: in through its inserts into its mute, its fader, its pa
     'send delay 1 → out delay 1',
   ]);
   assert.deepEqual(
-    nodeAt(planned(), ['my tap 1']).wires.map(wireText).slice(4, 6),
+    nodeAt(planned(), ['my tap']).wires.map(wireText).slice(4, 6),
     ['fader → out', 'cut → send pre'],
     'no pan: out of its fader, its post sends too',
   );
@@ -109,7 +109,7 @@ test("a send on every channel for each return before it on the desk, none that f
   const sendsOf = (name) => nodeAt(plan, [name, 'send'])?.macros.map(({ spec }) => spec.name) ?? [];
   assert.deepEqual(
     Object.fromEntries(
-      ['reverb', 'sings', 'delay 1', 'you', 'tap', 'my tap 1', 'replay tower 1'].map((name) => [name, sendsOf(name)]),
+      ['reverb', 'sings', 'delay 1', 'you', 'tap', 'my tap', 'replay tower'].map((name) => [name, sendsOf(name)]),
     ),
     {
       reverb: [],
@@ -117,8 +117,8 @@ test("a send on every channel for each return before it on the desk, none that f
       'delay 1': ['reverb'],
       you: ['reverb', 'delay 1'],
       tap: ['reverb', 'delay 1'],
-      'my tap 1': ['reverb', 'delay 1'],
-      'replay tower 1': ['reverb', 'delay 1'],
+      'my tap': ['reverb', 'delay 1'],
+      'replay tower': ['reverb', 'delay 1'],
     },
   );
   assert.equal(nodeAt(plan, ['reverb', 'send']), undefined, 'none before the first return: no sends');
@@ -131,9 +131,9 @@ test("a send on every channel for each return before it on the desk, none that f
   assert.deepEqual(
     [
       tapOf('tap', 'reverb'),
-      tapOf('my tap 1', 'reverb'),
-      tapOf('replay tower 1', 'reverb'),
-      tapOf('replay tower 1', 'delay 1'),
+      tapOf('my tap', 'reverb'),
+      tapOf('replay tower', 'reverb'),
+      tapOf('replay tower', 'delay 1'),
     ],
     ['a', 'b', 'b', 'a'],
     "post (a) to start; pre (b), its channel's; post again where the desk says",
@@ -200,16 +200,16 @@ test("the desk of the desk's form: its own inputs into its channels and buses, e
 test("a channel built on another: its base's inserts, then its own; its pan, volume and tap its own where it writes them, else its base's; a pool's own over its channel's", () => {
   const plan = planned();
   assert.deepEqual(
-    nodeAt(plan, ['replay tower 1']).children.map(({ name }) => name),
+    nodeAt(plan, ['replay tower']).children.map(({ name }) => name),
     ['air', 'utility', 'dull', 'cut', 'fader', 'send'],
     "the Replay's inserts, then the Tower's; no pan, the Replay's",
   );
   assert.deepEqual(
     [
-      paramAt(plan, ['replay tower 1', 'volume']).value,
-      paramAt(plan, ['my tap 1', 'volume']).value,
-      paramAt(plan, ['replay tower 1', 'dull', 'cutoff']).value,
-      settingAt(plan, ['replay tower 1', 'utility', 'pan', 'law']).value,
+      paramAt(plan, ['replay tower', 'volume']).value,
+      paramAt(plan, ['my tap', 'volume']).value,
+      paramAt(plan, ['replay tower', 'dull', 'cutoff']).value,
+      settingAt(plan, ['replay tower', 'utility', 'pan', 'law']).value,
     ],
     [0, 1, 350, 'pan pot'],
   );
@@ -282,7 +282,11 @@ test("silenced(): which channels a mute or a solo silences, as Ableton's, over a
   );
   assert.deepEqual(quiet(['master'], ['master']), [], 'the master: neither muted nor soloed');
   const copy = copyOf(desk.pools[0], 1);
-  const withCopy = { children: [...desk.children, copy.node], wires: [...desk.wires, ...copy.wires] };
+  // the copy keyed by its address, as a desk's routing keys it
+  const withCopy = {
+    children: [...desk.children, { ...copy.node, name: 'my tap/1' }],
+    wires: [...desk.wires, ...copy.wires],
+  };
   assert.deepEqual(
     [...silenced(withCopy, { muted: new Set(), soloed: new Set(['you']) })].sort(),
     ['ambient', 'background 1', 'replay tap 1', 'replay vine 1', 'sings'],

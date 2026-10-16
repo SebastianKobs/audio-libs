@@ -46,14 +46,15 @@ test("a template of templates: a child's template planned into it, its role kept
   assert.equal(paramAt(plan, ['utility', 'gain', 'gain']).value, 0.5, 'and on onto its gain');
 });
 
-test("a pool's child ready: its template planned, under its name, its wires and its note's addresses kept; a copy's values by its address", () => {
+test("a pool's child ready: its template planned, under its name, its wires and its note's addresses kept; its values by the pool's name, a copy's under it by its number", () => {
   const plan = planner.plan('Synth');
   const [pool] = plan.node.pools;
   assert.equal(pool.child.name, 'voice');
   assert.deepEqual(pool.note.gate, [['envelope', 'gate']]);
-  assert.equal(settingAt(plan, ['voice 2', 'oscillator', 'wave']).value, 'triangle');
-  assert.equal(paramAt(plan, ['voice 1', 'envelope', 'release']).value, 0.3);
-  assert.equal(paramAt(plan, ['voice 1', 'envelope', 'decay']).value, 0, 'its default');
+  assert.equal(settingAt(plan, ['voice', 'oscillator', 'wave']).value, 'triangle', "the pool's child");
+  assert.equal(settingAt(plan, ['voice', '2', 'oscillator', 'wave']).value, 'triangle', 'a copy, built from it');
+  assert.equal(paramAt(plan, ['voice', '1', 'envelope', 'release']).value, 0.3);
+  assert.equal(paramAt(plan, ['voice', '1', 'envelope', 'decay']).value, 0, 'its default');
 });
 
 test("a jack's channels as they come, where its block doesn't fix them: those wired into it, a node's outputs its inputs'; through a loop; mono where nothing comes", () => {
@@ -96,6 +97,7 @@ test('every template checked well-formed as it is handed in, every failure said 
       { name: 'gain', kind: 'pan' },
       { name: 'choir', kind: 'Choir' },
       { name: 'self', kind: 'Broken' },
+      { name: '3', kind: 'gain' },
     ],
     wires: [
       { from: { input: 'side' }, to: { node: 'gain', input: 'in' } },
@@ -118,6 +120,7 @@ test('every template checked well-formed as it is handed in, every failure said 
       assert.deepEqual(error.message.split('\n'), [
         'templates not well-formed:',
         'Broken: gain: a name two children have',
+        "Broken: 3: a number alone, a name only a pool's copy has",
         'Broken: gain: no param cutoff to change',
         'Broken: choir: no block or template Choir',
         'Broken: self: holds itself, through Broken',

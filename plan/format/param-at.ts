@@ -1,26 +1,19 @@
 // ---------- plan/format/param-at: a node, a param or a setting found by its address; settings changed by it ----------
-// Walked down from the plan's top by the address's names: each a child by its name,
-// or a pool's copy by its name and number. Its last name a param or a macro, or a setting.
+// Walked down from the plan's top by the address's names: each a child by its name, or a
+// pool's child by the pool's name, a copy under it by its number (my tap/3). Its last name a
+// param or a macro, or a setting.
 // None where nothing's there.
-// Settings changed by address: a new plan, the old as it was. A pool's child's by a copy's
-// address: every copy of it, as they're built from it. A setting not there refused.
+// Settings changed by address: a new plan, the old as it was. A pool's child's by the pool's
+// name: every copy's, as they're built from it. A copy's, or a setting not there, refused.
 import { addressOf, type Address, type ValuesByAddress } from './address.ts';
 import { isComposite, type Node } from './node.ts';
 import type { Param, Setting } from './param.ts';
 import type { Plan } from './plan.ts';
-import { poolOfCopy } from './pool.ts';
+import { copyOf, isCopyNumber, poolNamed } from './pool.ts';
 
 // The node an address's names lead to; the plan's top for none.
 export function nodeAt(plan: Plan, names: Address): Node | undefined {
-  let node = plan.node;
-  for (const name of names) {
-    const child = childNamed(node, name);
-    if (!child) {
-      return undefined;
-    }
-    node = child;
-  }
-  return node;
+  return walked(plan.node, names);
 }
 // A param by its address: a node's own, or a composite's macro.
 export function paramAt(plan: Plan, address: Address): Param | undefined {
@@ -41,12 +34,30 @@ export function settingAt(plan: Plan, address: Address): Setting | undefined {
   return named(node.settings, name);
 }
 
-// a node's child by its name, or its pool's copy by its name and number, the pool's child standing for it
-function childNamed(node: Node, name: string): Node | undefined {
+// A node down its names, each in turn:
+//   - a child by its name;
+//   - a pool's child by the pool's name; under it, a copy by its number, as it's built from the
+//     pool's child, or a part of the pool's child by its name.
+function walked(node: Node, [name, ...rest]: Address): Node | undefined {
+  if (name === undefined) {
+    return node;
+  }
   if (!isComposite(node)) {
     return undefined;
   }
-  return node.children.find((child) => child.name === name) ?? poolOfCopy(node, name)?.child;
+  const child = node.children.find((each) => each.name === name);
+  if (child) {
+    return walked(child, rest);
+  }
+  const pool = poolNamed(node, name);
+  if (!pool) {
+    return undefined;
+  }
+  const [copy, ...inCopy] = rest;
+  if (copy !== undefined && isCopyNumber(copy)) {
+    return walked(copyOf(pool, Number(copy)).node, inCopy);
+  }
+  return walked(pool.child, rest);
 }
 // a param or a setting by its spec's name
 function named<Item extends Param>(items: readonly Item[], name: string): Item | undefined {
@@ -61,7 +72,8 @@ export function withSettings(plan: Plan, settings: ValuesByAddress): Plan {
   return { ...plan, node };
 }
 
-// a node with one setting changed, down its address: its own where the address names it, else a child's
+// A node with one setting changed, down its address: its own where the address names it,
+// else a child's, or a pool's child's by the pool's name; a copy's refused, its settings its pool's.
 function settingChanged(node: Node, [name, ...rest]: Address, value: number | string, whole: string): Node {
   if (name === undefined) {
     throw new Error(`${whole}: no setting`);
@@ -81,9 +93,12 @@ function settingChanged(node: Node, [name, ...rest]: Address, value: number | st
     const children = node.children.map((each) => (each === child ? settingChanged(each, rest, value, whole) : each));
     return { ...node, children };
   }
-  const pool = poolOfCopy(node, name);
+  const pool = poolNamed(node, name);
   if (!pool) {
     throw new Error(`${whole}: no setting`);
+  }
+  if (rest[0] !== undefined && isCopyNumber(rest[0])) {
+    throw new Error(`${whole}: a copy's settings are its pool's`);
   }
   const pools = node.pools.map((each) =>
     each === pool ? { ...each, child: settingChanged(each.child, rest, value, whole) } : each,
