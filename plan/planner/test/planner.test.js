@@ -412,6 +412,60 @@ test("a macro onto a choice: its choices the choice's own, as it moves it by pos
   );
 });
 
+test('a sound into a macro refused where a map on its way holds it to a range, which holds a value, not a sound; through a macro onto a macro too; once every template is well-formed', () => {
+  const onto = (to, range = {}) => [{ to, factor: 1, offset: 0, ...range }];
+  const clamped = {
+    kind: 'Clamped',
+    inputs: [{ name: 'in', channels: 1 }],
+    outputs: [{ name: 'out', channels: 1 }],
+    children: [{ name: 'amp', kind: 'gain' }],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'amp', input: 'in' } },
+      { from: { node: 'amp', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: [
+      { name: 'held', maps: onto(['amp', 'gain'], { high: 1 }) },
+      { name: 'open', maps: onto(['amp', 'gain']) },
+    ],
+  };
+  const wrapped = {
+    ...clamped,
+    kind: 'Wrapped',
+    children: [{ name: 'inner', kind: 'Clamped' }],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'inner', input: 'in' } },
+      { from: { node: 'inner', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: [
+      { name: 'deep', maps: onto(['inner', 'held']) },
+      { name: 'open', maps: onto(['inner', 'open']) },
+    ],
+  };
+  const moved = {
+    kind: 'Moved',
+    outputs: [{ name: 'out', channels: 1 }],
+    children: [
+      { name: 'lfo', kind: 'oscillator' },
+      { name: 'tone', kind: 'oscillator' },
+      { name: 'vca', kind: 'Clamped' },
+      { name: 'wrap', kind: 'Wrapped' },
+    ],
+    wires: [
+      { from: { node: 'tone', output: 'out' }, to: { node: 'vca', input: 'in' } },
+      { from: { node: 'vca', output: 'out' }, to: { node: 'wrap', input: 'in' } },
+      { from: { node: 'wrap', output: 'out' }, to: { output: 'out' } },
+      { from: { node: 'lfo', output: 'out' }, to: { node: 'vca', param: 'held' } },
+      { from: { node: 'lfo', output: 'out' }, to: { node: 'vca', param: 'open' } },
+      { from: { node: 'lfo', output: 'out' }, to: { node: 'wrap', param: 'deep' } },
+      { from: { node: 'lfo', output: 'out' }, to: { node: 'wrap', param: 'open' } },
+    ],
+  };
+  assert.deepEqual(failuresOf([clamped, wrapped, moved]), [
+    'Moved: a sound into vca/held: on its way, vca/amp/gain held to a range, which holds a value, not a sound',
+    'Moved: a sound into wrap/deep: on its way, wrap/inner/amp/gain held to a range, which holds a value, not a sound',
+  ]);
+});
+
 test("a template built on another: its base's jacks, form, children, wires, macros and pools, then its own; planned flat, checked as one", () => {
   const wobbled = {
     kind: 'Wobbled',

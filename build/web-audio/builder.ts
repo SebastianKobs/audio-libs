@@ -71,12 +71,13 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       const children = new Map(
         node.children.map((child) => [child.name, this.#jacksOf(child, [...at, child.name], parts)]),
       );
+      const attenuator = (factor: number): AudioNode => attenuatorOf(factor, making);
       if (!node.pools.length) {
-        return compositeJacks(node, children);
+        return compositeJacks(node, children, attenuator);
       }
       const own = ownJacks(node, making);
       parts.poolHolders.set(addressText(at), { node, children, own });
-      return compositeJacks(node, children, own);
+      return compositeJacks(node, children, attenuator, own);
     }
     const make = MAKERS[node.kind as BlockKind]; // a block's kind, or one it can't make
     if (!make) {
@@ -108,4 +109,10 @@ function ownJacks(node: Node, making: Making): OwnJacks {
   const gains = (jacks: readonly { name: string }[]): Record<string, AudioNode> =>
     Object.fromEntries(jacks.map(({ name }) => [name, making.kept(making.context.createGain())]));
   return { inputs: gains(node.inputs), outputs: gains(node.outputs) };
+}
+// a gain at a macro map's factor, a sound into the macro going through it to the map's target
+function attenuatorOf(factor: number, making: Making): AudioNode {
+  const gain = making.kept(making.context.createGain());
+  gain.gain.value = factor;
+  return gain;
 }

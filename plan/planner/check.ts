@@ -7,9 +7,10 @@
 //   4. each macro named, its targets params inside, one at least where it has no spec of its own;
 //      a voice's note's addresses params inside too.
 // Then, once every template is, a spec followed down safely, past no template holding itself:
-//   5. each macro onto a choice: its choices the choice's own, as it moves it by position.
+//   5. each macro onto a choice: its choices the choice's own, as it moves it by position;
+//   6. each sound wired into a macro: no map on its way holding it to a range.
 // Every failure said, plainly: its template, its child or wire, its rule.
-import { addressOf, addressText, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
+import { addressOf, addressText, type Address, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
 import type { Form } from './form.ts';
 import { formProblems } from './form-check.ts';
 import type { Catalog } from './catalog.ts';
@@ -19,7 +20,8 @@ import type { Template, TemplateChild } from './template.ts';
 const NUMBER_ALONE = /^\d+$/;
 
 // What's wrong with the templates, each failure a line: each one's own; once there are none,
-// each macro onto a choice with other choices than the choice's.
+// each macro onto a choice with other choices than the choice's, each sound into a macro held to
+// a range on its way.
 export function problemsInAll(
   templates: readonly Template[],
   catalog: Catalog,
@@ -30,7 +32,9 @@ export function problemsInAll(
     return problems;
   }
   return templates.flatMap((template) =>
-    choiceProblems(template, catalog).map((problem) => `${template.kind}: ${problem}`),
+    [...choiceProblems(template, catalog), ...soundRangeProblems(template, catalog)].map(
+      (problem) => `${template.kind}: ${problem}`,
+    ),
   );
 }
 
@@ -169,6 +173,45 @@ function choiceProblems(template: Template, catalog: Catalog): string[] {
       })
       .map(({ to }) => `macro ${macro.name}: its choices not those of ${addressText(to)}, which it moves by position`);
   });
+}
+// Each sound wired into a macro: no map on its way holding it to a range.
+// A range holds a value; a sound through a macro goes to each target by its factor alone.
+function soundRangeProblems(template: Template, catalog: Catalog): string[] {
+  return wiresOf(template).flatMap(({ to }) => {
+    if (!('node' in to) || !('param' in to)) {
+      return [];
+    }
+    const child = catalog.childrenOf(template).find((each) => each.name === to.node);
+    return rangesOnTheWay(child?.kind, to.param, [to.node], catalog).map(
+      (held) =>
+        `a sound into ${to.node}/${to.param}: on its way, ${addressText(held)} held to a range, which holds a value, not a sound`,
+    );
+  });
+}
+// Where a macro's maps hold its value to a range, by their addresses from where it's found:
+// its own, and those of the macros it moves, followed down; none for a block's param.
+function rangesOnTheWay(kind: string | undefined, name: string, at: Address, catalog: Catalog): Address[] {
+  const template = kind === undefined ? undefined : catalog.template(kind);
+  const macro = template?.macros?.find((each) => each.name === name);
+  if (!template || !macro) {
+    return [];
+  }
+  return macro.maps.flatMap(({ to, low, high }) => {
+    if (low !== undefined || high !== undefined) {
+      return [[...at, ...to]];
+    }
+    const path = to.slice(0, -1);
+    return rangesOnTheWay(kindAt(template, path, catalog), to.at(-1)!, [...at, ...path], catalog);
+  });
+}
+// a node's kind by its path of children's names within a template; none where it isn't there
+function kindAt(template: Template, [name, ...rest]: Address, catalog: Catalog): string | undefined {
+  const child = catalog.childrenOf(template).find((each) => each.name === name);
+  if (!child || !rest.length) {
+    return child?.kind;
+  }
+  const inner = catalog.template(child.kind);
+  return inner && kindAt(inner, rest, catalog);
 }
 // two lists of choices the same, in the same order
 function sameChoices(one: readonly string[], other: readonly string[]): boolean {

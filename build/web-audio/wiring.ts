@@ -4,17 +4,23 @@
 //   - with no pool: no node of its own, a sound wired into it going straight inside, out of it straight
 //     from inside: an input the children's inputs and params it leads to, an output those that lead to it;
 //   - with a pool: a node at each of its own jacks, where copies come and go, wired later by its pool's rule.
-import type { Node, Wire, WireFrom, WireTo } from '../../plan/format/index.ts';
+// A sound into a composite's macro goes to each of its targets through a gain at the map's factor,
+// as CV through attenuators; on into a child's macro, through its own.
+import type { Address, Node, Wire, WireFrom, WireTo } from '../../plan/format/index.ts';
 import type { BuiltNode } from './built-node.ts';
 
 // where a sound can go: a node's input, or a param
 export type Destination = AudioNode | AudioParam;
-// a node's jacks as built: where each input goes in, what each output comes out of, each param's Web Audio params
+// A node's jacks as built: where each input goes in, what each output comes out of, and where a
+// sound into a param goes, by its address within the node: a block's Web Audio params; a macro's
+// gains, one for each of its targets.
 export interface Jacks {
   readonly inputs: Readonly<Record<string, readonly Destination[]>>;
   readonly outputs: Readonly<Record<string, readonly AudioNode[]>>;
-  paramsOf(name: string): readonly AudioParam[];
+  paramsOf(address: Address): readonly Destination[];
 }
+// a gain at a map's factor, made for a sound into a macro
+export type Attenuator = (factor: number) => AudioNode;
 // a composite's own jacks as nodes, where it holds a pool: a node at each input and each output, by name
 export interface OwnJacks {
   readonly inputs: Readonly<Record<string, AudioNode>>;
@@ -31,17 +37,26 @@ export function blockJacks(node: Node, built: BuiltNode): Jacks {
   return {
     inputs: Object.fromEntries(node.inputs.map(({ name }) => [name, built.inputsOf(name)])),
     outputs: Object.fromEntries(node.outputs.map(({ name }) => [name, [built.output]])),
-    paramsOf: (name) => built.cablesOf(name),
+    paramsOf: (address) => built.cablesOf(address.at(-1)!), // a block's own: its name alone
   };
 }
 // A composite's jacks, its wires made: its own nodes where it has them (own), else what its wires lead through it.
-export function compositeJacks(node: Node, children: ReadonlyMap<string, Jacks>, own?: OwnJacks): Jacks {
+// A sound into its macro through a gain for each target, made by the attenuator.
+export function compositeJacks(
+  node: Node,
+  children: ReadonlyMap<string, Jacks>,
+  attenuator: Attenuator,
+  own?: OwnJacks,
+): Jacks {
   const collected: Collected = { inputs: {}, outputs: {} };
   for (const wire of node.wires ?? []) {
     wireInside(node, wire, { children, own, collected });
   }
-  const paramsOf = (name: string): never => {
-    throw new Error(`${node.name}/${name}: a sound into a macro, not built`);
+  const paramsOf = ([name, ...rest]: Address): readonly Destination[] => {
+    if (rest.length) {
+      return children.get(name!)!.paramsOf(rest); // a well-formed plan's child, a param within it
+    }
+    return attenuated(node, name!, children, attenuator);
   };
   if (!own) {
     return { ...collected, paramsOf };
@@ -105,10 +120,27 @@ function destinationsOf(
   own?: OwnJacks,
 ): readonly Destination[] | undefined {
   if ('node' in to) {
-    return 'param' in to ? childNamed(to.node).paramsOf(to.param) : (childNamed(to.node).inputs[to.input] ?? []);
+    return 'param' in to ? childNamed(to.node).paramsOf([to.param]) : (childNamed(to.node).inputs[to.input] ?? []);
   }
   const jack = own?.outputs[to.output];
   return jack ? [jack] : undefined;
+}
+// A sound into a macro: a gain at each map's factor, into what the map moves, where the sound
+// goes; a map's offset already in the value the macro set.
+function attenuated(
+  node: Node,
+  name: string,
+  children: ReadonlyMap<string, Jacks>,
+  attenuator: Attenuator,
+): Destination[] {
+  const macro = (node.macros ?? []).find((each) => each.spec.name === name)!; // a well-formed plan's
+  return macro.maps.map(({ to: [child, ...within], factor }) => {
+    const gain = attenuator(factor);
+    for (const destination of children.get(child!)!.paramsOf(within)) {
+      connectInto(gain, destination);
+    }
+    return gain;
+  });
 }
 // a wire from a composite's input straight to its output: no node to carry it
 function refused(node: Node, input: string): never {

@@ -181,6 +181,63 @@ test("a placeholder for a block it can't make, said by its address: its sound pa
   assert.deepEqual(outOf(context, master), [context.destination]);
 });
 
+test('a sound into a macro fanned out to its targets, a gain each at its factor, as CV through attenuators; through a macro onto a macro too', () => {
+  const { context, builder, made } = builderOn();
+  const macro = (name, maps) => ({
+    spec: { name, range: [-48, 48, 0.01] },
+    value: 0,
+    maps: maps.map(([to, factor]) => ({ to, factor, offset: 0 })),
+  });
+  const composite = (name, children, wires, macros) => ({
+    name,
+    kind: name,
+    inputs: [],
+    outputs: [{ name: 'out', channels: 1 }],
+    params: [],
+    settings: [],
+    children,
+    wires: [...wires, { from: { node: children.at(-1).name, output: 'out' }, to: { output: 'out' } }],
+    macros,
+    pools: [],
+  });
+  const vco = (name) =>
+    composite(
+      name,
+      [blockNode('osc', 'oscillator'), blockNode('level', 'gain')],
+      [{ from: { node: 'osc', output: 'out' }, to: { node: 'level', input: 'in' } }],
+      [
+        macro('tune', [[['osc', 'detune'], 100]]),
+        macro('both', [
+          [['osc', 'detune'], 50],
+          [['level', 'gain'], 0.5],
+        ]),
+      ],
+    );
+  const card = composite('card', [vco('inner')], [], [macro('pitch', [[['inner', 'tune'], 2]])]);
+  const into = (node, param) => ({ from: { node: 'lfo', output: 'out' }, to: { node, param } });
+  const patch = composite(
+    'patch',
+    [blockNode('lfo', 'oscillator'), card, vco('vco')],
+    [into('vco', 'tune'), into('vco', 'both'), into('card', 'pitch')],
+    [],
+  );
+  builder.build({ version: 1, node: patch }, { into: context.destination });
+  const [lfo, inner, osc] = made('oscillator');
+  const attenuators = outOf(context, lfo);
+  assert.deepEqual(
+    attenuators.map((gain) => gain.gain.value),
+    [100, 50, 0.5, 2],
+  );
+  const [tune, both, half, pitch] = attenuators;
+  const [level] = outOf(context, osc);
+  assert.deepEqual(
+    [outOf(context, tune), outOf(context, both), outOf(context, half)],
+    [[osc.detune], [osc.detune], [level.gain]],
+  );
+  const [deeper] = outOf(context, pitch);
+  assert.deepEqual([deeper.gain.value, outOf(context, deeper)], [100, [inner.detune]], 'through the inner tune');
+});
+
 test("what's built taken apart: its sources stopped, its nodes disconnected", () => {
   const { context, builder, made } = builderOn();
   const built = builder.build(chainOf(blockNode('osc', 'oscillator'), blockNode('level', 'gain')), {
