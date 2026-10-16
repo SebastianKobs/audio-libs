@@ -1,8 +1,8 @@
 // ---------- build/web-audio/blocks/makers: each block it can make, by its kind ----------
-// An envelope not yet: a placeholder for it, silent.
 import type { BlockKind } from '../../../plan/blocks/index.ts';
 import type { Maker } from '../making.ts';
 import { delay } from './delay.ts';
+import { envelope } from './envelope.ts';
 import { filter } from './filter.ts';
 import { gain } from './gain.ts';
 import { limiter } from './limiter.ts';
@@ -23,4 +23,5 @@ export const MAKERS: Readonly<Partial<Record<BlockKind, Maker>>> = Object.freeze
   noise,
   limiter,
   select,
+  envelope,
 });

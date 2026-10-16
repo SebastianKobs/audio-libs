@@ -63,3 +63,21 @@ export class ParamInUnits implements Automatable {
     return this;
   }
 }
+// A param that holds a number and tells its owner each change, at its time:
+//   - set as it's built: at no time;
+//   - a ramp or a glide: its value where it lands.
+export function toldParam(read: () => number, told: (value: number, at?: number) => void): Automatable {
+  return {
+    get value() {
+      return read();
+    },
+    set value(value: number) {
+      told(value);
+    },
+    setValueAtTime: (value, at) => told(value, at),
+    linearRampToValueAtTime: (value, at) => told(value, at),
+    exponentialRampToValueAtTime: (value, at) => told(value, at),
+    setTargetAtTime: (value, at) => told(value, at),
+    cancelScheduledValues: () => undefined,
+  };
+}

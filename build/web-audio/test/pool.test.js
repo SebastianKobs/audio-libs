@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
-import { BLOCKS } from '../../../plan/blocks/index.ts';
+import { blockNode, THEREMIN } from './blocks.js';
 import { SYNTH } from '../../../plan/format/test/plans.ts';
 
 // what's built of a plan on a stand-in context, from a source where it has an input; the context's nodes by their kind
@@ -21,17 +21,11 @@ function built(plan, now = 4) {
   const made = (kind) => context.rec.nodes.filter((node) => node.kind === kind && node !== source);
   return { context, source, what, made };
 }
-// a gain block, as a plan has it
-function gainBlock(name) {
-  const { params } = BLOCKS.gain;
-  return {
-    name,
-    kind: 'gain',
-    inputs: [{ name: 'in', channels: 2 }],
-    outputs: [{ name: 'out', channels: 2 }],
-    params: params.map((spec) => ({ spec, value: spec.default })),
-    settings: [],
-  };
+// an instrument with a block in its voice no builder makes
+function withTheremin(instrument) {
+  const [pool] = instrument.node.pools;
+  const voice = { ...pool.child, children: [...pool.child.children, THEREMIN] };
+  return { ...instrument, node: { ...instrument.node, pools: [{ ...pool, child: voice }] } };
 }
 // a desk: its own input into a pool of channels, each into its bus, the bus into the master, the master out
 const DESK = {
@@ -43,7 +37,7 @@ const DESK = {
     outputs: [{ name: 'out', channels: 2 }],
     params: [],
     settings: [],
-    children: [gainBlock('bus'), gainBlock('master')],
+    children: [blockNode('bus', 'gain', {}, {}, 2), blockNode('master', 'gain', {}, {}, 2)],
     wires: [
       { from: { node: 'bus', output: 'out' }, to: { node: 'master', input: 'in' } },
       { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
@@ -51,7 +45,7 @@ const DESK = {
     macros: [],
     pools: [
       {
-        child: gainBlock('replay'),
+        child: blockNode('replay', 'gain', {}, {}, 2),
         wires: [
           { from: { input: 'in' }, to: { node: 'replay', input: 'in' } },
           { from: { node: 'replay', output: 'out' }, to: { node: 'bus', input: 'in' } },
@@ -79,17 +73,22 @@ test("a voice added from an instrument's pool: built from its voice card, into t
     ],
     'voice 1 alone',
   );
-  assert.deepEqual(
-    what.placeholders,
-    [
-      ['voice', '1', 'envelope'],
-      ['voice', '2', 'envelope'],
-    ],
-    'its placeholders by their own addresses',
-  );
+  assert.equal(made('constant').length, 2, 'each its envelope, built');
 });
 
-test('a voice let go: its oscillator stopped, its nodes disconnected, its placeholders gone, its address no longer set; the other kept', () => {
+test("a voice's placeholders by its own address, gone as it's let go", () => {
+  const { what } = built(withTheremin(SYNTH));
+  what.add(['voice', '1']);
+  what.add(['voice', '2']);
+  assert.deepEqual(what.placeholders, [
+    ['voice', '1', 'theremin'],
+    ['voice', '2', 'theremin'],
+  ]);
+  what.letGo(['voice', '1']);
+  assert.deepEqual(what.placeholders, [['voice', '2', 'theremin']]);
+});
+
+test('a voice let go: its sources stopped, its nodes disconnected, its address no longer set; the other kept', () => {
   const { context, what, made } = built(SYNTH);
   what.add(['voice', '1']);
   what.add(['voice', '2']);
@@ -100,7 +99,11 @@ test('a voice let go: its oscillator stopped, its nodes disconnected, its placeh
   assert.equal(second.stops.length, 0);
   assert.ok(context.rec.disconnects.includes(first));
   assert.equal(context.rec.nodes.length, before, 'nothing made');
-  assert.deepEqual(what.placeholders, [['voice', '2', 'envelope']]);
+  assert.deepEqual(
+    made('constant').map((envelope) => envelope.stops.length),
+    [1, 0],
+    'its envelope',
+  );
   assert.throws(
     () => what.set(['voice', '1', 'oscillator', 'frequency'], 1),
     /voice\/1\/oscillator\/frequency: not built/,

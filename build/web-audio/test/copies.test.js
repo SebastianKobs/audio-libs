@@ -4,22 +4,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Copies } from '../index.ts';
-import { BLOCKS } from '../../../plan/blocks/index.ts';
+import { blockNode } from './blocks.js';
 
-// a block as a plan has it, its params and settings at their defaults
-function block(name, kind) {
-  const { inputs, outputs, params, settings } = BLOCKS[kind];
-  const jack = ({ name: jackName }) => ({ name: jackName, channels: 2 });
-  const at = (spec) => ({ spec, value: spec.default });
-  return {
-    name,
-    kind,
-    inputs: inputs.map(jack),
-    outputs: outputs.map(jack),
-    params: params.map(at),
-    settings: settings.map(at),
-  };
-}
 // a composite of its children, as a plan has it
 function composite(name, children) {
   return {
@@ -37,10 +23,13 @@ function composite(name, children) {
 }
 // a desk of three rooms, each a level and a reverb, and a channel with neither; an owner recording what it's told
 function deskOf() {
-  const room = (name) => composite(name, [composite('room', [block('level', 'gain'), block('reverb', 'reverb')])]);
+  const room = (name) =>
+    composite(name, [
+      composite('room', [blockNode('level', 'gain', {}, {}, 2), blockNode('reverb', 'reverb', {}, {}, 2)]),
+    ]);
   const plan = {
     version: 1,
-    node: composite('', [room('reverb'), room('far reverb'), room('hall'), block('sings', 'gain')]),
+    node: composite('', [room('reverb'), room('far reverb'), room('hall'), blockNode('sings', 'gain', {}, {}, 2)]),
   };
   const told = [];
   const owner = {

@@ -1,5 +1,6 @@
 // ---------- libs/web-audio-fx/timing: a port set by a timing, on a built module or a chain of them ----------
-import { SMOOTHING, type Operation } from '../audio-plan/index.ts';
+import type { Operation } from '../audio-plan/index.ts';
+import { SMOOTHING } from '../automation/index.ts';
 import type { Plan } from '../synth/index.ts';
 
 // When a value lands on a port:

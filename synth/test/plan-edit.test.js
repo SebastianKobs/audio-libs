@@ -5,7 +5,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fadeIn, fadeOut, plan, adsr } from '../index.ts';
-import { SMOOTHING, followEdit } from '../../audio-plan/index.ts';
+import { followEdit } from '../../audio-plan/index.ts';
+import { SMOOTHING } from '../../automation/index.ts';
 import { levelAt } from '../../automation/index.ts';
 
 // a small voice: a triangle into a lowpass, its VCA moved by an envelope that rises over a second, falls to half over half a second and

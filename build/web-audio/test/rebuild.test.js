@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { CROSSFADE, RING_OUT, WebAudioBuilder } from '../index.ts';
-import { BLOCKS } from '../../../plan/blocks/index.ts';
+import { blockNode } from './blocks.js';
 import { SYNTH, UTILITY } from '../../../plan/format/test/plans.ts';
 
 // what's built of a plan on a stand-in context at a time, fed from a source; the context's nodes by their kind
@@ -30,10 +30,7 @@ const TONE = {
     outputs: [{ name: 'out', channels: 1 }],
     params: [],
     settings: [],
-    children: [
-      { ...block('oscillator'), name: 'osc' },
-      { ...block('gain'), name: 'level' },
-    ],
+    children: [blockNode('osc', 'oscillator'), blockNode('level', 'gain')],
     wires: [
       { from: { node: 'osc', output: 'out' }, to: { node: 'level', input: 'in' } },
       { from: { node: 'level', output: 'out' }, to: { output: 'out' } },
@@ -42,19 +39,6 @@ const TONE = {
     pools: [],
   },
 };
-// a block as a plan has it, at its declared defaults
-function block(kind) {
-  const { inputs, outputs, params, settings } = BLOCKS[kind];
-  const jack = ({ name, channels = 1 }) => ({ name, channels });
-  return {
-    name: kind,
-    kind,
-    inputs: inputs.map(jack),
-    outputs: outputs.map(jack),
-    params: params.map((spec) => ({ spec, value: spec.default })),
-    settings: settings.map((spec) => ({ spec, value: spec.default })),
-  };
-}
 
 test('what only processes sound built again: its input moved over to the new, the old left to ring out, unfaded, let go once it has', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });

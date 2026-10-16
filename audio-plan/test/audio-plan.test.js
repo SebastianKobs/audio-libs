@@ -6,7 +6,8 @@
 //   - a plan faded out and in through one of its gains.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SMOOTHING, fadeInThrough, fadeOutThrough, followEdit, glideEdit, lastStop } from '../index.ts';
+import { fadeInThrough, fadeOutThrough, followEdit, glideEdit, lastStop } from '../index.ts';
+import { SMOOTHING } from '../../automation/index.ts';
 import { near } from '../../util/test/near.js';
 
 // a sound: an oscillator from 0, stopped at 4, into a gain at 0.5, out

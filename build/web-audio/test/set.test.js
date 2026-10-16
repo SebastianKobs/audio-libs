@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
-import { BLOCKS } from '../../../plan/blocks/index.ts';
+import { oneBlockPlan, THEREMIN } from './blocks.js';
 import { UTILITY } from '../../../plan/format/test/plans.ts';
 import { near } from '../../../util/test/near.js';
 
@@ -21,22 +21,6 @@ function built(plan, now = 4) {
   });
   const made = (kind) => context.rec.nodes.filter((node) => node.kind === kind);
   return { what, made };
-}
-// a plan of one block, as a plan has it, at its declared defaults but the values and settings given
-function oneBlock(kind, values = {}, settings = {}) {
-  const { inputs, outputs, params, settings: declared } = BLOCKS[kind];
-  const jack = ({ name, channels = 1 }) => ({ name, channels });
-  return {
-    version: 1,
-    node: {
-      name: kind,
-      kind,
-      inputs: inputs.map(jack),
-      outputs: outputs.map(jack),
-      params: params.map((spec) => ({ spec, value: values[spec.name] ?? spec.default })),
-      settings: declared.map((spec) => ({ spec, value: settings[spec.name] ?? spec.default })),
-    },
-  };
 }
 const last = (param) => param.events.at(-1);
 // the Utility, its level a macro twice its gain
@@ -64,7 +48,7 @@ test('a param set by its address: now, at a time, or gliding there from now; a m
 });
 
 test("a filter's frequency and resonance set on every stage, its resonance in Web Audio's dB", () => {
-  const { what, made } = built(oneBlock('filter', {}, { slope: '24' }));
+  const { what, made } = built(oneBlockPlan('filter', {}, { slope: '24' }));
   what.set(['frequency'], 900);
   assert.deepEqual(
     made('biquad').map((biquad) => last(biquad.frequency)),
@@ -80,7 +64,7 @@ test("a filter's frequency and resonance set on every stage, its resonance in We
 });
 
 test("a delay's time: its note while synced, its ms while free, its switch between them; a new tempo followed while synced, gliding", () => {
-  const { what, made } = built(oneBlock('delay'));
+  const { what, made } = built(oneBlockPlan('delay'));
   const [delay] = made('delay');
   what.set(['note'], '1/4');
   assert.deepEqual(last(delay.delayTime), ['set', BEAT, 4], 'a quarter at the beat');
@@ -149,7 +133,7 @@ test("an address with no param refused; a setting refused, a preset's; a placeho
   const { what } = built(UTILITY);
   assert.throws(() => what.set(['gain', 'cutoff'], 1), /gain\/cutoff: no param/);
   assert.throws(() => what.set(['pan', 'law'], 'pan pot'), /pan\/law: a setting, sent with a preset/);
-  const env = built(oneBlock('envelope', { release: 0.3 }));
-  assert.deepEqual(env.what.placeholders, [[]]);
-  env.what.set(['attack'], 0.2); // nothing built to move
+  const theremin = built({ version: 1, node: THEREMIN });
+  assert.deepEqual(theremin.what.placeholders, [[]]);
+  theremin.what.set(['pitch'], 0.2); // nothing built to move
 });

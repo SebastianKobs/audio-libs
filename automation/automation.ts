@@ -25,6 +25,33 @@ export function eventTime(event: Automation): number {
   }
   return event[2];
 }
+// automation later by a time: each event but a value as the node is made, a cancel too
+export function shiftedBy(automation: readonly Automation[], seconds: number): Automation[] {
+  return automation.map((event): Automation => {
+    if (event[0] === 'value') {
+      return event;
+    }
+    if (event[0] === 'cancel') {
+      return ['cancel', event[1] + seconds];
+    }
+    const [kind, value, at, ...rest] = event;
+    return [kind, value, at + seconds, ...rest] as Automation;
+  });
+}
+// Automation as Web Audio holds it, told more events:
+//   - a cancel dropping what was planned from its time, as cancelScheduledValues() does;
+//   - the rest in time order, one told later at the same time after.
+export function scheduled(automation: readonly Automation[], told: readonly Automation[]): Automation[] {
+  let events = [...automation];
+  for (const event of told) {
+    if (event[0] === 'cancel') {
+      events = events.filter((kept) => eventTime(kept) < event[1]);
+    } else {
+      events = [...events, event].sort((one, other) => eventTime(one) - eventTime(other) || 0); // stable
+    }
+  }
+  return events;
+}
 // a param restarted at a time: what was planned from then cancelled, set there to a level
 export function restartAt(level: number, at: number): Automation[] {
   return [

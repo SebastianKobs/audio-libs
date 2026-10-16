@@ -5,7 +5,7 @@ import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { FILTER, FxChain, FxModules, GAIN } from '../index.ts';
-import { SMOOTHING } from '../../audio-plan/index.ts';
+import { SMOOTHING } from '../../automation/index.ts';
 
 test('FX modules as they play: copies of those handed in, by name; an edit plays on every chain that plays it, glided there, rebuilt only for a change of structure, a chain playing another left be; a reset brings back the one it started from', () => {
   mock.timers.enable({ apis: ['setTimeout'] }); // an old chain rings out before it's let go

@@ -7,4 +7,4 @@
 //     gains, as a rebuild crossfades.
 export type { AudioPlan, BufferSpec, Edge, NodeKind, Operation, PlanNode } from './plan.ts';
 export { lastStop } from './plan.ts';
-export { SMOOTHING, fadeInThrough, fadeOutThrough, followEdit, glideEdit } from './edit.ts';
+export { fadeInThrough, fadeOutThrough, followEdit, glideEdit } from './edit.ts';

@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { engineOn } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES, DeviceParams, FILTER, FxChain, UTILITY } from '../index.ts';
 import { dBOf, timeSpecs } from '../../params/index.ts';
-import { SMOOTHING } from '../../audio-plan/index.ts';
+import { SMOOTHING } from '../../automation/index.ts';
 
 let time = 0;
 const beat = 0.5;

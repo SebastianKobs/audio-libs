@@ -1,11 +1,17 @@
 // ---------- plan/blocks/envelope: an envelope generator ----------
 // As a modular's: no input, its signal out, wired into the params it moves.
 // Its gate, opened and closed by the note; its stages' times; its sustain; its amount.
-// Its curve a setting: each stage to its target, as an analog's, or in a line.
+// Its curve a setting:
+//   - exponential: up in a line, down straight in dB, as a level falls;
+//   - target: each stage approaching its point by its time, as an analog's;
+//   - linear: every stage in a line, as a pitch in semitones moves.
 // Its mode a setting, as Ableton's: the gate's, released as the note ends; or a trigger's,
 // running on past the note-off, a struck sound ringing out.
 import { SWITCH, type ParamSpecs } from '../../params/index.ts';
 import type { Block } from './block.ts';
+
+// an envelope's curve, one of its setting's choices
+export type EnvelopeCurve = (typeof CURVES)[number];
 
 // Its stages' knobs, by their names; the synth's envelopes too.
 //   amount: in its target's units, so a wide range.
@@ -24,6 +30,8 @@ export const ENVELOPE_SPECS = {
 const { amount, delay, attack, hold, decay, sustain, release } = ENVELOPE_SPECS;
 // an envelope's release to start, its mode the gate's: short, no click
 const RELEASE = 0.1;
+// its curve's choices, the first to start: most envelopes move a level
+const CURVES = ['exponential', 'target', 'linear'] as const;
 
 export default {
   kind: 'envelope',
@@ -40,7 +48,7 @@ export default {
     amount,
   ],
   settings: [
-    { name: 'curve', choices: ['target', 'linear'], default: 'target' },
+    { name: 'curve', choices: CURVES, default: CURVES[0] },
     { name: 'mode', choices: ['gate', 'trigger'], default: 'gate' },
   ],
 } as const satisfies Block;

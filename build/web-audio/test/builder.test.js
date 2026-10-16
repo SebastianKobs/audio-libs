@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
-import { BLOCKS } from '../../../plan/blocks/index.ts';
+import { blockNode, THEREMIN } from './blocks.js';
 import { DESK, UTILITY } from '../../../plan/format/test/plans.ts';
 import { near } from '../../../util/test/near.js';
 
@@ -19,19 +19,6 @@ function builderOn() {
   const builder = new WebAudioBuilder({ context, beat: () => BEAT, random: () => 0.5 });
   const made = (kind) => context.rec.nodes.filter((node) => node.kind === kind);
   return { context, builder, made };
-}
-// a block as a plan has it, at its declared defaults but the values and settings given
-function block(name, kind, values = {}, settings = {}) {
-  const { inputs, outputs, params, settings: declared } = BLOCKS[kind];
-  const jack = ({ name: jackName, channels = 1 }) => ({ name: jackName, channels });
-  return {
-    name,
-    kind,
-    inputs: inputs.map(jack),
-    outputs: outputs.map(jack),
-    params: params.map((spec) => ({ spec, value: values[spec.name] ?? spec.default })),
-    settings: declared.map((spec) => ({ spec, value: settings[spec.name] ?? spec.default })),
-  };
 }
 // a plan of its children wired in a row, from the first to the last, the last into its output
 function chainOf(...children) {
@@ -78,13 +65,13 @@ test('each block made by its kind, at its values and settings: an oscillator and
   const { context, builder, made } = builderOn();
   builder.build(
     chainOf(
-      block('osc', 'oscillator', { frequency: 220 }, { wave: 'triangle' }),
-      block('level', 'gain', { gain: 0.5 }),
-      block('filter', 'filter', { frequency: 800, resonance: Math.SQRT1_2 }, { type: 'highpass', slope: '24' }),
-      block('pan', 'pan', { pan: -0.5 }, { law: 'pan pot' }),
-      block('delay', 'delay', {}, { longest: 2 }),
-      block('room', 'reverb', {}, { length: 1.5 }),
-      block('limit', 'limiter', { gain: 6, ceiling: -1, release: 0.3 }),
+      blockNode('osc', 'oscillator', { frequency: 220 }, { wave: 'triangle' }),
+      blockNode('level', 'gain', { gain: 0.5 }),
+      blockNode('filter', 'filter', { frequency: 800, resonance: Math.SQRT1_2 }, { type: 'highpass', slope: '24' }),
+      blockNode('pan', 'pan', { pan: -0.5 }, { law: 'pan pot' }),
+      blockNode('delay', 'delay', {}, { longest: 2 }),
+      blockNode('room', 'reverb', {}, { length: 1.5 }),
+      blockNode('limit', 'limiter', { gain: 6, ceiling: -1, release: 0.3 }),
     ),
     { into: context.destination },
   );
@@ -121,8 +108,11 @@ test('each block made by its kind, at its values and settings: an oscillator and
 
 test("a signal wired into a delay's time, by its ms: into its line's own time, moving it in seconds, as Web Audio's does; into its note, refused", () => {
   const wobbled = (param) => {
-    const plan = chainOf(block('line', 'delay'));
-    plan.node.children.push(block('wobble', 'oscillator', { frequency: 0.5 }), block('depth', 'gain', { gain: 0.004 }));
+    const plan = chainOf(blockNode('line', 'delay'));
+    plan.node.children.push(
+      blockNode('wobble', 'oscillator', { frequency: 0.5 }),
+      blockNode('depth', 'gain', { gain: 0.004 }),
+    );
     plan.node.wires.push(
       { from: { node: 'wobble', output: 'out' }, to: { node: 'depth', input: 'in' } },
       { from: { node: 'depth', output: 'out' }, to: { node: 'line', param } },
@@ -142,8 +132,8 @@ test("a signal wired into a delay's time, by its ms: into its line's own time, m
 
 // a select between two gains: each wired into one of its inputs, the select into the plan's output
 function selecting(input) {
-  const plan = chainOf(block('pick', 'select', {}, { input }));
-  plan.node.children.unshift(block('first', 'gain'), block('second', 'gain'));
+  const plan = chainOf(blockNode('pick', 'select', {}, { input }));
+  plan.node.children.unshift(blockNode('first', 'gain'), blockNode('second', 'gain'));
   plan.node.wires.push(
     { from: { node: 'first', output: 'out' }, to: { node: 'pick', input: 'a' } },
     { from: { node: 'second', output: 'out' }, to: { node: 'pick', input: 'b' } },
@@ -168,7 +158,7 @@ test("a select: the input its setting names passed on, the other taken in nowher
 
 test('a noise, looping, started, its buffer by its colour; a source with nothing wired into it', () => {
   const { context, builder, made } = builderOn();
-  builder.build(chainOf(block('hiss', 'noise', {}, { colour: 'breath' })), { into: context.destination });
+  builder.build(chainOf(blockNode('hiss', 'noise', {}, { colour: 'breath' })), { into: context.destination });
   const [hiss] = made('buffer');
   assert.deepEqual([hiss.loop, hiss.buffer.duration, hiss.starts.length], [true, 0.2, 1]);
   assert.deepEqual(into(context, context.destination), [hiss]);
@@ -176,9 +166,8 @@ test('a noise, looping, started, its buffer by its colour; a source with nothing
 
 test("a placeholder for a block it can't make, said by its address: its sound passed straight through, a source silent", () => {
   const { context, builder } = builderOn();
-  const env = block('env', 'envelope', { release: 0.3 });
-  const built = builder.build(chainOf(block('osc', 'oscillator'), env), { into: context.destination });
-  assert.deepEqual(built.placeholders, [['env']]);
+  const built = builder.build(chainOf(blockNode('osc', 'oscillator'), THEREMIN), { into: context.destination });
+  assert.deepEqual(built.placeholders, [['theremin']]);
   const desk = builder.build(DESK, { into: context.destination });
   assert.deepEqual(
     desk.placeholders,
@@ -192,7 +181,7 @@ test("a placeholder for a block it can't make, said by its address: its sound pa
 
 test("what's built taken apart: its sources stopped, its nodes disconnected", () => {
   const { context, builder, made } = builderOn();
-  const built = builder.build(chainOf(block('osc', 'oscillator'), block('level', 'gain')), {
+  const built = builder.build(chainOf(blockNode('osc', 'oscillator'), blockNode('level', 'gain')), {
     into: context.destination,
   });
   built.dispose();
@@ -202,7 +191,9 @@ test("what's built taken apart: its sources stopped, its nodes disconnected", ()
 
 test("a meter on a node's main output by its address, made as it's first read; a block's points and readings by name, the limiter's in and its reduction; a node not built, or a point it hasn't, refused", () => {
   const { context, builder, made } = builderOn();
-  const what = builder.build(chainOf(block('level', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const what = builder.build(chainOf(blockNode('level', 'gain'), blockNode('limit', 'limiter')), {
+    into: context.destination,
+  });
   const [level] = made('gain');
   assert.equal(made('analyser').length, 0, 'no meter until one is read');
   assert.equal(what.peak(['level']), 0, 'silence');
@@ -227,7 +218,9 @@ test("a meter on a node's main output by its address, made as it's first read; a
 
 test("a sound fed into a node's input by its address, as a phrase into a bus; a node not built refused", () => {
   const { context, builder, made } = builderOn();
-  const what = builder.build(chainOf(block('bus', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const what = builder.build(chainOf(blockNode('bus', 'gain'), blockNode('limit', 'limiter')), {
+    into: context.destination,
+  });
   const [bus] = made('gain');
   const phrase = context.createGain();
   what.feed(['bus'], phrase);
@@ -240,7 +233,9 @@ test("a sound fed into a node's input by its address, as a phrase into a bus; a 
 
 test("a way of its own into a node's input by its address: a gain at 1, made by the builder, fed into it", () => {
   const { context, builder, made } = builderOn();
-  const what = builder.build(chainOf(block('bus', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const what = builder.build(chainOf(blockNode('bus', 'gain'), blockNode('limit', 'limiter')), {
+    into: context.destination,
+  });
   const [bus] = made('gain');
   const way = what.wayInto(['bus']);
   assert.equal(way.kind, 'gain');
@@ -250,7 +245,9 @@ test("a way of its own into a node's input by its address: a gain at 1, made by 
 
 test("what a node is built as, by its address, for who names it or listens to it: its jacks' nodes; every node built under it", () => {
   const { context, builder, made } = builderOn();
-  const what = builder.build(chainOf(block('bus', 'gain'), block('limit', 'limiter')), { into: context.destination });
+  const what = builder.build(chainOf(blockNode('bus', 'gain'), blockNode('limit', 'limiter')), {
+    into: context.destination,
+  });
   const [bus] = made('gain');
   assert.deepEqual(what.jacksOf(['bus']), { inputs: { in: [bus] }, outputs: { out: [bus] } }, "a block's: its node's");
   const limiter = what.jacksOf(['limit']);

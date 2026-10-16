@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { engineOn, into } from '../../web-audio-engine/test/audio-stand-in.js';
 import { DEVICES, FILTER, FxChain, GAIN, PAN_POT, RING_OUT, UTILITY } from '../index.ts';
 import { DELAY_TIME, NO_DRAWS, plan } from '../../synth/index.ts';
-import { SMOOTHING } from '../../audio-plan/index.ts';
+import { SMOOTHING } from '../../automation/index.ts';
 import { dBOf, isSwitch, NOTE_VALUES } from '../../params/index.ts';
 
 let time = 0;

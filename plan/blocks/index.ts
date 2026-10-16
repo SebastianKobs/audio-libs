@@ -11,10 +11,12 @@
 export { STOP, type Block, type Jack } from './block.ts';
 export { BLOCKS, type BlockKind } from './blocks.ts';
 export { DELAY_TIME } from './delay.ts';
-export { ENVELOPE_SPECS } from './envelope.ts';
+export { ENVELOPE_SPECS, type EnvelopeCurve } from './envelope.ts';
 export {
+  envelopeCurve,
   envelopeRelease,
   envelopeStages,
+  envelopeTarget,
   type EnvelopeStage,
   type EnvelopeTarget,
   type EnvelopeTimes,

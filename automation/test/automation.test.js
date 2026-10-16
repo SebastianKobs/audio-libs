@@ -2,10 +2,25 @@
 //   - a param's level as Web Audio plays its automation, alone or at rising times in one walk;
 //   - its level coming up to a time, a jump there not yet made;
 //   - an event's time, a param restarted;
-//   - a value at a time, when a value lands, and changes as automation.
+//   - a value at a time, when a value lands, and changes as automation;
+//   - automation later by a time; one continued as another from a time, from where it plays;
+//   - automation as Web Audio holds it, told more.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Levels, automationOf, eventOf, eventTime, levelAt, restartAt, timedAt, timedValue } from '../index.ts';
+import {
+  Levels,
+  SMOOTHING,
+  automationOf,
+  continuedAs,
+  eventOf,
+  eventTime,
+  levelAt,
+  restartAt,
+  scheduled,
+  shiftedBy,
+  timedAt,
+  timedValue,
+} from '../index.ts';
 import { near } from '../../util/test/near.js';
 
 // every kind of event in turn: a value as the node is made, a jump, two ramps, a target, a jump
@@ -129,4 +144,98 @@ test('changes in time order as automation: the first set at its time, nothing be
     ['target', 1, 3, 0.2],
   ]);
   assert.deepEqual(automationOf([]), [], 'none: nothing told');
+});
+
+test('automation later by a time: each event but a value as the node is made, a cancel too', () => {
+  assert.deepEqual(shiftedBy(EVERY_KIND, 10), [
+    ['value', 0.2],
+    ['set', 0, 11],
+    ['linear', 1, 12],
+    ['exp', 4, 13],
+    ['target', 0, 14, 0.5],
+    ['set', 2, 16],
+  ]);
+  assert.deepEqual(shiftedBy([['cancel', 1]], 2), [['cancel', 3]]);
+});
+
+test('automation continued as another from a time, from where it plays: a ramp coming taken on from there; a target approached from there; a value held glided to by the smoothing', () => {
+  const rising = [
+    ['set', 0, 0],
+    ['linear', 1, 2],
+  ];
+  assert.deepEqual(
+    continuedAs(
+      rising,
+      [
+        ['set', 0, 0],
+        ['linear', 2, 4],
+      ],
+      1,
+    ),
+    [
+      ['cancel', 1],
+      ['set', 0.5, 1],
+      ['linear', 2, 4],
+    ],
+  );
+  const held = [['set', 1, 0]];
+  assert.deepEqual(
+    continuedAs(
+      held,
+      [
+        ['set', 1, 0],
+        ['target', 0, 0.5, 0.2],
+      ],
+      1,
+    ),
+    [
+      ['cancel', 1],
+      ['set', 1, 1],
+      ['target', 0, 1, 0.2],
+    ],
+  );
+  assert.deepEqual(continuedAs(held, [['set', 0.5, 0]], 1), [
+    ['cancel', 1],
+    ['set', 1, 1],
+    ['target', 0.5, 1, SMOOTHING],
+  ]);
+  assert.deepEqual(
+    continuedAs(held, [['set', 0.5, 0]], 1, 0.2).at(-1),
+    ['target', 0.5, 1, 0.2],
+    'a smoothing asked for',
+  );
+  assert.equal(SMOOTHING, 0.05, 's: as a plugin smooths a knob against zipper noise');
+});
+
+test('automation as Web Audio holds it, told more: a cancel dropping what was planned from its time, the rest in time order, one told later at the same time after', () => {
+  const rising = [
+    ['set', 0, 0],
+    ['linear', 1, 2],
+  ];
+  assert.deepEqual(
+    scheduled(rising, [
+      ['cancel', 1],
+      ['set', 0.5, 1],
+      ['linear', 0, 3],
+    ]),
+    [
+      ['set', 0, 0],
+      ['set', 0.5, 1],
+      ['linear', 0, 3],
+    ],
+  );
+  assert.deepEqual(
+    scheduled(
+      [['set', 1, 2]],
+      [
+        ['set', 0, 1],
+        ['set', 2, 2],
+      ],
+    ),
+    [
+      ['set', 0, 1],
+      ['set', 1, 2],
+      ['set', 2, 2],
+    ],
+  );
 });

@@ -8,12 +8,21 @@
 // old graph faded out through one of its gains (fadeOutThrough()) as a new one, its plan faded in through its own (fadeInThrough()),
 // comes in (G0.2b); a synth's voice's through its out (libs/synth/fades.ts)
 // A lasting graph, an FX module, follows an edit with no account of what it was told: glideEdit()
-import { eventTime, levelAt, restartAt, type Automation } from '../automation/index.ts';
+import {
+  SMOOTHING,
+  approachAt,
+  continuedAs,
+  eventsAfter,
+  eventTime,
+  levelAt,
+  onTheWay,
+  restartAt,
+  scheduled,
+  type Automation,
+} from '../automation/index.ts';
 import { lastStop, type AudioPlan, type Operation, type PlanNode } from './plan.ts';
 import type { Seconds } from '../clock/index.ts';
 
-// s: the time constant a held value glides to a new one by, as a plugin smooths a knob against zipper noise: an edit's, a control's set
-export const SMOOTHING = 0.05;
 const SAME = 1e-9; // a level this close to another is the same one
 
 // the operations that move a sounding note from its plan before an edit to its plan after it, from at; none where the two differ in
@@ -98,7 +107,7 @@ export function fadeInThrough<Planned extends AudioPlan>(
     ...automation.filter((event) => eventTime(event) <= at),
     ['set', 0, at],
     ['linear', levelAt(automation, at + over), at + over],
-    ...later(automation, at + over),
+    ...eventsAfter(automation, at + over),
   ];
   return {
     ...plan,
@@ -135,21 +144,16 @@ function paramOps(
     if (sameFrom(playing, wanted, at)) {
       return [];
     }
-    return [{ id: node.id, param, events: continued(playing, wanted, at, smoothing) }];
+    return [{ id: node.id, param, events: continuedAs(playing, wanted, at, smoothing) }];
   });
 }
 // a param's automation as it plays: its plan's, with what the note was told since, each operation's events in turn, a cancel dropping
 // what was planned from its time, as Web Audio's cancelScheduledValues(), the rest in time order, as Web Audio keeps them
 function played(automation: Automation[], told: readonly Operation[]): Automation[] {
-  let events = [...automation];
-  for (const event of told.flatMap((op) => op.events ?? [])) {
-    if (event[0] === 'cancel') {
-      events = events.filter((kept) => eventTime(kept) < event[1]);
-    } else {
-      events = [...events, event].sort((one, other) => eventTime(one) - eventTime(other) || 0); // stable: one told later, after
-    }
-  }
-  return events;
+  return scheduled(
+    automation,
+    told.flatMap((op) => op.events ?? []),
+  );
 }
 // whether a lasting graph's sources stop alike before an edit and after it
 function sameStops(before: AudioPlan, after: AudioPlan): boolean {
@@ -161,7 +165,11 @@ function glidedParams(node: PlanNode, edited: PlanNode, at: Seconds, smoothing: 
   const changed = Object.keys(node.params).filter(
     (param) => !sameFrom(node.params[param]!, edited.params[param]!, at), // the same structure: the same params
   );
-  if (changed.some((param) => later(node.params[param]!, at).length || later(edited.params[param]!, at).length)) {
+  if (
+    changed.some(
+      (param) => eventsAfter(node.params[param]!, at).length || eventsAfter(edited.params[param]!, at).length,
+    )
+  ) {
     return null;
   }
   return changed.map((param) => ({ id: node.id, param, events: onTheWay(edited.params[param]!, at, [], smoothing) }));
@@ -171,36 +179,8 @@ function sameFrom(playing: Automation[], wanted: Automation[], at: Seconds): boo
   return (
     Math.abs(levelAt(playing, at) - levelAt(wanted, at)) < SAME
     && JSON.stringify(approachAt(playing, at)) === JSON.stringify(approachAt(wanted, at))
-    && JSON.stringify(later(playing, at)) === JSON.stringify(later(wanted, at))
+    && JSON.stringify(eventsAfter(playing, at)) === JSON.stringify(eventsAfter(wanted, at))
   );
-}
-// the wanted automation from at, from where the param is as it plays: what was planned from then cancelled, set where it is, on its way
-// to where the wanted one is, and the wanted events after it
-function continued(playing: Automation[], wanted: Automation[], at: Seconds, smoothing: Seconds): Automation[] {
-  const coming = later(wanted, at);
-  return [...restartAt(levelAt(playing, at), at), ...onTheWay(wanted, at, coming, smoothing), ...coming];
-}
-// how it goes on from where it is: a ramp coming takes it on to its end by itself; a target the wanted automation approaches,
-// approached from there; else the value it holds, glided to by the smoothing
-function onTheWay(wanted: Automation[], at: Seconds, coming: Automation[], smoothing: Seconds): Automation[] {
-  const next = coming[0];
-  if (next && (next[0] === 'linear' || next[0] === 'exp')) {
-    return [];
-  }
-  const approach = approachAt(wanted, at);
-  if (approach) {
-    return [['target', approach.value, at, approach.tc]];
-  }
-  return [['target', levelAt(wanted, at), at, smoothing]];
-}
-// the target an automation approaches at a time: its last event by then, if that's a target
-function approachAt(automation: Automation[], at: Seconds): { value: number; tc: number } | null {
-  const last = automation.filter((event) => eventTime(event) <= at).at(-1);
-  return last?.[0] === 'target' ? { value: last[1], tc: last[3] } : null;
-}
-// its events after a time
-function later(automation: Automation[], at: Seconds): Automation[] {
-  return automation.filter((event) => eventTime(event) > at);
 }
 // a source's stop moved where the edited plan has it, the last told it since kept on both; none for a node that's no source, one that
 // has stopped by at, or one that stops as it did; and none at all where it would never stop now, a stop not taken back: a rebuild's
