@@ -22,11 +22,9 @@ const play = (owner, region, notes, more = {}) => ({
 });
 const spans = (regions) => regions.map((region) => [region.owner, region.from, region.to, region.notes.length]);
 
-test("a replay, one play with all its notes: one region, from its first note to the end of its last, with its track, its track's name, until, sends and seed", () => {
+test("a replay, one play with all its notes: one region, from its first note to the end of its last, with its track, its track's name and until; what it drew its track's controllers, none of the region's (LAY14b)", () => {
   const recorder = new Recorder();
-  recorder.heard(
-    play(flower, 1, [1, 1.5, 2], { track: 0, trackName: 'replay tap 1', until: 4, sends: { dry: 0.5 }, seed: 7 }),
-  );
+  recorder.heard(play(flower, 1, [1, 1.5, 2], { track: 0, trackName: 'replay tap 1', until: 4 }));
   const [region] = recorder.regions(5);
   assert.deepEqual(
     { ...region, notes: region.notes.length },
@@ -39,8 +37,6 @@ test("a replay, one play with all its notes: one region, from its first note to 
       track: 0,
       trackName: 'replay tap 1',
       until: 4,
-      sends: { dry: 0.5 },
-      seed: 7,
       notes: 3,
       from: 1,
       to: 2.2,

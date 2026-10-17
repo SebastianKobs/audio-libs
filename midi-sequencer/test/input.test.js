@@ -131,13 +131,12 @@ test("the input: a track's controller with nothing to name its kind, named by it
   assert.equal(plays[0].owner, null);
 });
 
-test("the input: a replay's play into the stream with what the stream carries of it beside its notes, its replay track, until when, its draws, as before G0", () => {
+test("the input: a replay's play into the stream with what the stream carries of it beside its notes, its replay track and until when", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
   const flower = { kind: 'tap' };
-  const sends = { dry: 0.8, reverb: 0.2, delay: null };
-  sequencer.send({ track: 'replay tap 2', clip: flower, play: { track: 1, until: 9, sends } }, [
+  sequencer.send({ track: 'replay tap 2', clip: flower, play: { track: 1, until: 9 } }, [
     noteOn(0, 5),
     noteOff(0, 5.25),
   ]);
@@ -153,7 +152,6 @@ test("the input: a replay's play into the stream with what the stream carries of
       track: 1,
       trackName: 'replay tap 2',
       until: 9,
-      sends,
     },
   );
 });

@@ -37,8 +37,7 @@ export interface RecordedNote extends PlayedNote {
   held?: true;
 }
 // a region as recorded: the element it's of and its clip, its kind and role, whether you played it, its replay track and until when it
-// holds it, the sends it drew and the seed its draws came from, as its first play had them; its notes, and from when to when, an open
-// one's end never
+// holds it, as its first play had them; its notes, and from when to when, an open one's end never
 export interface Region {
   owner: unknown;
   clip: unknown;
@@ -48,8 +47,6 @@ export interface Region {
   track: number | null;
   trackName: string | undefined;
   until: Seconds | undefined;
-  sends: unknown;
-  seed: number | undefined;
   notes: RecordedNote[];
   from: Seconds;
   to: Seconds;
@@ -208,7 +205,7 @@ function recorded({ glides, ...note }: PlayedNote): RecordedNote {
 }
 // a kept region as it's handed out: its first play's, its notes, from its first to the end of its last
 function regionOf(kept: Kept): Region {
-  const { owner, clip, kind, role, live, track, trackName, until, sends, seed } = kept.first;
+  const { owner, clip, kind, role, live, track, trackName, until } = kept.first;
   return {
     owner,
     clip: clip ?? owner,
@@ -218,8 +215,6 @@ function regionOf(kept: Kept): Region {
     track: track ?? null,
     trackName,
     until,
-    sends,
-    seed,
     notes: kept.notes,
     from: Math.min(...kept.notes.map((note) => note.t)),
     to: Math.max(...kept.notes.map((note) => endOf(note))),

@@ -3,7 +3,7 @@ import type { Seconds } from '../clock/index.ts';
 import type { Controller, NoteOff, PerNoteController, PerNoteValues } from '../midi/index.ts';
 
 // a play, as the stream carries it: whose it is, its kind and role, whether it's played as you play it, its notes at clock times; the
-// replay track it's on and until when, the clip it's of, the sends it drew, and the seed its draws came from (G0g); the region it's of, a
+// replay track it's on and until when, the clip it's of (what a replay drew its track's controllers since LAY14b); the region it's of, a
 // number its source hands out (G1a): a replay's its own, your notes their gesture's, a loop's its launch's, a held part's its key's, so
 // the plays of one region are told apart from another's of the same element; the ends and glides of notes sent before it, a held note's,
 // by the note's index, as MIDI pairs a note off with its note on (G2a), a play with no notes of its own where nothing else came with them;
@@ -19,8 +19,6 @@ export interface Play {
   trackName?: string; // the track it was sent to, by name, as its sender named it
   until?: number;
   clip?: unknown;
-  sends?: unknown;
-  seed?: number;
   region?: number;
   ends?: NoteOff[];
   changes?: PerNoteController[];
