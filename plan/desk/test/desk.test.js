@@ -8,18 +8,10 @@
 //   - a controller on a strip as its param's address on the desk: the strip's address in front.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DESK_FORMS, channelOf, controlAddress, deskOf, deskTemplates, SEND, silenced } from '../index.ts';
+import { channelOf, controlAddress, deskOf, deskTemplates, SEND, silenced } from '../index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../../params/index.ts';
-import { Planner } from '../../planner/index.ts';
-import { EFFECT_FORM, EFFECT_TEMPLATES } from '../../effects/index.ts';
 import { copyOf, nodeAt, paramAt, settingAt } from '../../format/index.ts';
-import { PRESETS, REPLAY, STUDIO, TOWER } from './desks.js';
-
-// a desk written short, planned with the effects, the forms and the presets
-function planned(desk = STUDIO) {
-  const templates = [...EFFECT_TEMPLATES, ...deskTemplates(desk, [REPLAY, TOWER])];
-  return new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], PRESETS).plan(desk.kind);
-}
+import { planned, STUDIO, TOWER } from './desks.js';
 // a param or a macro by its spec and value alone
 function specAndValue({ spec, value }) {
   return { spec, value };

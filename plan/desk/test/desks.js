@@ -5,6 +5,10 @@
 //   STUDIO: today's desk, small: the reverb, the garden sings bus, a delay into it, your bus, your taps' channel
 //     into it, the master with its limiter; a pool of your taps' tracks, a pool of towers' replays.
 //   PRESETS: a theme's, the delay's echo.
+// planned(): a desk written short, STUDIO unless another, planned with the effects, the forms and the presets.
+import { DESK_FORMS, deskTemplates } from '../index.ts';
+import { Planner } from '../../planner/index.ts';
+import { EFFECT_FORM, EFFECT_TEMPLATES } from '../../effects/index.ts';
 
 export const REPLAY = {
   kind: 'Replay',
@@ -55,3 +59,9 @@ export const STUDIO = {
 };
 
 export const PRESETS = { echo: { kind: 'Delay', values: { note: '1/8.', feedback: 0.5 } } };
+
+// a desk written short, planned with the effects, the forms and the presets
+export function planned(desk = STUDIO) {
+  const templates = [...EFFECT_TEMPLATES, ...deskTemplates(desk, [REPLAY, TOWER])];
+  return new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], PRESETS).plan(desk.kind);
+}

@@ -1,0 +1,155 @@
+// ---------- build/desk/strip-controls: a strip's controls, set on the desk on time ----------
+// As its track's controllers name them: by their params' addresses on the strip, as the
+// views set them:
+//   - its fader's volume and pan, a send by its FX channel's name; its mute and solo;
+//   - its Utility's level and pan; the master's volume and its limiter's gain, ceiling and
+//     release;
+//   - an FX channel's own param: a delay's time.
+// On the desk, the strip's address in front (my tap/1/send/reverb).
+// Where each goes:
+//   1. one a track's notes set, where a note is heard from and what its phrase drew: its
+//      channel's (TrackChannels), at its time on the audio's clock;
+//   2. a strip's mute and solo: the live mix's (mix.ts);
+//   3. any other: the desk's, which keeps it.
+// When, each held on the clock's cues:
+//   - one that glides: until its lead ahead of its time, as the 16ths are, then set at its
+//     time, gliding;
+//   - a switch, a choice and an FX channel's own time: until its time.
+// Each checked as it comes: an address the desk hasn't refused, naming it.
+import type { TimedValue, When } from '../../automation/index.ts';
+import { Cues, LOOKAHEAD, type Clock } from '../../clock/index.ts';
+import type { Controller } from '../../midi/index.ts';
+import { isSwitch, type ParamSpec } from '../../params/index.ts';
+import { controlAddress } from '../../plan/desk/index.ts';
+import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
+import type { DeskBuilt, DeskState } from './desk-state.ts';
+import type { Mix } from './mix.ts';
+
+// a change to a param by its address: its value, when it lands, its glide's time constant if any
+export interface Change extends TimedValue {
+  readonly address: Address;
+}
+// the clock a change's time is on, and the audio's clock a time on it is played on
+interface Clocks {
+  now: number;
+  at: (t: number) => number;
+}
+
+// When a change lands on the audio's clock: at its time if it's to come, else now;
+// gliding there by its time constant where it says.
+export function whenOf({ t, glide }: Pick<Change, 't' | 'glide'>, { now, at }: Clocks): When {
+  const atTime = t > now ? { at: at(t) } : {};
+  if (glide === undefined) {
+    return atTime;
+  }
+  return { ...atTime, glide };
+}
+
+export class StripControls {
+  readonly #desk: Pick<DeskState<DeskBuilt>, 'plan' | 'specOf' | 'set'>;
+  readonly #mix: Mix;
+  readonly #ownTime: (address: Address) => boolean;
+  readonly #channels: { control(strip: string, change: Change): boolean };
+  readonly #clock: Pick<Clock, 'now' | 'onTick'>;
+  readonly #at: (t: number) => number;
+  readonly #stripTracks: ReadonlySet<string>; // the strips that are tracks of their own (isStripTrack())
+  // the changes held, by when they're set:
+  //   ahead: those that glide, set their lead ahead;
+  //   due: switches, choices and an FX channel's own time, set at their time
+  readonly #held: Readonly<Record<'ahead' | 'due', Cues<Change>>>;
+
+  // desk: the desk, whose own channels are tracks of their own;
+  // ownTime: whether a key is an FX channel's own time (a delay's sync, note and ms);
+  // channels: the tracks' channels, a change their notes set on them;
+  // clock: its time now and its ticks; at(): a time on it on the audio's clock
+  constructor({
+    desk,
+    mix,
+    ownTime,
+    channels,
+    clock,
+    at,
+  }: {
+    desk: Pick<DeskState<DeskBuilt>, 'plan' | 'specOf' | 'set'>;
+    mix: Mix;
+    ownTime: (address: Address) => boolean;
+    channels: { control(strip: string, change: Change): boolean };
+    clock: Pick<Clock, 'now' | 'onTick'>;
+    at: (t: number) => number;
+  }) {
+    this.#desk = desk;
+    this.#mix = mix;
+    this.#ownTime = ownTime;
+    this.#channels = channels;
+    this.#clock = clock;
+    this.#at = at;
+    // a desk is a composite
+    this.#stripTracks = new Set(desk.plan.node.children!.map(({ name }) => name));
+    const timeOf = (change: Change): number => change.t;
+    const handOn = (change: Change): void => this.#set(change);
+    this.#held = { ahead: new Cues({ timeOf, handOn, lead: LOOKAHEAD }), due: new Cues({ timeOf, handOn }) };
+    clock.onTick((now) => {
+      this.#held.ahead.tick(now);
+      this.#held.due.tick(now);
+    });
+  }
+  // Whether a track is a strip of the desk's alone, its instrument the strip itself: the buses,
+  // the FX busses and the master. Your channels, the background's and the replay tracks are
+  // tracks with instruments of their own, which pass a strip's controllers on.
+  isStripTrack(track: string): boolean {
+    return this.#stripTracks.has(track);
+  }
+  // Whether a control glides there, as a knob's move is smoothed: not a switch, as its param
+  // is declared (a mute, a solo), nor a choice, nor an FX channel's own time, which land at
+  // their time. One no strip has glides, refused as it comes.
+  glides(strip: string, controller: string): boolean {
+    const address = controlAddress(strip, controller);
+    const spec = this.#desk.specOf(address);
+    return !spec || !this.#atItsTime(address, spec);
+  }
+  // A strip's controller set on time, as a change to its key, gliding by its time constant
+  // where it has one: on its track's channel where its notes set it, else held for the desk.
+  control(strip: string, { controller, value, t, glide }: Controller): void {
+    const address = controlAddress(strip, controller);
+    const change: Change = { address, value, t, ...(glide === undefined ? {} : { glide }) };
+    if (this.#channels.control(strip, change)) {
+      return;
+    }
+    this.#hold(change);
+  }
+
+  // A change for the desk, checked as it comes, held until it's set on time.
+  #hold(change: Change): void {
+    const spec = this.#desk.specOf(change.address);
+    if (!spec) {
+      const { child, within } = splitAtChild(change.address);
+      throw new Error(`no controller ${addressText(within)} on strip ${addressText(child)}`);
+    }
+    const due = this.#atItsTime(change.address, spec);
+    this.#held[due ? 'due' : 'ahead'].cue(change, this.#clock.now());
+  }
+  // whether a change is set at its time, not glided there: a switch, a choice, or an FX
+  // channel's own time
+  #atItsTime(address: Address, spec: ParamSpec): boolean {
+    return isSwitch(spec) || spec.choices !== undefined || this.#ownTime(address);
+  }
+  // A change set by its address's shape, when it says:
+  //   - a strip's own mute or solo (strip/mute): the live mix's switch;
+  //   - any other (strip/volume, strip/send/reverb, strip/utility/level): the desk's.
+  #set({ address, value, t, glide }: Change): void {
+    const { child, within } = splitAtChild(address);
+    const [own] = within;
+    if (within.length === 1 && (own === 'mute' || own === 'solo')) {
+      this.#switched(addressText(child), own, value > 0);
+      return;
+    }
+    this.#desk.set(address, value, whenOf({ t, glide }, { now: this.#clock.now(), at: this.#at }));
+  }
+  #switched(strip: string, param: 'mute' | 'solo', on: boolean): void {
+    if (param === 'mute') {
+      this.#mix.setMute(strip, on);
+      return;
+    }
+    this.#mix.setSolo(strip, on);
+  }
+}
