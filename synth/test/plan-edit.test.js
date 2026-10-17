@@ -1,7 +1,7 @@
 // A sounding note following an edit to its instrument (G0.2a, mockup/architecture/done.md), on patches written by hand: its plan
 // before and after compared, the operations that move what's built from a time, as a synth's knob turned while a note sounds: a value
 // gliding there with a 50 ms time constant, an envelope's rest planned again from where it is, a note let go or a value a control set
-// since left as it plays; a change of structure told apart, a rebuild's. Every theme's instruments: mockup/test/unit/plan-edit-themes.test.js
+// since left as it plays; a change of structure told apart, a rebuild's. Every theme's instruments' went with their patches (LAY15b)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fadeIn, fadeOut, plan, adsr } from '../index.ts';

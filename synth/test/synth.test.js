@@ -1,6 +1,6 @@
 // The synth's unit tests (mockup/src/libs/synth, its test/ folder since W4): what the recordings don't show, on patches written by hand:
 // note values for times and an LFO's rate, a note's conditions, envelopes as blocks cabled to what they move. Those on every theme's
-// patches, the blocks planned in any order and a block of one's own among them, in mockup/test/unit/synth-themes.test.js
+// patches went with the patches (LAY15b), the themes' instruments their voice cards since
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
