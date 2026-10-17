@@ -15,12 +15,28 @@ wires:
   - { from: { node: level, output: out }, to: { output: out } }
 macros:
   - name: level
+    hint: >-
+      How loud it goes into the chain: a share, 1 as it comes.
     spec: { range: [0, 2, 0.001], default: 1 }
     maps: [{ to: [level, gain], factor: 1, offset: 0 }]
-  - { name: cutoff, maps: [{ to: [filter, frequency], factor: 1, offset: 0 }] }
-  - { name: resonance, maps: [{ to: [filter, resonance], factor: 1, offset: 0 }] }
+  - name: cutoff
+    hint: >-
+      Its filter's cutoff, in hertz; following the keys where the note's frequency is wired in.
+    maps: [{ to: [filter, frequency], factor: 1, offset: 0 }]
+  - name: resonance
+    hint: >-
+      How much its filter rings at its cutoff, as an EQ's Q: 0.707 flat, more a bump there.
+    maps: [{ to: [filter, resonance], factor: 1, offset: 0 }]
   - name: tune
+    hint: >-
+      Its filter's cutoff moved in semitones: an offset from the keys where it follows them.
     spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
     maps: [{ to: [filter, detune], factor: 100, offset: 0 }]
-  - { name: offset, maps: [{ to: [noise, offset], factor: 1, offset: 0 }] }
-  - { name: stop, maps: [{ to: [noise, stop], factor: 1, offset: 0 }] }
+  - name: offset
+    hint: >-
+      How far into its noise it starts, at most, drawn anew for each note, so no two sound alike.
+    maps: [{ to: [noise, offset], factor: 1, offset: 0 }]
+  - name: stop
+    hint: >-
+      When it stops, in seconds from the note's start; at 0 it plays until its voice is let go.
+    maps: [{ to: [noise, stop], factor: 1, offset: 0 }]

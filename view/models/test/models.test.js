@@ -183,3 +183,41 @@ test("a view of its own, registered for a kind, where a view is more than its pa
   assert.equal(custom.of(UTILITY.node), undefined);
   assert.throws(() => custom.register('gain', 'another'), /gain: a view's registered already/);
 });
+
+test("a knob set from what's typed, read as its text shows it: a gain in dB, -∞ silence; a pan by its side; any other a number; anything else passed by", () => {
+  const sent = [];
+  const plan = {
+    version: 1,
+    node: {
+      name: 'strip',
+      kind: 'Strip',
+      inputs: [],
+      outputs: [],
+      params: [
+        { spec: { name: 'gain', range: [0, 2, 0.001], dB: true }, value: 1 },
+        { spec: { name: 'pan', range: [-1, 1, 0.01] }, value: 0 },
+        { spec: { name: 'cutoff', unit: 'Hz', range: [20, 20000, 1] }, value: 1000 },
+      ],
+      settings: [],
+    },
+  };
+  const models = new ViewBuilder({
+    plan,
+    valueOf: () => undefined,
+    startOf: () => undefined,
+    roleOf: () => ({ by: 'live' }),
+    peakOf: () => 0,
+    readingOf: () => 0,
+    copiesOf: () => [],
+    slotOf: () => undefined,
+    send: (command) => sent.push(command.value),
+  });
+  const typed = (name, text) => models.control([name]).setText(text);
+  assert.deepEqual(
+    [typed('gain', '-6'), typed('gain', '-∞'), typed('pan', 'L20'), typed('pan', 'C'), typed('pan', 'R50')],
+    [true, true, true, true, true],
+  );
+  assert.deepEqual([typed('cutoff', ' 440 '), typed('cutoff', 'loud')], [true, false], 'a word passed by');
+  near(sent[0], 0.5, 'a gain at −6 dB, to its hundredth', 0.002);
+  assert.deepEqual(sent.slice(1), [0, -0.4, 0, 1, 440]);
+});

@@ -5,6 +5,7 @@
 import type { ParamSpec } from '../../params/index.ts';
 import type { Address } from '../../plan/format/index.ts';
 import type { Found, Model, Role, Slot } from './model.ts';
+import type { Move } from './moves.ts';
 
 // A node as a device:
 //   - its address, its name, its kind, its label as shown, its node's, else its kind;
@@ -45,5 +46,9 @@ export abstract class Control {
   }
   get live(): boolean {
     return this.role.by === 'live';
+  }
+  // what moves it: a macro's maps, a child wired into it
+  get moves(): readonly Move[] {
+    return this.model.movesOf(this.address);
   }
 }

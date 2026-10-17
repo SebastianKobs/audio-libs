@@ -1,12 +1,24 @@
 // ---------- view/models/knob: a param with a range as a control ----------
 // Its name, unit, range and taper its declared spec; its value and its address.
-// Turned, set or reset: a command by its address, where it's live.
+// Turned, set, typed or reset: a command by its address, where it's live; typed, read as its
+// text shows it.
+// Its rings: the range each of what moves it moves it through, on its control, as Serum's.
 // Its text as a view shows it:
 //   - a gain in dB, to a tenth: 0.0 at unity, -∞ all the way down;
 //   - a pan by its side: C in the middle, L or R and how far, 0 to 50;
 //   - any other to its step, its unit beside it.
-import { dBOf, isSwitch, positionOf, valueAt, type ParamSpec } from '../../params/index.ts';
+import { dBOf, gainOf, isSwitch, positionOf, valueAt, type ParamSpec } from '../../params/index.ts';
+import { addressText, mapOnto } from '../../plan/format/index.ts';
+import { clamp } from '../../util/index.ts';
 import { Control } from './device.ts';
+import type { Move } from './moves.ts';
+
+// a range a move takes a knob through, by where it lies on its control, by what moves it
+export interface Ring {
+  readonly by: string;
+  readonly from: number;
+  readonly to: number;
+}
 
 // a gain is set to a hundredth, a share, as the session view's faders always were
 const GAIN_STEP = 0.01;
@@ -38,6 +50,16 @@ export class Knob extends Control {
   get text(): string {
     return textOf(this.spec, this.value);
   }
+  // Where each of what moves it takes it, on its control:
+  //   - a macro: across its own range, mapped, held within its map's ends;
+  //   - a modulator: from its value by its reach, where it has one.
+  // None for one it can't say, a choice's macro, a modulator with no reach.
+  get rings(): Ring[] {
+    return this.moves.flatMap((move) => {
+      const span = this.#spanOf(move);
+      return span ? [{ by: addressText(move.by), from: this.#placeOf(span[0]), to: this.#placeOf(span[1]) }] : [];
+    });
+  }
   // turned to a place on its control: its value there by its taper
   turnTo(position: number): void {
     this.set(valueAt(this.spec, position));
@@ -48,6 +70,15 @@ export class Knob extends Control {
     }
     this.model.send({ type: this.kind, address: this.address, value: rounded(this.spec, value) });
   }
+  // Set from what's typed, read as its text shows it; false for what isn't a value, passed by.
+  setText(typed: string): boolean {
+    const value = valueOfText(this.spec, typed.trim());
+    if (value === undefined) {
+      return false;
+    }
+    this.set(value);
+    return true;
+  }
   // a switch on where it's off, off where it's on
   toggle(): void {
     this.set(this.value > 0 ? 0 : 1);
@@ -55,6 +86,24 @@ export class Knob extends Control {
   // back to its start
   reset(): void {
     this.set(Number(this.model.startOf(this.address, this.found)));
+  }
+
+  // the values a move takes it between
+  #spanOf(move: Move): [number, number] | undefined {
+    if (move.kind === 'macro') {
+      const range = this.model.find(move.by)?.param.spec.range;
+      return range && move.map && [mapOnto(move.map, range[0]), mapOnto(move.map, range[1])];
+    }
+    const reach = move.reach && this.model.find(move.reach);
+    if (!reach) {
+      return undefined;
+    }
+    return [this.value, this.value + Number(this.model.valueOf(move.reach, reach))];
+  }
+  // where a value lies on its control, held within its range
+  #placeOf(value: number): number {
+    const [low = -Infinity, high = Infinity] = this.spec.range ?? [];
+    return positionOf(this.spec, clamp(value, low, high));
   }
 }
 
@@ -65,6 +114,34 @@ function rounded({ dB, range }: ParamSpec, value: number): number {
     return value;
   }
   return Number((Math.round(value / step) * step).toFixed(decimalsOf(step)));
+}
+// A value from its text, as textOf() writes it: a gain in dB, -∞ silence; a pan by its side, C
+// its middle; any other a number. None for what's none of these.
+function valueOfText(spec: ParamSpec, text: string): number | undefined {
+  if (spec.dB) {
+    return text === '-∞' ? 0 : asNumber(text, gainOf);
+  }
+  if (isPan(spec)) {
+    return sideOf(text) ?? asNumber(text, (pan) => pan);
+  }
+  return asNumber(text, (value) => value);
+}
+// a pan from its side: C, L or R and how far; none for any other text
+function sideOf(text: string): number | undefined {
+  if (text.toUpperCase() === 'C') {
+    return 0;
+  }
+  const side = /^([LR])\s*(\d+(?:\.\d+)?)$/i.exec(text);
+  if (!side) {
+    return undefined;
+  }
+  const sign = side[1]!.toUpperCase() === 'L' ? -1 : 1; // matched: a side
+  return (sign * Number(side[2])) / PAN_SIDE;
+}
+// a number typed, made a value; none where it isn't one
+function asNumber(text: string, valueOf: (typed: number) => number): number | undefined {
+  const typed = Number(text);
+  return text !== '' && Number.isFinite(typed) ? valueOf(typed) : undefined;
 }
 // A value's text, as a view shows it: a gain in dB, a pan by its side, any other to its step.
 export function textOf(spec: ParamSpec, value: number): string {

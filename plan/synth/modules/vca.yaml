@@ -13,8 +13,12 @@ wires:
   - { from: { node: level, output: out }, to: { output: out } }
 macros:
   - name: gain
+    hint: >-
+      The gain an envelope moves: open at 1 where nothing moves it, at 0 where an envelope opens it.
     spec: { range: [0, 2, 0.001], default: 1 }
     maps: [{ to: [amp, gain], factor: 1, offset: 0 }]
   - name: level
+    hint: >-
+      How loud it passes the sound on, after its gain: a share, 1 as it comes.
     spec: { range: [0, 2, 0.001], default: 1 }
     maps: [{ to: [level, gain], factor: 1, offset: 0 }]

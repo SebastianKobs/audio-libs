@@ -8,8 +8,10 @@
 //   - a pool's copies added so far;
 //   - what a node does in its slot and what sets it there, the tool's words;
 //   - what's done, sent as a command.
+// And what moves each param, worked out from the plan alone (moves.ts).
 import { paramAt, settingAt, type Address, type Param, type Plan } from '../../plan/format/index.ts';
 import type { Command } from './command.ts';
+import { PlanMoves, type Move } from './moves.ts';
 
 // How a value is set, as the tool says:
 //   - live: set here, in a view;
@@ -46,6 +48,7 @@ export interface Found {
 // The plan and its values by address, read through the tool's port.
 export class Model {
   readonly #port: ModelPort;
+  readonly #moves = new PlanMoves();
 
   constructor(port: ModelPort) {
     this.#port = port;
@@ -87,5 +90,14 @@ export class Model {
   }
   send(command: Command): void {
     this.#port.send(command);
+  }
+  // what moves a param, by its address: a macro's maps, a child wired into it; worked out again
+  // for a plan handed anew
+  movesOf(address: Address): readonly Move[] {
+    return this.#moves.of(this.plan, address);
+  }
+  // what a composite's own sources move, by its address
+  movesAt(address: Address): readonly Move[] {
+    return this.#moves.madeAt(this.plan, address);
   }
 }

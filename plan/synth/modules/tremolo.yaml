@@ -10,5 +10,7 @@ wires:
   - { from: { node: gain, output: out }, to: { output: out } }
 macros:
   - name: gain
+    hint: >-
+      The gain an LFO moves: at rest it passes the sound as it comes.
     spec: { range: [0, 2, 0.001], default: 1 }
     maps: [{ to: [gain, gain], factor: 1, offset: 0 }]

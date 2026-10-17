@@ -14,8 +14,12 @@ wires:
   - { from: { node: note volume, output: out }, to: { output: out } }
 macros:
   - name: volume
+    hint: >-
+      The instrument's volume at its output, after everything else: a share, 1 at 0 dB.
     spec: { range: [0, 2, 0.001], default: 1 }
     maps: [{ to: [volume, gain], factor: 1, offset: 0 }]
   - name: note volume
+    hint: >-
+      The note's own volume, MIDI 2.0's per-note #7: a held note hushed, the instrument's kept.
     spec: { range: [0, 1, 0.001], default: 1 }
     maps: [{ to: [note volume, gain], factor: 1, offset: 0 }]

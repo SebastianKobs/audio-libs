@@ -8,14 +8,20 @@
 //   - device.ts: a node as a device, its controls in order, what every control has;
 //   - strip.ts: a channel as a strip, by its form, its name as shown;
 //   - mixer.ts: a desk as a mixer, its strips by role, a solo click;
+//   - moves.ts: what moves each param, a macro's maps and a child wired into it, as a mod matrix;
+//   - envelope.ts: an envelope's curve from its knobs, as a view draws it, the curve played;
+//   - preset-port.ts: a port for a plan whose values a preset gives, a patch's on its voice card;
 //   - command.ts: what's done in a view, by address;
 //   - custom.ts: a view of its own, registered by kind.
 export { Choice } from './choice.ts';
 export type { Command } from './command.ts';
 export { CustomViews } from './custom.ts';
 export { Control, type Device } from './device.ts';
-export { Knob, textOf } from './knob.ts';
+export { envelopeDrawing, type EnvelopeDrawing } from './envelope.ts';
+export { Knob, textOf, type Ring } from './knob.ts';
 export { Mixer, type BusGroup } from './mixer.ts';
 export type { ModelPort, Role, Slot } from './model.ts';
+export type { Move } from './moves.ts';
+export { PresetPort, type PresetOwner } from './preset-port.ts';
 export { Strip, shortName, shownName } from './strip.ts';
-export { ViewBuilder } from './view-builder.ts';
+export { ViewBuilder, type MatrixRow } from './view-builder.ts';

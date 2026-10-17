@@ -1,7 +1,7 @@
 // The synth's library (mockup/src/libs/plan/synth), in node: what a voice card is made of.
 //   - the note's sources, a voice card's CV: each on a control, by MIDI's names where it has them; the note's settings;
 //   - the modules, a YAML template each, of its form: sources, modulators, stages, the output;
-//   - each module's params, its macros, onto its blocks: a tune in semitones onto a detune in cents;
+//   - each module's params, its macros, onto its blocks: a tune in semitones onto a detune in cents; each its hint;
 //   - an architecture, of its form: sources into the chain, the chain into one output, modulators into params, a
 //     module's among them; the note's sources its macros; refused where it breaks its form, every failure said.
 import { test } from 'node:test';
@@ -109,6 +109,16 @@ test("each module's params, its macros by name, at their values as each starts",
     'in tune, at unity, open',
   );
   assert.deepEqual([paramsOf('FM').index, paramsOf('LFO').depth, paramsOf('Envelope generator').velocity], [0, 0, 1]);
+});
+
+test("every module's macro its hint, in its YAML, as a view shows it beside its knob", () => {
+  const unhinted = MODULE_TEMPLATES.flatMap(({ kind }) =>
+    planner
+      .plan(kind)
+      .node.macros.filter(({ hint }) => !hint)
+      .map(({ spec }) => `${kind}/${spec.name}`),
+  );
+  assert.deepEqual(unhinted, []);
 });
 
 test("a module's params onto its blocks: a tune in semitones onto a detune in cents; a ring's gain at 0, its oscillator moving it; each module's settings its blocks'", () => {

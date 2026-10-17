@@ -30,8 +30,12 @@ export function deviceHtml(device: Device, look: DeviceLook): Html {
   const key = addressText(device.address);
   const reset =
     look.reset === undefined ? html`` : html`<button class="reset" data-reset="${key}">${look.reset}</button>`;
-  const controls = shownOf(device.controls).map((control) => controlHtml(control, look.hintOf(control)));
-  return html`<div class="device flowless" data-device="${key}"><div class="bar"><div class="status" title="${look.status}">${look.status}</div>${reset}</div><div class="body"><div class="controls">${look.own ?? ''}${controls}</div></div></div>`;
+  return html`<div class="device flowless" data-device="${key}"><div class="bar"><div class="status" title="${look.status}">${look.status}</div>${reset}</div><div class="body">${controlsHtml(device, look)}</div></div>`;
+}
+// A device's controls drawn: a view of its own first, where it has one; then each shown.
+export function controlsHtml(device: Device, { own, hintOf }: Pick<DeviceLook, 'own' | 'hintOf'>): Html {
+  const controls = shownOf(device.controls).map((control) => controlHtml(control, hintOf(control)));
+  return html`<div class="controls">${own ?? ''}${controls}</div>`;
 }
 
 // Its controls shown, in order:

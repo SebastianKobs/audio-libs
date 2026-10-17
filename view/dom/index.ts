@@ -4,6 +4,9 @@
 //   - elements.ts: an element made, and HTML made by html``, every value escaped;
 //   - knob-view.ts: a knob and a fader drawn, dragged and set back, brought up to date;
 //   - device-view.ts: a device drawn, its status, its reset, its controls;
+//   - group-view.ts: a group of a composite's children drawn, a tab each, the chosen one's controls;
+//   - envelope-view.ts: an envelope's curve drawn, its delay's end and the note's marked;
+//   - matrix-view.ts: a matrix drawn, a row a source and what it moves, how much;
 //   - choice-view.ts: a choice drawn as a list of its options, and a switch;
 //   - meter-view.ts: a level bar, its fall, and where a level shows on it;
 //   - limiter-view.ts: the limiter's view of its own, its history and what it takes away;
@@ -13,7 +16,10 @@
 //     tracks it's handed, its level bars and its lights.
 export { appendHtml, Html, html, makeElement, setHtml } from './elements.ts';
 export { choiceHtml, switchHtml } from './choice-view.ts';
-export { deviceHtml, type DeviceLook } from './device-view.ts';
+export { controlsHtml, deviceHtml, type DeviceLook } from './device-view.ts';
+export { envelopeHtml } from './envelope-view.ts';
+export { groupHtml, type Group, type GroupLook } from './group-view.ts';
+export { matrixHtml } from './matrix-view.ts';
 export { faderHtml, KnobDrag, knobHtml, refreshKnobs, stillPanHtml } from './knob-view.ts';
 export { LimiterView, type LimiterLook } from './limiter-view.ts';
 export { Levels, meterFall, meterHtml, meterPosition } from './meter-view.ts';

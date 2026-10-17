@@ -36,7 +36,7 @@ test('a knob drawn: its label, its bar by its taper, a gain its unity marked, it
   const unity = positionOf(send.spec, 1);
   assert.equal(
     knobHtml('rev', send).text,
-    `<div class="knob" data-knob="you/send/reverb" data-set="you/send/reverb" title="drag up or down to set it, with shift for finer steps; double-click: back to where it started"><span>rev</span><i class="" style="--v:${unity};--unity:${unity}"></i><b>0.0</b></div>`,
+    `<div class="knob" data-knob="you/send/reverb" data-set="you/send/reverb" title="drag up or down to set it, with shift for finer steps; click its value to type one; double-click: back to where it started"><span>rev</span><i class="" style="--v:${unity};--unity:${unity}"></i><b>0.0</b></div>`,
   );
   assert.match(knobHtml('pan', views.control(['you', 'pan'])).text, /<i class="pan" style="--v:0.25"><\/i><b>L25<\/b>/);
   const automated = viewsOn({ roles: { 'you/pan': { by: 'automated' } } }).control(['you', 'pan']);

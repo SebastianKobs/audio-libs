@@ -17,12 +17,26 @@ wires:
   - { from: { node: depth, output: out }, to: { node: scale, input: in } }
   - { from: { node: scale, output: out }, to: { output: out } }
 macros:
-  - { name: sync, maps: [{ to: [osc, sync], factor: 1, offset: 0 }] }
-  - { name: note, maps: [{ to: [osc, note], factor: 1, offset: 0 }] }
-  - { name: hz, maps: [{ to: [osc, frequency], factor: 1, offset: 0 }] }
+  - name: sync
+    hint: >-
+      Its rate synced to the tempo: on, a note value; off, in hertz. Both are kept: the switch picks
+      one.
+    maps: [{ to: [osc, sync], factor: 1, offset: 0 }]
+  - name: note
+    hint: >-
+      Its rate while synced: a note value (1/8, 1/8. dotted, 1/8t a triplet), following the tempo.
+    maps: [{ to: [osc, note], factor: 1, offset: 0 }]
+  - name: hz
+    hint: >-
+      Its rate while free, in hertz.
+    maps: [{ to: [osc, frequency], factor: 1, offset: 0 }]
   - name: depth
+    hint: >-
+      How far it moves what it's wired into, in that param's units: cents, hertz, a gain's share.
     spec: { range: [0, 1000, 0.0001], default: 0 }
     maps: [{ to: [depth, gain], factor: 1, offset: 0 }]
   - name: scale
+    hint: >-
+      What its depth is a share of: 1, or a value of the note's wired in, its frequency for a vibrato.
     spec: { range: [0, 20000, 0.01], default: 1 }
     maps: [{ to: [scale, gain], factor: 1, offset: 0 }]

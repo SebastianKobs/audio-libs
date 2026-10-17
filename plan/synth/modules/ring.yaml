@@ -13,8 +13,16 @@ wires:
   - { from: { node: osc, output: out }, to: { node: ring, param: gain } }
   - { from: { node: ring, output: out }, to: { output: out } }
 macros:
-  - { name: frequency, maps: [{ to: [osc, frequency], factor: 1, offset: 0 }] }
+  - name: frequency
+    hint: >-
+      Its frequency, in hertz: the note's, which the voice card sets.
+    maps: [{ to: [osc, frequency], factor: 1, offset: 0 }]
   - name: tune
+    hint: >-
+      Its oscillator's ratio to the note, in semitones.
     spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
     maps: [{ to: [osc, detune], factor: 100, offset: 0 }]
-  - { name: stop, maps: [{ to: [osc, stop], factor: 1, offset: 0 }] }
+  - name: stop
+    hint: >-
+      When it stops, in seconds from the note's start; at 0 it plays until its voice is let go.
+    maps: [{ to: [osc, stop], factor: 1, offset: 0 }]
