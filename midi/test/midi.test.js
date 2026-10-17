@@ -3,7 +3,7 @@
 // rotation. The sequencer's input, which passes them on, is tested in libs/midi-sequencer/test/input.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { NoteRotation, noteMessages, notesIn } from '../index.ts';
+import { NoteRotation, noteMessages, notesIn, retimed } from '../index.ts';
 
 const noteOn = (index, t, more = {}) => ({ type: 'note on', index, pitch: 60, velocity: 1, t, ...more });
 const noteOff = (index, t) => ({ type: 'note off', index, t });
@@ -110,4 +110,13 @@ test("a note's messages, as notesIn() reads them back: its note on, its values a
     ],
     'held, no note off; its values sent when asked; a value it has none of left out',
   );
+});
+
+test("messages on another clock: each one's time moved by the clock's own, the rest as it was", () => {
+  const messages = [noteOn(1, 2), perNote(1, 'pitch', 62, 2.5), noteOff(1, 3)];
+  assert.deepEqual(
+    retimed(messages, (t) => t + 10),
+    [noteOn(1, 12), perNote(1, 'pitch', 62, 12.5), noteOff(1, 13)],
+  );
+  assert.deepEqual(messages[0], noteOn(1, 2), 'the messages handed in left as they were');
 });

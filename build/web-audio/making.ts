@@ -3,7 +3,7 @@
 // hands for what it makes:
 //   - kept(): a node made, taken apart with the rest;
 //   - started(): a source, started at its time with the rest, by its own way where it has one,
-//     stopped with the rest;
+//     stopped by a time with the rest, by its own way where it has one, stopped as it's taken apart;
 //   - followsTempo(): what follows a new beat, a synced delay's time, a synced oscillator's rate.
 // And a block's values and settings read from its node, what a plan leaves out at its block's
 // declared default; its values set on what's built.
@@ -21,11 +21,14 @@ export interface Making {
   readonly canPan: boolean;
   readonly random: () => number;
   kept<Made extends AudioNode>(node: Made): Made;
-  started<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt): Source;
+  started<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source;
   followsTempo(follower: TempoFollower): void;
 }
 // a source's own way of starting at its time, now where none
 export type StartAt = (at: number | undefined) => void;
+// a source's own way of being stopped by a time, as what it plays into has gone silent: no later
+// than its own stop
+export type StopBy = (at: number) => void;
 // what follows a new beat: told it, when it lands, and the context's time now
 export type TempoFollower = (beat: number, when: When, now: number) => void;
 // a block's maker: its node as planned, made in Web Audio

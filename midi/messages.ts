@@ -138,3 +138,7 @@ function glidesOf(noteOn: NoteOn, controllers: readonly PerNoteController[]): [S
   const its = controllers.filter((sent) => sent.index === noteOn.index && sent.controller === 'pitch');
   return its.map((sent): [Seconds, number] => [sent.t, sent.value]);
 }
+// Messages on another clock: each one's time moved by the clock's own (at), the rest as it was.
+export function retimed(messages: readonly Message[], at: (t: Seconds) => Seconds): Message[] {
+  return messages.map((message) => ({ ...message, t: at(message.t) }));
+}

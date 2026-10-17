@@ -3,7 +3,8 @@
 //   1. A gain resting at nothing, opened only by envelopes, closes once they have all faded.
 //   2. A block is silent from where a gain it is closes, or as late as the latest of where its
 //      sound goes; the voice's own output never, a block whose sound goes nowhere at once.
-//   3. A source nothing closes is silent as its note's last release fades.
+//   3. A source nothing closes is silent as its note's last envelope fades: a gate's release, a
+//      trigger's run, which goes on past its note off.
 //   4. The voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO
 //      or FM with the sound it moves.
 // Its blocks' sound followed across its composites, through their macros.
@@ -40,8 +41,8 @@ export class Silence {
   // addresses within it, its note's end where it has one.
   silentFrom(faded: (address: Address) => number, end: number | undefined): number {
     const fadedAt = (block: string): number => faded(addressOf(block));
-    const released = [...this.#blocks].filter(([, node]) => isGateEnvelope(node)).map(([block]) => fadedAt(block));
-    const lastRelease = end === undefined ? Infinity : Math.max(end, ...released);
+    const envelopes = [...this.#blocks].filter(([, node]) => node.kind === 'envelope').map(([block]) => block);
+    const lastRelease = end === undefined ? Infinity : Math.max(end, ...envelopes.map(fadedAt));
     const sources = [...this.#blocks].filter(([, node]) => !node.inputs.length).map(([block]) => block);
     return Math.max(
       -Infinity,
@@ -121,10 +122,6 @@ export class Silence {
   }
 }
 
-// an envelope its gate releases, not a trigger's
-function isGateEnvelope(node: Node): boolean {
-  return node.kind === 'envelope' && node.settings.find((setting) => setting.spec.name === 'mode')?.value !== 'trigger';
-}
 // The blocks whose sound a wire's start carries in a composite: a child block's; a child
 // composite's output's, followed inside; none for its own input, led in from outside.
 function soundsFrom(node: Composite, from: Wire['from'], at: Address): string[] {

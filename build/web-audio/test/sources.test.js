@@ -2,13 +2,14 @@
 //   - a plan's sources started as it's built; a pool's copy's at the time it's added, a free
 //     oscillator's as it's built, running free;
 //   - a source's stop, its stop after it starts, 0 none; changed once started, moved;
+//   - a copy stopped by a time, as it's gone silent: each of its sources then, none later than its own stop;
 //   - a noise looped where it says, started drawn into its buffer up to its offset;
 //   - an oscillator's rate synced: its note at the beat, in Hz, a new tempo followed; free, its
 //     frequency.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from './audio-stand-in.js';
-import { WebAudioBuilder } from '../index.ts';
+import { Buffers, WebAudioBuilder } from '../index.ts';
 import { blockNode, oneBlockPlan } from './blocks.js';
 
 // what's built of a plan at 4 s on a stand-in context, the beat 0.5 s; the context's nodes by their kind
@@ -80,6 +81,27 @@ test("a source's stop: stopped its stop after it starts, 0 none; changed once st
   assert.deepEqual(held.made('oscillator')[0].stops, [], 'none: playing until its voice is let go');
 });
 
+test("a copy stopped by a time, as it's gone silent: each of its sources then, none later than its own stop; its own stop moved, still no later", () => {
+  const { what, made } = built(
+    instrumentOf(
+      blockNode('tone', 'oscillator'),
+      blockNode('click', 'oscillator', { stop: 0.25 }),
+      blockNode('env', 'envelope'),
+    ),
+  );
+  what.add(['voice', '1'], 6);
+  what.add(['voice', '2'], 6);
+  what.stopBy(['voice', '1'], 7);
+  const [tone, click, , otherClick] = made('oscillator');
+  const [env] = made('constant');
+  assert.deepEqual([tone.stops.at(-1), env.stops.at(-1)], [[7], [7]], 'each source then');
+  assert.deepEqual(click.stops.at(-1), [6.25], 'its own stop sooner, kept');
+  assert.deepEqual(otherClick.stops, [[6.25]], 'the other copy left alone');
+  what.set(['voice', '1', 'click', 'stop'], 2, { at: 6 });
+  assert.deepEqual(click.stops.at(-1), [7], 'its own stop moved past it: still stopped by then');
+  assert.throws(() => what.stopBy(['voice', '3'], 7), /voice\/3: not added/);
+});
+
 test('a noise looped where it says, its buffer by its colour; started drawn into its buffer up to its offset', () => {
   const { made } = built(oneBlockPlan('noise', { offset: 1.5 }, { loop: 'on', colour: 'breath' }));
   const [hiss] = made('buffer');
@@ -91,6 +113,17 @@ test('a noise looped where it says, its buffer by its colour; started drawn into
   assert.deepEqual(drawn.starts, [[4, 0.375]], 'its draws from a generator of their own, given');
   const once = built(oneBlockPlan('noise'));
   assert.deepEqual([once.made('buffer')[0].loop, once.made('buffer')[0].starts], [false, [[]]]);
+});
+
+test("a noise's buffer shared by builders in one context, each its own draws: made once, by the buffers they're handed", () => {
+  const context = new StandInContext(() => 4);
+  const buffers = new Buffers(context, () => 0.5);
+  const builder = (draws) => new WebAudioBuilder({ context, beat: () => 0.5, buffers, draws });
+  builder(() => 0.25).build(oneBlockPlan('noise', { offset: 1.5 }), { into: context.destination });
+  builder(() => 0.5).build(oneBlockPlan('noise', { offset: 1.5 }), { into: context.destination });
+  const [one, other] = context.rec.nodes.filter((node) => node.kind === 'buffer');
+  assert.equal(one.buffer, other.buffer, 'one buffer');
+  assert.deepEqual([one.starts, other.starts], [[[4, 0.375]], [[4, 0.75]]], 'each its own draws');
 });
 
 test("an oscillator's rate synced: its note at the beat, in Hz, a new tempo followed; free, its frequency", () => {

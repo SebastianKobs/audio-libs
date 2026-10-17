@@ -13,6 +13,7 @@ import {
   LiveCopies,
   modulo,
   pickFrom,
+  sameData,
   seeded,
   SETTLED,
   smoothstep,
@@ -268,4 +269,13 @@ test("values kept live by name, as a device's: copies of their start, set in pla
     ['reverb', 0.5],
     ['reverb', 0.3],
   ]);
+});
+
+test('data the same as other data: numbers, strings and nulls by value, arrays item by item in order, objects key by key in any order', () => {
+  assert.ok(sameData({ a: 1, b: [1, { c: 'x' }] }, { b: [1, { c: 'x' }], a: 1 }), 'keys in another order');
+  assert.ok(!sameData({ a: 1 }, { a: 1, b: undefined }), 'a key more');
+  assert.ok(!sameData([1, 2], [2, 1]), 'an array in another order');
+  assert.ok(!sameData({ a: [1] }, { a: { 0: 1 } }), 'an array not an object');
+  assert.ok(!sameData({ a: null }, { a: {} }));
+  assert.ok(sameData(null, null) && !sameData(1, '1'));
 });

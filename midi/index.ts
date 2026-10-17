@@ -2,7 +2,7 @@
 // The protocol alone, as a synth and a sequencer share it and nothing else: the messages and the notes among them (messages.ts), each
 // note a fresh index (rotation.ts), and what they're played into (receiver.ts). Out of the MIDI sequencer in V1, so an instrument speaks
 // MIDI without a sequencer
-export { noteMessages, notesIn } from './messages.ts';
+export { noteMessages, notesIn, retimed } from './messages.ts';
 export type {
   Controller,
   Message,

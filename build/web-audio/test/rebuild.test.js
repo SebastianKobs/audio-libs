@@ -60,7 +60,7 @@ test('what only processes sound built again: its input moved over to the new, th
   assert.ok(!context.rec.disconnects.includes(newPan), 'the new kept');
 });
 
-test('what makes sound of its own built again: the old faded out, the new faded in, over the crossfade; its oscillator stopped once it has rung out', (t) => {
+test('what makes sound of its own built again: the old faded out, the new faded in, over the crossfade; its oscillator stopped once faded, let go once it has rung out', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { context, what, made } = built(TONE);
   const [oldOsc] = made('oscillator');
@@ -86,8 +86,12 @@ test('what makes sound of its own built again: the old faded out, the new faded 
     'the new faded in',
   );
   assert.deepEqual(into(context, context.destination), [fadeOut, fadeIn]);
+  assert.deepEqual(oldOsc.stops, [[4 + CROSSFADE]], 'stopped once faded');
   t.mock.timers.tick(RING_OUT);
-  assert.equal(oldOsc.stops.length, 1);
+  assert.ok(
+    oldOsc.stops.every(([at = 4]) => at <= 4 + CROSSFADE),
+    'taken apart: never stopped later than its fade',
+  );
   assert.ok(context.rec.disconnects.includes(fadeOut), 'its fade let go with it');
   assert.ok(!context.rec.disconnects.includes(fadeIn), 'the new kept');
 });
@@ -106,6 +110,15 @@ test('what was told kept as it was built again: the values set, a macro by its o
   instrument.what.letGo(['voice', '2']);
   instrument.what.rebuild(SYNTH);
   assert.equal(instrument.made('oscillator').length, 2, 'a voice let go not added again, what it was told forgotten');
+});
+
+test('a copy added at its time, built again: added again at that time, its sources started then, as its note did', () => {
+  const instrument = built(SYNTH);
+  instrument.what.add(['voice', '1'], 3.5);
+  instrument.what.add(['voice', '2']);
+  instrument.what.rebuild(SYNTH);
+  const [, , again, againNow] = instrument.made('oscillator');
+  assert.deepEqual([again.starts, againNow.starts], [[[3.5]], [[]]], 'at its time; one added now, now');
 });
 
 test('a preset that changes a setting: built again with it, its values set on the new; one that keeps it, passed over', () => {

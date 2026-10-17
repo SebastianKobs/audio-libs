@@ -17,12 +17,17 @@ import { BuiltParts } from './parts.ts';
 import { placeholder } from './placeholder.ts';
 import { blockJacks, compositeJacks, type Jacks, type OwnJacks } from './wiring.ts';
 
-// What the builder is made with: the context, the beat's length now, the random its noise is drawn
-// from, and the draws its sources make as they start (a noise's offset), the same unless given.
+// What the builder is made with:
+//   - the context, and the beat's length now;
+//   - the random its noise is drawn from;
+//   - the buffers its noise and reverbs play: its own, drawn from that random, unless handed ones
+//     shared with other builders in the context;
+//   - the draws its sources make as they start (a noise's offset), the random unless given.
 export interface WebAudioOptions {
   readonly context: BaseAudioContext;
   readonly beat: () => number;
   readonly random?: () => number;
+  readonly buffers?: Buffers;
   readonly draws?: () => number;
 }
 // where a plan's sound goes, and where each of its inputs comes from, by name
@@ -37,10 +42,10 @@ export class WebAudioBuilder implements Builder<AudioNode> {
   readonly #buffers: Buffers;
   readonly #draws: () => number;
 
-  constructor({ context, beat, random = Math.random, draws = random }: WebAudioOptions) {
+  constructor({ context, beat, random = Math.random, buffers, draws = random }: WebAudioOptions) {
     this.#context = context;
     this.#beat = beat;
-    this.#buffers = new Buffers(context, random);
+    this.#buffers = buffers ?? new Buffers(context, random);
     this.#draws = draws;
   }
   // a plan built, fed from where its inputs come from, its output into where it goes
@@ -100,7 +105,7 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       canPan: typeof this.#context.createStereoPanner === 'function',
       random: this.#draws,
       kept: (made) => parts.keep(made),
-      started: (source, startAt) => parts.keepSource(source, startAt),
+      started: (source, startAt, stopBy) => parts.keepSource(source, startAt, stopBy),
       followsTempo: (follower) => parts.tempoFollowers.push(follower),
     };
   }

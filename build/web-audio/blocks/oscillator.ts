@@ -18,7 +18,11 @@ export function oscillator(node: Node, making: Making): BuiltNode {
   making.followsTempo((beat, when, now) => rate.tempo(beat, when, now));
   const times = new SourceTimes(made, { stop: Number(valueOf(node, 'stop')), now: () => making.context.currentTime });
   const free = settingOf(node, 'phase') === 'free';
-  making.started(made, (at) => times.start(free ? undefined : at));
+  making.started(
+    made,
+    (at) => times.start(free ? undefined : at),
+    (at) => times.stopBy(at),
+  );
   return new BuiltNode({
     input: made,
     output: made,

@@ -9,6 +9,7 @@
 //   - add(), letGo(): a pool's copy added by its own address, its pool's name and its number
 //     (my tap/3), its sources started at a time, now unless given; let go once it has rung out,
 //     as its owner says: an instrument's voice, a desk's channel;
+//   - stopBy(): a copy's sources stopped by the time it's silent, as its owner works it out;
 //   - rebuild(): built again from a plan, a setting or its structure changed, the old ringing out;
 //   - faded(): when what a block makes has faded for good, by its address: an envelope's, so its
 //     owner knows when a voice has rung out;
@@ -25,6 +26,7 @@ export interface Built {
   preset(values: ValuesByAddress, settings?: ValuesByAddress, when?: When): void;
   tempo(beat: number, when?: When): void;
   add(copy: Address, at?: number): void;
+  stopBy(copy: Address, at: number): void;
   letGo(copy: Address): void;
   rebuild(plan: Plan): void;
   faded(address: Address): number;

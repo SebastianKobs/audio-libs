@@ -16,7 +16,11 @@ export function noise(node: Node, making: Making): BuiltNode {
   made.loop = settingOf(node, 'loop') === 'on';
   let offset = Number(valueOf(node, 'offset'));
   const times = new SourceTimes(made, { stop: Number(valueOf(node, 'stop')), now: () => making.context.currentTime });
-  making.started(made, (at) => times.start(at, making.random() * offset));
+  making.started(
+    made,
+    (at) => times.start(at, making.random() * offset),
+    (at) => times.stopBy(at),
+  );
   const offsetParam = toldParam(
     () => offset,
     (value) => {

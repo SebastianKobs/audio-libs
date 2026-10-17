@@ -1,4 +1,4 @@
-// ---------- util/objects: a key toggled, a map's entry made when asked, an object updated or frozen ----------
+// ---------- util/objects: a key toggled, a map's entry made when asked, an object updated, frozen or compared ----------
 
 // a map as entryOf() asks it: a Map, or a WeakMap
 interface Keyed<Key, Value> {
@@ -53,4 +53,20 @@ export function frozen<T extends object>(data: T): T {
     }
   }
   return (data as { [Symbol.toStringTag]?: unknown })[Symbol.toStringTag] === 'Module' ? data : Object.freeze(data);
+}
+// Data the same as other data, as plain data compares: a number, a string or a null by value, an
+// array item by item in order, an object key by key in any order.
+export function sameData(one: unknown, other: unknown): boolean {
+  if (one === null || other === null || typeof one !== 'object' || typeof other !== 'object') {
+    return one === other;
+  }
+  if (Array.isArray(one) !== Array.isArray(other)) {
+    return false;
+  }
+  const keys = Object.keys(one);
+  if (keys.length !== Object.keys(other).length) {
+    return false;
+  }
+  const record = (data: object): Record<string, unknown> => data as Record<string, unknown>;
+  return keys.every((key) => Object.hasOwn(other, key) && sameData(record(one)[key], record(other)[key]));
 }

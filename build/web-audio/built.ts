@@ -41,7 +41,7 @@ import { automate } from './automation.ts';
 import type { BuiltNode } from './built-node.ts';
 import { meterOn, type PeakMeter } from './meters.ts';
 import { BuiltParts, type PoolHolder } from './parts.ts';
-import { disconnectFrom, fadedThrough, RING_OUT } from './rebuild.ts';
+import { CROSSFADE, disconnectFrom, fadedThrough, RING_OUT } from './rebuild.ts';
 import { connectInto, wireInside, type Jacks } from './wiring.ts';
 
 // a sound fed into a node's input, by the node's address and the input's name, to feed it again
@@ -56,6 +56,7 @@ interface Copy {
   readonly holder: PoolHolder;
   readonly name: string;
   readonly address: Address;
+  readonly at: number | undefined; // when it was added for, none now
 }
 // what's built of one plan: its plan, its parts, its jacks at the top, its copies by their addresses as text
 interface Generation {
@@ -161,7 +162,7 @@ export class WebAudioBuilt implements Built {
       wireInside(holder.node, wire, { children: holder.children, own: holder.own });
     }
     this.#now.parts.takeIn(parts);
-    this.#now.copies.set(addressText(copy), { parts, holder, name, address: copy });
+    this.#now.copies.set(addressText(copy), { parts, holder, name, address: copy, at });
     parts.startSources(at);
   }
   // A sound fed into a node's input by its address, its main one unless named:
@@ -221,13 +222,14 @@ export class WebAudioBuilt implements Built {
     const under = [...this.#now.parts.made].filter(([at]) => !text || at === text || at.startsWith(`${text}/`));
     return [...new Set(under.flatMap(([, nodes]) => nodes))];
   }
+  // a copy's sources stopped by a time, as it's gone silent then: none later than its own stop
+  stopBy(copy: Address, at: number): void {
+    this.#added(copy).parts.stopSourcesBy(at);
+  }
   // a copy let go: its sources stopped, its nodes disconnected, its address no longer set, what it was told forgotten
   letGo(copy: Address): void {
     const text = addressText(copy);
-    const added = this.#now.copies.get(text);
-    if (!added) {
-      throw new Error(`${text}: not added`);
-    }
+    const added = this.#added(copy);
     for (const { input, source } of this.#fed.filter(({ address }) => addressText(address) === text)) {
       (this.#now.parts.jacks.get(text)?.inputs[input] ?? []).forEach((destination) =>
         disconnectFrom(source, destination),
@@ -249,8 +251,9 @@ export class WebAudioBuilt implements Built {
   }
   // Built again from a plan, the new beside the old:
   //   1. its inputs moved over to the new;
-  //   2. the old faded out and the new faded in, where the old makes sound of its own;
-  //   3. the copies added and the values told, told the new again;
+  //   2. the old faded out and the new faded in, where the old makes sound of its own, its sources
+  //      stopped once faded;
+  //   3. the copies added, each at its own time, and the values told, told the new again;
   //   4. the old let go once it has rung out.
   rebuild(plan: Plan): void {
     const old = this.#now;
@@ -267,9 +270,10 @@ export class WebAudioBuilt implements Built {
     if (makesSound(old)) {
       this.#faded(old, [1, 0]);
       this.#faded(this.#now, [0, 1]);
+      stoppedBy(old, this.#context().currentTime + CROSSFADE);
     }
-    for (const { address } of old.copies.values()) {
-      this.add(address);
+    for (const { address, at } of old.copies.values()) {
+      this.add(address, at);
     }
     this.#fed.forEach((fed) => this.#feedNow(fed));
     for (const [text, value] of this.#told) {
@@ -303,6 +307,14 @@ export class WebAudioBuilt implements Built {
   }
   #context(): BaseAudioContext {
     return this.#building.context;
+  }
+  // a copy added, by its address; one not added refused
+  #added(copy: Address): Copy {
+    const added = this.#now.copies.get(addressText(copy));
+    if (!added) {
+      throw new Error(`${addressText(copy)}: not added`);
+    }
+    return added;
   }
   // a sound fed into a node's input, as built now
   #feedNow({ address, input, source }: Fed): void {
@@ -379,6 +391,13 @@ function mappedEvent(event: Automation, map: (value: number) => number): Automat
 // whether a generation makes sound of its own: a source running in it or in a copy
 function makesSound({ parts, copies }: Generation): boolean {
   return parts.sources.length > 0 || [...copies.values()].some((copy) => copy.parts.sources.length > 0);
+}
+// a generation's sources stopped by a time, its copies' too
+function stoppedBy({ parts, copies }: Generation, at: number): void {
+  parts.stopSourcesBy(at);
+  for (const copy of copies.values()) {
+    copy.parts.stopSourcesBy(at);
+  }
 }
 // a generation taken apart: its sources stopped, its nodes disconnected, its copies' too
 function takeApart({ parts, copies }: Generation): void {

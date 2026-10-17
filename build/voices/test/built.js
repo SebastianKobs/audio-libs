@@ -4,6 +4,7 @@ export class BuiltStandIn {
   added = [];
   told = [];
   letGone = [];
+  stoppedBy = [];
   rebuilt = [];
   fadedAt = new Map();
   placeholders = [];
@@ -13,6 +14,9 @@ export class BuiltStandIn {
   }
   set(address, value, when = {}) {
     this.told.push([address.join('/'), value, when]);
+  }
+  stopBy(copy, at) {
+    this.stoppedBy.push([copy.join('/'), at]);
   }
   letGo(copy) {
     this.letGone.push(copy.join('/'));

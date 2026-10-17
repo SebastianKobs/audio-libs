@@ -23,11 +23,12 @@ function paramsOf(kind) {
   return Object.fromEntries(planner.plan(kind).node.macros.map(({ spec, value }) => [spec.name, value]));
 }
 
-test("the note's sources, as a voice card's CV: its frequency, gate and velocity, its bend, the per-note controllers; each on a control, starting at its default; by MIDI's names where it has them", () => {
+test("the note's sources, as a voice card's CV: its frequency, gate and velocity, its volume, its bend, the per-note controllers; each on a control, starting at its default; by MIDI's names where it has them", () => {
   assert.deepEqual(Object.keys(NOTE_SOURCES), [
     'frequency',
     'gate',
     'velocity',
+    'volume',
     'bend',
     'vibrato depth',
     'vibrato rate',
@@ -45,9 +46,9 @@ test("the note's sources, as a voice card's CV: its frequency, gate and velocity
     ['Hz', 'semitones', 'cents', 'Hz', 's', 's'],
   );
   assert.deepEqual(
-    ['bend', 'vibrato depth', 'breath'].map((name) => NOTE_SOURCES[name].default),
-    [0, 0, 0],
-    'nothing moved where a note sends none',
+    ['bend', 'vibrato depth', 'breath', 'volume'].map((name) => NOTE_SOURCES[name].default),
+    [0, 0, 0, 1],
+    'nothing moved where a note sends none, its volume at unity',
   );
   assert.deepEqual(Object.keys(NOTE_SETTINGS), ['glide', 'shortest', 'longest']);
 });
@@ -92,7 +93,7 @@ test("each module's params, its macros by name, at their values as each starts",
     VCF: ['cutoff', 'resonance', 'tune'],
     Tremolo: ['gain'],
     Ring: ['frequency', 'tune', 'stop'],
-    Out: ['volume'],
+    Out: ['volume', 'note volume'],
   });
   const lfo = planner.plan('LFO', { values: { sync: 1, note: '1/8', hz: 0.06 } });
   assert.deepEqual(
@@ -101,8 +102,10 @@ test("each module's params, its macros by name, at their values as each starts",
     "an LFO's rate its oscillator's",
   );
   assert.deepEqual(
-    [paramsOf('VCO').tune, paramsOf('VCO').level, paramsOf('VCA').gain, paramsOf('Out').volume],
-    [0, 1, 1, 1],
+    ['tune', 'level']
+      .map((name) => paramsOf('VCO')[name])
+      .concat(paramsOf('VCA').gain, paramsOf('Out').volume, paramsOf('Out')['note volume']),
+    [0, 1, 1, 1, 1],
     'in tune, at unity, open',
   );
   assert.deepEqual([paramsOf('FM').index, paramsOf('LFO').depth, paramsOf('Envelope generator').velocity], [0, 0, 1]);

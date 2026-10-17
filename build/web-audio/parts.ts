@@ -4,7 +4,7 @@
 // Each node's jacks by its address too: where a sound is fed in, where a meter listens.
 import type { Address, Node } from '../../plan/format/index.ts';
 import type { BuiltNode } from './built-node.ts';
-import type { StartAt, TempoFollower } from './making.ts';
+import type { StartAt, StopBy, TempoFollower } from './making.ts';
 import type { Jacks, OwnJacks } from './wiring.ts';
 
 // a composite holding a pool, as built: its node, its children's jacks by name, copies among them as they come, a node at each of its own jacks
@@ -25,6 +25,7 @@ export class BuiltParts {
   // each block's nodes, as its maker made them, by its address as text
   readonly made = new Map<string, AudioNode[]>();
   readonly #starts: StartAt[] = []; // each source's, until it's started
+  readonly #stopsBy: StopBy[] = []; // each source's
 
   // a copy's parts taken in among these: its blocks, jacks and placeholders, its tempo's followers
   takeIn(copy: BuiltParts): void {
@@ -56,15 +57,21 @@ export class BuiltParts {
     this.nodes.push(node);
     return node;
   }
-  // a source kept, to start with the rest at its time, by its own way where it has one, and to stop
-  keepSource<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt): Source {
+  // A source kept, to start with the rest at its time and to be stopped by one, each by its own
+  // way where it has one; and to stop as it's taken apart.
+  keepSource<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source {
     this.sources.push(source);
     this.#starts.push(startAt ?? ((at) => source.start(at)));
+    this.#stopsBy.push(stopBy ?? ((at) => source.stop(at)));
     return source;
   }
   // its sources started at a time, now unless given
   startSources(at?: number): void {
     this.#starts.splice(0).forEach((start) => start(at));
+  }
+  // its sources, started, stopped by a time, as what they play into has gone silent
+  stopSourcesBy(at: number): void {
+    this.#stopsBy.forEach((stopBy) => stopBy(at));
   }
 }
 

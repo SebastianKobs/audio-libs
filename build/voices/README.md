@@ -4,25 +4,28 @@ MIDI's notes played into an instrument: its voices juggled on what's built, a pa
 
 ```ts
 import { Voices } from './index.ts';
-const voices = new Voices(built, plan, () => context.currentTime);
+const voices = new Voices(built, plan, () => context.currentTime, () => ({ 'voice/decay': 0.6 })); // its voice cards' own values
 voices.receive(noteMessages({ pitch: 69, velocity: 0.8, t: 2, duration: 0.5 }, index)); // a voice added at 2 s, its gate opened, closed at 2.5 s
+voices.edit({ 'voice/cutoff': 900 }); // an edit, glided on every voice of its card sounding
 voices.rebuild(changed); // a change of structure while notes sound
 ```
 
 How it plays a note:
-1. a note on: a copy of its pool's voice card added at its time (`Built.add(copy, at)`), a drum rack's pad's by its key, none where no pool plays it; its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is built at them (LAY14a5a: set at its time, a biquad took a cutoff at its block's edge, a voice's first milliseconds through another), its frequency, its velocity and the per-note controllers sent with it, its gate opened last; its glides glided by its voice card's `glide`, a jump with none; with no end yet, closed at its `longest`, 10 s unless its voice card says;
-2. a note off: its gate closed at its time, no sooner than its `shortest`; a per-note controller sent later a change at its time, gliding as it says, its pitch glided;
+1. a note on: a copy of its pool's voice card added at its time (`Built.add(copy, at)`), a drum rack's pad's by its key, none where no pool plays it; its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is built at them (LAY14a5a: set at its time, a biquad took a cutoff at its block's edge, a voice's first milliseconds through another), its frequency, its velocity and the per-note controllers sent with it, its gate opened last; its glides glided by its voice card's `glide`, a jump with none; held until its note off, closed at its `longest` only where its voice card has one (0, none, its default: a held note sounds until it's let go, as G0i2 has it);
+2. a note off: its gate closed at its time, no sooner than its `shortest`, its sources stopped by when it's silent, where that's known then (`Built.stopBy()`, LAY14a5b); a per-note controller sent later a change at its time, gliding as it says, its pitch glided;
 3. a voice let go once it has rung out, as the next messages come; at once where its sender detaches its note.
+
+Its voice cards' own values, a knob's or an edit's, by their addresses in the instrument (`voice/cutoff`, `pad 38/env 1/decay`), where a voice card has them: read and set on each voice as it's added, before its sources; an edit set on every voice of its card sounding, gliding (LAY14a5b).
 
 When a voice has rung out, worked out from its voice card's plan, as a synth stops a note's sources (`silence.ts`):
 1. a gain resting at nothing, opened only by envelopes, closes once they have all faded, what's built saying when each has (`Built.faded()`); one another source opens too, an LFO, never;
 2. a block is silent from where a gain it is closes, or as late as the latest of where its sound goes, followed across its composites and through their macros; the voice's own output never;
-3. a source nothing closes is silent as its note's last release fades, every envelope its gate releases;
+3. a source nothing closes is silent as its note's last envelope fades: a gate's release, a trigger's run, which goes on past its note off (LAY14a5b: every struck sound, a tap, a chime, the brushes);
 4. the voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO or FM with the sound it moves.
 
 | | |
 |---|---|
-| `Voices` | MIDI's notes played into an instrument's plan on what's built: `receive(messages)`, `rebuild(plan)`, each sounding note's gate told again at its own time (`voices.ts`) |
+| `Voices` | MIDI's notes played into an instrument's plan on what's built: `receive(messages)`; `edit(values)`, its voice cards' own; `rebuild(plan)`, each sounding note's gate told again at its own time (`voices.ts`) |
 | `Silence` | when a voice of a voice card has rung out, by its envelopes' faded times and its note's end (`silence.ts`, not exported) |
 
-Tested in node, in its `test/` folder, on a stand-in for what's built (`test/built.js`) and the format's synth: a note on, its voice added, its sources set, its gate last; a note off, its shortest, its longest; per-note controllers, set as it starts, changed later, its pitch glided; a drum rack's pads; a voice let go once it has rung out, a gain resting at nothing an envelope closes, held and decayed to nothing before its note ends, a source nothing closes as its last release fades, an LFO with the sound it moves, a note detached; a gain an LFO opens too never closed; a change of structure (`test/voices.test.js`). On the builder, a planned pluck played and let go (`mockup/test/unit/voices-built.test.js`).
+Tested in node, in its `test/` folder, on a stand-in for what's built (`test/built.js`) and the format's synth: a note on, its voice added, its sources set, its gate last; a note off, its shortest, a held note, its longest where written; per-note controllers, set as it starts, changed later, its pitch glided; a drum rack's pads; a voice let go once it has rung out, a gain resting at nothing an envelope closes, held and decayed to nothing before its note ends, a source nothing closes as its last release fades, an LFO with the sound it moves, a note detached; its sources stopped by when it's silent, a trigger's envelope running on; a gain an LFO opens too never closed; a change of structure; its voice cards' own values, a drum rack's pads' apart (`test/voices.test.js`). On the builder, a planned pluck played, stopped and let go (`mockup/test/unit/voices-built.test.js`).

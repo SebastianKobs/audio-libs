@@ -22,12 +22,12 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 | `VCF` | stage | a filter | cutoff, resonance; tune (onto its detune, a sweep in semitones, an offset from the keys) | `filter/type`, `filter/slope` |
 | `Tremolo` | stage | a gain an LFO moves | gain | |
 | `Ring` | stage | the sound into a gain at 0, an oscillator moving it | frequency; tune; stop | `osc/wave` |
-| `Out` | output | its volume | volume | |
+| `Out` | output | its volume, then the note's own (MIDI 2.0's per-note #7, LAY14a5b) | volume, note volume | |
 
 | | |
 |---|---|
-| `NOTE_SOURCES`, `NoteSource` | a note's sources into a voice, as a voice card's CV, each a param's spec: frequency, gate, velocity, bend, and the per-note controllers by MIDI's names where it has them, vibrato depth and rate, breath, decay time, rise; at its default where a note sends none (`note.ts`) |
-| `NOTE_SETTINGS` | the note's settings: the time constant a later pitch glides by, its shortest, its longest (`note.ts`) |
+| `NOTE_SOURCES`, `NoteSource` | a note's sources into a voice, as a voice card's CV, each a param's spec: frequency, gate, velocity, its volume (#7, a held note hushed, LAY14a5b), bend, and the per-note controllers by MIDI's names where it has them, vibrato depth and rate, breath, decay time, rise; at its default where a note sends none (`note.ts`) |
+| `NOTE_SETTINGS` | the note's settings: the time constant a later pitch glides by, its shortest, its longest, 0 none, a held note sounding until its note off (LAY14a5b) (`note.ts`) |
 | `ARCHITECTURE_FORM` | what a voice card is: sources, modulators, stages and its one output, by role; sources into stages or out, stages into the next or out, the output out of the card, modulators into params of any role; no loops, every way out ending in its output (`architecture-form.ts`) |
 | `SOURCE_FORM`, `MODULATOR_FORM`, `STAGE_FORM`, `OUTPUT_FORM`, `SYNTH_FORMS` | a module's form by its job, its jacks; the synth's forms, the architecture's then its modules' (`architecture-form.ts`) |
 | `INSTRUMENT_FORM` | an instrument's form: its voices, each of the architecture's form, each into its one output (`architecture-form.ts`, LAY13b) |
