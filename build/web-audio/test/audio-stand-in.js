@@ -1,10 +1,12 @@
 // A stand-in for Web Audio that records what's built with it: every node, its props, its connections, its starts and stops, and every
-// value and automation call on its params. The sound engine (mockup/src/libs/web-audio-engine/) runs on it in node as it does on a browser's audio
-// context: a browser makes the same calls, so it builds the same graph. Used to record the graph each voice builds (record-instruments.js),
-// so a new sound engine can be held to building exactly the same (mockup/architecture/instruments.md).
+// value and automation call on its params. The builder (mockup/src/libs/build/web-audio/) runs on it in node as it does on a browser's
+// audio context: a browser makes the same calls, so it builds the same graph. Used to record the graph each voice builds
+// (record-instruments.js), so a change to the builder can be held to building exactly the same (mockup/architecture/instruments.md).
 // canonical(rec) turns a recording into a tree from where the sound goes out back to its sources, the same however the graph was built:
 // inputs sorted, numbers to 10 significant digits, times from `t0`, and how often a node was disconnected. A named node met on the way is
 // a ref to its name, written once under it, as itself, so a desk with every strip named is written strip by strip, not once for every path
+
+import { ClockedContext } from '../context.ts';
 
 const NOISE = 1e-9; // s: a time this near the start written as the start, a float's noise, as a time added up step by step has (P3c1)
 const PARAMS = {
@@ -239,6 +241,16 @@ export function install(now) {
   globalThis.document = { hidden: false };
 }
 
+// A context on a clock, as the studio makes one, on a stand-in of its own at the time now() gives; the clock's time onto it by
+// toContext, the same where none is given (the old engine's engineOn() until LAY16).
+export function clockedOn(now, toContext) {
+  const AudioContext = class extends StandInContext {
+    constructor() {
+      super(now);
+    }
+  };
+  return new ClockedContext({ AudioContext, ...(toContext && { toContext }) });
+}
 // what was built from node index `from` on, up to `to`: the nodes, and the edges and disconnects from them. Nodes made before are
 // outside it, and named in `names` (a Map from node to name) where they're endpoints
 export function take(ctx, from = 0, to) {

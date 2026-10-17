@@ -146,3 +146,10 @@ test("an address with no param refused; a setting refused, a preset's; a placeho
   assert.deepEqual(theremin.what.placeholders, [[]]);
   theremin.what.set(['pitch'], 0.2); // nothing built to move
 });
+
+test("a bandpass's resonance a ratio in Web Audio, as a plan writes it; a lowpass's in dB", () => {
+  const { what, made } = built(oneBlockPlan('filter', { resonance: 2 }, { type: 'bandpass' }));
+  assert.equal(made('biquad')[0].Q.value, 2, 'a ratio already');
+  what.set(['resonance'], 3);
+  assert.deepEqual(last(made('biquad')[0].Q), ['set', 3, 4], 'set, a ratio still');
+});

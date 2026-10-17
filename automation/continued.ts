@@ -36,14 +36,14 @@ export function cutAt(automation: readonly Automation[], at: number): Automation
   return ['set', level, at];
 }
 // its events after a time
-export function eventsAfter(automation: readonly Automation[], at: number): Automation[] {
+function eventsAfter(automation: readonly Automation[], at: number): Automation[] {
   return automation.filter((event) => eventTime(event) > at);
 }
 // How it goes on from where it is:
 //   - a ramp coming takes it on to its end by itself;
 //   - a target the wanted automation approaches, approached from there;
 //   - else the value it holds, glided to by the smoothing.
-export function onTheWay(
+function onTheWay(
   wanted: readonly Automation[],
   at: number,
   coming: readonly Automation[],
@@ -78,7 +78,7 @@ function timedToMeet(onItsWay: Automation[], level: number, coming: readonly Aut
   return [['target', target, from, (at - from) / Math.log(before / after)]];
 }
 // the target an automation approaches at a time: its last event by then, if that's a target
-export function approachAt(automation: readonly Automation[], at: number): { value: number; tc: number } | null {
+function approachAt(automation: readonly Automation[], at: number): { value: number; tc: number } | null {
   const last = automation.filter((event) => eventTime(event) <= at).at(-1);
   return last?.[0] === 'target' ? { value: last[1], tc: last[3] } : null;
 }

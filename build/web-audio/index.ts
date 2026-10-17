@@ -1,6 +1,7 @@
 // ---------- build/web-audio: the builder for Web Audio, handed a plan, handing back what's built ----------
-// The only code, with the engine it takes over from (libs/web-audio-engine/), that makes Web Audio nodes.
+// The only code that makes Web Audio nodes.
 // Its parts:
+//   - context.ts: the audio context a plan is built in, made at a low latency, on a clock;
 //   - builder.ts: the builder, a plan built, its blocks made, its composites opened, its placeholders said;
 //   - built.ts: what it hands back, its front panel; parts.ts, the parts it's taken apart by;
 //   - making.ts: what a block's maker is handed; wiring.ts, a node's jacks, a composite's wires made;
@@ -12,6 +13,7 @@
 //   - meters.ts: a meter on a node, its peak; output.ts, the output after what's built, faded in and out;
 //   - changes.ts: changes held until their time, a lead ahead where Web Audio can schedule them;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
+export { ClockedContext, type ClockedContextOptions } from './context.ts';
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
 export { WebAudioBuilt, type Building } from './built.ts';
 export { CROSSFADE, RING_OUT } from './rebuild.ts';

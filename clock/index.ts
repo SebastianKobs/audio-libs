@@ -4,7 +4,7 @@
 // - the ticks: about every 25 ms, from a worker, so they keep going in a hidden tab. They drive the scheduler and every timeout
 // - the beat grid: 16ths with their swing, scheduled a little ahead and sent to onStep's listeners
 // - the edge to Web Audio, which keeps its own time. toContext(t) turns a clock time into the audio context's time, for the engine
-//   (libs/web-audio-engine/, given it as toContext). The offset between the two is measured on every tick, followed slowly as the two clocks
+//   (libs/build/web-audio/'s ClockedContext, given it as toContext). The offset between the two is measured on every tick, followed slowly as the two clocks
 //   drift apart, and found again when the audio resumes after a suspend
 // Its settings are an object it reads live (new Clock({ settings })): bpm, the tempo; swing, 0 straight to 2; swingOn, '16ths' or '8ths'; quantize,
 // the grid snap() uses unless told another (GRIDS). A frame time is the caller's: faking() says whether time is the fake one.

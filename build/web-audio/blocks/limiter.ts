@@ -1,6 +1,6 @@
 // ---------- libs/build/web-audio/blocks/limiter: how a limiter holds at its ceiling, as hard as Web Audio's compressor goes ----------
-// Its settings are the Limiter module's (libs/web-audio-fx/inserts.ts) and a limiter block's (libs/synth/blocks/limiter.ts); Web Audio's quirk, the
-// makeup gain its compressor adds, is taken back here, at the edge, where Web Audio is
+// Its settings are a limiter block's (libs/plan/blocks/limiter.ts), the Limiter effect's on it; Web Audio's quirk, the makeup gain
+// its compressor adds, is taken back here, at the edge, where Web Audio is
 import { BuiltNode } from '../built-node.ts';
 import { ParamInUnits } from '../param-units.ts';
 import { gainOf } from '../../../params/index.ts';
@@ -13,7 +13,7 @@ const HOLD = { ratio: 20, knee: 0, attack: 0.003 }; // as hard as Web Audio's co
 export function makeupOf(threshold: number, ratio: number): number {
   return 0.6 * -threshold * (1 - 1 / ratio);
 }
-// a limiter as Web Audio holds it, as a limiter block plans it (libs/synth/blocks/limiter.ts): its gain (drive) into a compressor at its
+// a limiter as Web Audio holds it, as a limiter block declares it (libs/plan/blocks/limiter.ts): its gain (drive) into a compressor at its
 // ceiling, as hard as it goes, and the gain (back) that takes its makeup back; its params in the plan's units, its gain in dB, its ceiling
 // in dBFS, its release in s. Read as Ableton's: its in after its gain, its out, and how much it takes away now, in dB
 // kept: each node it makes, handed to whoever takes them apart later

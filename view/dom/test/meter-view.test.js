@@ -1,6 +1,6 @@
 // The level meters' unit tests (mockup/src/libs/view/dom/meter-view.ts; mockup/src/mixer-surface/meters.ts until LAY12d1): where a level shows on a meter's scale,
-// and how it falls. Where the desk takes its peaks is the engine's (engine.test.js). Where a gain shows on a fader, its law, a param's
-// taper since U2c4a (libs/synth/test/taper.test.js)
+// and how it falls. Where the desk takes its peaks is the builder's (builder.test.js). Where a gain shows on a fader, its law, a param's
+// taper since U2c4a (libs/params/test/taper.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { meterFall, meterPosition } from '../index.ts';

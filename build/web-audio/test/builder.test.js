@@ -321,3 +321,15 @@ test("what a node is built as, by its address, for who names it or listens to it
   assert.deepEqual(what.nodesUnder([]).length >= under.length + 1, true, "the top's: all of them");
   assert.throws(() => what.jacksOf(['nowhere']), /nowhere: not built/);
 });
+
+test('a pan where the context has no stereo panner: a gain passing the sound through, unpanned', () => {
+  const { context, builder, made } = builderOn();
+  context.createStereoPanner = undefined;
+  builder.build(chainOf(blockNode('pan', 'pan', { pan: -0.5 })), { into: context.destination });
+  assert.deepEqual(made('panner'), [], 'no panner');
+  assert.deepEqual(
+    made('gain').map((gain) => gain.gain.value),
+    [1],
+    'passed through at 1',
+  );
+});
