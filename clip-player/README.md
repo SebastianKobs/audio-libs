@@ -1,0 +1,20 @@
+# clip-player
+
+The clip player, its model, as Ableton's session view holds and plays clips: tracks of clip slots, each slot holding a clip, a pattern of notes; a clip launched from its slot plays on its track, one a track, looping on the grid, its notes sent into the input a control surface plays into (`libs/midi-sequencer/`), so they reach their instrument and the stream as a played note does. A clip's notes are pitches, or steps of the scale pitched in the key as it's launched, so a clip follows a change of key the next time it's launched. A library of its own since SHAPE2a0a, `ClipPlayer` moved out of the MIDI sequencer: for the background's loops and, to come, a recorded clip's preview; not the garden's own singing, which picks a run of what was played and sends it as notes. No DOM: its port and its view model are the views' (`libs/view/`).
+
+```ts
+import { ClipPlayer } from './index.ts';
+const clips = new ClipPlayer({ input: sequencer, grid: clock.grid, key: () => mood() });
+clips.put(bassSlot, { to: { track: 'bass', clip: bassSlot, live: false }, pattern: BASS, transpose: -12, straight: true });
+clips.launch(bassSlot);                  // pitched in the key now, looping on its track from the next 16th
+clock.onStep((i, t) => clips.step(i, t)); // every playing clip's notes due in the 16th i sent on
+```
+
+| | |
+|---|---|
+| `new ClipPlayer({ input, grid, key })`, `step(i, t)` | the clips playing, one a track: each 16th, every playing clip's notes due there sent on, in the order the clips were launched, each with its note on and its note off together, its length known as it starts, a fresh index each, the player one source (note rotation); the looping and when each note comes due the sequencer's clip launcher's (`libs/sequencer/`, `ClipLauncher`); `key()`, the key a clip's steps are pitched in, read as it's launched (`player.ts`) |
+| `Clip` | a clip: where its notes go (`to`, an address on the MIDI sequencer's input), its pattern of notes, each a `pitch` or a `step` of the scale; `transpose`, semitones once its notes are pitched; `straight`, under the grid's swing or on it; `velocity()`, read as each note comes due, as a velocity device sets it, full if it has none, none leaving the note out (`player.ts`) |
+| `put(slot, clip)`, `slotsOn(track)`, `clipIn(slot)` | the slots: a clip put in its slot, in place of the one it held, a slot known by whatever its owner gives; a track's slots in the order they were first put, a slot's track the one its clip's notes go to; a slot's clip, none where it's empty (`player.ts`) |
+| `launch(slot)`, `stop(track)` | a slot's clip launched on its track, in place of what the track played, pitched in the key then, its notes carrying a fresh region, one while it loops, as the recorder tells one launch from another; an empty slot launches nothing; a track stopped (`player.ts`) |
+
+Tested in node, in its `test/` folder (`test/player.test.js`): a launched clip's notes as they come due, round its loop, on the swing or straight, at its velocity; one clip a track; a launch's region; the slots; a clip's steps pitched in the key it's launched in, transposed.
