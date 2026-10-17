@@ -16,6 +16,6 @@ export type { Pattern, PatternEvent } from './pattern.ts';
 export { upcoming, whole, due, liveEvents, underWayAt, rescaled, place, placeOn } from './playing.ts';
 export type { Grid } from './playing.ts';
 export { ClipLauncher } from './launcher.ts';
-export type { ClipGrid, LaunchedClip, PlayEvent } from './launcher.ts';
+export type { ClipGrid, ClipsTold, LaunchedClip, PlayEvent, Span } from './launcher.ts';
 export { TrackPool } from './track-pool.ts';
 export { Holding } from './holding.ts';

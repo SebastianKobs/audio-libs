@@ -7,6 +7,7 @@ export interface PatternEvent {
   start: Ticks;
   duration?: Ticks | undefined;
   offset?: Ticks | undefined;
+  straight?: boolean | undefined; // played straight under the swing, or on it, in place of its clip
   [value: string]: unknown;
 }
 // a pattern, as a clip: its time signature, its length in bars, whether it loops, where a record was played from, its events, its name

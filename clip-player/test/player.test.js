@@ -169,3 +169,77 @@ test("a clip's notes in steps of the scale, pitched in the key as it's launched,
     "in the key it's launched in, its root an octave below as the theory puts it, transposed",
   );
 });
+
+test("a clip's note carries its part, its per-note values and a held note's glides, in ticks after its start, transposed with it", () => {
+  const into = input();
+  const clips = new ClipPlayer({ input: into, grid, key: () => KEY });
+  const sung = {
+    bars: 1,
+    loop: true,
+    events: [{ start: 0, duration: 4 * STEP, pitch: 60, part: 3, values: { vibrato: 20 }, glides: [[2 * STEP, 62]] }],
+  };
+  launch(clips, { to: to('reed'), pattern: sung, transpose: 12 });
+  clips.step(0, 0);
+  assert.deepEqual(into.sent[0].messages, [
+    { type: 'note on', index: 0, pitch: 72, velocity: 1, t: 0, part: 3 },
+    { type: 'per-note controller', index: 0, controller: 'vibrato', value: 20, t: 0 },
+    { type: 'per-note controller', index: 0, controller: 'pitch', value: 74, t: 2 * SIXTEENTH },
+    { type: 'note off', index: 0, t: 4 * SIXTEENTH },
+  ]);
+});
+
+test("a clip played once on a track lent as it starts, by its owner's hook, for its span; launched again from its slot, lent again", () => {
+  const into = input();
+  const lent = [];
+  const clips = new ClipPlayer({ input: into, grid, key: () => KEY });
+  const lend = (where, span) => {
+    lent.push([where.track, span]);
+    return {
+      ...where,
+      track: `my ${where.track}/${lent.length}`,
+      play: { ...where.play, track: lent.length, until: span.until },
+    };
+  };
+  const phrase = { bars: 1, events: [{ start: STEP, duration: STEP, pitch: 50 }] };
+  const flower = { kind: 'tap' };
+  clips.put(flower, { to: { track: 'tap', clip: flower, live: false }, pattern: phrase, once: true, lend });
+  assert.deepEqual(clips.slotsOn('tap'), [flower], 'on the track it borrows from');
+  clips.launch(flower);
+  clips.step(2, 2 * SIXTEENTH);
+  assert.deepEqual(lent, [], 'not before its beat');
+  clips.step(4, 4 * SIXTEENTH);
+  clips.step(5, 5 * SIXTEENTH + SWING);
+  clips.launch(flower);
+  clips.step(8, 8 * SIXTEENTH);
+  clips.step(9, 9 * SIXTEENTH + SWING);
+  assert.deepEqual(lent, [
+    ['tap', { from: 5 * SIXTEENTH + SWING, until: 5 * SIXTEENTH + SWING + SIXTEENTH }],
+    ['tap', { from: 9 * SIXTEENTH + SWING, until: 9 * SIXTEENTH + SWING + SIXTEENTH }],
+  ]);
+  assert.deepEqual(
+    into.sent.map(({ to: where, messages }) => [where.track, where.play.track, where.play.region, messages[0].t]),
+    [
+      ['my tap/1', 1, 1, 5 * SIXTEENTH + SWING],
+      ['my tap/2', 2, 2, 9 * SIXTEENTH + SWING],
+    ],
+    "each on its lent track, its launch's region",
+  );
+});
+
+test('a slot emptied: its clip gone from its track, stopped where it plays', () => {
+  const into = input();
+  const clips = new ClipPlayer({ input: into, grid, key: () => KEY });
+  clips.put('groove', { to: to('drums'), pattern });
+  clips.put('line', { to: to('bass'), pattern });
+  clips.launch('groove');
+  clips.launch('line');
+  clips.remove('groove');
+  clips.step(0, 0);
+  assert.deepEqual(clips.slotsOn('drums'), []);
+  assert.equal(clips.clipIn('groove'), undefined);
+  assert.deepEqual(
+    into.sent.map(({ to: where }) => where.track),
+    ['bass'],
+    'the other still plays',
+  );
+});
