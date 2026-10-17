@@ -8,6 +8,7 @@ export class BuiltStandIn {
   rebuilt = [];
   fadedAt = new Map();
   placeholders = [];
+  tempi = [];
 
   add(copy, at) {
     this.added.push([copy.join('/'), at]);
@@ -29,6 +30,8 @@ export class BuiltStandIn {
   }
   automate() {}
   preset() {}
-  tempo() {}
+  tempo(beat) {
+    this.tempi.push(beat);
+  }
   dispose() {}
 }

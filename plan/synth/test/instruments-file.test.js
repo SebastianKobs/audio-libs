@@ -8,18 +8,7 @@ import assert from 'node:assert/strict';
 import { instrumentsOf, MODULE_TEMPLATES, SYNTH_FORMS } from '../index.ts';
 import { Planner } from '../../planner/index.ts';
 import { paramAt } from '../../format/index.ts';
-import { PLUCK } from './pluck.js';
-
-// the file, as a person writes it: the pluck by its name, two patches on it, a rack of one pad
-const { kind: _kind, form: _form, outputs: _outputs, ...voiceCard } = PLUCK;
-const FILE = {
-  instruments: { Pluck: voiceCard },
-  patches: {
-    bright: { instrument: 'Pluck', values: { 'osc 1/tune': 12 } },
-    rtlprnf: { instrument: 'Pluck', settings: { 'osc 1/osc/wave': 'triangle' } },
-  },
-  racks: { kit: [{ key: 38, patch: 'bright' }] },
-};
+import { PLUCK_CARD as voiceCard, PLUCK_FILE as FILE } from './pluck.js';
 
 test("each instrument a template of a voice card's form, its name its kind, one mono output; each patch a preset by a name of its own, the instrument it plays its kind; each rack its pads", () => {
   const { templates, patches, racks } = instrumentsOf(FILE, 'test.yaml');

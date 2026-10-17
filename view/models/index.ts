@@ -11,6 +11,8 @@
 //   - moves.ts: what moves each param, a macro's maps and a child wired into it, as a mod matrix;
 //   - envelope.ts: an envelope's curve from its knobs, as a view draws it, the curve played;
 //   - preset-port.ts: a port for a plan whose values a preset gives, a patch's on its voice card;
+//   - cards.ts: an instrument's patches as the device view edits them, a port each, the patch
+//     edited in the bank;
 //   - command.ts: what's done in a view, by address;
 //   - custom.ts: a view of its own, registered by kind.
 export { Choice } from './choice.ts';
@@ -23,5 +25,6 @@ export { Mixer, type BusGroup } from './mixer.ts';
 export type { ModelPort, Role, Slot } from './model.ts';
 export type { Move } from './moves.ts';
 export { PresetPort, type PresetOwner } from './preset-port.ts';
+export { InstrumentCards, type CardValues, type InstrumentCard } from './cards.ts';
 export { Strip, shortName, shownName } from './strip.ts';
 export { ViewBuilder, type MatrixRow } from './view-builder.ts';

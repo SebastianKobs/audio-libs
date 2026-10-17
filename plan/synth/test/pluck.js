@@ -22,3 +22,15 @@ export const PLUCK = {
     { name: 'velocity', maps: [{ to: ['amp', 'velocity'], factor: 1, offset: 0 }] },
   ],
 };
+// The pluck as a file of instruments writes it, its kind its name there; and the tests' file: the pluck by its name, two
+// patches on it, a rack of one pad.
+const { kind: _kind, form: _form, outputs: _outputs, ...card } = PLUCK;
+export const PLUCK_CARD = card;
+export const PLUCK_FILE = {
+  instruments: { Pluck: PLUCK_CARD },
+  patches: {
+    bright: { instrument: 'Pluck', values: { 'osc 1/tune': 12 } },
+    rtlprnf: { instrument: 'Pluck', settings: { 'osc 1/osc/wave': 'triangle' } },
+  },
+  racks: { kit: [{ key: 38, patch: 'bright' }] },
+};
