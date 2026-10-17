@@ -9,5 +9,5 @@
 //   - mix.ts: the live mix's mute and solo, a mute taking along what its setup says;
 //   - setup.ts: what a setup hands in, its rules, by a strip's name.
 export { Desk } from './desk.ts';
-export type { DeskBuilt } from './desk-state.ts';
+export type { DeskBuilt, WayIn } from './desk-state.ts';
 export type { DeskSetup, SlotRole } from './setup.ts';
