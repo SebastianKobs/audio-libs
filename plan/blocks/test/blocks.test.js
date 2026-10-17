@@ -80,7 +80,7 @@ test('what each block declares, in short standard terms: its params, its setting
     limiter: { params: ['gain', 'ceiling', 'release'], settings: [], inputs: ['in'], outputs: ['out'] },
     envelope: {
       params: ['gate', 'delay', 'attack', 'hold', 'decay', 'sustain', 'release', 'amount'],
-      settings: ['curve', 'mode'],
+      settings: ['mode'],
       inputs: [],
       outputs: [`out ${MONO}`],
     },
@@ -109,7 +109,7 @@ test("the blocks' choices: an oscillator's waves, a filter's three types, a pan'
   assert.deepEqual(param('gain', 'gain'), { ...FADER_GAIN, unit: 'dB', default: 1 }, "a gain the fader's, in dB, at 1");
 });
 
-test("a voice's blocks: an oscillator's rate a time with a sync switch, free its frequency in Hz, down to an LFO's, its phase reset with each note or running free; a source's stop, at 0 none, to play until it's let go; a noise looped or not, its offset into its buffer; an oscillator's detune and a filter's wide enough for a tune of four octaves; an envelope's curve exponential, to its target or in a line, its mode the gate's or a trigger's, running on past the note-off", () => {
+test("a voice's blocks: an oscillator's rate a time with a sync switch, free its frequency in Hz, down to an LFO's, its phase reset with each note or running free; a source's stop, at 0 none, to play until it's let go; a noise looped or not, its offset into its buffer; an oscillator's detune and a filter's wide enough for a tune of four octaves; an envelope's curve an ARP's, no setting, its mode the gate's or a trigger's, running on past the note-off", () => {
   const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   assert.ok(isSwitch(param('oscillator', 'sync')));
@@ -146,10 +146,6 @@ test("a voice's blocks: an oscillator's rate a time with a sync switch, free its
     assert.ok(low <= -4800 && high >= 4800, `${kind}: four octaves either way, ${low}..${high}`);
     assert.deepEqual([param(kind, 'detune').unit, param(kind, 'detune').default], ['cents', 0]);
   }
-  assert.deepEqual(
-    [setting('envelope', 'curve').choices, setting('envelope', 'curve').default],
-    [['exponential', 'target', 'linear'], 'exponential'],
-  );
   assert.deepEqual(
     [setting('envelope', 'mode').choices, setting('envelope', 'mode').default],
     [['gate', 'trigger'], 'gate'],

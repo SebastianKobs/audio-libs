@@ -1,6 +1,6 @@
 // ---------- build/web-audio/blocks/envelope: an envelope in Web Audio ----------
-// A constant source, its level following the envelope's curve from its gate. Wired into the
-// params it moves, its level adds to theirs, as CV into a VCA's.
+// A constant source, its level following the envelope's curve from its gate, an ARP's. Wired into
+// the params it moves, its level adds to theirs, as CV into a VCA's.
 //   1. Its gate opened at a time: its curve drawn from 0 there.
 //   2. Closed, a gate's: its release from where it is then; sooner than it was told, from then.
 //      A trigger's runs on.
@@ -8,7 +8,7 @@
 //      where it is then, a held level glided to; before its gate opens, kept for it.
 import { continuedAs, fadedFrom, scheduled, type Automation } from '../../../automation/index.ts';
 import { SILENCE } from '../../../params/index.ts';
-import { envelopeCurve, envelopeTarget, type EnvelopeCurve } from '../../../plan/blocks/index.ts';
+import { envelopeCurve } from '../../../plan/blocks/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
 import { automate } from '../automation.ts';
 import { BuiltNode } from '../built-node.ts';
@@ -26,7 +26,6 @@ export function envelope(node: Node, making: Making): BuiltNode {
   const held = Object.fromEntries(STAGES.map((name) => [name, Number(valueOf(node, name))])) as Held;
   const curve = new EnvelopeCurveAsBuilt(made.offset, {
     held,
-    curve: settingOf(node, 'curve') as EnvelopeCurve, // one of its choices
     trigger: settingOf(node, 'mode') === 'trigger',
     now: () => making.context.currentTime,
   });
@@ -46,7 +45,6 @@ export function envelope(node: Node, making: Making): BuiltNode {
 class EnvelopeCurveAsBuilt {
   readonly #level: AudioParam;
   readonly #held: Held;
-  readonly #curve: EnvelopeCurve;
   readonly #trigger: boolean;
   readonly #now: () => number;
   #gate = 0;
@@ -54,23 +52,19 @@ class EnvelopeCurveAsBuilt {
   #closed: number | undefined;
   #drawn: Automation[] = [];
 
-  constructor(
-    level: AudioParam,
-    { held, curve, trigger, now }: { held: Held; curve: EnvelopeCurve; trigger: boolean; now: () => number },
-  ) {
+  constructor(level: AudioParam, { held, trigger, now }: { held: Held; trigger: boolean; now: () => number }) {
     this.#level = level;
     this.#held = held;
-    this.#curve = curve;
     this.#trigger = trigger;
     this.#now = now;
   }
-  // When it has faded for good, within the floor of silence: from the start before its gate
-  // opens; never while it holds a level.
+  // When it has faded for good, within the floor of silence of its amount, as each stage is done
+  // at its time: from the start before its gate opens; never while it holds a level.
   faded(): number {
     if (this.#opened === undefined) {
       return -Infinity;
     }
-    return fadedFrom(this.#drawn, SILENCE);
+    return fadedFrom(this.#drawn, SILENCE * Math.abs(this.#held.amount));
   }
   // its gate, or a stage, its sustain, its release or its amount, as a param is automated
   param(name: string): ReturnType<typeof toldParam> {
@@ -113,7 +107,7 @@ class EnvelopeCurveAsBuilt {
   // its curve as its stages have it now, from its gate opening, released where it has closed
   #wanted(): Automation[] {
     const { release, amount, ...times } = this.#held;
-    return envelopeCurve(times, envelopeTarget(this.#curve, amount), {
+    return envelopeCurve(times, amount, {
       opened: this.#opened!, // drawn only once its gate has opened
       closed: this.#closed,
       release,

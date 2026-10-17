@@ -6,7 +6,8 @@
 import { time, val, type Time, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
 import type { Automation } from '../automation/index.ts';
-import { ENVELOPE_SPECS, envelopeRelease, envelopeStages, type EnvelopeTarget } from '../plan/blocks/index.ts';
+import { ENVELOPE_SPECS } from '../plan/blocks/index.ts';
+import { envelopeRelease, envelopeStages, type EnvelopeTarget } from './stage-curve.ts';
 
 // what the stages need of the note: its values, whether it runs on, and its target
 interface Note {

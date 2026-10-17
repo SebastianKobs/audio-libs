@@ -9,7 +9,7 @@ import { val, type Valued, type Values } from './values.ts';
 import type { Envelope } from './patch.ts';
 import { eventTime, type Automation } from '../automation/index.ts';
 import { releaseOf, stagesOf } from './stages.ts';
-import type { EnvelopeTarget } from '../plan/blocks/index.ts';
+import type { EnvelopeTarget } from './stage-curve.ts';
 import { SILENCE } from '../params/index.ts';
 
 // what an envelope needs of the note being planned (plan-builder.ts's builder): its values, its velocity, whether it runs on

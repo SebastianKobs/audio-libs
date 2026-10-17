@@ -1,122 +1,106 @@
-// An envelope's curve (mockup/src/libs/plan/blocks/envelope-curve.ts), on numbers:
+// An envelope's curve (mockup/src/libs/plan/blocks/envelope-curve.ts), on numbers, as an ARP's:
 //   - its stages from its gate opening: after its delay up over its attack, held, down to its sustain;
+//   - its attack charging toward 1.3 times its peak, cut there at its time;
+//   - its decay and its release approaching where they go, done at their time, within the floor of silence, never set there;
 //   - its release from its gate closing: from where its stages have it then, down to 0;
-//   - its curve's three shapes, exponential, to its target, in a line;
 //   - its whole curve from its gate opening at a time, released where it has closed.
-// On a target that takes a point as it is, its attack straight, its decay and release exponential.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { envelopeCurve, envelopeRelease, envelopeStages, envelopeTarget } from '../index.ts';
+import { envelopeCurve, envelopeRelease, envelopeStages } from '../index.ts';
+import { levelAt } from '../../../automation/index.ts';
 import { SILENCE } from '../../../params/index.ts';
 import { near } from '../../../util/test/near.js';
 
-const TARGET = { valueAt: (point) => point, rampOf: (stage) => (stage === 'attack' ? 'linear' : 'exp') };
 const NONE = { delay: 0, attack: 0, hold: 0, decay: 0, sustain: 1 };
+// the attack's time constant, a time over it: an RC charging toward 1.3, at 1 after the attack's time
+const CHARGED = Math.log(1.3 / (1.3 - 1));
+// a decay's and a release's, a time over it: within the floor of silence of where it goes, at its time
+const DONE = Math.log(1 / SILENCE);
 
-test('its stages: after its delay up over its attack, held over its hold, down to its sustain over its decay; each level held until its stage starts', () => {
+test('its stages: after its delay up over its attack, toward 1.3 times its peak, cut there; held over its hold; down to its sustain over its decay, approaching it', () => {
   const times = { delay: 0.5, attack: 0.25, hold: 0.25, decay: 0.5, sustain: 0.5 };
-  assert.deepEqual(envelopeStages(times, TARGET, false), [
+  const stages = envelopeStages(times, 2, false);
+  assert.deepEqual(stages, [
     ['set', 0, 0],
-    ['set', 0, 0.5],
-    ['linear', 1, 0.75],
-    ['set', 1, 1],
-    ['exp', 0.5, 1.5],
+    ['target', 2.6, 0.5, 0.25 / CHARGED],
+    ['set', 2, 0.75],
+    ['target', 1, 1, 0.5 / DONE],
   ]);
+});
+
+test('its attack an RC charging past its peak, cut there at its time: faster at first, slowing to a quarter at the top', () => {
+  const stages = envelopeStages({ ...NONE, attack: 1 }, 1, false);
+  near(levelAt(stages.slice(0, 2), 1), 1, 'at its peak at its time');
+  near(levelAt(stages, 0.5), 1.3 * (1 - Math.sqrt(0.3 / 1.3)), 'halfway, past half');
+  const slope = (t) => (levelAt(stages, t + 1e-6) - levelAt(stages, t)) / 1e-6;
+  near(slope(0.999) / slope(0), 0.3 / 1.3, 'its speed at the top', 0.001);
+});
+
+test('its decay and its release done at their time: within the floor of silence of where they go', () => {
+  const stages = envelopeStages({ ...NONE, decay: 1, sustain: 0.25 }, 1, false);
+  near(levelAt(stages, 1), 0.25 + 0.75 * SILENCE, 'its decay at its time');
+  const { automation } = envelopeRelease(2, { from: 3, stages });
+  near(levelAt(automation, 5), 0.25 * SILENCE, 'its release at its time');
 });
 
 test('its stages, the short ways: no delay and no attack, at its top at once; no decay and a full sustain, nothing more; a stage with no time set at its start; one that runs on, its first a value', () => {
-  assert.deepEqual(envelopeStages(NONE, TARGET, false), [['set', 1, 0]]);
-  assert.deepEqual(envelopeStages({ ...NONE, attack: 0.25 }, TARGET, false), [
+  assert.deepEqual(envelopeStages(NONE, 1, false), [['set', 1, 0]]);
+  assert.deepEqual(envelopeStages({ ...NONE, delay: 0.25 }, 1, false), [
     ['set', 0, 0],
-    ['linear', 1, 0.25],
+    ['set', 1, 0.25],
   ]);
-  assert.deepEqual(envelopeStages({ ...NONE, sustain: 0.5 }, TARGET, false), [
+  assert.deepEqual(envelopeStages({ ...NONE, sustain: 0.5 }, 1, false), [
     ['set', 1, 0],
     ['set', 0.5, 0],
   ]);
-  assert.deepEqual(envelopeStages({ ...NONE, attack: 0.25 }, TARGET, true)[0], ['value', 0]);
+  assert.deepEqual(envelopeStages({ ...NONE, attack: 0.25 }, 1, true)[0], ['value', 0]);
 });
 
-test('its release from its gate closing: from where its stages have it, a ramp running then cut there; down to 0 over its release; when it has faded', () => {
-  const stages = envelopeStages({ ...NONE, attack: 1, decay: 1, sustain: 0.5 }, TARGET, false);
-  assert.deepEqual(envelopeRelease(0.5, TARGET, { from: 0.25, stages }), {
-    automation: [
-      ['linear', 0.25, 0.25],
-      ['exp', 0, 0.75],
+test('its release from its gate closing: from where its stages have it, a stage running then cut there; down to 0; when it has faded', () => {
+  const stages = envelopeStages({ ...NONE, attack: 1, decay: 1, sustain: 0.5 }, 1, false);
+  const { automation, faded } = envelopeRelease(0.5, { from: 0.25, stages });
+  assert.deepEqual(
+    automation.map(([kind, , at]) => [kind, at]),
+    [
+      ['set', 0.25],
+      ['target', 0.25],
     ],
-    faded: 0.75,
-  });
-  assert.deepEqual(envelopeRelease(0.5, TARGET, { from: 4, stages }).automation[0], ['set', 0.5, 4], 'at its sustain');
-  assert.deepEqual(envelopeRelease(0, TARGET, { from: 4, stages }), {
-    automation: [
-      ['set', 0.5, 4],
-      ['set', 0, 4],
-    ],
-    faded: 4,
-  });
+  );
+  near(automation[0][1], 1.3 * (1 - Math.exp(-0.25 * CHARGED)), 'cut where its attack has it');
+  assert.deepEqual(automation[1], ['target', 0, 0.25, 0.5 / DONE]);
+  assert.equal(faded, 0.75);
+  const [held] = envelopeRelease(0.5, { from: 4, stages }).automation;
+  assert.deepEqual([held[0], held[2]], ['set', 4], 'at its sustain');
+  near(held[1], 0.5 + 0.5 * Math.exp(-3 * DONE), 'within the floor of silence of it');
+  const { automation: cut, faded: at } = envelopeRelease(0, { from: 4, stages });
+  assert.deepEqual([cut[1], at], [['set', 0, 4], 4], 'no release: at nothing at once');
 });
 
-test("its curve's three shapes: exponential, up in a line, down straight in dB, never past the floor of silence; to its target, each stage approaching its point by its time as a time constant; in a line", () => {
-  const exponential = envelopeTarget('exponential', 0.8);
-  assert.deepEqual([exponential.valueAt(1), exponential.valueAt(0.5), exponential.valueAt(0)], [0.8, 0.4, SILENCE]);
-  assert.deepEqual(['attack', 'decay', 'release'].map(exponential.rampOf), ['linear', 'exp', 'exp']);
-  assert.equal(envelopeTarget('exponential', -2).valueAt(0), -SILENCE, 'below 0, its floor below it');
-  const target = envelopeTarget('target', 2);
-  assert.deepEqual([target.valueAt(0), target.valueAt(1)], [0, 2]);
-  assert.deepEqual(['attack', 'decay', 'release'].map(target.rampOf), ['target', 'target', 'target']);
-  const linear = envelopeTarget('linear', -0.6);
-  near(linear.valueAt(0), 0);
-  near(linear.valueAt(1), -0.6);
-  assert.deepEqual(['attack', 'decay', 'release'].map(linear.rampOf), ['linear', 'linear', 'linear']);
-});
-
-test('its stages to their target: each approached from its start by its time, no level held before it; an LFO fading in after its delay', () => {
-  const fade = { ...NONE, delay: 0.4, attack: 0.25 };
-  assert.deepEqual(envelopeStages(fade, envelopeTarget('target', 2), false), [
+test("its amount below 0, a pitch's sweep down: every point its share of it, its attack toward 1.3 times it", () => {
+  assert.deepEqual(envelopeStages({ ...NONE, attack: 0.5, decay: 0.5, sustain: 0 }, -0.4, false), [
     ['set', 0, 0],
-    ['target', 2, 0.4, 0.25],
+    ['target', -0.52, 0, 0.5 / CHARGED],
+    ['set', -0.4, 0.5],
+    ['target', 0, 0.5, 0.5 / DONE],
   ]);
-  const stages = envelopeStages({ ...NONE, decay: 0.5, sustain: 0.5 }, envelopeTarget('target', 1), false);
-  assert.deepEqual(stages, [
-    ['set', 1, 0],
-    ['target', 0.5, 0, 0.5],
-  ]);
-  const [cut, release] = envelopeRelease(0.3, envelopeTarget('target', 1), { from: 2, stages }).automation;
-  assert.deepEqual([cut[0], cut[2]], ['set', 2], 'set where it is, four time constants down');
-  near(cut[1], 0.5 + 0.5 * Math.exp(-4));
-  assert.deepEqual(release, ['target', 0, 2, 0.3]);
 });
 
 test('its whole curve from its gate opening at a time: its stages from then; released where its gate has closed, from where they have it then', () => {
   const times = { ...NONE, attack: 1, decay: 1, sustain: 0.5 };
-  assert.deepEqual(envelopeCurve(times, TARGET, { opened: 10, release: 0.5 }), [
+  assert.deepEqual(envelopeCurve(times, 1, { opened: 10, release: 0.5 }), [
     ['set', 0, 10],
-    ['linear', 1, 11],
-    ['exp', 0.5, 12],
+    ['target', 1.3, 10, 1 / CHARGED],
+    ['set', 1, 11],
+    ['target', 0.5, 11, 1 / DONE],
   ]);
-  assert.deepEqual(envelopeCurve(times, TARGET, { opened: 10, closed: 10.25, release: 0.5 }), [
-    ['set', 0, 10],
-    ['linear', 0.25, 10.25],
-    ['exp', 0, 10.75],
-  ]);
-});
-
-test('its exponential curve, once down to its floor, silent there, as a source stops once whatever gates it has faded: its decay to nothing, its release', () => {
-  const target = envelopeTarget('exponential', 1);
-  const stages = envelopeStages({ ...NONE, attack: 0.25, decay: 0.5, sustain: 0 }, target, false);
-  assert.deepEqual(stages.slice(-2), [
-    ['exp', SILENCE, 0.75],
-    ['set', 0, 0.75],
-  ]);
-  const held = envelopeStages({ ...NONE, decay: 0.5, sustain: 0.5 }, target, false);
-  assert.deepEqual(held.at(-1), ['exp', 0.5, 0.5], 'held at its sustain, not silent');
-  assert.deepEqual(envelopeRelease(0.3, target, { from: 2, stages: held }).automation.slice(-2), [
-    ['exp', SILENCE, 2.3],
-    ['set', 0, 2.3],
-  ]);
+  const released = envelopeCurve(times, 1, { opened: 10, closed: 10.25, release: 0.5 });
   assert.deepEqual(
-    envelopeStages({ ...NONE, decay: 0.5, sustain: 0 }, TARGET, false).at(-1),
-    ['exp', 0, 0.5],
-    "a caller's own target as it is",
+    released.map(([kind, , at]) => [kind, at]),
+    [
+      ['set', 10],
+      ['target', 10],
+      ['set', 10.25],
+      ['target', 10.25],
+    ],
   );
 });

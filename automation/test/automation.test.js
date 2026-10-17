@@ -226,6 +226,28 @@ test('automation continued as another from a time, from where it plays: a ramp r
   assert.equal(SMOOTHING, 0.05, 's: as a plugin smooths a knob against zipper noise');
 });
 
+test('a target continued from where it plays, an event coming cutting it at a value on its way, as a comparator an attack: timed to reach that value then, so nothing jumps; one cut elsewhere, or past it, approached as wanted', () => {
+  const charging = [
+    ['set', 0, 0],
+    ['target', 1.3, 0, 0.5],
+  ];
+  const wanted = [
+    ['set', 0, 0],
+    ['target', 1.3, 0, 0.8],
+    ['set', 1, 2],
+  ];
+  const continued = continuedAs(charging, wanted, 0.5);
+  const level = 1.3 * (1 - Math.exp(-1));
+  near(continued[1][1], level, 'from where it is');
+  const [kind, value, at, tc] = continued[2];
+  assert.deepEqual([kind, value, at], ['target', 1.3, 0.5]);
+  near(tc, 1.5 / Math.log((1.3 - level) / 0.3), 'timed to reach 1 at 2 s');
+  near(levelAt(continued.slice(0, 3), 2), 1, 'reaching the cut as it comes');
+  assert.deepEqual(continued.at(-1), ['set', 1, 2]);
+  const past = continuedAs(charging, [...wanted.slice(0, 2), ['set', 0.2, 2]], 0.5);
+  assert.deepEqual(past[2], ['target', 1.3, 0.5, 0.8], 'cut below where it is: as wanted');
+});
+
 test('automation as Web Audio holds it, told more: a cancel dropping what was planned from its time, the rest in time order, one told later at the same time after', () => {
   const rising = [
     ['set', 0, 0],

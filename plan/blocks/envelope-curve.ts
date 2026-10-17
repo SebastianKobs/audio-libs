@@ -1,26 +1,17 @@
 // ---------- plan/blocks/envelope-curve: how an envelope moves, as automation ----------
-// For a builder that builds an envelope as a curve. Stage by stage, on numbers its caller resolved:
-//   1. its stages from its gate opening: from 0, after its delay up to 1 over its attack, held over
-//      its hold, down to its sustain over its decay, held until its gate closes;
+// As an ARP's, a capacitor charged and discharged, every stage an RC curve. Stage by stage, on
+// numbers its caller resolved:
+//   1. its stages from its gate opening: from 0, after its delay up to its amount over its attack,
+//      held over its hold, down to its sustain over its decay, held until its gate closes;
 //   2. its release from its gate closing: from where it is then, down to 0 over its release.
-// A stage with no time is set at once; with no delay and no attack it starts at 1.
-// Its target says what a point of the curve is there, and the ramp each stage takes:
-// its curve's (envelopeTarget()), or a caller's own.
+// Each stage done at its time:
+//   - its attack charging toward 1.3 times its peak, cut there by a comparator at its time;
+//   - its decay and its release approaching where they go, within the floor of silence of it at
+//     their time, as an analog's, never set there, so one drawn again from where it is never jumps.
+// A stage with no time is set at once; with no delay and no attack it starts at its top.
 import { cutAt, eventTime, shiftedBy, type Automation } from '../../automation/index.ts';
 import { SILENCE } from '../../params/index.ts';
-import type { EnvelopeCurve } from './envelope.ts';
 
-// a stage of the curve
-export type EnvelopeStage = 'attack' | 'decay' | 'release';
-// What the curve moves: a point of it, 0 to 1, as a value there, and the ramp a stage takes there.
-// A target's ramp approaches its point by the stage's time as a time constant.
-// silentAtFloor: down to nothing by an exponential, silent once at its floor, as a source stops
-// once whatever gates it has faded; the exponential curve's (envelopeTarget()).
-export interface EnvelopeTarget {
-  valueAt: (point: number) => number;
-  rampOf: (stage: EnvelopeStage) => 'linear' | 'exp' | 'target';
-  silentAtFloor?: boolean;
-}
 // its stages' times, in seconds, and its sustain, a share of its top
 export interface EnvelopeTimes {
   readonly delay: number;
@@ -30,28 +21,29 @@ export interface EnvelopeTimes {
   readonly sustain: number;
 }
 
-// Its stages from its gate opening, until its sustain.
+// how far past its peak the attack charges, a share of it, as the CEM3310 is documented
+const OVERSHOOT = 1.3;
+// time constants an attack takes to charge from 0 to its peak, toward OVERSHOOT
+const CHARGED = Math.log(OVERSHOOT / (OVERSHOOT - 1));
+// time constants a decay or a release takes to come within the floor of silence of where it goes
+const DONE = Math.log(1 / SILENCE);
+
+// Its stages from its gate opening, until its sustain; amount: its top, in its target's units.
 // One that runs on (continuous) starts as its node is made, its first a value, not set at a time.
 export function envelopeStages(
   { delay, attack, hold, decay, sustain }: EnvelopeTimes,
-  target: EnvelopeTarget,
+  amount: number,
   continuous: boolean,
 ): Automation[] {
   const rises = delay > 0 || attack > 0;
-  const first = target.valueAt(rises ? 0 : 1);
+  const first = rises ? 0 : amount;
   const automation: Automation[] = [continuous ? ['value', first] : ['set', first, 0]];
   if (rises) {
-    automation.push(
-      ...held(target, 'attack', { level: target.valueAt(0), until: delay, length: attack }),
-      ...stage(target, 'attack', 1, { start: delay, length: attack }),
-    );
+    automation.push(...charged(amount, { start: delay, length: attack }));
   }
   if (decay > 0 || sustain !== 1) {
-    const start = delay + attack + hold;
-    automation.push(
-      ...held(target, 'decay', { level: target.valueAt(1), until: hold > 0 ? start : 0, length: decay }),
-      ...stage(target, 'decay', sustain, { start, length: decay }),
-    );
+    const level = amount * sustain + 0; // + 0: an amount below 0 with no sustain, 0, not -0
+    automation.push(...settled(level, { start: delay + attack + hold, length: decay }));
   }
   return automation;
 }
@@ -59,85 +51,44 @@ export function envelopeStages(
 // release; and when it has faded.
 export function envelopeRelease(
   release: number,
-  target: EnvelopeTarget,
   { from, stages }: { from: number; stages: Automation[] },
 ): { automation: Automation[]; faded: number } {
   return {
-    automation: [cutAt(stages, from), ...stage(target, 'release', 0, { start: from, length: release })],
+    automation: [cutAt(stages, from), ...settled(0, { start: from, length: release })],
     faded: from + release,
   };
 }
-
 // Its whole curve from its gate opening at a time: its stages from then; released where its
 // gate has closed, from where they have it then. Times from the start, as a builder's.
 export function envelopeCurve(
   times: EnvelopeTimes,
-  target: EnvelopeTarget,
+  amount: number,
   { opened, closed, release }: { opened: number; closed?: number | undefined; release: number },
 ): Automation[] {
-  const stages = shiftedBy(envelopeStages(times, target, false), opened);
+  const stages = shiftedBy(envelopeStages(times, amount, false), opened);
   if (closed === undefined) {
     return stages;
   }
   const before = stages.filter((event) => eventTime(event) <= closed);
-  return [...before, ...envelopeRelease(release, target, { from: closed, stages }).automation];
-}
-// What its curve makes of its amount: a point's value, and the ramp each stage takes.
-//   - exponential: up in a line, down straight in dB, never nearer 0 than the floor of silence,
-//     silent once down to it;
-//   - target: each stage approaching its point by its time as a time constant, as an analog's;
-//   - linear: every stage in a line.
-export function envelopeTarget(curve: EnvelopeCurve, amount: number): EnvelopeTarget {
-  if (curve === 'exponential') {
-    return {
-      valueAt: (point) => floored(amount * point, amount),
-      rampOf: (stage) => (stage === 'attack' ? 'linear' : 'exp'),
-      silentAtFloor: true,
-    };
-  }
-  const ramp = curve === 'target' ? 'target' : 'linear';
-  return { valueAt: (point) => amount * point, rampOf: () => ramp };
+  return [...before, ...envelopeRelease(release, { from: closed, stages }).automation];
 }
 
-// A level held until a stage starts: set again there, as a ramp runs from the event before it.
-// None where nothing is held, the stage is set at once, or it approaches from where it is.
-function held(
-  target: EnvelopeTarget,
-  name: EnvelopeStage,
-  { level, until, length }: { level: number; until: number; length: number },
-): Automation[] {
-  if (target.rampOf(name) === 'target') {
-    return [];
-  }
-  return until > 0 && length > 0 ? [['set', level, until]] : [];
-}
-// a stage: reaching its point at its end by its target's ramp, or, with no time, set there at its start
-function stage(
-  target: EnvelopeTarget,
-  name: EnvelopeStage,
-  point: number,
-  { start, length }: { start: number; length: number },
-): Automation[] {
-  const value = target.valueAt(point);
+// an attack: charging toward OVERSHOOT times its peak from its start, cut at its peak at its end;
+// with no time, at its peak at its start
+function charged(peak: number, { start, length }: { start: number; length: number }): Automation[] {
   if (length === 0) {
-    return [['set', value, start]];
+    return [['set', peak, start]];
   }
-  const ramp = target.rampOf(name);
-  if (ramp === 'target') {
-    return [['target', value, start, length]];
-  }
-  const end = start + length;
-  if (ramp === 'exp' && point === 0 && target.silentAtFloor) {
-    return [
-      [ramp, value, end],
-      ['set', 0, end],
-    ];
-  }
-  return [[ramp, value, end]];
+  return [
+    ['target', OVERSHOOT * peak, start, length / CHARGED],
+    ['set', peak, start + length],
+  ];
 }
-// a value never nearer 0 than the floor of silence, on its amount's side: an exponential ramp's
-// ends, which can't reach 0 or cross it
-function floored(value: number, amount: number): number {
-  const side = amount < 0 ? -1 : 1;
-  return side * Math.max(Math.abs(value), SILENCE);
+// a decay or a release: approaching its level from its start, within the floor of silence of it
+// at its end; with no time, set there at its start
+function settled(level: number, { start, length }: { start: number; length: number }): Automation[] {
+  if (length === 0) {
+    return [['set', level, start]];
+  }
+  return [['target', level, start, length / DONE]];
 }

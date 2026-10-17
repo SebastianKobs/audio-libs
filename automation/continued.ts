@@ -2,7 +2,8 @@
 // As a knob turned while a param plays: from where it is at a time, on to the other.
 //   1. What was planned from then cancelled, cut where it is (cutAt()).
 //   2. On its way: a ramp coming takes it on to its end by itself; a target the other
-//      approaches approached from there; else the value the other holds, glided to.
+//      approaches approached from there, timed to meet an event coming that cuts it on its way,
+//      as a comparator cuts an attack; else the value the other holds, glided to.
 //   3. The other's events after then.
 import { eventTime, type Automation } from './automation.ts';
 import { levelAt } from './level-at.ts';
@@ -19,7 +20,8 @@ export function continuedAs(
   smoothing = SMOOTHING,
 ): Automation[] {
   const coming = eventsAfter(wanted, at);
-  return [['cancel', at], cutAt(playing, at), ...onTheWay(wanted, at, coming, smoothing), ...coming];
+  const cut = cutAt(playing, at);
+  return [['cancel', at], cut, ...timedToMeet(onTheWay(wanted, at, coming, smoothing), cut[1], coming), ...coming];
 }
 // Where an automation has its param at a time, as its events from then are cancelled:
 //   - a ramp running then: cut there, at the level it has reached, so it still runs up to it;
@@ -56,6 +58,24 @@ export function onTheWay(
     return [['target', approach.value, at, approach.tc]];
   }
   return [['target', levelAt(wanted, at), at, smoothing]];
+}
+// A target approached from a level, where the event coming sets a value on its way, as a
+// comparator cuts an attack: its time constant such that it reaches that value then, so nothing
+// jumps there. Else as it is.
+function timedToMeet(onItsWay: Automation[], level: number, coming: readonly Automation[]): Automation[] {
+  const [approach] = onItsWay;
+  const [cut] = coming;
+  if (approach?.[0] !== 'target' || cut?.[0] !== 'set') {
+    return onItsWay;
+  }
+  const [, target, from] = approach;
+  const [, value, at] = cut;
+  const before = target - level;
+  const after = target - value;
+  if (at <= from || after === 0 || Math.sign(before) !== Math.sign(after) || Math.abs(after) >= Math.abs(before)) {
+    return onItsWay;
+  }
+  return [['target', target, from, (at - from) / Math.log(before / after)]];
 }
 // the target an automation approaches at a time: its last event by then, if that's a target
 export function approachAt(automation: readonly Automation[], at: number): { value: number; tc: number } | null {
