@@ -11,6 +11,7 @@
 //   - param-units.ts: a param in a plan's units, moving the Web Audio params behind it;
 //   - buffers.ts: the buffers a noise or a reverb plays, each made once;
 //   - meters.ts: a meter on a node, its peak; output.ts, the output after what's built, faded in and out;
+//   - power.ts: the audio's power, the output faded out and the context suspended, and back on;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
 export { ClockedContext, type ClockedContextOptions } from './context.ts';
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
@@ -25,4 +26,5 @@ export { limiterNodes, makeupOf } from './blocks/limiter.ts';
 export { panOf, type PanLaw } from './blocks/pan.ts';
 export { meterOn, type PeakMeter } from './meters.ts';
 export { FADE_IN, FADE_OUT, Output } from './output.ts';
+export { AudioPower } from './power.ts';
 export { Copies, type Editable } from './copies.ts';
