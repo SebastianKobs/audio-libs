@@ -4,10 +4,11 @@
 //   - a send for each return before a channel, none that feeds it, its tap post unless said;
 //   - the desk of the desk's form: its inputs, each way out and send, its pools;
 //   - a channel built on another; a desk written wrong refused, every failure said;
-//   - silenced(): which channels a mute or a solo silences, as Ableton's, over a plan's wires.
+//   - silenced(): which channels a mute or a solo silences, as Ableton's, over a plan's wires;
+//   - a controller on a strip as its param's address on the desk: the strip's address in front.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DESK_FORMS, channelOf, deskOf, deskTemplates, silenced } from '../index.ts';
+import { DESK_FORMS, channelOf, controlAddress, deskOf, deskTemplates, SEND, silenced } from '../index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../../params/index.ts';
 import { Planner } from '../../planner/index.ts';
 import { EFFECT_FORM, EFFECT_TEMPLATES } from '../../effects/index.ts';
@@ -361,4 +362,9 @@ test("a desk and a channel read from data, as YAML's are: their shape checked, e
       '  its tap late, not pre or post',
     ].join('\n'),
   });
+});
+
+test("a controller on a strip as its param's address on the desk: the strip's address in front, a pool's copy's too", () => {
+  assert.deepEqual(controlAddress('reverb', 'volume'), ['reverb', 'volume']);
+  assert.deepEqual(controlAddress('my tap/3', `${SEND}/delay 1`), ['my tap', '3', 'send', 'delay 1']);
 });

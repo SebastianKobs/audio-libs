@@ -13,7 +13,7 @@
 //   3. its sends one child (send), a template of its own. For each return:
 //      a select between its taps, then a gain, its amount (send/reverb).
 // The master: its inserts and its fader alone.
-import type { Wire } from '../format/index.ts';
+import { addressOf, type Address, type Wire } from '../format/index.ts';
 import type { PresetChild, Template, TemplateChild, TemplateMacro, WrittenTemplate } from '../planner/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../params/index.ts';
 import { fromData, type Shape } from '../../util/index.ts';
@@ -72,6 +72,11 @@ const PLAIN = { factor: 1, offset: 0 } as const; // a macro onto its target as i
 // a send's select: post its first input, pre its second
 const TAP_INPUT: Readonly<Record<Tap, string>> = { post: 'a', pre: 'b' };
 
+// A controller on a strip, as its param's address on the desk: the strip's address in front,
+// a pool's copy's its pool's name and number (my tap/3/send/reverb).
+export function controlAddress(strip: string, controller: string): Address {
+  return [...addressOf(strip), ...addressOf(controller)];
+}
 // A channel read from data, as it is once it's of a channel's shape; refused where it isn't.
 export function channelOf(data: unknown, source: string): Channel {
   return fromData(data, CHANNEL_SHAPE, { source, what: 'a channel' });
