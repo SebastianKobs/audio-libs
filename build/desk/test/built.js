@@ -1,6 +1,7 @@
 // What's built of a desk, a stand-in for the desk's tests: each call recorded, by its address as text; a way in by its
-// address and its input, as text.
+// address and its input, as text; its meters' levels and readings as a test sets them, by their address and point.
 class DeskBuiltStandIn {
+  levels = new Map();
   told = [];
   added = [];
   presets = [];
@@ -18,6 +19,12 @@ class DeskBuiltStandIn {
   }
   tempo(beat) {
     this.tempi.push(beat);
+  }
+  peak(address, point = '') {
+    return this.levels.get([...address, point].join('/')) ?? 0;
+  }
+  reading(address, name) {
+    return this.levels.get([...address, name].join('/')) ?? 0;
   }
   wayInto(address, input = 'in') {
     return `into ${[...address, input].join('/')}`;
