@@ -5,7 +5,8 @@
 //   - in the roles' order, where the form says;
 //   - the wires it allows: from a role's output, its main one or a tap, or the parent's own
 //     input; into a role's input or param, or the parent's own output;
-//   - rules by name: no loops; every way out ending in one role (the master).
+//   - rules by name: no loops, but through the wires from one role into another it names;
+//     every way out ending in one role (the master).
 // A template names the form it fulfils, and is held to it as it's handed in (check.ts).
 
 // a role a child plays in its parent: its kind or the form it fulfils, how many there are
@@ -25,8 +26,13 @@ export interface FormWire {
   readonly from: FormFrom;
   readonly to: FormTo;
 }
-// a rule by name: no loops between its children; every child's way out, by its main outputs, ending in a role
-export type FormRule = { readonly rule: 'no loops' } | { readonly rule: 'ends in'; readonly role: string };
+// a rule by name:
+//   - no loops between its children, but through the wires from a role into a role, where it says:
+//     a desk's sends between returns, each delayed, as a loop needs;
+//   - every child's way out, by its main outputs, ending in a role.
+export type FormRule =
+  | { readonly rule: 'no loops'; readonly but?: { readonly from: string; readonly to: string } }
+  | { readonly rule: 'ends in'; readonly role: string };
 // A form, by its name:
 //   - its jacks, any where it names none;
 //   - its roles, in order where it says; children free of roles where it names none;

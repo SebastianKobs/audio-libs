@@ -5,7 +5,7 @@
 //   3. how many of each role, at least and at most;
 //   4. the roles in their order, where the form says;
 //   5. each wire one the form allows, where it lists them;
-//   6. its rules: no loops; every way out ending in a role.
+//   6. its rules: no loops, but through the wires it names; every way out ending in a role.
 import { feeds, reached, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
 import type { Form, FormFrom, FormRole, FormRule, FormTo } from './form.ts';
 import type { Catalog } from './catalog.ts';
@@ -127,16 +127,24 @@ function endName(end: WireFrom | WireTo): string {
   }
   return 'input' in end ? `in ${end.input}` : `out ${end.output}`;
 }
-// a rule held: no loops through any child; every child's way out, by its main outputs, ending in the role, where there's one;
+// a rule held: no loops through any child, but through the wires it names; every child's way out, by its main outputs, ending in the role, where there's one;
 // a pool's child among the children, its wires among the wires
 function ruleProblems(rule: FormRule, template: Template): string[] {
   const children = [...(template.children ?? []), ...(template.pools ?? []).map((pool) => pool.child)];
   const inside = { wires: wiresOf(template) };
   if (rule.rule === 'no loops') {
+    const roleOf = (name: string | undefined): string | undefined =>
+      children.find((child) => child.name === name)?.role;
+    const loopsThrough = ({ from, to }: Wire): boolean =>
+      rule.but !== undefined
+      && roleOf(fromChild(from)) === rule.but.from
+      && 'node' in to
+      && roleOf(to.node) === rule.but.to;
+    const looped = { wires: inside.wires.filter((wire) => !loopsThrough(wire)) };
     return children
       .filter((child) =>
-        inside.wires.some(
-          ({ from, to }) => fromChild(from) === child.name && 'node' in to && feeds(inside, to.node, child.name),
+        looped.wires.some(
+          ({ from, to }) => fromChild(from) === child.name && 'node' in to && feeds(looped, to.node, child.name),
         ),
       )
       .map((child) => `a loop through ${child.name}`);

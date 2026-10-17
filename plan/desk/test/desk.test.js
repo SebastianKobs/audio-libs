@@ -2,6 +2,7 @@
 //   - a channel of the channel's form: its inserts, mute, fader, pan and sends, wired in that order; its own params;
 //   - the master: its inserts and its fader alone;
 //   - a send for each return before a channel, none that feeds it, its tap post unless said;
+//   - a return's send to every other return, a delay in those into one after it, so a loop can be worked out;
 //   - the desk of the desk's form: its inputs, each way out and send, its pools;
 //   - a channel built on another; a desk written wrong refused, every failure said;
 //   - silenced(): which channels a mute or a solo silences, as Ableton's, over a plan's wires;
@@ -97,7 +98,7 @@ test("the master: its inserts and its fader alone, its volume the Output's (mast
   );
 });
 
-test("a send on every channel for each return before it on the desk, none that feeds it; a pool's for every return; each at 0, today's key; its tap post unless its channel or the desk says pre", () => {
+test("a send on every channel for each return before it on the desk, none that feeds it but through a send between returns; a return's to every other; a pool's for every return; each at 0, today's key; its tap post unless its channel or the desk says pre", () => {
   const plan = planned();
   const sendsOf = (name) => nodeAt(plan, [name, 'send'])?.macros.map(({ spec }) => spec.name) ?? [];
   assert.deepEqual(
@@ -105,7 +106,7 @@ test("a send on every channel for each return before it on the desk, none that f
       ['reverb', 'sings', 'delay 1', 'you', 'tap', 'my tap', 'replay tower'].map((name) => [name, sendsOf(name)]),
     ),
     {
-      reverb: [],
+      reverb: ['delay 1'],
       sings: ['reverb'],
       'delay 1': ['reverb'],
       you: ['reverb', 'delay 1'],
@@ -114,7 +115,7 @@ test("a send on every channel for each return before it on the desk, none that f
       'replay tower': ['reverb', 'delay 1'],
     },
   );
-  assert.equal(nodeAt(plan, ['reverb', 'send']), undefined, 'none before the first return: no sends');
+  assert.equal(nodeAt(plan, ['master', 'send']), undefined, 'the master: no sends');
   assert.deepEqual(
     specAndValue(paramAt(plan, ['you', 'send', 'reverb'])),
     { spec: { ...SEND_PARAM, name: 'reverb' }, value: 0 },
@@ -142,6 +143,44 @@ test("a send on every channel for each return before it on the desk, none that f
   );
 });
 
+test("a return's send into a return after it: after its amount a delay of a block's length, 3 ms, free of the tempo, so the loop it closes can be worked out; one into a return before it, and a channel's, without one", () => {
+  const plan = planned();
+  const sendsOn = (name) => nodeAt(plan, [name, 'send']);
+  assert.deepEqual(
+    sendsOn('reverb').children.map(({ name, kind }) => [name, kind]),
+    [
+      ['delay 1 tap', 'select'],
+      ['delay 1', 'gain'],
+      ['delay 1 loop', 'delay'],
+    ],
+  );
+  assert.deepEqual(sendsOn('reverb').wires.map(wireText), [
+    'in post → delay 1 tap a',
+    'in pre → delay 1 tap b',
+    'delay 1 tap → delay 1',
+    'delay 1 → delay 1 loop',
+    'delay 1 loop → out delay 1',
+  ]);
+  const loop = ['reverb', 'send', 'delay 1 loop'];
+  assert.deepEqual(
+    [
+      paramAt(plan, [...loop, 'sync']).value,
+      paramAt(plan, [...loop, 'ms']).value,
+      settingAt(plan, [...loop, 'longest']).value,
+    ],
+    [0, 3, 0.1],
+    'free, 3 ms; its line no longer than it needs',
+  );
+  assert.ok(
+    sendsOn('delay 1').children.every(({ kind }) => kind !== 'delay'),
+    'into a return before it: no delay, as it was before returns sent into those after them',
+  );
+  assert.ok(
+    sendsOn('you').children.every(({ kind }) => kind !== 'delay'),
+    "a channel's sends: no delay, its returns never feeding it",
+  );
+});
+
 test("the desk of the desk's form: its own inputs into its channels and buses, each way out into a bus or the master, each send into its return, the master its output; a pool's channels wired by its rule", () => {
   const desk = planned().node;
   assert.equal(desk.form, 'desk');
@@ -162,6 +201,7 @@ test("the desk of the desk's form: its own inputs into its channels and buses, e
   );
   assert.deepEqual(desk.wires.map(wireText), [
     'reverb → master',
+    'reverb delay 1 → delay 1',
     'in sings → sings',
     'sings → master',
     'sings reverb → reverb',

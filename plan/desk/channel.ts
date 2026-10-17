@@ -11,7 +11,8 @@
 //   2. its own params as a strip's: volume, pan, mute, solo.
 //      Mute and solo are wired to nothing: what they silence is mute-solo.ts's.
 //   3. its sends one child (send), a template of its own. For each return:
-//      a select between its taps, then a gain, its amount (send/reverb).
+//      a select between its taps, then a gain, its amount (send/reverb);
+//      a delay after it where the send can close a loop: a return's into one after it.
 // The master: its inserts and its fader alone.
 import { addressOf, type Address, type Wire } from '../format/index.ts';
 import type { PresetChild, Template, TemplateChild, TemplateMacro, WrittenTemplate } from '../planner/index.ts';
@@ -41,10 +42,12 @@ export interface Parts {
   readonly volume: number | undefined;
   readonly tap: Tap;
 }
-// a send on a channel: the return it goes to, and where it's taken
+// a send on a channel: the return it goes to, where it's taken, and whether it can close a loop
+// (a return's into one after it)
 export interface Send {
   readonly to: string;
   readonly tap: Tap;
+  readonly loops?: boolean;
 }
 // a channel as its desk makes it: its kind there, whether it's the master, its sends
 export interface OnDesk {
@@ -71,6 +74,10 @@ const STEREO = 2;
 const PLAIN = { factor: 1, offset: 0 } as const; // a macro onto its target as it is
 // a send's select: post its first input, pre its second
 const TAP_INPUT: Readonly<Record<Tap, string>> = { post: 'a', pre: 'b' };
+// A send that can close a loop, delayed by the least a loop can be worked out with.
+// That's a block, as Web Audio works in: 128 samples, 2.9 ms at 44.1 kHz.
+// Free of the tempo; its line no longer than it needs.
+const LOOP_DELAY = { values: { sync: 0, ms: 3 }, settings: { longest: 0.1 } } as const;
 
 // A controller on a strip, as its param's address on the desk: the strip's address in front,
 // a pool's copy's its pool's name and number (my tap/3/send/reverb).
@@ -170,7 +177,9 @@ function stripMacros(parts: Parts, { master, panned }: { master: boolean; panned
 }
 // A channel's sends, for each return:
 //   1. a select between its taps: post its first input, pre its second;
-//   2. its amount, a gain, out by the return's name.
+//   2. its amount, a gain;
+//   3. a delay, where it can close a loop (its loop);
+//   4. out by the return's name.
 function sendsTemplate(kind: string, sends: readonly Send[]): Template {
   return {
     kind,
@@ -179,16 +188,21 @@ function sendsTemplate(kind: string, sends: readonly Send[]): Template {
       { name: 'post', channels: STEREO },
     ],
     outputs: sends.map(({ to }) => ({ name: to, channels: STEREO })),
-    children: sends.flatMap(({ to, tap }) => [
+    children: sends.flatMap(({ to, tap, loops }) => [
       { name: `${to} tap`, kind: 'select', settings: { input: TAP_INPUT[tap] } },
       { name: to, kind: 'gain' },
+      ...(loops ? [{ name: `${to} loop`, kind: 'delay', ...LOOP_DELAY }] : []),
     ]),
-    wires: sends.flatMap(({ to }) => [
-      { from: { input: 'post' }, to: { node: `${to} tap`, input: 'a' } },
-      { from: { input: 'pre' }, to: { node: `${to} tap`, input: 'b' } },
-      { from: { node: `${to} tap`, output: 'out' }, to: { node: to, input: 'in' } },
-      { from: { node: to, output: 'out' }, to: { output: to } },
-    ]),
+    wires: sends.flatMap(({ to, loops }) => {
+      const last = loops ? `${to} loop` : to;
+      return [
+        { from: { input: 'post' }, to: { node: `${to} tap`, input: 'a' } },
+        { from: { input: 'pre' }, to: { node: `${to} tap`, input: 'b' } },
+        { from: { node: `${to} tap`, output: 'out' }, to: { node: to, input: 'in' } },
+        ...(loops ? [{ from: { node: to, output: 'out' }, to: { node: last, input: 'in' } }] : []),
+        { from: { node: last, output: 'out' }, to: { output: to } },
+      ];
+    }),
     macros: sends.map(({ to }) => ({ name: to, spec: SEND_PARAM, maps: [{ to: [to, 'gain'], ...PLAIN }] })),
   };
 }

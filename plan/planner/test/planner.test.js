@@ -301,6 +301,57 @@ test("each template held to its form's wires and rules: a wire the form doesn't 
   ]);
 });
 
+test('no loops but through the wires the rule names: two returns sending into each other held, a loop through a bus still said', () => {
+  const sendsBetween = {
+    ...DESK_FORM,
+    wires: [
+      ...DESK_FORM.wires,
+      { from: { role: 'return', output: 'tap' }, to: { role: 'return' } },
+      { from: { role: 'return', output: 'out' }, to: { role: 'bus' } },
+    ],
+    rules: [
+      { rule: 'no loops', but: { from: 'return', to: 'return' } },
+      { rule: 'ends in', role: 'master' },
+    ],
+  };
+  const echoing = {
+    kind: 'Echoing',
+    form: 'desk',
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [
+      { name: 'bus', kind: 'Strip', role: 'bus' },
+      { name: 'rev 1', kind: 'Strip', role: 'return' },
+      { name: 'rev 2', kind: 'Strip', role: 'return' },
+      { name: 'a', kind: 'Strip', role: 'channel' },
+      { name: 'master', kind: 'Strip', role: 'master' },
+    ],
+    wires: [
+      { from: { node: 'bus', output: 'out' }, to: { node: 'master', input: 'in' } },
+      { from: { node: 'bus', output: 'reverb' }, to: { node: 'rev 1', input: 'in' } },
+      { from: { node: 'rev 1', output: 'out' }, to: { node: 'bus', input: 'in' } },
+      { from: { node: 'rev 1', output: 'reverb' }, to: { node: 'rev 2', input: 'in' } },
+      { from: { node: 'rev 2', output: 'reverb' }, to: { node: 'rev 1', input: 'in' } },
+      { from: { node: 'rev 2', output: 'out' }, to: { node: 'master', input: 'in' } },
+      { from: { node: 'a', output: 'out' }, to: { node: 'master', input: 'in' } },
+      { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
+    ],
+  };
+  assert.deepEqual(failuresOf([UTILITY, STRIP, echoing], [CHANNEL_FORM, sendsBetween]), [
+    'Echoing: form desk: a loop through bus',
+    'Echoing: form desk: a loop through rev 1',
+  ]);
+  const anyLoop = { ...sendsBetween, rules: [{ rule: 'no loops' }] };
+  assert.deepEqual(
+    failuresOf([UTILITY, STRIP, echoing], [CHANNEL_FORM, anyLoop]),
+    [
+      'Echoing: form desk: a loop through bus',
+      'Echoing: form desk: a loop through rev 1',
+      'Echoing: form desk: a loop through rev 2',
+    ],
+    'with none named: the loop between the returns said too',
+  );
+});
+
 // an effect's form: one input and one output, its children playing no role
 const EFFECT_FORM = { name: 'effect', inputs: ['in'], outputs: ['out'] };
 // an effect: a gain, its level a macro naming no spec of its own

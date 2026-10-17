@@ -9,6 +9,9 @@
 // Made into templates: the desk's, of the desk's form, and each channel's (channel.ts).
 // Sends, as a desk's knobs:
 //   - a channel has one for each return before it on the desk, none that feeds it;
+//   - a return has one for every other return, as Ableton's: the only loops on a desk.
+//     Each loop goes through a return's send into one after it, delayed, as a loop needs (channel.ts).
+//     Without those the desk has no loops: the sends into returns before it never close one.
 //   - a pool's channel has one for every return.
 // Each failure said at once, naming the desk.
 import { feeds, type Wire } from '../format/index.ts';
@@ -183,8 +186,9 @@ function outWires(desk: Desk, problems: string[]): Map<string, Wire> {
   return wires;
 }
 // Each channel's sends, in the desk's order, a pool's after:
-//   - one for each return before it, none that feeds it (by the ways out and sends so far);
-//   - its tap the desk's, else its channel's.
+//   - the returns it reaches (returnsFor());
+//   - its tap the desk's, else its channel's;
+//   - a return's into a return after it able to close a loop.
 // A tap written for a return it has no send to said.
 function sendsOn(
   desk: Desk,
@@ -192,22 +196,41 @@ function sendsOn(
   problems: string[],
 ): Placed[] {
   const wires: Wire[] = [...outs.values()];
-  const returns: string[] = [];
+  const every = desk.channels.filter(({ role }) => role === 'return').map(({ name }) => name);
+  const before: string[] = [];
   const all = [...desk.channels, ...(desk.pools ?? []).map((pool) => ({ ...pool, role: 'channel' as const }))];
   const placed = all.map((written, index) => {
     const own = parts[index]!; // one for each, in order
-    const reached = written.role === 'master' ? [] : returns.filter((to) => !feeds({ wires }, to, written.name));
-    const sends = reached.map((to) => ({ to, tap: written.taps?.[to] ?? own.tap }));
+    const reached = returnsFor(written, { every, before, wires });
+    const loops = (to: string): boolean => written.role === 'return' && !before.includes(to);
+    const sends = reached.map((to) => ({ to, tap: written.taps?.[to] ?? own.tap, loops: loops(to) }));
     for (const to of Object.keys(written.taps ?? {}).filter((to) => !reached.includes(to))) {
       problems.push(`${written.name}: a tap for ${to}, no send to it`);
     }
-    wires.push(...sends.map(({ to }) => sendWire(written.name, to)));
-    if (written.role === 'return' && index < desk.channels.length) {
-      returns.push(written.name);
+    wires.push(...sends.filter((send) => !send.loops).map(({ to }) => sendWire(written.name, to)));
+    if (written.role === 'return') {
+      before.push(written.name);
     }
     return { written, role: written.role, parts: own, sends };
   });
   return placed;
+}
+// The returns a channel sends to, in the desk's order:
+//   - the master: none;
+//   - a return: every other;
+//   - any other: each before it, none that feeds it.
+//     Fed by the ways out and the sends so far, those that can close a loop left out.
+function returnsFor(
+  { name, role }: { name: string; role: DeskRole },
+  { every, before, wires }: { every: readonly string[]; before: readonly string[]; wires: readonly Wire[] },
+): string[] {
+  if (role === 'master') {
+    return [];
+  }
+  if (role === 'return') {
+    return every.filter((to) => to !== name);
+  }
+  return before.filter((to) => !feeds({ wires }, to, name));
 }
 // A channel's wires on the desk:
 //   1. in from the desk's own input, where it's fed from outside;

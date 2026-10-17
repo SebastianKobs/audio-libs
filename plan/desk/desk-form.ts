@@ -6,7 +6,8 @@
 //   - the master, exactly one: the last sum, its way out the desk's.
 // Its wires and rules:
 //   - a way out into a bus or the master, a send into a return;
-//   - no loops; every way out ending in the master.
+//   - no loops, but through a send between returns, those that can close one delayed (desk.ts);
+//   - every way out ending in the master.
 import type { Form } from '../planner/index.ts';
 import { frozen } from '../../util/index.ts';
 
@@ -37,5 +38,8 @@ export const DESK_FORM: Form = frozen<Form>({
     ]),
     { from: { role: 'master', output: 'out' }, to: { parent: 'out' } },
   ],
-  rules: [{ rule: 'no loops' }, { rule: 'ends in', role: 'master' }],
+  rules: [
+    { rule: 'no loops', but: { from: 'return', to: 'return' } },
+    { rule: 'ends in', role: 'master' },
+  ],
 });
