@@ -243,6 +243,20 @@ test("its voice cards' own values, a knob's or an edit's, by their addresses in 
   ]);
 });
 
+test('an edit reaches the voices still sounding: one rung out let go first, left alone', () => {
+  const { built, clock, voices } = voicesOn(SYNTH);
+  played(voices, { pitch: 69, velocity: 1, t: 5, duration: 0.5 });
+  played(voices, { pitch: 69, velocity: 1, t: 6 }, 2);
+  built.fadedAt.set('voice/1/envelope', 5.8);
+  clock.now = 7;
+  voices.edit({ 'voice/oscillator/frequency': 330 });
+  assert.deepEqual(built.letGone, ['voice/1'], 'rung out: let go');
+  assert.deepEqual(
+    built.told.filter(([, value]) => value === 330).map(([address]) => address),
+    ['voice/2/oscillator/frequency'],
+  );
+});
+
 test("a drum rack's own values, by their pads' addresses: each pad's on its own voices alone", () => {
   const { built, voices } = voicesOn(rackOf([38, 40]), () => ({ 'pad 40/vca/gain': 0.5 }));
   played(voices, { pitch: 38, velocity: 1, t: 5 });

@@ -13,7 +13,7 @@
 // Its voice cards' own values, a knob's or an edit's, by their addresses in the instrument
 // ('voice/cutoff', 'pad 38/env 1/decay'), where a voice card has them:
 //   - read and set on each voice as it's added, before its sources;
-//   - an edit set on every voice of its card sounding, gliding.
+//   - an edit set on every voice of its card still sounding, gliding.
 // No sound of its own: what's built makes it.
 import { SMOOTHING, type When } from '../../automation/index.ts';
 import { notesIn, type Message, type PerNoteController, type Receiver, type SentNote } from '../../midi/index.ts';
@@ -99,8 +99,10 @@ export class Voices implements Receiver {
     }
   }
 
-  // an edit of its voice cards' own values: set on every voice of its card sounding, gliding there
+  // an edit of its voice cards' own values: any voice rung out let go first, then set on every
+  // voice of its card sounding, gliding there
   edit(values: ValuesByAddress): void {
+    this.#letGoOfRungOut();
     for (const voice of this.#sounding) {
       this.#owned(voice, values, { glide: SMOOTHING });
     }

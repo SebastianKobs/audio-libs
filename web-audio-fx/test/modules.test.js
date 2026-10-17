@@ -1,4 +1,4 @@
-// FX modules as they play (mockup/src/libs/web-audio-fx/modules.ts, U2c3), as libs/web-audio-synth/'s Patches has the instruments:
+// FX modules as they play (mockup/src/libs/web-audio-fx/modules.ts, U2c3), as the tool's bank has the instruments' patches:
 // copies of the modules handed in, by name; an edit followed on every chain that plays it, glided there, rebuilt only for a change of
 // structure, a chain playing another left be; a reset bringing back the one it started from. On the engine's stand-in for Web Audio
 import { test, mock } from 'node:test';

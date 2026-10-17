@@ -1,5 +1,5 @@
 // ---------- libs/web-audio-fx/modules: FX modules as they play, by name, each edit followed by every chain that plays it ----------
-// As libs/web-audio-synth/'s Patches has the instruments: live copies of the modules it starts from (libs/util/'s LiveCopies), each
+// As the tool's bank has the instruments' patches: live copies of the modules it starts from (libs/util/'s LiveCopies), each
 // set in place, so a chain planned again from the module it holds plays the change (FxChain.follow()).
 import type { Patch } from '../synth/index.ts';
 import { LiveCopies } from '../util/index.ts';
