@@ -18,11 +18,16 @@
 //   - custom.ts: a view of its own, registered by kind;
 //   - clip-tracks.ts: the clip tracks, each clip read from what holds it, a clip player or the
 //     control surface, its ▶, and its × asking first;
+//   - session.ts: what the session view shows of what's played, each track of a group and
+//     what holds it, lit as it sounds, in its own words;
+//   - transport-lane.ts: the transport as its lane shows it, whether it plays, bar and beat;
 //   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
 //     view and the playhead, in 16ths; its port in its own words (ports.ts); a region's notes'
 //     and a lane's shapes, as they're drawn; what the desk declares, read from its view models.
 export { Choice } from './choice.ts';
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
+export { Session, type GroupShown, type TrackShown } from './session.ts';
+export { TransportLane } from './transport-lane.ts';
 export type { Command } from './command.ts';
 export { CustomViews } from './custom.ts';
 export { Control, type Device } from './device.ts';

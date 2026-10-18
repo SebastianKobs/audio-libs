@@ -22,6 +22,12 @@
 //     tracks it's handed, its level bars and its lights;
 //   - clip-tracks-view.ts: the clip tracks drawn, a column each, a chip a clip, lit while it
 //     sounds, its ▶ and its × handed to its model;
+//   - device-panel.ts: the device view below the tracks, opened by a kind and what of it, each
+//     kind a chain of devices handed in, its knobs dragged and brought up to date;
+//   - insert-devices.ts: a strip's inserts, each a composite drawn flat, a reset for what's live;
+//   - transport-lane-view.ts: the transport's lane drawn, ▶ and ■ sent, bar and beat;
+//   - views.ts: the session view and the arrangement, one open at a time in the strip along the
+//     bottom, a tab each;
 //   - canvas.ts: a canvas sized for the screen's pixels;
 //   - arrangement/: the arrangement on the page, its names beside its time, drawn on canvases,
 //     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
@@ -56,3 +62,7 @@ export {
   type ArrangementColors,
   type Drawn as ArrangementDrawn,
 } from './arrangement/arrangement-view.ts';
+export { DevicePanel, type DeviceChain } from './device-panel.ts';
+export { InsertDevices } from './insert-devices.ts';
+export { TransportLaneView, type TransportHints } from './transport-lane-view.ts';
+export { Views, type ViewName } from './views.ts';
