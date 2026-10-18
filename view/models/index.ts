@@ -1,8 +1,8 @@
 // ---------- libs/view/models: view models built from a plan, no DOM ----------
-// Handed a plan and its values through the plan's in (libs/view/control-surface/), hands back
+// Handed a plan and its values through the plan's readout (libs/view/control-surface/), hands back
 // what a view shows and what it can do.
 // Its parts:
-//   - model.ts: the plan and its values by address, read through the plan's in;
+//   - model.ts: the plan and its values by address, read through the plan's readout;
 //   - view-builder.ts: view models for whatever part of a plan is asked;
 //   - knob.ts: a param with a range as a control, its text as shown;
 //   - choice.ts: a param or a setting with choices;
@@ -10,7 +10,7 @@
 //   - strip.ts: a channel as a strip, by its form, its name as shown;
 //   - mixer.ts: a desk as a mixer, its strips by role, a solo click;
 //   - envelope.ts: an envelope's curve from its knobs, as a view draws it, the curve played;
-//   - cards.ts: an instrument's patches as the device view edits them, a preset's in each, the
+//   - cards.ts: an instrument's patches as the device view edits them, a preset's readout each, the
 //     patch edited in the bank;
 //   - instrument-racks.ts: the instruments as the device view shows them, a rack of cards each,
 //     the test note every one plays, which of its own values each reads;

@@ -1,10 +1,10 @@
 // ---------- view/control-surface/arrangement: what the arrangement reads, in its own words ----------
 // Types only. Whatever answers fits them by its shape:
-//   - the recording (RecordingIn): a MIDI sequencer's recorder (libs/midi-sequencer/), its regions and lanes;
-//   - the tracks (TracksIn): the control surface that played them, its groups and its clips' names;
+//   - the recording (RecordingReadout): a MIDI sequencer's recorder (libs/midi-sequencer/), its regions and lanes;
+//   - the tracks (TracksReadout): the control surface that played them, its groups and its clips' names;
 //     the session's tracks read them too;
-//   - the playhead (PlayheadIn): the transport, a cue sent on the app's bus;
-//   - the declarations (DeclaredIn): the desk's view models (declaredBy());
+//   - the playhead (PlayheadReadout): the transport, a cue sent on the app's bus;
+//   - the declarations (DeclaredReadout): the desk's view models (declaredBy());
 //   - the clock: the one clock (libs/clock/), its time, its 16ths and its grid.
 import type { TimedValue } from '../../automation/index.ts';
 import type { Clock, HeardGrid, Seconds, TimeMap } from '../../clock/index.ts';
@@ -51,7 +51,7 @@ export interface RecordedLane {
 }
 // The recording at a time: the regions of the last 30 minutes and the tracks' lanes,
 // each in the order they began.
-export interface RecordingIn {
+export interface RecordingReadout {
   regions(now: Seconds): readonly RecordedRegion[];
   lanes(now: Seconds): readonly RecordedLane[];
 }
@@ -69,7 +69,7 @@ export interface TrackGroup {
 //     on; none where there's none;
 //   - clipName(): a clip's name, in its group;
 //   - hasClip(): whether a clip is still there, in its group.
-export interface TracksIn {
+export interface TracksReadout {
   readonly groups: readonly TrackGroup[];
   groupOf(kind: string, live: boolean): string | null;
   clipName(clip: unknown, group: string): string;
@@ -77,7 +77,7 @@ export interface TracksIn {
 }
 // The transport, as the arrangement's playhead reads it; a cue is sent on the app's bus.
 // playhead(): where the playhead is; it moves while the recording plays back.
-export interface PlayheadIn {
+export interface PlayheadReadout {
   readonly playingBack: boolean;
   playhead(): Seconds | null;
 }
@@ -85,7 +85,7 @@ export interface PlayheadIn {
 //   - specOf(): a param's range and taper, by its controller there, which its lane is laid
 //     on; none for one nothing declares;
 //   - controllersOf(): the strip's controllers in the order the sound goes through it.
-export interface DeclaredIn {
+export interface DeclaredReadout {
   specOf(strip: string, controller: string): ParamSpec | undefined;
   controllersOf(strip: string): readonly string[];
 }

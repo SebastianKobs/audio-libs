@@ -1,7 +1,7 @@
 // The cards of an instrument (mockup/src/libs/view/models/cards.ts), as the device view edits them, on the tests' file of
 // instruments (libs/plan/synth/test/pluck.js):
 //   - a card for each patch an instrument plays: the patch alone, or a rack's pads, each its key;
-//   - its preset on its voice card, read through a preset's in: each value its preset's, values from outside over its own
+//   - its preset on its voice card, read through a preset's readout: each value its preset's, values from outside over its own
 //     where its card has them;
 //   - how each is set: a note's source by the note, a value from outside by what it says, the rest live;
 //   - a value or a setting set: sent as the app's message (SHAPE3b), the bank's preset changed by whoever hears it, the card

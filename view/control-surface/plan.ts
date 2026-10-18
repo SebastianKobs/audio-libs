@@ -1,6 +1,6 @@
 // ---------- view/control-surface/plan: a plan's jacks, as the views read it and edit it ----------
-// Types only. In: the plan as it plays, by address (PlanIn), how each value is set (Role), what
-// a device does in its slot (Slot).
+// Types only. Readout: the plan as it plays, by address (PlanReadout), how each value is set
+// (Role), what a device does in its slot (Slot).
 // Out: what's done, a command. A view never plays into the sound itself. It sends a command,
 // as the app's message for the plan, and the tool:
 //   - a param's: records it through the sequencer and sets it, as every move is;
@@ -32,7 +32,7 @@ export interface Slot {
 }
 // What the views read of a plan as it plays, by address: its values, starts, roles, slots,
 // copies and meters; a readout, what's done going out on the app's bus.
-export interface PlanIn {
+export interface PlanReadout {
   readonly plan: Plan;
   valueOf(address: Address): number | string | undefined;
   startOf(address: Address): number | string | undefined;

@@ -1,4 +1,4 @@
-// The desk as the view models read it (mockup/src/libs/view/control-surface/desk.ts), its in as it plays, on the
+// The desk as the view models read it (mockup/src/libs/view/control-surface/desk.ts), its readout as it plays, on the
 // desk library's desk and its stand-in for what's built (libs/build/desk/test/built.js), the desk library's small studio:
 //   - its plan; a value as it plays, its start; a strip's mute and solo the live mix's;
 //   - how a param is set, worked out: a strip's own live, by its notes where they set it; an insert's own params and
@@ -9,7 +9,7 @@
 //   - what's done sent as the desk's message, a param's value or a setting, by its address.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deskEdited, deskIn } from '../index.ts';
+import { deskEdited, deskReadout } from '../index.ts';
 import { Desk } from '../../../build/desk/index.ts';
 import { deskOn } from '../../../build/desk/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
@@ -23,71 +23,71 @@ const SETUP = {
   setBy: (address) => SETS[address.slice(-2).join('/')] ?? SETS[address.at(-1)],
 };
 
-function planInOn() {
+function planReadoutOn() {
   const on = deskOn(Desk, PLAN, { setup: SETUP });
-  const planIn = deskIn({ desk: on.desk, setup: SETUP });
-  return { ...on, planIn };
+  const planReadout = deskReadout({ desk: on.desk, setup: SETUP });
+  return { ...on, planReadout };
 }
 const switched = (name) => ({ type: 'controller', controller: name, value: 1, t: 0 });
 
 test("the desk's plan; a value as it plays, its start; a strip's mute and solo the live mix's", () => {
-  const { desk, planIn } = planInOn();
-  assert.equal(planIn.plan, PLAN);
+  const { desk, planReadout } = planReadoutOn();
+  assert.equal(planReadout.plan, PLAN);
   desk.set(['tap', 'volume'], 0.5);
-  assert.equal(planIn.valueOf(['tap', 'volume']), 0.5);
-  assert.equal(planIn.startOf(['tap', 'utility', 'level']), 0.7);
+  assert.equal(planReadout.valueOf(['tap', 'volume']), 0.5);
+  assert.equal(planReadout.startOf(['tap', 'utility', 'level']), 0.7);
   desk.control('tap', switched('mute'));
   assert.deepEqual(
-    [planIn.valueOf(['tap', 'mute']), planIn.valueOf(['tap', 'solo']), planIn.valueOf(['you', 'mute'])],
+    [planReadout.valueOf(['tap', 'mute']), planReadout.valueOf(['tap', 'solo']), planReadout.valueOf(['you', 'mute'])],
     [1, 0, 0],
   );
 });
 
 test("how a param is set, worked out: a strip's own live, on a live track or where its notes don't set it, by its notes where they do; an insert's own params and settings live on a live strip, deeper ones fixed; on a track by what sets it, else fixed; what a slot does there, its words where its plan has them, else on its strip", () => {
-  const { planIn } = planInOn();
-  assert.deepEqual(planIn.roleOf(['tap', 'volume']), { by: 'live' }, "the desk's own");
+  const { planReadout } = planReadoutOn();
+  assert.deepEqual(planReadout.roleOf(['tap', 'volume']), { by: 'live' }, "the desk's own");
   assert.deepEqual(
-    planIn.roleOf(['my tap', '3', 'volume']),
+    planReadout.roleOf(['my tap', '3', 'volume']),
     { by: 'automated', recorded: true },
     'its notes, its lane recorded',
   );
-  assert.deepEqual(planIn.roleOf(['replay tower', '1', 'volume']), { by: 'live' }, 'a live track');
-  assert.deepEqual(planIn.roleOf(['my tap', '3', 'mute']), { by: 'live' }, 'its mute');
-  assert.deepEqual(planIn.roleOf(['my tap', '3', 'air', 'cutoff']), {
+  assert.deepEqual(planReadout.roleOf(['replay tower', '1', 'volume']), { by: 'live' }, 'a live track');
+  assert.deepEqual(planReadout.roleOf(['my tap', '3', 'mute']), { by: 'live' }, 'its mute');
+  assert.deepEqual(planReadout.roleOf(['my tap', '3', 'air', 'cutoff']), {
     by: 'automated',
     source: 'distance',
     recorded: true,
   });
-  assert.deepEqual(planIn.roleOf(['my tap', '3', 'air', 'q']), { by: 'fixed' }, 'nothing sets it');
+  assert.deepEqual(planReadout.roleOf(['my tap', '3', 'air', 'q']), { by: 'fixed' }, 'nothing sets it');
   assert.deepEqual(
-    ['level', 'pan', 'pan/law'].map((param) => planIn.roleOf(['tap', 'utility', ...param.split('/')])),
+    ['level', 'pan', 'pan/law'].map((param) => planReadout.roleOf(['tap', 'utility', ...param.split('/')])),
     [{ by: 'live' }, { by: 'live' }, { by: 'fixed' }],
     "the desk's own Utility: its macros live, a setting within fixed",
   );
-  assert.deepEqual(planIn.roleOf(['reverb', 'reverb', 'length']), { by: 'live' }, "a Reverb's own setting");
-  assert.deepEqual(planIn.slotOf(['my tap', '3', 'air', 'cutoff']), { job: 'the air', setBy: 'distance' });
-  assert.deepEqual(planIn.slotOf(['tap', 'utility']), { job: 'on tap' });
-  assert.equal(planIn.slotOf(['tap', 'nowhere']), undefined);
+  assert.deepEqual(planReadout.roleOf(['reverb', 'reverb', 'length']), { by: 'live' }, "a Reverb's own setting");
+  assert.deepEqual(planReadout.slotOf(['my tap', '3', 'air', 'cutoff']), { job: 'the air', setBy: 'distance' });
+  assert.deepEqual(planReadout.slotOf(['tap', 'utility']), { job: 'on tap' });
+  assert.equal(planReadout.slotOf(['tap', 'nowhere']), undefined);
 });
 
 test("a level and a reading once the desk is built, its channel there, a copy's once added; 0 before", () => {
-  const { desk, built, build, planIn } = planInOn();
-  assert.equal(planIn.peakOf(['tap']), 0, 'not built yet');
+  const { desk, built, build, planReadout } = planReadoutOn();
+  assert.equal(planReadout.peakOf(['tap']), 0, 'not built yet');
   build();
   built.levels.set('tap/', 0.4);
   built.levels.set('master/limiter/reduction', 3);
   built.levels.set('my tap/3/', 0.2);
-  assert.deepEqual([planIn.peakOf(['tap']), planIn.readingOf(['master', 'limiter'], 'reduction')], [0.4, 3]);
-  assert.equal(planIn.peakOf(['my tap', '3']), 0, 'a copy not added');
+  assert.deepEqual([planReadout.peakOf(['tap']), planReadout.readingOf(['master', 'limiter'], 'reduction')], [0.4, 3]);
+  assert.equal(planReadout.peakOf(['my tap', '3']), 0, 'a copy not added');
   desk.inputOf('my tap/3');
-  assert.equal(planIn.peakOf(['my tap', '3']), 0.2);
+  assert.equal(planReadout.peakOf(['my tap', '3']), 0.2);
 });
 
 test("a pool's copies added", () => {
-  const { desk, build, planIn } = planInOn();
+  const { desk, build, planReadout } = planReadoutOn();
   build();
   desk.inputOf('my tap/3');
-  assert.deepEqual(planIn.copiesOf(['my tap']), [['my tap', '3']]);
+  assert.deepEqual(planReadout.copiesOf(['my tap']), [['my tap', '3']]);
 });
 
 test("what's done sent as the desk's message: a param's value, a setting, by its address", () => {

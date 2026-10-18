@@ -7,7 +7,7 @@
 //   3. what sounded since the last look, for the folded sections' lights: a replay group's
 //      clips, and each lit track's channel.
 import { addressOf, type Address } from '../../plan/format/index.ts';
-import type { TracksIn } from '../control-surface/index.ts';
+import type { TracksReadout } from '../control-surface/index.ts';
 import type { GroupShown, TrackShown } from './session.ts';
 
 // What a track plays now, as its cell shows it: the clip, a visitor's motif named after it, a
@@ -36,10 +36,10 @@ export interface SessionGroup {
 type TrackAt = (place: { kind: string; track: number }) => string;
 
 export class SessionTracks {
-  readonly #tracks: Pick<TracksIn, 'groups' | 'clipName'>;
+  readonly #tracks: Pick<TracksReadout, 'groups' | 'clipName'>;
   readonly #trackAt: TrackAt;
 
-  constructor({ tracks, trackAt }: { tracks: Pick<TracksIn, 'groups' | 'clipName'>; trackAt: TrackAt }) {
+  constructor({ tracks, trackAt }: { tracks: Pick<TracksReadout, 'groups' | 'clipName'>; trackAt: TrackAt }) {
     this.#tracks = tracks;
     this.#trackAt = trackAt;
   }

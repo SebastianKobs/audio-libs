@@ -1,5 +1,5 @@
 // ---------- view/models/arrangement/rows: the arrangement's rows and their lanes ----------
-import type { RecordedLane, RecordedRegion, TracksIn } from '../../control-surface/index.ts';
+import type { RecordedLane, RecordedRegion, TracksReadout } from '../../control-surface/index.ts';
 import type { Mixer } from '../mixer.ts';
 import { SEND } from '../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../plan/format/index.ts';
@@ -55,7 +55,7 @@ interface Group {
 // in the order the sound goes through the strip.
 export function rowsOf(
   regions: readonly RecordedRegion[],
-  tracks: TracksIn,
+  tracks: TracksReadout,
   unfolded: ReadonlySet<string>,
   { strips = [], lanes = [], opened = new Set(), controllersOf = () => [] }: Partial<Beside> = {},
 ): Row[] {
@@ -71,7 +71,7 @@ export function rowsOf(
 // The row a region goes on: the region's track in its group.
 // Played live, on the group it was played on; played back, on its kind's.
 // None when the region has no group or no track.
-export function rowKeyOf(region: RecordedRegion, tracks: TracksIn): string | null {
+export function rowKeyOf(region: RecordedRegion, tracks: TracksReadout): string | null {
   const group = tracks.groupOf(region.kind, region.live);
   if (group === null || region.track === null) {
     return null;
@@ -83,7 +83,7 @@ export function rowKeyOf(region: RecordedRegion, tracks: TracksIn): string | nul
 // background tracks and your pool tracks; a pool's kind is the pool group's name.
 // A lane without one: the strip's own row, your kinds' channels included.
 // None for a strip that has no row.
-export function laneRowOf(lane: RecordedLane, tracks: TracksIn, strips: readonly ArrangedStrip[]): string | null {
+export function laneRowOf(lane: RecordedLane, tracks: TracksReadout, strips: readonly ArrangedStrip[]): string | null {
   if (lane.track !== null) {
     const group = tracks.groupOf(lane.kind, false);
     return group === null ? null : `${group} ${lane.track}`;
@@ -100,7 +100,11 @@ function headerOf(group: string, name: string, open: boolean | undefined): Row {
 }
 // The groups that hold tracks, each shown once used, in the tracks' order. Tracks are
 // numbered from 1.
-function trackGroups(regions: readonly RecordedRegion[], lanes: readonly RecordedLane[], tracks: TracksIn): Group[] {
+function trackGroups(
+  regions: readonly RecordedRegion[],
+  lanes: readonly RecordedLane[],
+  tracks: TracksReadout,
+): Group[] {
   const used = tracksUsed(regions, lanes, tracks);
   return tracks.groups
     .filter(({ group }) => used.has(group))
@@ -144,7 +148,7 @@ function arranged(group: string, { address, name }: { address: readonly string[]
 function tracksUsed(
   regions: readonly RecordedRegion[],
   lanes: readonly RecordedLane[],
-  tracks: TracksIn,
+  tracks: TracksReadout,
 ): Map<string, number> {
   const used = new Map<string, number>();
   const placed = [
@@ -163,7 +167,7 @@ function tracksUsed(
 // as the desk lists it; one it doesn't list after, in the order recorded.
 function controllersByRow(
   lanes: readonly RecordedLane[],
-  tracks: TracksIn,
+  tracks: TracksReadout,
   strips: readonly ArrangedStrip[],
   controllersOf: (strip: string) => readonly string[],
 ): Map<string, string[]> {

@@ -31,7 +31,7 @@ export interface ClipTrack {
 //   - clipTracks: in the order shown;
 //   - clipName(): a clip's name, on its clip track;
 //   - notesIn(): how many notes a clip holds; none for one that holds no notes.
-export interface ClipsIn {
+export interface ClipsReadout {
   readonly clipTracks: readonly ClipTrack[];
   clipName(slot: unknown, track: string): string;
   notesIn(slot: unknown, track: string): number | undefined;

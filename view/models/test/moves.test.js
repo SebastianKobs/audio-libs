@@ -4,11 +4,11 @@
 //   - a knob's rings: the range each moves it through, where it lies on its control by its taper;
 //   - the matrix: what a composite's own sources move, by their maps and reach;
 //   - a composite's children by their roles, a group each, in the order they first come;
-//   - a preset on the card through its in: its values over the plan's, its starts, how each is set, what's done handed on.
+//   - a preset on the card through its readout: its values over the plan's, its starts, how each is set, what's done handed on.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ViewBuilder } from '../index.ts';
-import { PresetIn } from '../../control-surface/index.ts';
+import { PresetReadout } from '../../control-surface/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { positionOf } from '../../../params/index.ts';
 import { near } from '../../../util/test/near.js';
@@ -72,11 +72,11 @@ test("a composite's children by their roles: a group each, in the order they fir
   );
 });
 
-test("a preset on a plan through its in: each value the preset's, the plan's where it has none; its start as it began; set as its owner says, else by the macro that moves it, else live; what's done handed on", () => {
+test("a preset on a plan through its readout: each value the preset's, the plan's where it has none; its start as it began; set as its owner says, else by the macro that moves it, else live; what's done handed on", () => {
   const values = { 'env/amount': 0.8, glide: 0.03 };
   const changed = [];
   const models = new ViewBuilder(
-    new PresetIn({
+    new PresetReadout({
       plan: () => CARD,
       values: () => values,
       start: () => ({ 'env/amount': 0.6 }),

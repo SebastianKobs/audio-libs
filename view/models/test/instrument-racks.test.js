@@ -17,18 +17,18 @@ const RISING = { ...CARD, node: { ...CARD.node, macros: [...CARD.node.macros, ma
 // the roles' instruments: a pluck playing on the tap, a drum rack's two pads on the hold, the trace with none
 const PATCHES = { tap: 'pluck', hold: 'kit', trace: undefined };
 const CARDS = {
-  tap: [{ patch: 'pluck', planIn: planInOn(CARD), send: () => {} }],
+  tap: [{ patch: 'pluck', planReadout: planReadoutOn(CARD), send: () => {} }],
   hold: [
-    { patch: 'pluck', key: 36, planIn: planInOn(CARD), send: () => {} },
-    { patch: 'swell', key: 38, planIn: planInOn(RISING), send: () => {} },
+    { patch: 'pluck', key: 36, planReadout: planReadoutOn(CARD), send: () => {} },
+    { patch: 'swell', key: 38, planReadout: planReadoutOn(RISING), send: () => {} },
   ],
 };
 
 function macro(name) {
   return { spec: { name, range: [0, 1, 0.01] }, value: 0, maps: [] };
 }
-// a plan's in of the tests' own onto a voice card: every value the plan's
-function planInOn(plan) {
+// a plan's readout of the tests' own onto a voice card: every value the plan's
+function planReadoutOn(plan) {
   return {
     plan,
     valueOf: () => undefined,
@@ -44,9 +44,9 @@ function planInOn(plan) {
 function racksOn() {
   const sent = [];
   const clock = { t: 10, now: () => clock.t };
-  const instrumentsIn = { instruments: PATCHES, cardsOf: (role) => CARDS[role] ?? [] };
+  const instrumentsReadout = { instruments: PATCHES, cardsOf: (role) => CARDS[role] ?? [] };
   const racks = new InstrumentRacks({
-    instrumentsIn,
+    instrumentsReadout,
     clock,
     send: (message) => sent.push(message),
     starts: { rise: 0.75 },

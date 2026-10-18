@@ -1,5 +1,5 @@
-// ---------- view/control-surface/desk: a desk as it plays, the plan's in ----------
-// The plan's in (PlanIn) for a desk (libs/build/desk/), as PresetIn is for a preset.
+// ---------- view/control-surface/desk: a desk as it plays, the plan's readout ----------
+// The plan's readout (PlanReadout) for a desk (libs/build/desk/), as PresetReadout is for a preset.
 // What the views' models read of the desk, by address:
 //   - a value as it plays, the desk's; a strip's mute and solo, its live mix's;
 //   - its start, the desk's, which a reset brings back;
@@ -13,15 +13,15 @@
 import { addressText, nodeAt, splitAtChild, type Address, type Node } from '../../plan/format/index.ts';
 import { SEND } from '../../plan/desk/index.ts';
 import type { Desk, DeskBuilt, DeskMessage, DeskSetup } from '../../build/desk/index.ts';
-import type { Command, PlanIn, Role, Slot } from './plan.ts';
+import type { Command, PlanReadout, Role, Slot } from './plan.ts';
 
-// What the desk's in asks of what's built beyond the desk's: its meters, a level and a reading,
+// What the desk's readout asks of what's built beyond the desk's: its meters, a level and a reading,
 // by address.
 interface Metered {
   peak(address: Address, point?: string): number;
   reading(address: Address, name: string): number;
 }
-// a desk whose built has meters, as its in reads it
+// a desk whose built has meters, as its readout reads it
 type MeteredDesk = Desk<DeskBuilt & Metered>;
 
 const LIVE: Role = { by: 'live' };
@@ -31,7 +31,7 @@ const FIXED: Role = { by: 'fixed' };
 const SWITCHES: readonly string[] = ['mute', 'solo'];
 
 // A desk as the view models read it, by its setup's rules.
-export function deskIn({ desk, setup }: { desk: MeteredDesk; setup: DeskSetup }): PlanIn {
+export function deskReadout({ desk, setup }: { desk: MeteredDesk; setup: DeskSetup }): PlanReadout {
   return {
     plan: desk.plan, // the desk's plan never changes: its settings are kept apart, set as it's built
     valueOf: (address) => switchOf(desk, address) ?? desk.valueOf(address),

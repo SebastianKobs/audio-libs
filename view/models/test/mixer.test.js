@@ -11,11 +11,11 @@ import { ViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from './desk.js';
 
-// The desk's view models on a plan's in of the tests' own: values and peaks by address, the copies
+// The desk's view models on a plan's readout of the tests' own: values and peaks by address, the copies
 // each pool has, every control live; what's sent kept.
 function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
   const sent = [];
-  const planIn = {
+  const planReadout = {
     plan: STUDIO,
     valueOf: (address) => values[addressText(address)],
     startOf: () => undefined,
@@ -25,7 +25,7 @@ function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
     slotOf: () => undefined,
   };
-  return { views: new ViewBuilder(planIn, (command) => sent.push(command)), sent };
+  return { views: new ViewBuilder(planReadout, (command) => sent.push(command)), sent };
 }
 
 test("a channel as a strip, by its form: its name as shown, its label's, else its own; where it goes; its inserts as devices; its sends' knobs by return; its fader, pan, mute and solo", () => {
@@ -77,7 +77,7 @@ test("a pool's copy as a strip: its pool's channel, under its address, named by 
   );
 });
 
-test("a strip's level, its peak as the planIn hears it; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
+test("a strip's level, its peak as the planReadout hears it; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
   const { views } = mixerOn({ peaks: { you: 0.4 }, values: { 'tap/cut/gain': 0 } });
   assert.equal(views.strip(['you']).level, 0.4);
   assert.deepEqual(

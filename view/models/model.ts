@@ -1,5 +1,5 @@
 // ---------- view/models/model: the plan and its values by address, as the views read them ----------
-// Read through the plan's in (PlanIn, libs/view/control-surface/):
+// Read through the plan's readout (PlanReadout, libs/view/control-surface/):
 //   - each value as it plays, worked out from what it was told; the plan's where none was;
 //   - each value's start, which a reset brings back;
 //   - how each is set: live here, automated by what its track plays, or fixed as built;
@@ -18,7 +18,7 @@ import {
   type Param,
   type Plan,
 } from '../../plan/format/index.ts';
-import type { Command, PlanIn, Role, Slot } from '../control-surface/index.ts';
+import type { Command, PlanReadout, Role, Slot } from '../control-surface/index.ts';
 
 // a param or a setting found by its address, and which of the two
 export interface Found {
@@ -26,15 +26,15 @@ export interface Found {
   readonly param: Param;
 }
 
-// The plan and its values by address, read through the plan's in.
+// The plan and its values by address, read through the plan's readout.
 export class Model {
-  readonly #in: PlanIn;
+  readonly #in: PlanReadout;
   readonly #send: (command: Command) => void;
   readonly #moves = new PlanMoves();
 
   // send(): what's done, as the app's message for the plan
-  constructor(planIn: PlanIn, send: (command: Command) => void) {
-    this.#in = planIn;
+  constructor(planReadout: PlanReadout, send: (command: Command) => void) {
+    this.#in = planReadout;
     this.#send = send;
   }
   get plan(): Plan {
