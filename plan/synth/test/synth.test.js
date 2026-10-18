@@ -6,7 +6,14 @@
 //     module's among them; the note's sources its macros; refused where it breaks its form, every failure said.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ARCHITECTURE_FORM, MODULE_TEMPLATES, NOTE_SETTINGS, NOTE_SOURCES, SYNTH_FORMS } from '../index.ts';
+import {
+  ARCHITECTURE_FORM,
+  MODULE_TEMPLATES,
+  NOTE_SETTINGS,
+  NOTE_SOURCES,
+  OWN_NOTE_VALUES,
+  SYNTH_FORMS,
+} from '../index.ts';
 import { Planner } from '../../planner/index.ts';
 import { isSwitch } from '../../../params/index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
@@ -183,4 +190,12 @@ test('an architecture refused where it breaks its form, every failure said: a se
     wires: [...pluck.wires, { from: { node: 'amp', output: 'out' }, to: { node: 'out', input: 'in' } }],
   });
   assert.throws(() => pluckPlanner(intoInput), /a wire from amp into out: not allowed/);
+});
+
+test("the note's own values, its sources beside its pitch, its gate, its velocity and its volume, as a test note sets them", () => {
+  assert.deepEqual(
+    OWN_NOTE_VALUES.map(({ name }) => name),
+    ['bend', 'vibrato depth', 'vibrato rate', 'breath', 'decay time', 'rise'],
+  );
+  assert.equal(OWN_NOTE_VALUES[0], NOTE_SOURCES.bend, 'their specs the sources');
 });

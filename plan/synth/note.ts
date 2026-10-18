@@ -8,7 +8,7 @@
 // Each set on a voice by the macro of its name, as the note starts.
 // One a note sends none of: at its default, moving nothing.
 // The note's settings: how fast its pitch glides to a later pitch, its shortest, its longest.
-import { SWITCH, type ParamSpecs } from '../../params/index.ts';
+import { SWITCH, type ParamSpec, type ParamSpecs } from '../../params/index.ts';
 
 // a note's source, by its name
 export type NoteSource = keyof typeof NOTE_SOURCES;
@@ -26,6 +26,11 @@ export const NOTE_SOURCES = {
   'decay time': { name: 'decay time', unit: 's', range: [0, 10, 0.001], default: 0.1 },
   rise: { name: 'rise', unit: 's', range: [0, 30, 0.01], default: 1 },
 } as const satisfies ParamSpecs;
+// The note's own values, a keyboard's per-note controllers, as a test note sets them: its
+// sources beside its pitch, its gate, its velocity and its volume, which every note has.
+export const OWN_NOTE_VALUES: readonly ParamSpec[] = Object.values(NOTE_SOURCES).filter(
+  ({ name }) => !['frequency', 'gate', 'velocity', 'volume'].includes(name),
+);
 // the note's settings:
 //   glide: the time constant a later pitch is glided to by, 0 at once;
 //   shortest: a release before it waits for it;
