@@ -8,7 +8,8 @@
 //   - a strip's name or slot: told to whoever listens, by the strip's address (onOpen());
 //   - M mutes, S solos it alone, with shift adds it or lets it go;
 //   - a group's header folds it to its first track, with shift every group;
-//   - a knob dragged, set back by a double-click (KnobDrag).
+//   - a knob dragged, set back by a double-click (KnobDrag), each bound to its model as it's
+//     drawn (Bound).
 // After each, the view is told to draw it again (changed()).
 // A send's knob is labelled by its return's short label.
 // Level bars: each falls as a peak meter's, drawn on every frame.
@@ -16,7 +17,8 @@
 // heard feed counted too.
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
-import { shortName, type BusGroup, type Strip, type ViewBuilder } from '../models/index.ts';
+import { shortName, type BusGroup, type Control, type Strip, type ViewBuilder } from '../models/index.ts';
+import { Bound, CONTROL_MARKS } from './bound.ts';
 import { html, makeElement, setHtml, type Html } from './elements.ts';
 import { KnobDrag } from './knob-view.ts';
 import { Levels, meterPosition } from './meter-view.ts';
@@ -62,6 +64,7 @@ export class MixerView {
   // its sections, in order: the tracks, the buses, the FX busses, the master
   readonly sections: readonly SectionView[];
   readonly #models: ViewBuilder;
+  readonly #bound = new Bound<Control>(CONTROL_MARKS); // each knob drawn, its model
   readonly #look: MixerLook;
   readonly #changed: () => void;
   readonly #events = new Events<{ open: Opened }>();
@@ -95,7 +98,7 @@ export class MixerView {
     for (const section of this.sections) {
       section.row.addEventListener('click', (event) => this.#clicked(event));
     }
-    new KnobDrag({ within, knobOf: (address) => models.control(address), moved: changed });
+    new KnobDrag({ within, knobOf: (element) => this.#bound.at(element), moved: changed });
   }
   // what a click on a strip's name or slot opens, to whoever listens
   readonly onOpen = (listener: (...opened: Opened) => void): (() => void) => this.#events.on('open', listener);
@@ -107,6 +110,9 @@ export class MixerView {
     setHtml(this.#buses.row, buses);
     setHtml(this.#returns.row, returns);
     setHtml(this.#master.row, master);
+    for (const section of this.sections) {
+      this.#bound.bind(section.row, (address) => this.#models.control(address));
+    }
   }
   // The level bars, each falling from its last as a peak meter's, dt s on: on every frame.
   // A track not on the desk yet reads silence, as all do before the audio starts.

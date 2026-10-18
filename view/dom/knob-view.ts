@@ -13,14 +13,14 @@
 //     elsewhere leaves it; one it can't read kept in the field, marked;
 //   - a double-click sets it back to its start.
 import { positionOf } from '../../params/index.ts';
-import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
+import { addressText } from '../../plan/format/index.ts';
 import { clamp01 } from '../../util/index.ts';
 import { Knob, type Ring } from '../models/index.ts';
 import { html, type Html } from './elements.ts';
 
 // A knob as drawn now, by its address and the element it's drawn as, which says whose it is
 // where a view draws several plans' knobs.
-type KnobOf = (address: Address, element: Element) => unknown;
+type KnobOf = (element: Element) => unknown; // the model an element is drawn as (Bound)
 
 const LIVE =
   'drag up or down to set it, with shift for finer steps; click its value to type one; double-click: back to where it started';
@@ -68,11 +68,11 @@ function liveMark(knob: Knob, title?: string): Html {
   }
   return html` data-set="${addressText(knob.address)}"${title === undefined ? html` title="${LIVE}"` : hint}`;
 }
-// The knobs drawn within an element brought up to date, each by its address: its bar and its
+// The knobs drawn within an element brought up to date, each by its element: its bar and its
 // text, as it plays now, its notes moving it; a value being typed left alone.
 export function refreshKnobs(within: Element, knobOf: KnobOf): void {
   for (const element of within.querySelectorAll<HTMLElement>('.knob[data-knob]')) {
-    const knob = knobOf(addressOf(element.dataset.knob!), element); // marked with it
+    const knob = knobOf(element);
     if (!(knob instanceof Knob)) {
       continue;
     }
@@ -85,7 +85,7 @@ export function refreshKnobs(within: Element, knobOf: KnobOf): void {
 }
 
 // The knobs drawn within an element, dragged, typed into and set back, listened for from when
-// it's made. knobOf(): a knob by its address, as drawn now; moved(): called as one moves, to
+// it's made. knobOf(): a knob by the element it's drawn as; moved(): called as one moves, to
 // draw again.
 export class KnobDrag {
   readonly #knobOf: KnobOf;
@@ -177,7 +177,7 @@ export class KnobDrag {
     if (!marked) {
       return undefined;
     }
-    const knob = this.#knobOf(addressOf(marked.dataset.set!), marked); // found by its mark
+    const knob = this.#knobOf(marked);
     return knob instanceof Knob ? knob : undefined;
   }
 }

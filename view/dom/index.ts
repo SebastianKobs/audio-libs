@@ -2,6 +2,7 @@
 // One implementation of the views, as Web Audio is of the sound.
 // Its parts:
 //   - elements.ts: an element made, and HTML made by html``, every value escaped;
+//   - bound.ts: drawn elements bound to their models as they're drawn, found by the element;
 //   - knob-view.ts: a knob and a fader drawn, dragged and set back, brought up to date;
 //   - device-view.ts: a device drawn, its status, its reset, its controls;
 //   - group-view.ts: a group of a composite's children drawn, a tab each, the chosen one's controls;
@@ -21,6 +22,7 @@
 //     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
 //     a drag and a wheel handed to its model.
 export { appendHtml, Html, html, makeElement, setHtml } from './elements.ts';
+export { Bound, CONTROL_MARKS } from './bound.ts';
 export { choiceHtml, switchHtml } from './choice-view.ts';
 export { controlsHtml, deviceHtml, type DeviceLook } from './device-view.ts';
 export { envelopeHtml } from './envelope-view.ts';
