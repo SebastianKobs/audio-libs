@@ -8,10 +8,17 @@
 //   - a pool's copies added so far;
 //   - what a node does in its slot and what sets it there, the tool's words;
 //   - what's done, sent as a command.
-// And what moves each param, worked out from the plan alone (moves.ts).
-import { paramAt, settingAt, type Address, type Param, type Plan } from '../../plan/format/index.ts';
+// And what moves each param, worked out from the plan alone (PlanMoves).
+import {
+  paramAt,
+  PlanMoves,
+  settingAt,
+  type Address,
+  type Move,
+  type Param,
+  type Plan,
+} from '../../plan/format/index.ts';
 import type { Command } from './command.ts';
-import { PlanMoves, type Move } from './moves.ts';
 
 // How a value is set, as the tool says:
 //   - live: set here, in a view;

@@ -12,11 +12,13 @@
 //   - address.ts: where a param or a setting is, by names from the top, and as text;
 //   - param-at.ts: a node, a param or a setting found by its address; settings changed by it,
 //     a new plan;
+//   - moves.ts: what moves each param, a macro's maps and a child wired into it, as a mod matrix;
 //   - routing.ts: what feeds what over one composite's wires, the loop check, a node's way out;
 //   - version.ts: a stored plan's version.
 export { addressOf, addressText, under, type Address, type ValuesByAddress } from './address.ts';
 export type { Channels, Input, Output } from './input-output.ts';
 export { macroValues, mapOnto, type Macro, type MacroTarget } from './macro.ts';
+export { PlanMoves, type Move } from './moves.ts';
 export { isComposite, type BlockNode, type Composite, type Node } from './node.ts';
 export type { Param, Setting } from './param.ts';
 export { nodeAt, paramAt, settingAt, withSettings } from './param-at.ts';

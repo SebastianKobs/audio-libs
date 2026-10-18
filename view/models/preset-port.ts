@@ -5,10 +5,9 @@
 //   - how each is set: as its owner says, else by what moves it where a macro does, else live;
 //   - what's done handed to its owner, to change the preset by.
 // It hears no sound, holds no copies and fills no slots.
-import { addressText, type Address, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
+import { addressText, PlanMoves, type Address, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
 import type { Command } from './command.ts';
 import type { ModelPort, Role, Slot } from './model.ts';
-import { PlanMoves } from './moves.ts';
 
 // What owns the preset:
 //   - plan: the plan at the preset as it is now, a macro's targets at its value;

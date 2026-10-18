@@ -3,9 +3,8 @@
 // What every control on it has: its address, a param's or a setting's, its declared spec,
 // its words, and how it's set.
 import type { ParamSpec } from '../../params/index.ts';
-import type { Address } from '../../plan/format/index.ts';
+import type { Address, Move } from '../../plan/format/index.ts';
 import type { Found, Model, Role, Slot } from './model.ts';
-import type { Move } from './moves.ts';
 
 // A node as a device:
 //   - its address, its name, its kind, its label as shown, its node's, else its kind;

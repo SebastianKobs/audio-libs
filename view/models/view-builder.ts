@@ -12,6 +12,7 @@ import {
   under,
   type Address,
   type MacroTarget,
+  type Move,
   type Node,
   type Plan,
 } from '../../plan/format/index.ts';
@@ -20,7 +21,6 @@ import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';
 import { Mixer } from './mixer.ts';
 import { Model, type ModelPort } from './model.ts';
-import type { Move } from './moves.ts';
 import { Strip } from './strip.ts';
 
 // A row of a matrix: a source, by its address within the composite, what it moves, and how

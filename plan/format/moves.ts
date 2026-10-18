@@ -1,18 +1,13 @@
-// ---------- view/models/moves: what moves each param, as a mod matrix shows it ----------
+// ---------- plan/format/moves: what moves each param, as a mod matrix shows it ----------
 // Worked out from a plan alone, each param by its address:
 //   - a macro: each target its maps move, by its factor and offset, held within its map's ends;
 //   - a child wired into a param or into a child's macro: a modulator moving it, as CV; its
 //     reach its own amount or depth, where it has one, as an envelope's or an LFO's.
 // Every composite's, in the plan's order; a pool's child's within it.
-import {
-  addressText,
-  isComposite,
-  type Address,
-  type Composite,
-  type MacroTarget,
-  type Node,
-  type Plan,
-} from '../../plan/format/index.ts';
+import { addressText, type Address } from './address.ts';
+import type { MacroTarget } from './macro.ts';
+import { isComposite, type Composite, type Node } from './node.ts';
+import type { Plan } from './plan.ts';
 
 // what moves a param: a macro, by its own address, and its map; or a child, by its address,
 // and what it reaches by
