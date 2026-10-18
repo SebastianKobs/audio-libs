@@ -8,7 +8,7 @@
 // It knows no planner, channel, desk, effect or instrument: only the plan's format and its blocks.
 import { addressText, isComposite, type Address, type Node, type Plan } from '../../plan/format/index.ts';
 import type { BlockKind } from '../../plan/blocks/index.ts';
-import type { Builder } from '../ports/index.ts';
+import type { Builder } from '../contract/index.ts';
 import { MAKERS } from './blocks/makers.ts';
 import { Buffers } from './buffers.ts';
 import { WebAudioBuilt } from './built.ts';

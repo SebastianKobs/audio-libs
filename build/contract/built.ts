@@ -1,4 +1,4 @@
-// ---------- build/ports/built: what every builder hands back ----------
+// ---------- build/contract/built: what every builder hands back ----------
 // The thing built from a plan, the desk in the room or the synth on the table, as its front panel:
 // its controls and its slots by address, its parts inside, out of reach.
 //   - set(): a param set by its address, now, at a time, or gliding there from now; a choice as

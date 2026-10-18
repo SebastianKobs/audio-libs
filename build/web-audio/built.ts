@@ -1,5 +1,5 @@
 // ---------- build/web-audio/built: what the Web Audio builder hands back ----------
-// The thing built, as its front panel (libs/build/ports/):
+// The thing built, as its front panel (libs/build/contract/):
 //   - a param set or automated by its address: a block's, on what's built of it; a macro's, onto
 //     its targets; a choice by its index, as its block's param holds it; a placeholder's left alone;
 //   - a preset's values set together; a new tempo told what follows it;
@@ -36,7 +36,7 @@ import {
   type Plan,
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
-import type { Built } from '../ports/index.ts';
+import type { Built } from '../contract/index.ts';
 import { automate } from './automation.ts';
 import type { BuiltNode } from './built-node.ts';
 import { meterOn, type PeakMeter } from './meters.ts';

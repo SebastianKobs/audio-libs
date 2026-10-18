@@ -1,6 +1,6 @@
 # build/web-audio
 
-The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds it and hands back what's built, the ports' `Builder` and `Built` (`libs/build/ports/`). A package of its own since LAY8a. It reads only the plan's format and its blocks (`libs/plan/format/`, `libs/plan/blocks/`), and knows no planner, channel, desk, effect or instrument. It's the only code that makes Web Audio nodes; the old engine's (`libs/web-audio-engine/`) node as built, its params in a plan's units, its limiter, pan, biquad and buffers became this library's, and in LAY16 its audio context on a clock (`context.ts`), the engine gone.
+The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds it and hands back what's built, the contract's `Builder` and `Built` (`libs/build/contract/`). A package of its own since LAY8a. It reads only the plan's format and its blocks (`libs/plan/format/`, `libs/plan/blocks/`), and knows no planner, channel, desk, effect or instrument. It's the only code that makes Web Audio nodes; the old engine's (`libs/web-audio-engine/`) node as built, its params in a plan's units, its limiter, pan, biquad and buffers became this library's, and in LAY16 its audio context on a clock (`context.ts`), the engine gone.
 
 ```ts
 import { WebAudioBuilder } from './index.ts';

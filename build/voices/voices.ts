@@ -29,7 +29,7 @@ import {
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
 import { NOTE_SETTINGS } from '../../plan/synth/index.ts';
-import type { Built } from '../ports/index.ts';
+import type { Built } from '../contract/index.ts';
 import { Silence } from './silence.ts';
 
 // a note's settings, its voice card's or their defaults

@@ -28,7 +28,7 @@ import {
   type Plan,
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
-import type { Built } from '../ports/index.ts';
+import type { Built } from '../contract/index.ts';
 
 // What the desk asks of what's built beyond what every builder hands back: a way into a
 // channel or into one of the desk's own inputs, by its address and its input.

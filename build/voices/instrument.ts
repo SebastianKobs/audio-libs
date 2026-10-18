@@ -11,7 +11,7 @@
 //   1. its settings the same: each value that changed glided to on every voice sounding, and
 //      set on each voice from then;
 //   2. else built again from it and crossfaded, its notes sounding on.
-import type { Builder, Built } from '../ports/index.ts';
+import type { Builder, Built } from '../contract/index.ts';
 import { retimed, type Message, type Receiver } from '../../midi/index.ts';
 import { addressOf, addressText, type Composite, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
 import type { Preset } from '../../plan/planner/index.ts';

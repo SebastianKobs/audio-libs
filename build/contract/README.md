@@ -1,6 +1,6 @@
-# build/ports
+# build/contract
 
-What every builder is and what it hands back, for every builder alike: what the tool and the voices talk to, whichever builder is there. A package of its own since LAY8a. Reads only the plan's format (`libs/plan/format/`) and what a param is told as it plays (`libs/automation/`).
+What every builder is and what it hands back, for every builder alike: what the tool and the voices talk to, whichever builder is there. A package of its own since LAY8a, `libs/build/ports/` until SHAPE5b5. Reads only the plan's format (`libs/plan/format/`) and what a param is told as it plays (`libs/automation/`).
 
 The plan is the schematic, timeless; what's built is the thing, the desk in the room or the synth on the table, held as its front panel: its controls and its slots by address, its parts inside, out of reach. Two builds of one plan are two machines, each told on its own.
 

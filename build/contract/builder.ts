@@ -1,4 +1,4 @@
-// ---------- build/ports/builder: what every builder is ----------
+// ---------- build/contract/builder: what every builder is ----------
 // Handed a plan, where its sound goes and where each of its inputs comes from, it builds the plan and
 // hands back what's built. Where a sound goes or comes from is each builder's own: for Web Audio a node.
 import type { Plan } from '../../plan/format/index.ts';
