@@ -9,19 +9,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentCards, ViewBuilder } from '../index.ts';
-import { edited, instrumentsOf } from '../../../plan/synth/index.ts';
-import { LiveCopies } from '../../../util/index.ts';
+import { instrumentsOf, LiveBank } from '../../../plan/synth/index.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
 
-// the cards on a bank, each edit sent, then made on the bank as the studio makes it
+// the cards on a live bank, each edit sent, then edited by the bank, as the studio's is
 function cardsOn() {
-  const bank = new LiveCopies(INSTRUMENTS.patches);
+  const bank = new LiveBank(INSTRUMENTS.patches);
   const sent = [];
   const send = (message) => {
     sent.push(message);
-    bank.set(message.patch, edited(bank.current(message.patch), message));
+    bank.edit(message);
   };
   return { bank, sent, cards: new InstrumentCards({ instruments: INSTRUMENTS, bank, send }) };
 }

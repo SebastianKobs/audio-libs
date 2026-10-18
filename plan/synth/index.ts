@@ -9,6 +9,7 @@
 //   - preset.ts: a preset changed, each value and setting that differs, by its address; edited as
 //     the app's messages ask (PresetMessage);
 //   - bank.ts: patches by name, a program change picking one;
+//   - live-bank.ts: a bank's patches as they play, edited or reset as the app's messages ask;
 //   - instruments-file.ts: a file of instruments, patches and racks, as a person writes it, read;
 //   - patch-plans.ts: a patch's instrument planned from a file of instruments, by its name, and
 //     the planner of its voice cards;
@@ -18,6 +19,7 @@
 // Handed to the planner, with the forms.
 export { NOTE_SETTINGS, NOTE_SOURCES, type NoteSource } from './note.ts';
 export { Bank } from './bank.ts';
+export { LiveBank } from './live-bank.ts';
 export { instrumentOf, type Chain } from './instrument.ts';
 export { instrumentsOf, type Instruments, type RackPad } from './instruments-file.ts';
 export { changesFrom, edited, type Changes, type PresetMessage } from './preset.ts';
