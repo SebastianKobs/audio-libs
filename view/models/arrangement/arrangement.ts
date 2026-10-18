@@ -40,7 +40,7 @@ import type {
   RecordedRegion,
   RecordingIn,
   TracksIn,
-} from './inputs.ts';
+} from '../../control-surface/index.ts';
 
 // A region on its row: its label, from when to when, clock times, an open one's end never;
 // whether it was played live, whether its clip is gone, and its notes (G4b).

@@ -3,7 +3,7 @@
 //   - a lane's param, its range and taper, by its controller there;
 //   - the strip's controllers in the order the sound goes through it, as its strip has them:
 //     its inserts' controls, its sends, its volume, pan, mute and solo.
-import type { DeclaredIn } from './inputs.ts';
+import type { DeclaredIn } from '../../control-surface/index.ts';
 import type { Strip } from '../strip.ts';
 import type { ViewBuilder } from '../view-builder.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';

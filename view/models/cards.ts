@@ -21,16 +21,8 @@ import {
 import type { Preset } from '../../plan/planner/index.ts';
 import { cardPlanner, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../plan/synth/index.ts';
 import { entryOf, type LiveCopies } from '../../util/index.ts';
-import { PresetIn, type Command, type PlanIn, type Role } from '../control-surface/index.ts';
+import { PresetIn, type Command, type InstrumentCard, type PlanIn, type Role } from '../control-surface/index.ts';
 
-// a card of an instrument: the patch it edits, by its name; a drum rack's pad's key; its plan's in;
-// what's done on it sent as the app's message (send())
-export interface InstrumentCard {
-  readonly patch: string;
-  readonly key?: number;
-  readonly planIn: PlanIn;
-  readonly send: (command: Command) => void;
-}
 // Values from outside over a voice card's own, by their addresses in it, and what sets them,
 // as a card's hints say it (the tweak panel).
 export interface CardValues {

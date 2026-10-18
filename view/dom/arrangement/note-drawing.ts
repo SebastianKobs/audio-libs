@@ -1,5 +1,6 @@
 // ---------- view/dom/arrangement/note-drawing: a region's notes drawn inside its block, each at its pitch (G4b) ----------
-import { noteShape, pitchRange, type Arrangement, type NoteShape, type RecordedNote } from '../../models/index.ts';
+import { noteShape, pitchRange, type Arrangement, type NoteShape } from '../../models/index.ts';
+import type { RecordedNote } from '../../control-surface/index.ts';
 import { STEP_PX, xOf } from './pixels.ts';
 
 // a note as drawn, what the browser tests read: its first pitch, where it starts and how wide, px, how high, whether it's still held

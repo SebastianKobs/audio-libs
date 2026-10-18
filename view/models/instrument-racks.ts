@@ -9,17 +9,9 @@
 import { OWN_NOTE_VALUES, type PresetMessage } from '../../plan/synth/index.ts';
 import type { TestNoteMessage } from '../../build/voices/index.ts';
 import type { Clock } from '../../clock/index.ts';
-import type { InstrumentCard } from './cards.ts';
-import type { PlanIn } from '../control-surface/index.ts';
+import type { InstrumentCard, InstrumentsIn, PlanIn } from '../control-surface/index.ts';
 import { ViewBuilder } from './view-builder.ts';
 
-// The instruments as the device view asks them:
-//   - the patch each role plays (instruments);
-//   - a role's instrument's cards, one for each patch it plays.
-export interface InstrumentsIn {
-  readonly instruments: Readonly<Record<string, string | undefined>>;
-  cardsOf(role: string): readonly InstrumentCard[];
-}
 // what the racks send on the app's bus: a role's reset, its test note pressed and let go
 type RackMessage = PresetMessage | TestNoteMessage;
 // A role's instrument as a rack: its status, the patch it plays; a pad for each card, by its

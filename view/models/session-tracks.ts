@@ -7,7 +7,7 @@
 //   3. what sounded since the last look, for the folded sections' lights: a replay group's
 //      clips, and each lit track's channel.
 import { addressOf, type Address } from '../../plan/format/index.ts';
-import type { TracksIn } from './arrangement/inputs.ts';
+import type { TracksIn } from '../control-surface/index.ts';
 import type { GroupShown, TrackShown } from './session.ts';
 
 // What a track plays now, as its cell shows it: the clip, a visitor's motif named after it, a

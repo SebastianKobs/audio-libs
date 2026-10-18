@@ -29,7 +29,7 @@
 //   - device-panel.ts: the device view, what's open in it, by a kind and what of it, its chain;
 //   - transport-lane.ts: the transport as its lane shows it, whether it plays, bar and beat;
 //   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
-//     view and the playhead, in 16ths; what it reads in its own words (inputs.ts); a region's notes'
+//     view and the playhead, in 16ths; what it reads in its own words (libs/view/control-surface/); a region's notes'
 //     and a lane's shapes, as they're drawn; what the desk declares, read from its view models.
 export { Choice } from './choice.ts';
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
@@ -47,8 +47,8 @@ export { Control, type Device } from './device.ts';
 export { envelopeDrawing, type EnvelopeDrawing } from './envelope.ts';
 export { Knob, textOf, type Ring } from './knob.ts';
 export { Mixer, type BusGroup } from './mixer.ts';
-export { InstrumentCards, type CardValues, type InstrumentCard } from './cards.ts';
-export { InstrumentRacks, type InstrumentRack, type InstrumentsIn } from './instrument-racks.ts';
+export { InstrumentCards, type CardValues } from './cards.ts';
+export { InstrumentRacks, type InstrumentRack } from './instrument-racks.ts';
 export { Strip, shortName, shownName } from './strip.ts';
 export { ViewBuilder, type MatrixRow } from './view-builder.ts';
 export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';
@@ -56,14 +56,3 @@ export { declaredBy } from './arrangement/declared.ts';
 export { laneLine, type Corner } from './arrangement/lane-shapes.ts';
 export { noteShape, pitchRange, type NoteShape } from './arrangement/note-shapes.ts';
 export type { Row, SectionLabels } from './arrangement/rows.ts';
-export type {
-  ArrangementClock,
-  DeclaredIn,
-  PlayheadIn,
-  RecordedLane,
-  RecordedNote,
-  RecordedRegion,
-  RecordingIn,
-  TrackGroup,
-  TracksIn,
-} from './arrangement/inputs.ts';

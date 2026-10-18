@@ -1,13 +1,14 @@
-// ---------- view/models/arrangement/inputs: what the arrangement reads, in its own words ----------
+// ---------- view/control-surface/arrangement: what the arrangement reads, in its own words ----------
 // Types only. Whatever answers fits them by its shape:
 //   - the recording (RecordingIn): a MIDI sequencer's recorder (libs/midi-sequencer/), its regions and lanes;
 //   - the tracks (TracksIn): the control surface that played them, its groups and its clips' names;
+//     the session's tracks read them too;
 //   - the playhead (PlayheadIn): the transport, a cue sent on the app's bus;
 //   - the declarations (DeclaredIn): the desk's view models (declaredBy());
 //   - the clock: the one clock (libs/clock/), its time, its 16ths and its grid.
-import type { TimedValue } from '../../../automation/index.ts';
-import type { Clock, HeardGrid, Seconds, TimeMap } from '../../../clock/index.ts';
-import type { ParamSpec } from '../../../params/index.ts';
+import type { TimedValue } from '../../automation/index.ts';
+import type { Clock, HeardGrid, Seconds, TimeMap } from '../../clock/index.ts';
+import type { ParamSpec } from '../../params/index.ts';
 
 // A note as recorded:
 //   - t, duration: when, and how long; none while it's held;
