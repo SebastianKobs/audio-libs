@@ -1,6 +1,7 @@
 // ---------- plan/desk/mute-solo: which channels a mute or a solo silences ----------
 // As Ableton's, over a desk plan's wires, each channel by its role:
-//   - those muted;
+//   - those muted, and what feeds them: a bus muted silences what goes into it, its sends
+//     among them, so nothing it gathers is heard by another way;
 //   - with any soloed, every one but what a soloed one needs to be heard:
 //     the channels on its way out to the master, and those whose way out goes through it;
 //   - a return never silenced by a solo; the master never silenced at all.
@@ -21,12 +22,13 @@ export const MUTE_GLIDE = 0.01; // s
 export function silenced(desk: Pick<Composite, 'children' | 'wires'>, { muted, soloed }: Muting): Set<string> {
   const roles = new Map(desk.children.map(({ name, role }) => [name, role]));
   const silenceable = (name: string): boolean => roles.has(name) && roles.get(name) !== 'master';
-  const quiet = new Set([...muted].filter(silenceable));
+  const wayOut = waysOut(desk);
+  const mutes = [...muted].filter(silenceable);
+  const quiet = new Set([...roles.keys()].filter((name) => wayOut(name).some((on) => mutes.includes(on))));
   const solos = [...soloed].filter(silenceable);
   if (!solos.length) {
     return quiet;
   }
-  const wayOut = waysOut(desk);
   const heard = new Set(solos.flatMap(wayOut));
   for (const name of roles.keys()) {
     if (wayOut(name).some((on) => solos.includes(on))) {

@@ -32,15 +32,16 @@ test('a mute: its channel cut, gliding, once the desk is built; let go, back', (
   assert.deepEqual(desk.mixState(), { muted: new Set(), soloed: new Set() });
 });
 
-test('a mute taking along the strips its setup says', () => {
-  const mutedWith = (muted) => (muted.has('you') ? new Set([...muted, 'tap']) : new Set(muted));
-  const { desk, built, build } = deskOn(Desk, PLAN, { setup: { mutedWith } });
+test("a bus muted taking along what feeds it, a track's channel among them as it's added", () => {
+  const { desk, built, build } = deskOn(Desk, PLAN);
   build();
   desk.control('you', switched('mute', true));
   assert.deepEqual(cuts(built), [
     ['you', 0],
     ['tap', 0],
   ]);
+  desk.inputOf('my tap/3');
+  assert.deepEqual(cuts(built).at(-1), ['my tap/3', 0]);
 });
 
 test('a solo keeping what a soloed strip needs to be heard, its way out; never an FX bus', () => {

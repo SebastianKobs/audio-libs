@@ -18,12 +18,12 @@ import { StripControls } from './strip-controls.ts';
 import { TrackChannels, type ChannelInput } from './track-channels.ts';
 
 // What a desk is made with:
-//   - plan: the desk's plan; setup: its rules, the strips a mute takes along, which tracks are
-//     set live, what a track's notes set;
+//   - plan: the desk's plan; setup: its rules, which tracks are set live, what a
+//     track's notes set;
 //   - clock: the clock's time now and its ticks; at(): a time on it on what's built's clock.
 export interface DeskMaking {
   readonly plan: Plan;
-  readonly setup: Pick<DeskSetup, 'mutedWith' | 'isLive' | 'setByNotes'>;
+  readonly setup: Pick<DeskSetup, 'isLive' | 'setByNotes'>;
   readonly clock: Pick<Clock, 'now' | 'onTick'>;
   readonly at: (t: number) => number;
 }
@@ -35,7 +35,7 @@ export class Desk<B extends DeskBuilt> extends DeskState<B> {
 
   constructor({ plan, setup, clock, at }: DeskMaking) {
     super({ plan });
-    this.#mix = new Mix({ desk: this, mutedWith: setup.mutedWith });
+    this.#mix = new Mix({ desk: this });
     // a track's channel muted as it's added, where it or what takes it along is
     const made = (): void => this.#mix.apply();
     this.#channels = new TrackChannels({ desk: this, clock, at, made, setup });

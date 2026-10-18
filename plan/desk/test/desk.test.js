@@ -324,12 +324,14 @@ const ROUTED = {
   pools: [{ name: 'my tap', out: 'you' }],
 };
 
-test("silenced(): which channels a mute or a solo silences, as Ableton's, over a desk plan's wires: a soloed one's way out and what feeds it heard; a return never silenced by a solo, the master never", () => {
+test("silenced(): which channels a mute or a solo silences, as Ableton's, over a desk plan's wires: a muted one and what feeds it, its sends among them; a soloed one's way out and what feeds it heard; a return never silenced by a solo, the master never", () => {
   const desk = planned(ROUTED).node;
   const quiet = (muted = [], soloed = []) =>
     [...silenced(desk, { muted: new Set(muted), soloed: new Set(soloed) })].sort();
   assert.deepEqual(quiet(), [], 'nothing muted, nothing soloed');
   assert.deepEqual(quiet(['tap']), ['tap'], 'a mute, alone');
+  assert.deepEqual(quiet(['you']), ['tap', 'you'], 'a bus muted: what feeds it too, so its sends go quiet');
+  assert.deepEqual(quiet(['sings']), ['replay tap 1', 'replay vine 1', 'sings'], 'every bus alike');
   assert.deepEqual(
     quiet([], ['replay tap 1']),
     ['ambient', 'background 1', 'replay vine 1', 'tap', 'you'],
@@ -343,8 +345,8 @@ test("silenced(): which channels a mute or a solo silences, as Ableton's, over a
   assert.deepEqual(quiet([], ['replay tap 1', 'background 1']), ['replay vine 1', 'tap', 'you'], 'two soloed');
   assert.deepEqual(
     quiet(['sings'], ['replay tap 1']),
-    ['ambient', 'background 1', 'replay vine 1', 'sings', 'tap', 'you'],
-    "a mute wins over a solo's way out",
+    ['ambient', 'background 1', 'replay tap 1', 'replay vine 1', 'sings', 'tap', 'you'],
+    "a mute wins over a solo's way out, and over a soloed one feeding it",
   );
   assert.deepEqual(quiet(['master'], ['master']), [], 'the master: neither muted nor soloed');
   const copy = copyOf(desk.pools[0], 1);
@@ -357,6 +359,11 @@ test("silenced(): which channels a mute or a solo silences, as Ableton's, over a
     [...silenced(withCopy, { muted: new Set(), soloed: new Set(['you']) })].sort(),
     ['ambient', 'background 1', 'replay tap 1', 'replay vine 1', 'sings'],
     "a pool's copy, wired by its pool's rule: feeding a soloed bus, heard",
+  );
+  assert.deepEqual(
+    [...silenced(withCopy, { muted: new Set(['you']), soloed: new Set() })].sort(),
+    ['my tap/1', 'tap', 'you'],
+    'feeding a muted bus, silenced with it',
   );
 });
 
