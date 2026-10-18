@@ -6,8 +6,6 @@
 // inputs sorted, numbers to 10 significant digits, times from `t0`, and how often a node was disconnected. A named node met on the way is
 // a ref to its name, written once under it, as itself, so a desk with every strip named is written strip by strip, not once for every path
 
-import { ClockedContext } from '../context.ts';
-
 const NOISE = 1e-9; // s: a time this near the start written as the start, a float's noise, as a time added up step by step has (P3c1)
 const PARAMS = {
   gain: { gain: 1 },
@@ -228,7 +226,7 @@ export function into(ctx, node) {
 export function outOf(ctx, node) {
   return ctx.rec.edges.filter((edge) => edge.from === node).map((edge) => edge.to);
 }
-// puts the stand-in where tool/audio/studio/engine.ts looks for a browser's. node's own navigator does: it has no audio session and doesn't vibrate
+// puts the stand-in where the studio looks for a browser's audio. node's own navigator does: it has no audio session and doesn't vibrate
 export function install(now) {
   globalThis.window = {
     AudioContext: class extends StandInContext {
@@ -241,16 +239,6 @@ export function install(now) {
   globalThis.document = { hidden: false };
 }
 
-// A context on a clock, as the studio makes one, on a stand-in of its own at the time now() gives; the clock's time onto it by
-// toContext, the same where none is given (the old engine's engineOn() until LAY16).
-export function clockedOn(now, toContext) {
-  const AudioContext = class extends StandInContext {
-    constructor() {
-      super(now);
-    }
-  };
-  return new ClockedContext({ AudioContext, ...(toContext && { toContext }) });
-}
 // what was built from node index `from` on, up to `to`: the nodes, and the edges and disconnects from them. Nodes made before are
 // outside it, and named in `names` (a Map from node to name) where they're endpoints
 export function take(ctx, from = 0, to) {

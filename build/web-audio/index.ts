@@ -27,5 +27,5 @@ export { limiterNodes, makeupOf } from './blocks/limiter.ts';
 export { panOf, type PanLaw } from './blocks/pan.ts';
 export { meterOn, type PeakMeter } from './meters.ts';
 export { FADE_IN, FADE_OUT, Output } from './output.ts';
-export { AudioPower } from './power.ts';
+export { AudioPower, type BrowserAudio, type EngineOnceStarted } from './power.ts';
 export { Copies, type Editable } from './copies.ts';

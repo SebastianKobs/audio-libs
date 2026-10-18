@@ -1,6 +1,7 @@
 // ---------- build/web-audio/power: the audio's power, started, paused and resumed ----------
 // Start: on the first touch, as browsers ask.
-//   1. The engine made, the audio context on the clock's time (its owner's, handed in).
+//   1. The engine made in the browser's audio, handed in: iOS's audio session set first, the
+//      audio context on the clock's time.
 //   2. What's built built in it by the Web Audio builder, into the output after it, faded in.
 //   3. The clock's beat grid on the audio's time.
 //   4. Told to whoever listens: a background struck then.
@@ -15,19 +16,27 @@ import type { Plan } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
 import type { WebAudioBuilt } from './built.ts';
 import { WebAudioBuilder } from './builder.ts';
-import type { ClockedContext } from './context.ts';
+import { ClockedContext, type ClockedContextOptions } from './context.ts';
 import { Output } from './output.ts';
 
+// The browser's audio, as the page hands it in: its AudioContext class, and iOS's audio
+// session where there is one.
+export interface BrowserAudio {
+  readonly AudioContext: ClockedContextOptions['AudioContext'];
+  readonly audioSession?: { type: string } | undefined;
+}
 // What the power is made with:
-//   - engine(): the engine, made at the first start, its owner's (an audio session set first);
+//   - browser(): the browser's audio, read at the first start;
 //   - build(): what's built, by the function handed it, as a desk builds itself;
 //   - beat(): a beat's length now, for synced times; clock: put on the audio's time.
 export interface AudioPowerMaking {
-  readonly engine: () => ClockedContext;
+  readonly browser: () => BrowserAudio;
   readonly build: (make: (plan: Plan) => WebAudioBuilt) => void;
   readonly beat: () => number;
-  readonly clock: Pick<Clock, 'useAudio'>;
+  readonly clock: Pick<Clock, 'useAudio' | 'audio'>;
 }
+// The engine as its users ask for it, as they need it: none until the audio starts.
+export type EngineOnceStarted = () => ClockedContext | null;
 
 const STOP_AFTER = 400; // ms before a pause suspends the context: the fade out has gone quiet
 
@@ -74,7 +83,7 @@ export class AudioPower {
   // The engine made and what's built built in it, into the output, with no clock on it and
   // nothing told, as a desk's offline render asks.
   build(): ClockedContext {
-    const engine = this.#making.engine();
+    const engine = this.#makeEngine();
     const context = engine.audioContext;
     this.#engine = engine;
     this.#output = new Output(context);
@@ -101,6 +110,13 @@ export class AudioPower {
     this.#events.on('start', listener);
   }
 
+  // The engine: the audio context on the clock's time, iOS's audio session set first.
+  #makeEngine(): ClockedContext {
+    const { AudioContext, audioSession } = this.#making.browser();
+    playThroughSilentSwitch(audioSession);
+    const clock = this.#making.clock;
+    return new ClockedContext({ AudioContext, toContext: (t) => clock.audio.toContext(t) });
+  }
   // Faded out, then suspended once quiet. Nothing while the context isn't running.
   #off(): void {
     const context = this.#engine?.audioContext;
@@ -131,4 +147,15 @@ export class AudioPower {
     this.#output!.fadeIn({ fromSilence: true });
     void context.resume(); // fire and forget, as suspend()
   }
+}
+
+// iOS's audio session, where there is one, set for playback, which ignores the silent switch.
+// The app's choice, not Web Audio's; a deviation from the design document, which asks for the
+// switch to be heeded by default.
+function playThroughSilentSwitch(session: { type: string } | undefined): void {
+  try {
+    if (session) {
+      session.type = 'playback';
+    }
+  } catch {} // a session that won't take it: the platform's default
 }

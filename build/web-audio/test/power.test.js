@@ -9,19 +9,22 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { AudioPower, FADE_IN, FADE_OUT } from '../index.ts';
-import { clockedOn, into } from './audio-stand-in.js';
+import { into, StandInContext } from './audio-stand-in.js';
 
-// The power on an engine of the stand-in's, made as it's asked for; what's built, the clock's audio and what's told kept.
-function powerOn() {
+// The power on the stand-in's audio, the browser's as it's handed in; the contexts made, what's built, the clock's audio and
+// what's told kept. session: iOS's audio session, where the browser has one.
+function powerOn(session) {
   const kept = { engines: [], builds: [], clocks: [], told: [] };
-  const engine = () => {
-    const made = clockedOn(() => 4);
-    kept.engines.push(made);
-    return made;
+  const AudioContext = class extends StandInContext {
+    constructor() {
+      super(() => 4);
+      kept.engines.push({ context: this, session: session?.type });
+    }
   };
+  const browser = () => ({ AudioContext, audioSession: session });
   const build = (make) => kept.builds.push(make);
-  const clock = { useAudio: (context) => kept.clocks.push(context) };
-  const power = new AudioPower({ engine, build, beat: () => 0.5, clock });
+  const clock = { useAudio: (context) => kept.clocks.push(context), audio: { toContext: (t) => t - 1 } };
+  const power = new AudioPower({ browser, build, beat: () => 0.5, clock });
   power.onStart(() => kept.told.push(kept.clocks.length));
   return { power, kept };
 }
@@ -40,12 +43,23 @@ test("started: the engine made, what's built built into the output after it, the
   power.start();
   assert.equal(power.started, true);
   assert.equal(kept.engines.length, 1, 'the engine made once');
-  assert.equal(power.engine, kept.engines[0]);
   const context = power.engine.audioContext;
+  assert.equal(context, kept.engines[0].context, "in the browser's audio");
   assert.deepEqual(into(context, context.destination), [power.output.node], 'the output into where the sound goes');
   assert.equal(kept.builds.length, 1, "what's built built once");
   assert.deepEqual(kept.clocks, [context], "the clock on the audio's time");
   assert.deepEqual(kept.told, [1], 'told once, the clock on the audio already');
+});
+
+test("the engine: the clock's time onto the audio's; iOS's audio session, where there is one, set for playback before the context is made, which ignores the silent switch", () => {
+  const session = {};
+  const { power, kept } = powerOn(session);
+  power.start();
+  assert.equal(kept.engines[0].session, 'playback', 'set before');
+  assert.equal(power.engine.at(5), 4, "the clock's time onto the audio's");
+  const { power: none } = powerOn();
+  none.start();
+  assert.equal(none.started, true, 'none: the platform as it is');
 });
 
 test("built alone: the engine and what's built, no clock on it, nothing told, as a desk's offline render asks", () => {
