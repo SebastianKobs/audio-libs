@@ -1,5 +1,5 @@
 // The clip launcher (mockup/src/libs/sequencer/launcher.ts; mockup/architecture/tests.md), on events of their own, not notes: a light's
-// cues, each a colour on a 16th, looping on a track, handed on as each comes due, on the swing or straight under it; one clip a track, each
+// cues, each a color on a 16th, looping on a track, handed on as each comes due, on the swing or straight under it; one clip a track, each
 // launch numbered
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,12 +8,12 @@ import { STEP } from '../../clock/index.ts';
 import { SIXTEENTH, SWING, swungGrid } from './swung-grid.js';
 
 const grid = swungGrid; // every odd 16th SWING late
-// a launcher that keeps what it hands on: each cue's track, colour, time and launch
+// a launcher that keeps what it hands on: each cue's track, color, time and launch
 function launcher() {
   const handed = [];
   const clips = new ClipLauncher({
     grid,
-    play: (track, cue, at, launch) => handed.push([track, cue.colour, at, launch]),
+    play: (track, cue, at, launch) => handed.push([track, cue.color, at, launch]),
   });
   return { handed, clips };
 }
@@ -22,9 +22,9 @@ const cues = {
   bars: 1,
   loop: true,
   events: [
-    { start: 0, colour: 'amber' },
-    { start: STEP, colour: 'blue' },
-    { start: 2 * STEP + 16, colour: 'violet' },
+    { start: 0, color: 'amber' },
+    { start: STEP, color: 'blue' },
+    { start: 2 * STEP + 16, color: 'violet' },
   ],
 };
 
@@ -56,8 +56,8 @@ test("a straight clip plays under the swing: a swung 16th's event at its straigh
 
 test('one clip a track: a launch replaces what it played, keeping its place in the order; stop() ends it; each launch a number of its own', () => {
   const { handed, clips } = launcher();
-  const one = { bars: 1, loop: true, events: [{ start: 0, colour: 'red' }] };
-  const two = { bars: 1, loop: true, events: [{ start: 0, colour: 'green' }] };
+  const one = { bars: 1, loop: true, events: [{ start: 0, color: 'red' }] };
+  const two = { bars: 1, loop: true, events: [{ start: 0, color: 'green' }] };
   assert.equal(clips.launch({ track: 'lamp', pattern: one }), 1);
   assert.equal(clips.launch({ track: 'strobe', pattern: two }), 2);
   assert.equal(clips.launch({ track: 'lamp', pattern: two }), 3);
@@ -76,7 +76,7 @@ test('a clip played once waits for the next beat, plays from its first event to 
   const told = [];
   const clips = new ClipLauncher({
     grid,
-    play: (track, cue, at, launch) => handed.push([track, cue.colour, at, launch]),
+    play: (track, cue, at, launch) => handed.push([track, cue.color, at, launch]),
     started: (track, launch, span) => told.push(['started', track, launch, span]),
     ended: (track, launch) => told.push(['ended', track, launch]),
   });
@@ -84,8 +84,8 @@ test('a clip played once waits for the next beat, plays from its first event to 
   const phrase = {
     bars: 4,
     events: [
-      { start: 9 * STEP, colour: 'amber' },
-      { start: 13 * STEP, duration: 2 * STEP, colour: 'blue' },
+      { start: 9 * STEP, color: 'amber' },
+      { start: 13 * STEP, duration: 2 * STEP, color: 'blue' },
     ],
   };
   clips.launch({ track: 'lamp', pattern: phrase, once: true });
@@ -110,14 +110,14 @@ test('launched again before it has started or while it plays: from the next beat
   const ended = [];
   const clips = new ClipLauncher({
     grid,
-    play: (track, cue, at, launch) => handed.push([cue.colour, at, launch]),
+    play: (track, cue, at, launch) => handed.push([cue.color, at, launch]),
     ended: (track, launch) => ended.push(launch),
   });
   const phrase = {
     bars: 1,
     events: [
-      { start: 0, colour: 'amber' },
-      { start: 6 * STEP, colour: 'blue' },
+      { start: 0, color: 'amber' },
+      { start: 6 * STEP, color: 'blue' },
     ],
   };
   clips.launch({ track: 'lamp', pattern: phrase, once: true });
@@ -136,7 +136,7 @@ test('launched again before it has started or while it plays: from the next beat
 
 test('an event of its own straight or swung, in place of its clip: a straight one in a swung clip at its straight time', () => {
   const { handed, clips } = launcher();
-  const mixed = { bars: 1, loop: true, events: [{ start: STEP, colour: 'blue', straight: true }] };
+  const mixed = { bars: 1, loop: true, events: [{ start: STEP, color: 'blue', straight: true }] };
   clips.launch({ track: 'lamp', pattern: mixed });
   clips.step(1, SIXTEENTH + SWING);
   assert.deepEqual(handed, [['lamp', 'blue', SIXTEENTH, 1]]);

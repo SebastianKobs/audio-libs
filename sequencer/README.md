@@ -6,7 +6,7 @@ Patterns played on the grid, after Ableton's session view, for events of any kin
 import { ClipLauncher, TrackPool, patternOf, upcoming } from './index.ts';
 const next = upcoming(patternOf(flower.seq, cycle), at, 3);             // a record's next three events from a place, round the loop
 const track = pool.place(flower, from, until);                          // a play on a pool's track, its index (a TrackPool)
-const lights = new ClipLauncher({ grid, play: (track, cue, at) => light(track, cue.colour, at) });
+const lights = new ClipLauncher({ grid, play: (track, cue, at) => light(track, cue.color, at) });
 lights.launch({ track: 'lamp', pattern: cues });                         // a clip of cues looping on its track
 lights.step(i, t);                                                       // each 16th: every clip's events due there handed on
 ```

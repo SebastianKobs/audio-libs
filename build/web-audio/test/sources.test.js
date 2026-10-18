@@ -102,8 +102,8 @@ test("a copy stopped by a time, as it's gone silent: each of its sources then, n
   assert.throws(() => what.stopBy(['voice', '3'], 7), /voice\/3: not added/);
 });
 
-test('a noise looped where it says, its buffer by its colour; started drawn into its buffer up to its offset', () => {
-  const { made } = built(oneBlockPlan('noise', { offset: 1.5 }, { loop: 'on', colour: 'breath' }));
+test('a noise looped where it says, its buffer by its color; started drawn into its buffer up to its offset', () => {
+  const { made } = built(oneBlockPlan('noise', { offset: 1.5 }, { loop: 'on', color: 'breath' }));
   const [hiss] = made('buffer');
   assert.deepEqual([hiss.loop, hiss.buffer.duration, hiss.starts], [true, 0.2, [[4, 0.75]]]);
   const context = new StandInContext(() => 4);

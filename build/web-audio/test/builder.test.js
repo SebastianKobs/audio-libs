@@ -156,9 +156,9 @@ test("a select: the input its setting names passed on, the other taken in nowher
   }
 });
 
-test('a noise, looping, started, its buffer by its colour; a source with nothing wired into it', () => {
+test('a noise, looping, started, its buffer by its color; a source with nothing wired into it', () => {
   const { context, builder, made } = builderOn();
-  builder.build(chainOf(blockNode('hiss', 'noise', {}, { colour: 'breath', loop: 'on' })), {
+  builder.build(chainOf(blockNode('hiss', 'noise', {}, { color: 'breath', loop: 'on' })), {
     into: context.destination,
   });
   const [hiss] = made('buffer');

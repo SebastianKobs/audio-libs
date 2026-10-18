@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/noise: noise in Web Audio ----------
-// A buffer of noise, its length its colour's (NOISE_SECONDS), looped where it says.
+// A buffer of noise, its length its color's (NOISE_SECONDS), looped where it says.
 // Started at its copy's time, from somewhere in its buffer: drawn up to its offset, so each hit
 // is noise from somewhere else in it. Stopped its stop after it starts, where it has one.
 import { NOISE_SECONDS } from '../../../plan/blocks/index.ts';
@@ -11,8 +11,8 @@ import { SourceTimes } from './source.ts';
 
 export function noise(node: Node, making: Making): BuiltNode {
   const made = making.kept(making.context.createBufferSource());
-  const colour = settingOf(node, 'colour') as keyof typeof NOISE_SECONDS; // one of its block's colours
-  made.buffer = making.buffers.noise(NOISE_SECONDS[colour]);
+  const color = settingOf(node, 'color') as keyof typeof NOISE_SECONDS; // one of its block's colors
+  made.buffer = making.buffers.noise(NOISE_SECONDS[color]);
   made.loop = settingOf(node, 'loop') === 'on';
   let offset = Number(valueOf(node, 'offset'));
   const times = new SourceTimes(made, { stop: Number(valueOf(node, 'stop')), now: () => making.context.currentTime });

@@ -14,10 +14,10 @@ import { meterPosition } from './meter-view.ts';
 
 // a column's: the loudest in and out, and the most it took away
 type Peaks = { in: number; out: number; gr: number };
-// What it's drawn with, the view's: the colours of what comes out and of its ceiling; this
+// What it's drawn with, the view's: the colors of what comes out and of its ceiling; this
 // frame's step in seconds, what its history scrolls by.
 export interface LimiterLook {
-  colours(): { readonly accent: string; readonly soft: string };
+  colors(): { readonly accent: string; readonly soft: string };
   frameStep(): number;
 }
 
@@ -87,7 +87,7 @@ export class LimiterView {
         columns.push(held);
         held = { in: 0, out: 0, gr: 0 };
       }
-      const { accent, soft } = look.colours();
+      const { accent, soft } = look.colors();
       context.clearRect(0, 0, width, height);
       drawColumns(context, columns, accent);
       drawCeiling(context, this.#ceiling(device), soft);
@@ -111,12 +111,12 @@ function sizedContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   return context;
 }
 // each column: what came out, and on it, in red, what it cut
-function drawColumns(context: CanvasRenderingContext2D, columns: Peaks[], colour: string): void {
+function drawColumns(context: CanvasRenderingContext2D, columns: Peaks[], color: string): void {
   const { height } = HISTORY;
   columns.forEach((peaks, pixel) => {
     const out = height * meterPosition(peaks.out);
     const cut = height * meterPosition(peaks.in) - out;
-    context.fillStyle = colour;
+    context.fillStyle = color;
     context.fillRect(pixel, height - out, 1, out); // out
     if (peaks.gr > 0.1 && cut > 0) {
       context.fillStyle = '#E0857F';
@@ -125,10 +125,10 @@ function drawColumns(context: CanvasRenderingContext2D, columns: Peaks[], colour
   });
 }
 // the ceiling, a line across
-function drawCeiling(context: CanvasRenderingContext2D, ceiling: number, colour: string): void {
+function drawCeiling(context: CanvasRenderingContext2D, ceiling: number, color: string): void {
   const { width, height } = HISTORY;
   const ceilingY = Math.round(height * atLevel(ceiling)) + 0.5;
-  context.strokeStyle = colour;
+  context.strokeStyle = color;
   context.lineWidth = 1;
   context.beginPath();
   context.moveTo(0, ceilingY);

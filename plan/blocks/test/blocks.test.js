@@ -76,7 +76,7 @@ test('what each block declares, in short standard terms: its params, its setting
     pan: { params: ['pan'], settings: ['law'], inputs: ['in'], outputs: [`out ${STEREO}`] },
     delay: { params: ['sync', 'note', 'ms'], settings: ['longest'], inputs: ['in'], outputs: ['out'] },
     reverb: { params: [], settings: ['length'], inputs: ['in'], outputs: [`out ${STEREO}`] },
-    noise: { params: ['offset', 'stop'], settings: ['colour', 'loop'], inputs: [], outputs: [`out ${MONO}`] },
+    noise: { params: ['offset', 'stop'], settings: ['color', 'loop'], inputs: [], outputs: [`out ${MONO}`] },
     limiter: { params: ['gain', 'ceiling', 'release'], settings: [], inputs: ['in'], outputs: ['out'] },
     envelope: {
       params: ['gate', 'delay', 'attack', 'hold', 'decay', 'sustain', 'release', 'amount'],
@@ -88,14 +88,14 @@ test('what each block declares, in short standard terms: its params, its setting
   });
 });
 
-test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colours, a select's inputs; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves; a gain the fader's", () => {
+test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colors, a select's inputs; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves; a gain the fader's", () => {
   const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   assert.deepEqual(setting('oscillator', 'wave').choices, ['sine', 'triangle', 'square', 'sawtooth']);
   assert.deepEqual(setting('filter', 'type').choices, ['lowpass', 'highpass', 'bandpass']);
   assert.deepEqual([setting('filter', 'slope').choices, setting('filter', 'slope').default], [['12', '24'], '12']);
   assert.deepEqual(setting('pan', 'law').choices, ['stereo', 'pan pot']);
-  assert.deepEqual(setting('noise', 'colour').choices, ['noise', 'breath']);
+  assert.deepEqual(setting('noise', 'color').choices, ['noise', 'breath']);
   assert.deepEqual(
     [setting('select', 'input').choices, setting('select', 'input').default],
     [['a', 'b'], 'a'],

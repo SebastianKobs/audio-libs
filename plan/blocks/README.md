@@ -12,7 +12,7 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `pan` | pan | law: stereo, pan pot | in; out, stereo |
 | `delay` | sync, note, ms: a time with a sync switch (`libs/params/`'s `timeSpecs()`); a signal wired into its ms moves its line in seconds, as Web Audio's does | longest (s) | in; out |
 | `reverb` | | length (s) | in; out, stereo |
-| `noise` | offset (s, the furthest into its buffer it starts, drawn as its voice starts), stop (LAY13a) | colour: noise, breath; loop: off, on (LAY13a) | none; out, mono |
+| `noise` | offset (s, the furthest into its buffer it starts, drawn as its voice starts), stop (LAY13a) | color: noise, breath; loop: off, on (LAY13a) | none; out, mono |
 | `limiter` | gain (dB), ceiling (dBFS), release (s) | | in; out |
 | `envelope` | gate, a switch; delay, attack, hold, decay, release (s, 0.1 to start); sustain; amount | mode: the gate's, or a trigger's running on past the note-off, as Ableton's (LAY13a) | none; out, mono |
 | `select` | | input: a, b, the one passed on, the other going nowhere, as a console's PRE button picks where a send is taken | a, b; out |
