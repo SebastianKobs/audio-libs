@@ -6,6 +6,8 @@
 //   - knob-view.ts: a knob and a fader drawn, dragged and set back, brought up to date;
 //   - device-view.ts: a device drawn, its status, its reset, its controls;
 //   - group-view.ts: a group of a composite's children drawn, a tab each, the chosen one's controls;
+//   - composite-view.ts: a composite drawn, an instrument's and a strip's alike, flat or with a
+//     face, a rack of them a pad each; its chosen pads and tabs, its resets;
 //   - envelope-view.ts: an envelope's curve drawn, its delay's end and the note's marked;
 //   - matrix-view.ts: a matrix drawn, a row a source and what it moves, how much;
 //   - choice-view.ts: a choice drawn as a list of its options, and a switch;
@@ -27,6 +29,7 @@ export { choiceHtml, switchHtml } from './choice-view.ts';
 export { controlsHtml, deviceHtml, type DeviceLook } from './device-view.ts';
 export { envelopeHtml } from './envelope-view.ts';
 export { groupHtml, type Group, type GroupLook } from './group-view.ts';
+export { CompositeView, type Composite, type CompositeLook, type Rack } from './composite-view.ts';
 export { matrixHtml } from './matrix-view.ts';
 export { faderHtml, KnobDrag, knobHtml, refreshKnobs, stillPanHtml } from './knob-view.ts';
 export { LimiterView, type LimiterLook } from './limiter-view.ts';
