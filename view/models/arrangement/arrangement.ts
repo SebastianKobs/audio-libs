@@ -17,11 +17,21 @@ import { SEND_PARAM, type ParamSpec } from '../../../params/index.ts';
 import type { TimedValue } from '../../../automation/index.ts';
 import { keptWhole } from './note-shapes.ts';
 import { playheadAt } from './playhead.ts';
-import { laneKeyOf, laneRowOf, rowKeyOf, rowsOf, stripOf, type Row } from './rows.ts';
+import {
+  arrangedStrips,
+  laneKeyOf,
+  laneRowOf,
+  rowKeyOf,
+  rowsOf,
+  stripOf,
+  type ArrangedStrip,
+  type Row,
+  type SectionLabels,
+} from './rows.ts';
+import type { Mixer } from '../mixer.ts';
 import { TimeWindow } from './time-window.ts';
 import { Toggles } from '../toggles.ts';
 import type {
-  ArrangedStrip,
   ArrangementClock,
   Declared,
   Playhead,
@@ -74,13 +84,15 @@ export class Arrangement {
   #playingBack = false; // as the last frame found it: a playback that starts is followed again (P3b)
 
   // declared: each lane's param's declaration and each strip's controllers in order
+  // mixer, sections: the desk's strips with no notes of their own, rows in the sections' groups
   // cue: the playhead set back to a time, or on the present, as the transport is asked it
   constructor({
     recording,
     transport,
     declared,
     tracks,
-    strips,
+    mixer,
+    sections,
     clock,
     cue,
   }: {
@@ -88,7 +100,8 @@ export class Arrangement {
     transport: Playhead;
     declared: Declared;
     tracks: Tracks;
-    strips: readonly ArrangedStrip[];
+    mixer: Pick<Mixer, 'buses' | 'returns' | 'master'>;
+    sections: SectionLabels;
     clock: ArrangementClock;
     cue: (t: Seconds | null) => void;
   }) {
@@ -96,7 +109,7 @@ export class Arrangement {
     this.#transport = transport;
     this.#declared = declared;
     this.#tracks = tracks;
-    this.#strips = strips;
+    this.#strips = arrangedStrips(mixer, sections);
     this.#clock = clock;
     this.#cue = cue;
     this.map = new GridMap({ clock });

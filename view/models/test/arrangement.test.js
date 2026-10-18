@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Arrangement, declaredBy, ViewBuilder } from '../index.ts';
-import { laneName, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
+import { arrangedStrips, laneName, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
 import { TimeWindow } from '../arrangement/time-window.ts';
 import { keptWhole, noteShape, pitchRange } from '../arrangement/note-shapes.ts';
 import { laneLine } from '../arrangement/lane-shapes.ts';
@@ -95,6 +95,25 @@ const strips = [
   { group: 'fx', strip: 'reverb', name: 'reverb' },
   { group: 'master', strip: 'master', name: 'master' },
 ];
+// the mixer's sections as a view labels them
+const SECTIONS = { buses: 'bus', returns: 'fx', master: 'master' };
+
+// the mixer they're from: each bus and those that go into it, the returns, the master
+const strip = (name, shown) => ({ address: [name], name: shown });
+const MIXER = {
+  buses: [
+    { bus: strip('you', 'my playing'), members: [strip('trace', 'my trace')] },
+    { bus: strip('ambient', 'background'), members: [] },
+  ],
+  returns: [strip('reverb', 'reverb')],
+  master: strip('master', 'master'),
+};
+
+test("the desk's strips with no notes of their own, from the mixer: each bus and those that go into it after it, the returns, the master; each by its address and its name as shown", () => {
+  assert.deepEqual(arrangedStrips(MIXER, SECTIONS), strips);
+  assert.deepEqual(arrangedStrips({ ...MIXER, master: undefined }, SECTIONS).at(-1), strips.at(-2), 'no master: none');
+});
+
 const lane = (kind, track, controller) => ({ kind, track, controller, points: [{ t: 1, value: 0.5 }] });
 
 test("the desk's strips with no notes of their own: rows of their own below the replay tracks, always, as the session view's sections, bus, fx and master", () => {
@@ -564,7 +583,16 @@ function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack 
     cued.push(t);
     Object.assign(transport, { playingBack: t !== null }); // as the transport plays back from there, at once
   };
-  const arrangement = new Arrangement({ recording, transport, declared, tracks, strips, clock, cue });
+  const arrangement = new Arrangement({
+    recording,
+    transport,
+    declared,
+    tracks,
+    mixer: MIXER,
+    sections: SECTIONS,
+    clock,
+    cue,
+  });
   return { arrangement, clock, transport, cued };
 }
 const region = (kind, track, clip, from = 1, to = 2) => ({ clip, kind, live: false, track, from, to, notes: [] });

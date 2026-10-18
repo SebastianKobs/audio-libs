@@ -80,15 +80,6 @@ export interface Playhead {
   readonly playingBack: boolean;
   playhead(): Seconds | null;
 }
-// One of the desk's strips that have no notes:
-//   - group: the session view's section, bus, fx or master;
-//   - strip: the name on the desk, which the strip's lanes have as their kind;
-//   - name: the name the views show.
-export interface ArrangedStrip {
-  group: string;
-  strip: string;
-  name: string;
-}
 // What the desk declares, by a strip's name:
 //   - specOf(): a param's range and taper, by its controller there, which its lane is laid
 //     on; none for one nothing declares;

@@ -1,7 +1,8 @@
 // ---------- view/models/arrangement/rows: the arrangement's rows and their lanes ----------
-import type { ArrangedStrip, RecordedLane, RecordedRegion, Tracks } from './ports.ts';
+import type { RecordedLane, RecordedRegion, Tracks } from './ports.ts';
+import type { Mixer } from '../mixer.ts';
 import { SEND } from '../../../plan/desk/index.ts';
-import { addressOf } from '../../../plan/format/index.ts';
+import { addressOf, addressText } from '../../../plan/format/index.ts';
 import { entryOf } from '../../../util/index.ts';
 
 // One row of the arrangement.
@@ -16,6 +17,17 @@ export interface Row {
   open?: boolean;
   track?: string;
 }
+// One of the desk's strips that have no notes:
+//   - group: the session view's section, by its label: the buses', the returns', the master's;
+//   - strip: the name on the desk, which the strip's lanes have as their kind;
+//   - name: the name the views show.
+export interface ArrangedStrip {
+  group: string;
+  strip: string;
+  name: string;
+}
+// The mixer's sections the arrangement shows, by the labels the session view gives them.
+export type SectionLabels = Readonly<Record<'buses' | 'returns' | 'master', string>>;
 // What shows beside the regions: the desk's strips that have no notes,
 // the recorded lanes, and the tracks whose lanes are open.
 // controllersOf(): a strip's controllers in the order the sound goes through it.
@@ -108,6 +120,25 @@ function stripGroups(strips: readonly ArrangedStrip[]): Group[] {
     entryOf(groups, group, () => ({ group, name: group, tracks: [] })).tracks.push({ key: `strip ${strip}`, name });
   }
   return [...groups.values()];
+}
+// The desk's strips with no notes of their own, as the arrangement's rows show them:
+//   1. the buses, each with those that go into it after it;
+//   2. the returns;
+//   3. the master.
+export function arrangedStrips(
+  mixer: Pick<Mixer, 'buses' | 'returns' | 'master'>,
+  sections: SectionLabels,
+): ArrangedStrip[] {
+  const buses = mixer.buses.flatMap(({ bus, members }) => [bus, ...members]);
+  const master = mixer.master ? [mixer.master] : [];
+  return [
+    ...buses.map((strip) => arranged(sections.buses, strip)),
+    ...mixer.returns.map((strip) => arranged(sections.returns, strip)),
+    ...master.map((strip) => arranged(sections.master, strip)),
+  ];
+}
+function arranged(group: string, { address, name }: { address: readonly string[]; name: string }): ArrangedStrip {
+  return { group, strip: addressText(address), name };
 }
 // How many tracks each group uses: its highest track number in regions and lanes, plus one.
 function tracksUsed(

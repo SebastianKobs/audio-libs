@@ -60,9 +60,8 @@ export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/a
 export { declaredBy } from './arrangement/declared.ts';
 export { laneLine, type Corner } from './arrangement/lane-shapes.ts';
 export { noteShape, pitchRange, type NoteShape } from './arrangement/note-shapes.ts';
-export type { Row } from './arrangement/rows.ts';
+export type { Row, SectionLabels } from './arrangement/rows.ts';
 export type {
-  ArrangedStrip,
   ArrangementClock,
   Declared,
   Playhead,
