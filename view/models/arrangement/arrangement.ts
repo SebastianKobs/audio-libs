@@ -33,14 +33,14 @@ import { TimeWindow } from './time-window.ts';
 import { Toggles } from '../toggles.ts';
 import type {
   ArrangementClock,
-  Declared,
-  Playhead,
+  DeclaredIn,
+  PlayheadIn,
   RecordedLane,
   RecordedNote,
   RecordedRegion,
-  Recording,
-  Tracks,
-} from './ports.ts';
+  RecordingIn,
+  TracksIn,
+} from './inputs.ts';
 
 // A region on its row: its label, from when to when, clock times, an open one's end never;
 // whether it was played live, whether its clip is gone, and its notes (G4b).
@@ -63,10 +63,10 @@ export interface PlacedLane {
 
 export class Arrangement {
   readonly map: GridMap;
-  readonly #recording: Recording;
-  readonly #transport: Playhead;
-  readonly #declared: Declared;
-  readonly #tracks: Tracks;
+  readonly #recording: RecordingIn;
+  readonly #transport: PlayheadIn;
+  readonly #declared: DeclaredIn;
+  readonly #tracks: TracksIn;
   readonly #strips: readonly ArrangedStrip[];
   readonly #clock: ArrangementClock;
   readonly #cue: (t: Seconds | null) => void;
@@ -96,10 +96,10 @@ export class Arrangement {
     clock,
     cue,
   }: {
-    recording: Recording;
-    transport: Playhead;
-    declared: Declared;
-    tracks: Tracks;
+    recording: RecordingIn;
+    transport: PlayheadIn;
+    declared: DeclaredIn;
+    tracks: TracksIn;
     mixer: Pick<Mixer, 'buses' | 'returns' | 'master'>;
     sections: SectionLabels;
     clock: ArrangementClock;

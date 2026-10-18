@@ -1,12 +1,13 @@
-// ---------- view/models/preset-port: a preset on a plan, as the views read and set it ----------
-// A port for a plan whose values a preset gives, as a patch gives its voice card's:
+// ---------- view/control-surface/preset: a preset on a plan, the plan's in ----------
+// The plan's in (PlanIn) for a plan whose values a preset gives, as a patch gives its voice
+// card's:
 //   - each value the preset's, by its address; the plan's where the preset has none;
 //   - each value's start the preset's as it began, which a reset brings back;
 //   - how each is set: as its owner says, else by what moves it where a macro does, else live.
 // What's done is sent as the preset's message by whoever makes its models.
 // It hears no sound, holds no copies and fills no slots.
 import { addressText, PlanMoves, type Address, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
-import type { ModelPort, Role, Slot } from './model.ts';
+import type { PlanIn, Role, Slot } from './plan.ts';
 
 // What owns the preset:
 //   - plan: the plan at the preset as it is now, a macro's targets at its value;
@@ -21,8 +22,8 @@ export interface PresetOwner {
 
 const LIVE: Role = { by: 'live' };
 
-// A preset on a plan, read and set through its owner.
-export class PresetPort implements ModelPort {
+// A preset on a plan, read through its owner.
+export class PresetIn implements PlanIn {
   readonly #owner: PresetOwner;
   readonly #moves = new PlanMoves();
 

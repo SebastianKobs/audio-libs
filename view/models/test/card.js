@@ -1,5 +1,5 @@
-// A voice card of the tests' own, a pluck, as the view models' and the view library's tests read it; its models on a port of
-// the tests' own
+// A voice card of the tests' own, a pluck, as the view models' and the view library's tests read it; its models on a plan's in
+// of the tests' own
 import { ViewBuilder } from '../index.ts';
 import { paramAt, settingAt } from '../../../plan/format/index.ts';
 
@@ -51,7 +51,7 @@ export const CARD = {
     pools: [],
   },
 };
-// a view builder on a port of the tests' own: every value the plan's, every one live
+// a view builder on a plan's in of the tests' own: every value the plan's, every one live
 export function builderOn(plan) {
   return new ViewBuilder(
     {
@@ -68,6 +68,6 @@ export function builderOn(plan) {
   );
 }
 // a card's view models, what's done on them sent through its send
-export function cardModels({ port, send }) {
-  return new ViewBuilder(port, send);
+export function cardModels({ planIn, send }) {
+  return new ViewBuilder(planIn, send);
 }

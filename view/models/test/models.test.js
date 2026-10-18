@@ -1,4 +1,4 @@
-// The view models (mockup/src/libs/view/models), in node, on a port of the tests' own:
+// The view models (mockup/src/libs/view/models), in node, on a plan's in of the tests' own:
 //   - a composite as a device: its macros as knobs, in its template's order, then its settings within;
 //     a block as a device, its params; none where nothing's there;
 //   - a knob: its value as it plays, where it lies on its control by its taper, its text in its unit;
@@ -43,11 +43,11 @@ const DELAY = {
   },
 };
 
-// A view builder on a port of the tests' own: values told by address, roles by address, every
+// A view builder on a plan's in of the tests' own: values told by address, roles by address, every
 // one live unless said; what's sent kept.
 function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
   const sent = [];
-  const port = {
+  const planIn = {
     plan,
     valueOf: (address) => values[addressText(address)],
     startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
@@ -57,7 +57,7 @@ function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
     copiesOf: () => [],
     slotOf: (address) => slots[addressText(address)],
   };
-  return { views: new ViewBuilder(port, (command) => sent.push(command)), sent };
+  return { views: new ViewBuilder(planIn, (command) => sent.push(command)), sent };
 }
 
 test("a composite as a device: its name and kind, its macros as knobs in its template's order, then its settings within, each by its address; its words the template's", () => {

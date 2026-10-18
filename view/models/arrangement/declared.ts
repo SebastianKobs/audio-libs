@@ -3,13 +3,13 @@
 //   - a lane's param, its range and taper, by its controller there;
 //   - the strip's controllers in the order the sound goes through it, as its strip has them:
 //     its inserts' controls, its sends, its volume, pan, mute and solo.
-import type { Declared } from './ports.ts';
+import type { DeclaredIn } from './inputs.ts';
 import type { Strip } from '../strip.ts';
 import type { ViewBuilder } from '../view-builder.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../plan/format/index.ts';
 
-export function declaredBy(views: ViewBuilder): Declared {
+export function declaredBy(views: ViewBuilder): DeclaredIn {
   return {
     specOf: (strip, controller) => views.control(controlAddress(strip, controller))?.spec,
     controllersOf: (strip) => controllersOf(views.strip(addressOf(strip))),

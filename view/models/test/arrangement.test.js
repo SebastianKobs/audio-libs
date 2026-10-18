@@ -509,7 +509,7 @@ test("where a click in the ruler puts the playhead: on the nearest beat; at or p
   );
 });
 
-// the desk's view models on a port of the tests' own, every value at its plan's
+// the desk's view models on a plan's in of the tests' own, every value at its plan's
 function viewsOf() {
   return new ViewBuilder(
     {

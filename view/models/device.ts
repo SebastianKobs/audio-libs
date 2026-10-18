@@ -4,7 +4,8 @@
 // its words, and how it's set.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Address, Move } from '../../plan/format/index.ts';
-import type { Found, Model, Role, Slot } from './model.ts';
+import type { Found, Model } from './model.ts';
+import type { Role, Slot } from '../control-surface/index.ts';
 
 // A node as a device:
 //   - its address, its name, its kind, its label as shown, its node's, else its kind;

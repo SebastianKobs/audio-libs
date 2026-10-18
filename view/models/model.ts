@@ -1,5 +1,5 @@
 // ---------- view/models/model: the plan and its values by address, as the views read them ----------
-// Read through a port, the tool's:
+// Read through the plan's in (PlanIn, libs/view/control-surface/):
 //   - each value as it plays, worked out from what it was told; the plan's where none was;
 //   - each value's start, which a reset brings back;
 //   - how each is set: live here, automated by what its track plays, or fixed as built;
@@ -18,54 +18,27 @@ import {
   type Param,
   type Plan,
 } from '../../plan/format/index.ts';
-import type { Command } from './command.ts';
+import type { Command, PlanIn, Role, Slot } from '../control-surface/index.ts';
 
-// How a value is set, as the tool says:
-//   - live: set here, in a view;
-//   - automated: by what its track plays, its source where it names one (distance);
-//     recorded where its automation is in the arrangement's lanes;
-//   - fixed: as it was built.
-export interface Role {
-  readonly by: 'live' | 'automated' | 'fixed';
-  readonly source?: string;
-  readonly recorded?: true;
-}
-// What a device does in its slot (job), and what sets it there, where its notes or the
-// tool do (setBy), as the tool says.
-export interface Slot {
-  readonly job: string;
-  readonly setBy?: string;
-}
-// What the views read through, the tool's.
-export interface ModelPort {
-  readonly plan: Plan;
-  valueOf(address: Address): number | string | undefined;
-  startOf(address: Address): number | string | undefined;
-  roleOf(address: Address): Role;
-  peakOf(address: Address, point?: string): number;
-  readingOf(address: Address, reading: string): number;
-  copiesOf(pool: Address): readonly Address[];
-  slotOf(address: Address): Slot | undefined;
-}
 // a param or a setting found by its address, and which of the two
 export interface Found {
   readonly kind: Command['type'];
   readonly param: Param;
 }
 
-// The plan and its values by address, read through the tool's port.
+// The plan and its values by address, read through the plan's in.
 export class Model {
-  readonly #port: ModelPort;
+  readonly #in: PlanIn;
   readonly #send: (command: Command) => void;
   readonly #moves = new PlanMoves();
 
   // send(): what's done, as the app's message for the plan
-  constructor(port: ModelPort, send: (command: Command) => void) {
-    this.#port = port;
+  constructor(planIn: PlanIn, send: (command: Command) => void) {
+    this.#in = planIn;
     this.#send = send;
   }
   get plan(): Plan {
-    return this.#port.plan;
+    return this.#in.plan;
   }
   // a param or a setting by its address; none where nothing's there
   find(address: Address): Found | undefined {
@@ -78,26 +51,26 @@ export class Model {
   }
   // a value as it plays; the plan's where none was told
   valueOf(address: Address, { param }: Found): number | string {
-    return this.#port.valueOf(address) ?? param.value;
+    return this.#in.valueOf(address) ?? param.value;
   }
   // a value as it starts, which a reset brings back; the plan's where the tool has none
   startOf(address: Address, { param }: Found): number | string {
-    return this.#port.startOf(address) ?? param.value;
+    return this.#in.startOf(address) ?? param.value;
   }
   roleOf(address: Address): Role {
-    return this.#port.roleOf(address);
+    return this.#in.roleOf(address);
   }
   peakOf(address: Address, point?: string): number {
-    return this.#port.peakOf(address, point);
+    return this.#in.peakOf(address, point);
   }
   readingOf(address: Address, reading: string): number {
-    return this.#port.readingOf(address, reading);
+    return this.#in.readingOf(address, reading);
   }
   copiesOf(pool: Address): readonly Address[] {
-    return this.#port.copiesOf(pool);
+    return this.#in.copiesOf(pool);
   }
   slotOf(address: Address): Slot | undefined {
-    return this.#port.slotOf(address);
+    return this.#in.slotOf(address);
   }
   send(command: Command): void {
     this.#send(command);

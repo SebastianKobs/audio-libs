@@ -1,6 +1,6 @@
 // ---------- view/models/arrangement/note-shapes: a region's notes as the arrangement draws them, in clock time and pitch, up to now (G4b) ----------
 import type { TimeMap } from '../../../clock/index.ts';
-import type { RecordedNote } from './ports.ts';
+import type { RecordedNote } from './inputs.ts';
 
 // a piece of a note, held at a pitch from when to when
 interface Piece {

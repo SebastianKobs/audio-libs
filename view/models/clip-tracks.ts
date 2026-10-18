@@ -3,9 +3,9 @@
 //   - a clip player's slots, whether a clip plays the player's to say;
 //   - the surface's own, for the clips on no player.
 // A clip's ▶ launches it. Its × asks first, as deleting is a deliberate, confirmed action.
-// Its port is the clip slots' (libs/view/control-surface/clips.ts).
+// It reads the clip slots' in (ClipsIn, libs/view/control-surface/clips.ts).
 import type { Clock, Seconds } from '../../clock/index.ts';
-import type { ClipSurface, ClipTrack } from '../control-surface/index.ts';
+import type { ClipsIn, ClipTrack } from '../control-surface/index.ts';
 
 // A clip on its clip track: its slot, as its holder knows it, its name, how many notes it
 // holds, none for one that holds no notes, and whether it plays.
@@ -26,7 +26,7 @@ const TOO_FAST = 0.4; // s, on the clock
 // The clip tracks (see the top of this file).
 // launch(), remove(): a clip asked to play, or to go, by its slot.
 export class ClipTracks {
-  readonly #surface: ClipSurface;
+  readonly #surface: ClipsIn;
   readonly #clock: Pick<Clock, 'now'>;
   readonly #launch: (slot: unknown) => void;
   readonly #remove: (slot: unknown) => void;
@@ -38,7 +38,7 @@ export class ClipTracks {
     launch,
     remove,
   }: {
-    surface: ClipSurface;
+    surface: ClipsIn;
     clock: Pick<Clock, 'now'>;
     launch: (slot: unknown) => void;
     remove: (slot: unknown) => void;

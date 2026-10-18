@@ -1,5 +1,5 @@
 // ---------- view/models/view-builder: view models for whatever part of a plan is asked ----------
-// Built from the plan by its nodes, the values read through the model's port.
+// Built from the plan by its nodes, the values read through the plan's in.
 //   - a param or a setting: a knob where it has a range, a choice where it has choices;
 //   - a node: a device, its controls in the plan's order;
 //   - a composite's children: grouped by their roles, as a synth's panel groups its modules;
@@ -17,11 +17,11 @@ import {
   type Plan,
 } from '../../plan/format/index.ts';
 import { Choice } from './choice.ts';
-import type { Command } from './command.ts';
 import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';
 import { Mixer } from './mixer.ts';
-import { Model, type ModelPort } from './model.ts';
+import { Model } from './model.ts';
+import type { Command, PlanIn } from '../control-surface/index.ts';
 import { Strip } from './strip.ts';
 
 // A row of a matrix: a source, by its address within the composite, what it moves, and how
@@ -34,15 +34,15 @@ export interface MatrixRow {
   readonly amount?: Control;
 }
 
-// The view models of a plan, read through the tool's port, what's done sent as the app's
+// The view models of a plan, read through the plan's in, what's done sent as the app's
 // message for the plan.
 export class ViewBuilder {
   readonly #model: Model;
 
-  constructor(port: ModelPort, send: (command: Command) => void) {
-    this.#model = new Model(port, send);
+  constructor(planIn: PlanIn, send: (command: Command) => void) {
+    this.#model = new Model(planIn, send);
   }
-  // the plan the models are built from, as the port hands it now
+  // the plan the models are built from, as its in hands it now
   get plan(): Plan {
     return this.#model.plan;
   }

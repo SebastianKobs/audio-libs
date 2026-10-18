@@ -1,6 +1,6 @@
 // ---------- view/models/cards: an instrument's patches as the device view edits them ----------
 // A card for each patch an instrument plays, its own, or a drum rack's pads, each by its key:
-// its preset on its voice card, read through a port (preset-port.ts). The patch is
+// its preset on its voice card, read through a preset's in (libs/view/control-surface/preset.ts). The patch is
 // edited in the bank, not an instrument playing it: an edit reaches every instrument that plays
 // it, and those still to come.
 //   - its voice card planned at its preset as the bank has it now, values from outside over its
@@ -21,16 +21,14 @@ import {
 import type { Preset } from '../../plan/planner/index.ts';
 import { cardPlanner, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../plan/synth/index.ts';
 import { entryOf, type LiveCopies } from '../../util/index.ts';
-import type { Command } from './command.ts';
-import type { ModelPort, Role } from './model.ts';
-import { PresetPort } from './preset-port.ts';
+import { PresetIn, type Command, type PlanIn, type Role } from '../control-surface/index.ts';
 
-// a card of an instrument: the patch it edits, by its name; a drum rack's pad's key; its port;
+// a card of an instrument: the patch it edits, by its name; a drum rack's pad's key; its plan's in;
 // what's done on it sent as the app's message (send())
 export interface InstrumentCard {
   readonly patch: string;
   readonly key?: number;
-  readonly port: ModelPort;
+  readonly planIn: PlanIn;
   readonly send: (command: Command) => void;
 }
 // Values from outside over a voice card's own, by their addresses in it, and what sets them,
@@ -43,12 +41,12 @@ export interface CardValues {
 const BY_THE_NOTE: Role = { by: 'automated', source: 'the note' };
 const NONE: CardValues = { values: () => ({}), source: '' };
 
-// The cards of a file of instruments' patches: one port for each patch, made as it's first asked for.
+// The cards of a file of instruments' patches: a preset's in for each patch, made as it's first asked for.
 export class InstrumentCards {
   readonly #instruments: Instruments;
   readonly #bank: LiveCopies<Preset>;
   readonly #send: (message: PresetMessage) => void;
-  readonly #ports = new Map<string, ModelPort>();
+  readonly #planIns = new Map<string, PlanIn>();
   // each patch's voice card planned at its preset alone, which says what values it has
   readonly #bare = new Map<string, Plan>();
   // each patch's voice card, planned at its preset and the values from outside, as they were
@@ -82,18 +80,18 @@ export class InstrumentCards {
     }
     return [this.#cardOf(patch, over)];
   }
-  // a patch's card: its port, and its edits sent as the bank's messages
+  // a patch's card: its preset's in, and its edits sent as the bank's messages
   #cardOf(patch: string, over: CardValues, key?: number): InstrumentCard {
-    const port = this.#portOf(patch, over);
+    const planIn = this.#planInOf(patch, over);
     const send = (command: Command): void => this.#send(editOf(patch, command));
-    return key === undefined ? { patch, port, send } : { patch, key, port, send };
+    return key === undefined ? { patch, planIn, send } : { patch, key, planIn, send };
   }
 
-  // a patch's port, made as it's first asked for
-  #portOf(name: string, over: CardValues): ModelPort {
-    return entryOf(this.#ports, name, () => {
+  // a patch's preset's in, made as it's first asked for
+  #planInOf(name: string, over: CardValues): PlanIn {
+    return entryOf(this.#planIns, name, () => {
       const preset = (): Preset => this.#bank.of(name)!; // a patch an instrument plays: the bank has it
-      return new PresetPort({
+      return new PresetIn({
         plan: () => this.#planOf(name, preset(), over.values()),
         values: () => ({ ...valuesOf(preset()), ...over.values() }),
         start: () => valuesOf(this.#bank.start(name)!), // the bank has it
@@ -126,7 +124,7 @@ function valuesOf({ values = {}, settings = {} }: Preset): ValuesByAddress {
   return { ...values, ...settings };
 }
 // How a card's value is set: a note's source by the note; one from outside by what sets it;
-// else as the port says of the rest.
+// else as the preset's in says of the rest.
 function roleOf(address: Address, over: CardValues): Role | undefined {
   const [name, ...within] = address;
   if (!within.length && name !== undefined && Object.hasOwn(NOTE_SOURCES, name)) {

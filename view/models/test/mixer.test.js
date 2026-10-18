@@ -1,5 +1,5 @@
-// The strips and the mixer (mockup/src/libs/view/models), in node, on a small desk (test/desk.js) and a port
-// of the tests' own:
+// The strips and the mixer (mockup/src/libs/view/models), in node, on a small desk (test/desk.js) and a plan's
+// in of the tests' own:
 //   - a channel as a strip, by its form: its shown name, where it goes, its inserts as devices, its sends'
 //     knobs, its fader, pan, mute and solo, its level; quiet where its cut is at 0; a pool's copy too;
 //   - a desk as a mixer: its buses, each with the buses that go into it, its returns, its master, in the
@@ -11,11 +11,11 @@ import { ViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from './desk.js';
 
-// The desk's view models on a port of the tests' own: values and peaks by address, the copies
+// The desk's view models on a plan's in of the tests' own: values and peaks by address, the copies
 // each pool has, every control live; what's sent kept.
 function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
   const sent = [];
-  const port = {
+  const planIn = {
     plan: STUDIO,
     valueOf: (address) => values[addressText(address)],
     startOf: () => undefined,
@@ -25,7 +25,7 @@ function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
     slotOf: () => undefined,
   };
-  return { views: new ViewBuilder(port, (command) => sent.push(command)), sent };
+  return { views: new ViewBuilder(planIn, (command) => sent.push(command)), sent };
 }
 
 test("a channel as a strip, by its form: its name as shown, its label's, else its own; where it goes; its inserts as devices; its sends' knobs by return; its fader, pan, mute and solo", () => {
@@ -77,7 +77,7 @@ test("a pool's copy as a strip: its pool's channel, under its address, named by 
   );
 });
 
-test("a strip's level, its peak as the port hears it; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
+test("a strip's level, its peak as the planIn hears it; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
   const { views } = mixerOn({ peaks: { you: 0.4 }, values: { 'tap/cut/gain': 0 } });
   assert.equal(views.strip(['you']).level, 0.4);
   assert.deepEqual(
