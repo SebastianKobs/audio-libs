@@ -14,7 +14,7 @@ import { LOOKAHEAD } from '../../../clock/index.ts';
 
 const PLAN = planned();
 function controlsOn() {
-  const setup = { setByNotes: (address) => address.includes('air') };
+  const setup = { setBy: (address) => (address.includes('air') ? 'distance' : undefined) };
   const on = deskOn(Desk, PLAN, { setup });
   on.build();
   return on;

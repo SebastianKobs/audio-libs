@@ -3,7 +3,8 @@
 // What the views' models ask of the desk, by address:
 //   - a value as it plays, the desk's; a strip's mute and solo, its live mix's;
 //   - its start, the desk's, which a reset brings back;
-//   - how a param is set (roleOf()), and what a slot does there (slotOf()), its setup's;
+//   - how a param is set (roleOf()), and what a slot does there (slotOf()), worked out from
+//     the plan and its setup's rules, a slot's words its plan's where it has them;
 //   - a channel's level, its meter's, or a block's in it at a point, once the desk is built;
 //     a reading, a limiter's reduction;
 //   - a pool's copies added so far;
@@ -11,9 +12,9 @@
 //     strip's track for a studio, so it's recorded as every move is; a setting, the desk built
 //     again with it.
 import { choiceIndex } from '../../params/index.ts';
-import { addressText, splitAtChild, type Address, type Plan } from '../../plan/format/index.ts';
+import { addressText, nodeAt, splitAtChild, type Address, type Node, type Plan } from '../../plan/format/index.ts';
 import { SEND } from '../../plan/desk/index.ts';
-import type { Desk, DeskBuilt, DeskSetup, SlotRole } from '../../build/desk/index.ts';
+import type { Desk, DeskBuilt, DeskSetup } from '../../build/desk/index.ts';
 import type { Command } from './command.ts';
 import type { ModelPort, Role, Slot } from './model.ts';
 
@@ -34,29 +35,27 @@ const FIXED: Role = { by: 'fixed' };
 // a strip's own switches, the live mix's
 const SWITCHES: readonly string[] = ['mute', 'solo'];
 
-// A desk as the view models read it: its setup's rules, the desk's own slots' among them, and
-// where a move goes, its owner's.
+// A desk as the view models read it: its setup's rules, and where a move goes, its owner's.
 export function deskPort({
   desk,
   setup,
   control,
 }: {
   desk: MeteredDesk;
-  setup: Pick<DeskSetup, 'isLive' | 'setByNotes' | 'roleOf'>;
+  setup: DeskSetup;
   control: Control;
 }): ModelPort {
-  const slotRole = (strip: string, slot: string): SlotRole | undefined => setup.roleOf(strip, slot);
   return {
     get plan(): Plan {
       return desk.plan;
     },
     valueOf: (address) => switchOf(desk, address) ?? desk.valueOf(address),
     startOf: (address) => desk.startOf(address),
-    roleOf: (address) => roleOn(address, { desk, setup, slotRole }),
+    roleOf: (address) => roleOn(address, { desk, setup }),
     peakOf: (address, point) => peakOn(desk, address, point),
     readingOf: (address, reading) => readingOn(desk, address, reading),
     copiesOf: ([pool = '']) => desk.copiesOf(pool),
-    slotOf: (address) => slotOn(address, slotRole),
+    slotOf: (address) => slotOn(address, { desk, setup }),
     send: (command) => sent(command, { desk, control }),
   };
 }
@@ -76,52 +75,61 @@ function switchOf(desk: Pick<MeteredDesk, 'mixState'>, address: Address): number
 //   - a strip's mute and solo: live;
 //   - its own volume, pan and sends: live on the desk's own channels and the background's
 //     tracks; on another track, by its notes where they set it, else live;
-//   - an insert's: as its slot's role says, fixed where it sets none of it.
-function roleOn(
-  address: Address,
-  {
-    desk,
-    setup,
-    slotRole,
-  }: {
-    desk: MeteredDesk;
-    setup: Pick<DeskSetup, 'isLive' | 'setByNotes'>;
-    slotRole: (strip: string, slot: string) => SlotRole | undefined;
-  },
-): Role {
+//   - an insert's on a live strip: its own params and settings live, those deeper fixed;
+//   - an insert's on a track: by what its setup says sets it, recorded; fixed where nothing
+//     does.
+function roleOn(address: Address, { desk, setup }: { desk: MeteredDesk; setup: DeskSetup }): Role {
   const { child, within } = splitAtChild(address);
   const strip = addressText(child);
   const [first = '', ...inSlot] = within;
+  const live = desk.isOwn(strip) || setup.isLive(strip);
   if (within.length === 1 || first === SEND) {
-    return ownRole(address, first, desk.isOwn(strip) || setup.isLive(strip), setup);
+    return ownRole(address, first, live, setup);
   }
-  const role = slotRole(strip, first);
-  if (!role || (role.sets && !role.sets.includes(addressText(inSlot)))) {
+  if (live) {
+    const own = inSlot.length === 1 && ownControls(nodeAt(desk.plan, [...child, first])).includes(inSlot[0]!);
+    return own ? LIVE : FIXED;
+  }
+  const source = setup.setBy(address);
+  if (source === undefined) {
     return FIXED;
   }
-  return {
-    by: role.by,
-    ...(role.source !== undefined && { source: role.source }),
-    ...(role.by === 'automated' && { recorded: true }),
-  };
+  return { by: 'automated', source, recorded: true };
 }
 // A strip's own param or send: its mute and solo live; its volume, pan and sends live on a
 // live strip, else by its notes where they set it.
-function ownRole(address: Address, own: string, live: boolean, setup: Pick<DeskSetup, 'setByNotes'>): Role {
-  if (SWITCHES.includes(own) || live || !setup.setByNotes(address)) {
+function ownRole(address: Address, own: string, live: boolean, setup: Pick<DeskSetup, 'setBy'>): Role {
+  if (SWITCHES.includes(own) || live || setup.setBy(address) === undefined) {
     return LIVE;
   }
   return AUTOMATED;
 }
-// What a slot does on its strip, and what sets it there; none where nothing says.
-function slotOn(address: Address, slotRole: (strip: string, slot: string) => SlotRole | undefined): Slot | undefined {
+// What an insert's slot does on its strip: its plan's words, else on its strip; what sets it
+// there, on a track, what its setup says sets its own controls. None where there's no insert.
+function slotOn(address: Address, { desk, setup }: { desk: MeteredDesk; setup: DeskSetup }): Slot | undefined {
   const { child, within } = splitAtChild(address);
   const [slot = ''] = within;
-  const role = slotRole(addressText(child), slot);
-  if (!role) {
+  const strip = addressText(child);
+  const insert = nodeAt(desk.plan, [...child, slot]);
+  if (insert?.role !== 'insert') {
     return undefined;
   }
-  return { job: role.job, ...(role.setBy !== undefined && { setBy: role.setBy }) };
+  const job = insert.does ?? `on ${strip}`;
+  if (desk.isOwn(strip) || setup.isLive(strip)) {
+    return { job }; // set live here
+  }
+  const sources = ownControls(insert).flatMap((name) => setup.setBy([...child, slot, name]) ?? []);
+  if (!sources.length) {
+    return { job };
+  }
+  return { job, setBy: [...new Set(sources)].join(', ') };
+}
+// an insert's own controls by name: its macros, its params, its settings; none where there's none
+function ownControls(insert: Node | undefined): string[] {
+  if (!insert) {
+    return [];
+  }
+  return [...(insert.macros ?? []), ...insert.params, ...insert.settings].map(({ spec }) => spec.name);
 }
 // A level once the desk is built, a channel's or a block's in it at a point: a copy's once
 // it's added; 0 before.

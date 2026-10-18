@@ -13,4 +13,4 @@
 export { Desk } from './desk.ts';
 export { DeskSurface } from './desk-surface.ts';
 export type { DeskBuilt, WayIn } from './desk-state.ts';
-export type { DeskSetup, SlotRole } from './setup.ts';
+export type { DeskSetup } from './setup.ts';

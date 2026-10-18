@@ -23,7 +23,7 @@ import { TrackChannels, type ChannelInput } from './track-channels.ts';
 //   - clock: the clock's time now and its ticks; at(): a time on it on what's built's clock.
 export interface DeskMaking {
   readonly plan: Plan;
-  readonly setup: Pick<DeskSetup, 'isLive' | 'setByNotes'>;
+  readonly setup: Pick<DeskSetup, 'isLive' | 'setBy'>;
   readonly clock: Pick<Clock, 'now' | 'onTick'>;
   readonly at: (t: number) => number;
 }

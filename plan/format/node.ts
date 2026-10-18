@@ -8,6 +8,7 @@
 // parent's form gives one (insert, fader).
 // Its label: the name a view shows it by, where its template gives one (my playing).
 // Its short label: the name a view shows it by in little room, where one is given (rev).
+// What it does there, in words, where its owner gives some (the air): a view's, else worked out.
 import type { Input, Output } from './input-output.ts';
 import type { Macro } from './macro.ts';
 import type { Param, Setting } from './param.ts';
@@ -22,6 +23,7 @@ interface Face {
   readonly role?: string;
   readonly label?: string;
   readonly short?: string;
+  readonly does?: string;
   readonly inputs: readonly Input[];
   readonly outputs: readonly Output[];
   readonly params: readonly Param[];

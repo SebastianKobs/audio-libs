@@ -39,7 +39,7 @@ class DeskBuiltStandIn {
   dispose() {}
 }
 // A setup of the test's own: no track live, nothing set by notes.
-const SETUP = { isLive: () => false, setByNotes: () => false };
+const SETUP = { isLive: () => false, setBy: () => undefined };
 
 // A desk on a plan, made with a setup, a clock, a time on what's built's clock, the tests' own unless
 // given; what's built of it once built, and what it's handed to build, kept.

@@ -1,8 +1,9 @@
 // The desk as the view models read it (mockup/src/libs/view/models/desk-port.ts), a port for a desk as it plays, on the
 // desk library's desk and its stand-in for what's built (libs/build/desk/test/built.js), the desk library's small studio:
 //   - its plan; a value as it plays, its start; a strip's mute and solo the live mix's;
-//   - how a param is set: a strip's own live, by its notes where they set it; an insert's as its slot's role says;
-//     what a slot does there;
+//   - how a param is set, worked out: a strip's own live, by its notes where they set it; an insert's own params and
+//     settings live on a live strip, by what sets it on a track; what a slot does there, its words where its plan has
+//     them;
 //   - a level and a reading once built, its channel there; 0 before;
 //   - a pool's copies; what's done: a param played as a controller, a choice by its index; a setting, a rebuild.
 import { test } from 'node:test';
@@ -13,17 +14,12 @@ import { deskOn } from '../../../build/desk/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
 
 const PLAN = planned();
-// the setup's rules: a replay tower live, a track's volume its notes'; the air a track's slot, set by distance, a
-// Utility the desk's own, its level live
+// the setup's rules: a replay tower live; on a track, its volume set by its notes' dry level, its air's cutoff by
+// distance
+const SETS = { volume: 'dry', 'air/cutoff': 'distance' };
 const SETUP = {
   isLive: (track) => track === 'replay tower/1',
-  setByNotes: (address) => address.at(-1) === 'volume',
-  roleOf: (strip, slot) => {
-    if (slot === 'air' && strip.includes('/')) {
-      return { job: 'the air', setBy: 'distance', by: 'automated', source: 'distance' };
-    }
-    return slot === 'utility' ? { job: 'its level', by: 'live', sets: ['level'] } : undefined;
-  },
+  setBy: (address) => SETS[address.slice(-2).join('/')] ?? SETS[address.at(-1)],
 };
 
 function portOn() {
@@ -47,7 +43,7 @@ test("the desk's plan; a value as it plays, its start; a strip's mute and solo t
   );
 });
 
-test("how a param is set: a strip's own live, on a live track or where its notes don't set it, by its notes where they do; an insert's as its slot's role says, fixed where it sets none of it; what a slot does there", () => {
+test("how a param is set, worked out: a strip's own live, on a live track or where its notes don't set it, by its notes where they do; an insert's own params and settings live on a live strip, deeper ones fixed; on a track by what sets it, else fixed; what a slot does there, its words where its plan has them, else on its strip", () => {
   const { port } = portOn();
   assert.deepEqual(port.roleOf(['tap', 'volume']), { by: 'live' }, "the desk's own");
   assert.deepEqual(
@@ -62,10 +58,16 @@ test("how a param is set: a strip's own live, on a live track or where its notes
     source: 'distance',
     recorded: true,
   });
-  assert.deepEqual(port.roleOf(['tap', 'utility', 'level']), { by: 'live' });
-  assert.deepEqual(port.roleOf(['tap', 'utility', 'pan']), { by: 'fixed' }, 'one its slot sets none of');
+  assert.deepEqual(port.roleOf(['my tap', '3', 'air', 'q']), { by: 'fixed' }, 'nothing sets it');
+  assert.deepEqual(
+    ['level', 'pan', 'pan/law'].map((param) => port.roleOf(['tap', 'utility', ...param.split('/')])),
+    [{ by: 'live' }, { by: 'live' }, { by: 'fixed' }],
+    "the desk's own Utility: its macros live, a setting within fixed",
+  );
+  assert.deepEqual(port.roleOf(['reverb', 'reverb', 'length']), { by: 'live' }, "a Reverb's own setting");
   assert.deepEqual(port.slotOf(['my tap', '3', 'air', 'cutoff']), { job: 'the air', setBy: 'distance' });
-  assert.equal(port.slotOf(['reverb', 'reverb', 'room']), undefined);
+  assert.deepEqual(port.slotOf(['tap', 'utility']), { job: 'on tap' });
+  assert.equal(port.slotOf(['tap', 'nowhere']), undefined);
 });
 
 test("a level and a reading once the desk is built, its channel there, a copy's once added; 0 before", () => {

@@ -23,7 +23,7 @@ export class TrackChannels<B extends DeskBuilt> {
   readonly #clock: Pick<Clock, 'now'>;
   readonly #at: (t: number) => number;
   readonly #made: () => void;
-  readonly #setup: Pick<DeskSetup, 'isLive' | 'setByNotes'>;
+  readonly #setup: Pick<DeskSetup, 'isLive' | 'setBy'>;
   readonly #ways = new Map<string, WayIn<B>>(); // each track's way into its channel, by its key
 
   // made: called each time a track's channel is added, so the mutes reach it (Mix.apply());
@@ -39,7 +39,7 @@ export class TrackChannels<B extends DeskBuilt> {
     clock: Pick<Clock, 'now'>;
     at: (t: number) => number;
     made?: () => void;
-    setup: Pick<DeskSetup, 'isLive' | 'setByNotes'>;
+    setup: Pick<DeskSetup, 'isLive' | 'setBy'>;
   }) {
     this.#desk = desk;
     this.#clock = clock;
@@ -64,7 +64,7 @@ export class TrackChannels<B extends DeskBuilt> {
   // Returns false for one it doesn't set: a live track's, a param not its notes', a track
   // with no pool.
   control(track: string, change: Change): boolean {
-    if (this.#setup.isLive(track) || !this.#added(track) || !this.#setup.setByNotes(change.address)) {
+    if (this.#setup.isLive(track) || !this.#added(track) || this.#setup.setBy(change.address) === undefined) {
       return false;
     }
     const when = whenOf(change, { now: this.#clock.now(), at: this.#at });

@@ -7,7 +7,8 @@
 //   - a setting of its own by its name, standing for a child's (to), its spec that one's;
 //   - its child's role in it, and the form it fulfils, where it has one;
 //   - its label and a child's, the name a view shows what's made of it by, where it has one,
-//     a child's over its template's; a child's short label, the name in little room.
+//     a child's over its template's; a child's short label, the name in little room; what a
+//     child does there, in words, where its owner gives some.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
 import type { Address, Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
@@ -20,6 +21,7 @@ export interface TemplateChild {
   readonly role?: string;
   readonly label?: string;
   readonly short?: string;
+  readonly does?: string;
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
 }

@@ -11,7 +11,10 @@ import { planned } from '../../../plan/desk/test/desks.js';
 
 const PLAN = planned();
 // the setup's rules: a replay tower live; a track's air its notes'
-const setup = { isLive: (track) => track === 'replay tower/1', setByNotes: (address) => address.includes('air') };
+const setup = {
+  isLive: (track) => track === 'replay tower/1',
+  setBy: (address) => (address.includes('air') ? 'distance' : undefined),
+};
 const cutoff = (value, t) => ({ type: 'controller', controller: 'air/cutoff', value, t });
 
 function channelsOn() {

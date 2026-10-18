@@ -15,7 +15,7 @@ export const REPLAY = {
   pan: false,
   tap: 'pre',
   inserts: [
-    { name: 'air', kind: 'Filter' },
+    { name: 'air', kind: 'Filter', does: 'the air' },
     { name: 'utility', kind: 'Utility', settings: { 'pan/law': 'pan pot' } },
   ],
 };
