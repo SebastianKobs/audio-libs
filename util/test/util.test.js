@@ -2,6 +2,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  addressOf,
+  addressText,
   approach,
   clamp,
   DueQueue,
@@ -18,6 +20,7 @@ import {
   SETTLED,
   smoothstep,
   toggleIn,
+  under,
   updateInPlace,
 } from '../index.ts';
 import { isNear, near } from './near.js';
@@ -278,4 +281,12 @@ test('data the same as other data: numbers, strings and nulls by value, arrays i
   assert.ok(!sameData({ a: [1] }, { a: { 0: 1 } }), 'an array not an object');
   assert.ok(!sameData({ a: null }, { a: {} }));
   assert.ok(sameData(null, null) && !sameData(1, '1'));
+});
+
+test("an address as text, its names joined by slashes, and back; a parent's name put in front; a name with a slash refused", () => {
+  assert.equal(addressText(['desk', 'channel 3', 'utility', 'level']), 'desk/channel 3/utility/level');
+  assert.deepEqual(addressOf('desk/channel 3/utility/level'), ['desk', 'channel 3', 'utility', 'level']);
+  assert.deepEqual(under('desk', ['channel 3', 'utility', 'level']), ['desk', 'channel 3', 'utility', 'level']);
+  assert.throws(() => addressText(['send/reverb', 'level']), /send\/reverb/);
+  assert.throws(() => under('a/b', ['level']), /a\/b/);
 });

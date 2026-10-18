@@ -1,7 +1,7 @@
 // The plan format's unit tests (mockup/src/libs/plan/format):
 //   - a plan is data, stored as JSON: its examples read back as they were (test/plans.ts, held to the format by the type check);
 //   - a stored plan's version: this format's, or refused, naming what was found;
-//   - an address and its text; a node, a param or a setting found by its address;
+//   - a node, a param or a setting found by its address;
 //   - a macro's value onto its targets; a pool's copies, their names and their wires;
 //   - an address split at the child it's in, a copy among them;
 //   - what feeds what over one inside's wires, and the loop check.
@@ -9,8 +9,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   VERSION,
-  addressOf,
-  addressText,
   copyOf,
   feeds,
   macroValues,
@@ -21,7 +19,6 @@ import {
   reached,
   settingAt,
   splitAtChild,
-  under,
   versionOf,
   wayOut,
   withCopies,
@@ -46,14 +43,6 @@ test("a stored plan's version: this format's, 1; one with none, one that isn't a
   assert.throws(() => versionOf({ version: '1' }), /found "1"/);
   assert.throws(() => versionOf({ version: 1.5 }), /found 1\.5/);
   assert.throws(() => versionOf({ version: 2 }), /2 is newer than this format's, 1/);
-});
-
-test("an address as text, its names joined by slashes, and back; a parent's name put in front; a name with a slash refused", () => {
-  assert.equal(addressText(['desk', 'channel 3', 'utility', 'level']), 'desk/channel 3/utility/level');
-  assert.deepEqual(addressOf('desk/channel 3/utility/level'), ['desk', 'channel 3', 'utility', 'level']);
-  assert.deepEqual(under('desk', ['channel 3', 'utility', 'level']), ['desk', 'channel 3', 'utility', 'level']);
-  assert.throws(() => addressText(['send/reverb', 'level']), /send\/reverb/);
-  assert.throws(() => under('a/b', ['level']), /a\/b/);
 });
 
 test("found by its address from the plan's top: a child's param, a composite's macro, a setting, a node; a pool's child by the pool's name, a copy under it by its number; none where nothing's there", () => {
