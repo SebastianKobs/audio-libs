@@ -7,7 +7,10 @@
 //     a track's channel's where its notes set it, a strip's mute and solo the live mix's;
 //   - track-channels.ts: each track's channel, its instrument's way in, what its notes set on it;
 //   - mix.ts: the live mix's mute and solo, a mute taking along what its setup says;
-//   - setup.ts: what a setup hands in, its rules, by a strip's name.
+//   - setup.ts: what a setup hands in, its rules, by a strip's name;
+//   - desk-surface.ts: the desk's own control surface, a strip's control moved by hand played
+//     into a sequencer as a controller.
 export { Desk } from './desk.ts';
+export { DeskSurface } from './desk-surface.ts';
 export type { DeskBuilt, WayIn } from './desk-state.ts';
 export type { DeskSetup, SlotRole } from './setup.ts';
