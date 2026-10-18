@@ -51,6 +51,7 @@ export class DeskState<B extends DeskBuilt> {
   // each copy added, by its address as text, its track's key
   readonly #copies = new Map<string, Address>();
   #built: B | null = null;
+  #beat: number | undefined; // the beat last told, none at first
 
   constructor({ plan }: { plan: Plan }) {
     this.plan = plan;
@@ -130,8 +131,12 @@ export class DeskState<B extends DeskBuilt> {
   isOwn(strip: string): boolean {
     return (this.plan.node as Composite).children.some(({ name }) => name === strip); // a desk is a composite
   }
-  // a new beat, its synced delays' times following it, gliding
+  // a new beat, its synced delays' times following it, gliding; one unchanged passed over
   tempo(beat: number): void {
+    if (beat === this.#beat) {
+      return;
+    }
+    this.#beat = beat;
     this.#built?.tempo(beat);
   }
 

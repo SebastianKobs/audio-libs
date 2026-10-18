@@ -4,7 +4,7 @@
 //     the values set before told it;
 //   - a track's channel, its pool's copy, added the first time it's asked for once built, what was set on it before told;
 //   - a value set by its address, kept, told where it plays; a choice by its index kept as its choice; read back;
-//   - settings changed as a preset; a new beat; whether a strip is one of its own channels.
+//   - settings changed as a preset; a new beat, one unchanged passed over; whether a strip is one of its own channels.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Desk } from '../index.ts';
@@ -63,13 +63,15 @@ test('a value set: kept, told what plays it; a choice by its index kept as its c
   assert.equal(desk.specOf(['nowhere']), undefined);
 });
 
-test("settings changed: kept, what's built built again with them; a new beat told; whether a strip is one of its own channels", () => {
+test("settings changed: kept, what's built built again with them; a new beat told, one unchanged passed over; whether a strip is one of its own channels", () => {
   const { desk, built, build } = deskOn(Desk, PLAN);
   build();
   desk.settings({ [ROOM]: 1.5 });
   assert.deepEqual(built.presets, [[{}, { [ROOM]: 1.5 }]]);
   assert.equal(desk.valueOf(['reverb', 'reverb', 'room', 'length']), 1.5);
   desk.tempo(0.5);
-  assert.deepEqual(built.tempi, [0.5]);
+  desk.tempo(0.5);
+  desk.tempo(0.6);
+  assert.deepEqual(built.tempi, [0.5, 0.6]);
   assert.deepEqual([desk.isOwn('tap'), desk.isOwn('my tap/3')], [true, false]);
 });

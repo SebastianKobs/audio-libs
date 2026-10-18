@@ -1,6 +1,6 @@
 // The recorder (G1b, mockup/architecture/done.md), as Ableton records the session into its arrangement: every play the stream carries
 // into the region it's of (G1a), told apart by its element and its number, a play with none a region of its own; a play its sender
-// leaves out (unrecorded), left out; a region from its first note to the end of its last, one with a held note open until its element's next region begins; the
+// leaves out (unrecorded), left out, and one its owner says to leave out; a region from its first note to the end of its last, one with a held note open until its element's next region begins; the
 // last 30 minutes kept. And what moves as it's heard, as automation (G3b): a track's controllers as its lanes, a note's changes on the note,
 // every change kept but a point that changes nothing
 import { test } from 'node:test';
@@ -327,4 +327,15 @@ test("a note's glides sent with it kept as its pitch's lane, a value at each tim
   recorder.heard(play(flower, 1, [{ t: 2, pitch: 60, duration: 2, index: 3, glides: [[2.5, 62]] }]));
   const [note] = recorder.regions(5)[0].notes;
   assert.deepEqual([note.glides, note.lanes], [undefined, { pitch: [{ value: 62, t: 2.5 }] }]);
+});
+
+test("a play its owner says to leave out, left out, as the transport leaves a surface's out while the arrangement plays back", () => {
+  const recorder = new Recorder();
+  recorder.leaveOut((each) => each.owner === bloom);
+  recorder.heard(play(flower, 1, [1]));
+  recorder.heard(play(bloom, 1, [1.5]));
+  assert.deepEqual(
+    spans(recorder.regions(5)).map(([owner]) => owner),
+    [flower],
+  );
 });

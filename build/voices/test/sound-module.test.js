@@ -3,7 +3,7 @@
 //   - a part for each track, an instrument playing a patch from its bank by name, built where it's told;
 //   - a patch edited in the bank: every part that plays it edited, its own or a pad's of its rack; one made after an
 //     edit made as edited;
-//   - a new tempo told every part.
+//   - a new tempo told every part, one unchanged passed over.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SoundModule } from '../index.ts';
@@ -50,12 +50,14 @@ test('a patch edited in the bank: every part that plays it edited, its own or a 
   );
 });
 
-test('a part made after an edit made as edited; a new tempo told every part', () => {
+test('a part made after an edit made as edited; a new tempo told every part, one unchanged passed over', () => {
   const { bank, module } = moduleOn();
   bank.set('bright', tuned(7));
   const { built, where } = making();
   module.part('bright', where).receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));
   assert.ok(built.told.some(([address, value]) => address === 'voice/1/osc 1/tune' && value === 7));
   module.tempo(0.4);
-  assert.deepEqual(built.tempi, [0.4]);
+  module.tempo(0.4);
+  module.tempo(0.5);
+  assert.deepEqual(built.tempi, [0.4, 0.5]);
 });

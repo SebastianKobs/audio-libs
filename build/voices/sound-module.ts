@@ -4,7 +4,7 @@
 //   - A part made where it's told, by the builder handed in (instrument.ts).
 //   - A patch edited in the bank: every part that plays it edited, its own or a pad's of its
 //     rack; a part made after an edit made as edited.
-//   - A new tempo told every part.
+//   - A new tempo told every part, one unchanged passed over.
 import type { Preset } from '../../plan/planner/index.ts';
 import type { Instruments } from '../../plan/synth/index.ts';
 import type { LiveCopies } from '../../util/index.ts';
@@ -18,6 +18,7 @@ export class SoundModule<Into> {
   readonly #bank: LiveCopies<Preset>;
   readonly #parts: Instrument<Into>[] = [];
   readonly #edited = new Set<string>(); // the patches edited, by name
+  #beat: number | undefined; // the beat last told, none at first
 
   // instruments: the file the patches are in, as it began; bank: its patches as they play,
   // edited in place by name
@@ -35,8 +36,12 @@ export class SoundModule<Into> {
     this.#parts.push(instrument);
     return instrument;
   }
-  // a new beat's length, told every part
+  // a new beat's length, told every part; one unchanged passed over
   tempo(beat: number): void {
+    if (beat === this.#beat) {
+      return;
+    }
+    this.#beat = beat;
     for (const part of this.#parts) {
       part.tempo(beat);
     }

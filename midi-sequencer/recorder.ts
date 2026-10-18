@@ -63,6 +63,7 @@ export class Recorder {
   #kept: Kept[] = []; // in the order they began
   readonly #numbered = new Map<unknown, Map<number, Kept>>(); // each element's regions, by their number
   readonly #lanes = new Map<string, Lane>(); // each track's, by its kind, number and controller, in the order they began
+  #leftOut: (play: Play) => boolean = () => false; // what its owner says to leave out
 
   constructor({ keep }: { keep?: Seconds } = {}) {
     this.#timeline = new Timeline<RecordedNote, LanePoint>({
@@ -71,9 +72,10 @@ export class Recorder {
       onLetGo: (gone) => this.#forget(gone),
     });
   }
-  // a play the stream carries, into the region it's of; one its sender leaves out of the recording, left out
+  // a play the stream carries, into the region it's of; one its sender or its owner leaves out
+  // of the recording, left out
   heard(play: Play): void {
-    if (play.unrecorded) {
+    if (play.unrecorded || this.#leftOut(play)) {
       return;
     }
     this.#told(play.owner, play.ends ?? []);
@@ -86,6 +88,11 @@ export class Recorder {
     const notes = [...play.notes.map((note) => recorded(note)), ...carried];
     kept.notes.push(...notes);
     this.#timeline.add(notes); // what's past the 30 minutes let go as they come
+  }
+  // What its owner leaves out, as the transport says: a surface's notes while the
+  // arrangement plays back.
+  leaveOut(leftOut: (play: Play) => boolean): void {
+    this.#leftOut = leftOut;
   }
   // the regions kept at now, in the order they began, those wholly before the last 30 minutes let go
   regions(now: Seconds): Region[] {
