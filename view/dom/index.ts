@@ -24,6 +24,9 @@
 //     sounds, its ▶ and its × handed to its model;
 //   - device-view-panel.ts: the device view drawn below the tracks from its model, what's open,
 //     each kind a chain of devices filling it, its knobs dragged and brought up to date;
+//   - instrument-devices.ts: each role's instrument a device, a rack of its cards, the test
+//     note's button held as long as it is, its reset; its words and the test note's row its
+//     owner's;
 //   - insert-devices.ts: a strip's inserts, each a composite drawn flat, a reset for what's live;
 //   - transport-lane-view.ts: the transport's lane drawn, ▶ and ■ sent, bar and beat;
 //   - session-drawing.ts: when the session view is drawn: on a beat, from a beat back as it's
@@ -58,6 +61,7 @@ export {
 } from './arrangement/arrangement-view.ts';
 export { DeviceViewPanel, type DeviceChain } from './device-view-panel.ts';
 export { InsertDevices } from './insert-devices.ts';
+export { InstrumentDevices, type InstrumentLook } from './instrument-devices.ts';
 export { TransportLaneView, type TransportHints } from './transport-lane-view.ts';
 export { SessionDrawing } from './session-drawing.ts';
 export { ViewStrip } from './view-strip.ts';
