@@ -1,6 +1,6 @@
 // ---------- view/models/cards: an instrument's patches as the device view edits them ----------
 // A card for each patch an instrument plays, its own, or a drum rack's pads, each by its key:
-// its preset on its voice card, read and set through a port (preset-port.ts). The patch is
+// its preset on its voice card, read through a port (preset-port.ts). The patch is
 // edited in the bank, not an instrument playing it: an edit reaches every instrument that plays
 // it, and those still to come.
 //   - its voice card planned at its preset as the bank has it now, values from outside over its
@@ -25,11 +25,13 @@ import type { Command } from './command.ts';
 import type { ModelPort, Role } from './model.ts';
 import { PresetPort } from './preset-port.ts';
 
-// a card of an instrument: the patch it edits, by its name; a drum rack's pad's key; its port
+// a card of an instrument: the patch it edits, by its name; a drum rack's pad's key; its port;
+// what's done on it sent as the app's message (send())
 export interface InstrumentCard {
   readonly patch: string;
   readonly key?: number;
   readonly port: ModelPort;
+  readonly send: (command: Command) => void;
 }
 // Values from outside over a voice card's own, by their addresses in it, and what sets them,
 // as a card's hints say it (the tweak panel).
@@ -76,9 +78,15 @@ export class InstrumentCards {
   of(patch: string, over: CardValues = NONE): InstrumentCard[] {
     const pads = this.#instruments.racks[patch];
     if (pads) {
-      return pads.map(({ key, patch: pad }) => ({ patch: pad, key, port: this.#portOf(pad, over) }));
+      return pads.map(({ key, patch: pad }) => this.#cardOf(pad, over, key));
     }
-    return [{ patch, port: this.#portOf(patch, over) }];
+    return [this.#cardOf(patch, over)];
+  }
+  // a patch's card: its port, and its edits sent as the bank's messages
+  #cardOf(patch: string, over: CardValues, key?: number): InstrumentCard {
+    const port = this.#portOf(patch, over);
+    const send = (command: Command): void => this.#send(editOf(patch, command));
+    return key === undefined ? { patch, port, send } : { patch, key, port, send };
   }
 
   // a patch's port, made as it's first asked for
@@ -90,7 +98,6 @@ export class InstrumentCards {
         values: () => ({ ...valuesOf(preset()), ...over.values() }),
         start: () => valuesOf(this.#bank.start(name)!), // the bank has it
         roleOf: (address) => roleOf(address, over),
-        changed: (command) => this.#send(editOf(name, command)),
       });
     });
   }

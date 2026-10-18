@@ -56,9 +56,8 @@ function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
     readingOf: () => 0,
     copiesOf: () => [],
     slotOf: (address) => slots[addressText(address)],
-    send: (command) => sent.push(command),
   };
-  return { views: new ViewBuilder(port), sent };
+  return { views: new ViewBuilder(port, (command) => sent.push(command)), sent };
 }
 
 test("a composite as a device: its name and kind, its macros as knobs in its template's order, then its settings within, each by its address; its words the template's", () => {
@@ -232,17 +231,19 @@ test("a knob set from what's typed, read as its text shows it: a gain in dB, -âˆ
       settings: [],
     },
   };
-  const models = new ViewBuilder({
-    plan,
-    valueOf: () => undefined,
-    startOf: () => undefined,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: () => undefined,
-    send: (command) => sent.push(command.value),
-  });
+  const models = new ViewBuilder(
+    {
+      plan,
+      valueOf: () => undefined,
+      startOf: () => undefined,
+      roleOf: () => ({ by: 'live' }),
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: () => [],
+      slotOf: () => undefined,
+    },
+    (command) => sent.push(command.value),
+  );
   const typed = (name, text) => models.control([name]).setText(text);
   assert.deepEqual(
     [typed('gain', '-6'), typed('gain', '-âˆž'), typed('pan', 'L20'), typed('pan', 'C'), typed('pan', 'R50')],

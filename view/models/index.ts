@@ -14,7 +14,8 @@
 //     edited in the bank;
 //   - instrument-racks.ts: the instruments as the device view shows them, a rack of cards each,
 //     the test note every one plays, which of its own values each reads;
-//   - desk-port.ts: a port for a desk as it plays (libs/build/desk/), its meters, its mix;
+//   - desk-port.ts: a port for a desk as it plays (libs/build/desk/), its meters, its mix; what's
+//     done on it as its message;
 //   - command.ts: what's done in a view, by address;
 //   - custom.ts: a view of its own, registered by kind;
 //   - clip-tracks.ts: the clip tracks, each clip read from what holds it, a clip player or the
@@ -53,14 +54,8 @@ export { Mixer, type BusGroup } from './mixer.ts';
 export type { ModelPort, Role, Slot } from './model.ts';
 export { PresetPort, type PresetOwner } from './preset-port.ts';
 export { InstrumentCards, type CardValues, type InstrumentCard } from './cards.ts';
-export {
-  InstrumentRacks,
-  type HeldNote,
-  type InstrumentPort,
-  type InstrumentRack,
-  type TestNote,
-} from './instrument-racks.ts';
-export { deskPort } from './desk-port.ts';
+export { InstrumentRacks, type InstrumentPort, type InstrumentRack } from './instrument-racks.ts';
+export { deskEdited, deskPort } from './desk-port.ts';
 export { Strip, shortName, shownName } from './strip.ts';
 export { ViewBuilder, type MatrixRow } from './view-builder.ts';
 export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';

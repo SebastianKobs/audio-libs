@@ -53,15 +53,21 @@ export const CARD = {
 };
 // a view builder on a port of the tests' own: every value the plan's, every one live
 export function builderOn(plan) {
-  return new ViewBuilder({
-    plan,
-    valueOf: () => undefined,
-    startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: () => undefined,
-    send: () => {},
-  });
+  return new ViewBuilder(
+    {
+      plan,
+      valueOf: () => undefined,
+      startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
+      roleOf: () => ({ by: 'live' }),
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: () => [],
+      slotOf: () => undefined,
+    },
+    () => {},
+  );
+}
+// a card's view models, what's done on them sent through its send
+export function cardModels({ port, send }) {
+  return new ViewBuilder(port, send);
 }

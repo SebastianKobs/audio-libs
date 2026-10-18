@@ -7,14 +7,12 @@
 //     the plan and its setup's rules, a slot's words its plan's where it has them;
 //   - a channel's level, its meter's, or a block's in it at a point, once the desk is built;
 //     a reading, a limiter's reduction;
-//   - a pool's copies added so far;
-//   - what's done: a param handed to where its owner says a move goes, a controller on its
-//     strip's track for a studio, so it's recorded as every move is; a setting, the desk built
-//     again with it.
-import { choiceIndex } from '../../params/index.ts';
+//   - a pool's copies added so far.
+// What's done sent as the desk's message (deskEdited()), its owner playing it in as it hears
+// it (the desk's surface).
 import { addressText, nodeAt, splitAtChild, type Address, type Node, type Plan } from '../../plan/format/index.ts';
 import { SEND } from '../../plan/desk/index.ts';
-import type { Desk, DeskBuilt, DeskSetup } from '../../build/desk/index.ts';
+import type { Desk, DeskBuilt, DeskMessage, DeskSetup } from '../../build/desk/index.ts';
 import type { Command } from './command.ts';
 import type { ModelPort, Role, Slot } from './model.ts';
 
@@ -26,8 +24,6 @@ interface Metered {
 }
 // a desk whose built has meters, as the port reads it
 type MeteredDesk = Desk<DeskBuilt & Metered>;
-// where a move goes, by its strip and its controller: a studio's into the sequencer
-type Control = (strip: string, controller: string, value: number) => void;
 
 const LIVE: Role = { by: 'live' };
 const AUTOMATED: Role = { by: 'automated', recorded: true }; // a desk's automation, in its lanes
@@ -35,16 +31,8 @@ const FIXED: Role = { by: 'fixed' };
 // a strip's own switches, the live mix's
 const SWITCHES: readonly string[] = ['mute', 'solo'];
 
-// A desk as the view models read it: its setup's rules, and where a move goes, its owner's.
-export function deskPort({
-  desk,
-  setup,
-  control,
-}: {
-  desk: MeteredDesk;
-  setup: DeskSetup;
-  control: Control;
-}): ModelPort {
+// A desk as the view models read it, by its setup's rules.
+export function deskPort({ desk, setup }: { desk: MeteredDesk; setup: DeskSetup }): ModelPort {
   return {
     get plan(): Plan {
       return desk.plan;
@@ -56,8 +44,14 @@ export function deskPort({
     readingOf: (address, reading) => readingOn(desk, address, reading),
     copiesOf: ([pool = '']) => desk.copiesOf(pool),
     slotOf: (address) => slotOn(address, { desk, setup }),
-    send: (command) => sent(command, { desk, control }),
   };
+}
+// What's done on the desk as its message: a param's value, or a setting.
+export function deskEdited({ type, address, value }: Command): DeskMessage {
+  if (type === 'setting') {
+    return { type: 'desk edited', of: 'settings', address, value };
+  }
+  return { type: 'desk edited', of: 'values', address, value };
 }
 
 // A strip's mute or solo, 1 where the live mix has it on; none for any other address.
@@ -153,18 +147,3 @@ function isBuilt(desk: MeteredDesk, address: Address): boolean {
 }
 // What's done: a param played on its strip's track, a choice by its index as a controller
 // carries it; a setting, the desk built again with it.
-function sent({ type, address, value }: Command, { desk, control }: { desk: MeteredDesk; control: Control }): void {
-  if (type === 'setting') {
-    desk.settings({ [addressText(address)]: value });
-    return;
-  }
-  const { child, within } = splitAtChild(address);
-  control(addressText(child), addressText(within), controllerValue(desk, address, value));
-}
-// a value as a controller carries it: a choice by its index among its param's choices
-function controllerValue(desk: MeteredDesk, address: Address, value: number | string): number {
-  if (typeof value === 'number') {
-    return value;
-  }
-  return choiceIndex(desk.specOf(address)!, value); // a choice is a param's, found there
-}

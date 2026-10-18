@@ -8,20 +8,34 @@
 //   - The stream's label for the strip's track its owner's, handed in.
 //   - Each move told to whoever listens: the transport passing that lane over while it plays
 //     back.
+// A desk's edit by address, as the app's message (a view's knob turned):
+//   - a param: played in as its strip's controller, a choice by its index;
+//   - a setting: the desk built again with it, not recorded, as a rebuild isn't automation.
 import { SMOOTHING } from '../../automation/index.ts';
 import type { Clock } from '../../clock/index.ts';
 import type { Controller } from '../../midi/index.ts';
+import { choiceIndex } from '../../params/index.ts';
+import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
 import type { Desk } from './desk.ts';
 import type { DeskBuilt } from './desk-state.ts';
 
+// A desk's edit, by its address: a param's value, or a setting.
+export interface DeskMessage {
+  readonly type: 'desk edited';
+  readonly of: 'values' | 'settings';
+  readonly address: Address;
+  readonly value: number | string;
+}
+// what the surface asks of the desk: what glides, a param's spec, its settings changed
+type SurfacedDesk = Pick<Desk<DeskBuilt>, 'glides' | 'specOf' | 'settings'>;
 // Where a move is played: a controller sent to a strip's track, with its label.
 interface MoveInput<Label> {
   send(to: { track: string; play: Label | undefined }, messages: readonly Controller[]): void;
 }
 
 export class DeskSurface<Label> {
-  readonly #desk: Pick<Desk<DeskBuilt>, 'glides'>;
+  readonly #desk: SurfacedDesk;
   readonly #clock: Pick<Clock, 'now'>;
   readonly #input: MoveInput<Label>;
   readonly #label: (strip: string) => Label | undefined;
@@ -34,7 +48,7 @@ export class DeskSurface<Label> {
     input,
     label,
   }: {
-    desk: Pick<Desk<DeskBuilt>, 'glides'>;
+    desk: SurfacedDesk;
     clock: Pick<Clock, 'now'>;
     input: MoveInput<Label>;
     label: (strip: string) => Label | undefined;
@@ -53,7 +67,23 @@ export class DeskSurface<Label> {
       : { type: 'controller', controller, value, t };
     this.#input.send({ track: strip, play: this.#label(strip) }, [change]);
   }
+  // a desk's edit as the app asks it
+  edit({ of, address, value }: DeskMessage): void {
+    if (of === 'settings') {
+      this.#desk.settings({ [addressText(address)]: value });
+      return;
+    }
+    const { child, within } = splitAtChild(address);
+    this.control(addressText(child), addressText(within), this.#controllerValue(address, value));
+  }
   onControl(listener: (strip: string, controller: string) => void): void {
     this.#events.on('control', listener);
+  }
+  // a value as a controller carries it: a choice by its index among its param's choices
+  #controllerValue(address: Address, value: number | string): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    return choiceIndex(this.#desk.specOf(address)!, value); // a choice is a param's, found there
   }
 }

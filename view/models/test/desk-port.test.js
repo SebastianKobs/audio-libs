@@ -5,10 +5,11 @@
 //     settings live on a live strip, by what sets it on a track; what a slot does there, its words where its plan has
 //     them;
 //   - a level and a reading once built, its channel there; 0 before;
-//   - a pool's copies; what's done: a param played as a controller, a choice by its index; a setting, a rebuild.
+//   - a pool's copies;
+//   - what's done sent as the desk's message, a param's value or a setting, by its address.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deskPort } from '../index.ts';
+import { deskEdited, deskPort } from '../index.ts';
 import { Desk } from '../../../build/desk/index.ts';
 import { deskOn } from '../../../build/desk/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
@@ -24,9 +25,8 @@ const SETUP = {
 
 function portOn() {
   const on = deskOn(Desk, PLAN, { setup: SETUP });
-  const moves = [];
-  const port = deskPort({ desk: on.desk, setup: SETUP, control: (...move) => moves.push(move) });
-  return { ...on, port, moves };
+  const port = deskPort({ desk: on.desk, setup: SETUP });
+  return { ...on, port };
 }
 const switched = (name) => ({ type: 'controller', controller: name, value: 1, t: 0 });
 
@@ -83,17 +83,20 @@ test("a level and a reading once the desk is built, its channel there, a copy's 
   assert.equal(port.peakOf(['my tap', '3']), 0.2);
 });
 
-test("a pool's copies added; what's done: a param played as a controller on its strip's track, a choice by its index; a setting, the desk built again with it", () => {
-  const { desk, built, build, port, moves } = portOn();
+test("a pool's copies added", () => {
+  const { desk, build, port } = portOn();
   build();
   desk.inputOf('my tap/3');
   assert.deepEqual(port.copiesOf(['my tap']), [['my tap', '3']]);
-  port.send({ type: 'param', address: ['my tap', '3', 'send', 'reverb'], value: 0.4 });
-  port.send({ type: 'param', address: ['delay 1', 'delay', 'note'], value: '1/16' });
-  assert.deepEqual(moves, [
-    ['my tap/3', 'send/reverb', 0.4],
-    ['delay 1', 'delay/note', 1],
-  ]);
-  port.send({ type: 'setting', address: ['reverb', 'reverb', 'length'], value: 2 });
-  assert.deepEqual(built.presets, [[{}, { 'reverb/reverb/length': 2 }]]);
+});
+
+test("what's done sent as the desk's message: a param's value, a setting, by its address", () => {
+  const address = ['delay 1', 'delay', 'note'];
+  assert.deepEqual(deskEdited({ type: 'param', address, value: '1/16' }), {
+    type: 'desk edited',
+    of: 'values',
+    address,
+    value: '1/16',
+  });
+  assert.deepEqual(deskEdited({ type: 'setting', address, value: 2 }).of, 'settings');
 });

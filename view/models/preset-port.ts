@@ -2,24 +2,21 @@
 // A port for a plan whose values a preset gives, as a patch gives its voice card's:
 //   - each value the preset's, by its address; the plan's where the preset has none;
 //   - each value's start the preset's as it began, which a reset brings back;
-//   - how each is set: as its owner says, else by what moves it where a macro does, else live;
-//   - what's done handed to its owner, to change the preset by.
+//   - how each is set: as its owner says, else by what moves it where a macro does, else live.
+// What's done is sent as the preset's message by whoever makes its models.
 // It hears no sound, holds no copies and fills no slots.
 import { addressText, PlanMoves, type Address, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
-import type { Command } from './command.ts';
 import type { ModelPort, Role, Slot } from './model.ts';
 
 // What owns the preset:
 //   - plan: the plan at the preset as it is now, a macro's targets at its value;
 //   - values, start: the preset's values and settings by address, now and as it began;
-//   - roleOf: how a value is set, where the owner says (set by the note, by a panel);
-//   - changed: what's done, to change the preset by.
+//   - roleOf: how a value is set, where the owner says (set by the note, by a panel).
 export interface PresetOwner {
   plan(): Plan;
   values(): ValuesByAddress;
   start(): ValuesByAddress;
   roleOf?(address: Address): Role | undefined;
-  changed(command: Command): void;
 }
 
 const LIVE: Role = { by: 'live' };
@@ -61,8 +58,5 @@ export class PresetPort implements ModelPort {
   }
   slotOf(): Slot | undefined {
     return undefined;
-  }
-  send(command: Command): void {
-    this.#owner.changed(command);
   }
 }

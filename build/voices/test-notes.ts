@@ -5,6 +5,7 @@
 //   - not through a sequencer, so it isn't recorded.
 // Each note a fresh index (MIDI 2.0's note rotation), phrased as its owner says, held at most
 // its longest; let go as its button is.
+// Pressed and let go as the app's messages too, a key's note held until its key's is let go.
 import { NoteRotation, type Message, type Receiver } from '../../midi/index.ts';
 import { entryOf } from '../../util/index.ts';
 
@@ -25,6 +26,11 @@ export interface PhrasedTestNote extends TestNote {
   readonly duration: number;
 }
 
+// A test note pressed on a key's instrument, or let go, as the app's message.
+export type TestNoteMessage<Key = string> =
+  | { readonly type: 'test note'; readonly key: Key; readonly note: TestNote }
+  | { readonly type: 'test note released'; readonly key: Key; readonly t: number };
+
 const LONGEST = 30; // s: a test note held at most this long
 
 export class TestNotes<Key> {
@@ -32,6 +38,7 @@ export class TestNotes<Key> {
   readonly #phrase: (key: Key, note: PhrasedTestNote, index: number) => Message[];
   readonly #made = new Map<Key, Receiver>();
   readonly #rotation = new NoteRotation();
+  readonly #held = new Map<Key, HeldTestNote>(); // pressed by a message, until its key's is let go
 
   // instrumentFor(): a key's instrument, made at its first test note;
   // phrase(): a note's messages as its owner plays one of that key's
@@ -56,5 +63,14 @@ export class TestNotes<Key> {
         this.#rotation.noteOff(index);
       },
     };
+  }
+  // A test note pressed or let go as the app asks it.
+  hear(message: TestNoteMessage<Key>): void {
+    if (message.type === 'test note') {
+      this.#held.set(message.key, this.play(message.key, message.note));
+      return;
+    }
+    this.#held.get(message.key)?.release(message.t);
+    this.#held.delete(message.key);
   }
 }

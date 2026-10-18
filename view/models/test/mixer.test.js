@@ -24,9 +24,8 @@ function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
     readingOf: (address, reading) => readings[`${addressText(address)} ${reading}`] ?? 0,
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
     slotOf: () => undefined,
-    send: (command) => sent.push(command),
   };
-  return { views: new ViewBuilder(port), sent };
+  return { views: new ViewBuilder(port, (command) => sent.push(command)), sent };
 }
 
 test("a channel as a strip, by its form: its name as shown, its label's, else its own; where it goes; its inserts as devices; its sends' knobs by return; its fader, pan, mute and solo", () => {

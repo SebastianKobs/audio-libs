@@ -6,8 +6,8 @@
 //   - a node's level as the implementation hears it, the only one that hears the sound, at
 //     one of its points where it has several; a reading, a limiter's reduction;
 //   - a pool's copies added so far;
-//   - what a node does in its slot and what sets it there, the tool's words;
-//   - what's done, sent as a command.
+//   - what a node does in its slot and what sets it there, the tool's words.
+// What's done sent as a command, through the send handed in: the app's message for the plan.
 // And what moves each param, worked out from the plan alone (PlanMoves).
 import {
   paramAt,
@@ -36,7 +36,7 @@ export interface Slot {
   readonly job: string;
   readonly setBy?: string;
 }
-// What the views read and send through, the tool's.
+// What the views read through, the tool's.
 export interface ModelPort {
   readonly plan: Plan;
   valueOf(address: Address): number | string | undefined;
@@ -46,7 +46,6 @@ export interface ModelPort {
   readingOf(address: Address, reading: string): number;
   copiesOf(pool: Address): readonly Address[];
   slotOf(address: Address): Slot | undefined;
-  send(command: Command): void;
 }
 // a param or a setting found by its address, and which of the two
 export interface Found {
@@ -57,10 +56,13 @@ export interface Found {
 // The plan and its values by address, read through the tool's port.
 export class Model {
   readonly #port: ModelPort;
+  readonly #send: (command: Command) => void;
   readonly #moves = new PlanMoves();
 
-  constructor(port: ModelPort) {
+  // send(): what's done, as the app's message for the plan
+  constructor(port: ModelPort, send: (command: Command) => void) {
     this.#port = port;
+    this.#send = send;
   }
   get plan(): Plan {
     return this.#port.plan;
@@ -98,7 +100,7 @@ export class Model {
     return this.#port.slotOf(address);
   }
   send(command: Command): void {
-    this.#port.send(command);
+    this.#send(command);
   }
   // what moves a param, by its address: a macro's maps, a child wired into it; worked out again
   // for a plan handed anew

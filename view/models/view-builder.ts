@@ -17,6 +17,7 @@ import {
   type Plan,
 } from '../../plan/format/index.ts';
 import { Choice } from './choice.ts';
+import type { Command } from './command.ts';
 import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';
 import { Mixer } from './mixer.ts';
@@ -33,12 +34,13 @@ export interface MatrixRow {
   readonly amount?: Control;
 }
 
-// The view models of a plan, read and set through the tool's port.
+// The view models of a plan, read through the tool's port, what's done sent as the app's
+// message for the plan.
 export class ViewBuilder {
   readonly #model: Model;
 
-  constructor(port: ModelPort) {
-    this.#model = new Model(port);
+  constructor(port: ModelPort, send: (command: Command) => void) {
+    this.#model = new Model(port, send);
   }
   // the plan the models are built from, as the port hands it now
   get plan(): Plan {

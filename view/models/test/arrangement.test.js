@@ -511,17 +511,19 @@ test("where a click in the ruler puts the playhead: on the nearest beat; at or p
 
 // the desk's view models on a port of the tests' own, every value at its plan's
 function viewsOf() {
-  return new ViewBuilder({
-    plan: STUDIO,
-    valueOf: () => undefined,
-    startOf: () => undefined,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: () => undefined,
-    send: () => {},
-  });
+  return new ViewBuilder(
+    {
+      plan: STUDIO,
+      valueOf: () => undefined,
+      startOf: () => undefined,
+      roleOf: () => ({ by: 'live' }),
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: () => [],
+      slotOf: () => undefined,
+    },
+    () => {},
+  );
 }
 
 test("a strip's controllers in the order the sound goes through it, as its view model has them: its inserts' controls, its sends, its volume, pan, mute and solo; a pool's copy's too; none for a strip not on the desk", () => {

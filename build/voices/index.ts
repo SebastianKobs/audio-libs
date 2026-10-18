@@ -7,8 +7,15 @@
 //     built by the builder handed in, its edits glided or built again;
 //   - sound-module.ts: a multitimbral sound module, a part for each track, each playing a
 //     patch from its bank, an edit reaching every part that plays it;
-//   - test-notes.ts: a device view's test note, an instrument of its own for each key.
+//   - test-notes.ts: a device view's test note, an instrument of its own for each key, pressed
+//     and let go as the app's messages too.
 export { Voices } from './voices.ts';
 export { Instrument, type InstrumentMaking } from './instrument.ts';
 export { SoundModule, type PartMaking } from './sound-module.ts';
-export { TestNotes, type TestNote, type HeldTestNote, type PhrasedTestNote } from './test-notes.ts';
+export {
+  TestNotes,
+  type TestNote,
+  type HeldTestNote,
+  type PhrasedTestNote,
+  type TestNoteMessage,
+} from './test-notes.ts';

@@ -30,17 +30,19 @@ function envelopeOf(values, mode = 'gate') {
       settings: [{ spec: { name: 'mode', choices: ['gate', 'trigger'] }, value: mode }],
     },
   };
-  const models = new ViewBuilder({
-    plan,
-    valueOf: () => undefined,
-    startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: () => undefined,
-    send: () => {},
-  });
+  const models = new ViewBuilder(
+    {
+      plan,
+      valueOf: () => undefined,
+      startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
+      roleOf: () => ({ by: 'live' }),
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: () => [],
+      slotOf: () => undefined,
+    },
+    () => {},
+  );
   return models.device([]);
 }
 

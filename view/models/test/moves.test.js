@@ -80,8 +80,8 @@ test("a preset on a plan through its port: each value the preset's, the plan's w
       values: () => values,
       start: () => ({ 'env/amount': 0.6 }),
       roleOf: (address) => (addressText(address) === 'gate' ? { by: 'automated', source: 'the note' } : undefined),
-      changed: (command) => changed.push(command),
     }),
+    (command) => changed.push(command),
   );
   const amount = models.control(['env', 'amount']);
   assert.deepEqual([amount.value, amount.live], [0.8, true], "the preset's");

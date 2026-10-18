@@ -3,35 +3,25 @@
 // The test note every instrument plays, set once for all:
 //   - its pitch and velocity, MIDI 1.0's at the edge, as its row sets them;
 //   - the note's own values, from their defaults, the starts handed in over them;
-//   - held for as long as its button is, from a little after now.
+//   - held for as long as its button is, from a little after now, pressed and let go as the
+//     app's messages.
 // Which of the note's own values a role's instrument reads, for its row to grey the others.
 import { OWN_NOTE_VALUES, type PresetMessage } from '../../plan/synth/index.ts';
+import type { TestNoteMessage } from '../../build/voices/index.ts';
 import type { Clock } from '../../clock/index.ts';
 import type { InstrumentCard } from './cards.ts';
 import type { ModelPort } from './model.ts';
 import { ViewBuilder } from './view-builder.ts';
 
-// A test note as it's played: its pitch, its velocity, 0 to 1, when, and its own values by
-// the note's sources' names, as its row sets them. Its length: as long as it's held.
-export interface TestNote {
-  pitch: number;
-  velocity: number;
-  t: number;
-  values: Readonly<Record<string, number>>;
-}
-// a test note as it's held: let go at a time
-export interface HeldNote {
-  release: (at: number) => void;
-}
 // The instruments as the device view asks them:
 //   - the patch each role plays (instruments);
-//   - a role's instrument's cards, one for each patch it plays;
-//   - a test note on a role's instrument.
+//   - a role's instrument's cards, one for each patch it plays.
 export interface InstrumentPort {
   readonly instruments: Readonly<Record<string, string | undefined>>;
   cardsOf(role: string): readonly InstrumentCard[];
-  playTestNote(role: string, note: TestNote): HeldNote;
 }
+// what the racks send on the app's bus: a role's reset, its test note pressed and let go
+type RackMessage = PresetMessage | TestNoteMessage;
 // A role's instrument as a rack: its status, the patch it plays; a pad for each card, by its
 // key and its patch, its models.
 export interface InstrumentRack {
@@ -49,11 +39,11 @@ export class InstrumentRacks {
   readonly values: Record<string, number>; // the test note's own, by the note's sources' names
   readonly #port: InstrumentPort;
   readonly #clock: Pick<Clock, 'now'>;
-  readonly #send: (message: PresetMessage) => void;
+  readonly #send: (message: RackMessage) => void;
   readonly #models = new WeakMap<ModelPort, ViewBuilder>(); // each card's, made as first asked for
-  #held: HeldNote | null = null; // the test note: held for as long as its button is
+  #pressed: string | null = null; // the role whose test note is held, for as long as its button is
 
-  // send(): a reset sent on the app's bus
+  // send(): a reset and the test note sent on the app's bus
   // starts: the test note's own values as it starts, by their names, over their defaults
   constructor({
     port,
@@ -63,7 +53,7 @@ export class InstrumentRacks {
   }: {
     port: InstrumentPort;
     clock: Pick<Clock, 'now'>;
-    send: (message: PresetMessage) => void;
+    send: (message: RackMessage) => void;
     starts: Readonly<Record<string, number>>;
   }) {
     this.#port = port;
@@ -79,10 +69,10 @@ export class InstrumentRacks {
     if (!cards.length) {
       return null;
     }
-    const pads = cards.map(({ key, patch, port }) => ({
-      name: `${key}: ${patch}`,
-      patch,
-      models: this.#modelsOf(port),
+    const pads = cards.map((card) => ({
+      name: `${card.key}: ${card.patch}`,
+      patch: card.patch,
+      models: this.#modelsOf(card),
     }));
     return { key: role, status: `${role}: ${this.#port.instruments[role]}`, pads };
   }
@@ -94,23 +84,25 @@ export class InstrumentRacks {
   }
   // The test note pressed on a role's instrument, its values as they are now.
   press(role: string): void {
-    this.#held = this.#port.playTestNote(role, {
+    this.#pressed = role;
+    const note = {
       pitch: this.note.pitch,
       velocity: this.note.velocity / 127,
       t: this.#clock.now() + AHEAD,
       values: { ...this.values },
-    });
+    };
+    this.#send({ type: 'test note', key: role, note });
   }
   lift(): void {
-    if (!this.#held) {
+    if (this.#pressed === null) {
       return;
     }
-    this.#held.release(this.#clock.now() + AHEAD);
-    this.#held = null;
+    this.#send({ type: 'test note released', key: this.#pressed, t: this.#clock.now() + AHEAD });
+    this.#pressed = null;
   }
   // whether a role's instrument reads one of the note's own values: a card of its has it
   reads(role: string, name: string): boolean {
-    return this.#port.cardsOf(role).some(({ port }) => this.#modelsOf(port).control([name]) !== undefined);
+    return this.#port.cardsOf(role).some((card) => this.#modelsOf(card).control([name]) !== undefined);
   }
   // the instruments that read one of the note's own values, by their names, each once
   readersOf(name: string): string[] {
@@ -118,10 +110,10 @@ export class InstrumentRacks {
     return [...new Set(roles.flatMap((role) => this.#port.instruments[role] ?? []))];
   }
   // a card's models, made as it's first asked for
-  #modelsOf(port: ModelPort): ViewBuilder {
+  #modelsOf({ port, send }: InstrumentCard): ViewBuilder {
     let models = this.#models.get(port);
     if (!models) {
-      models = new ViewBuilder(port);
+      models = new ViewBuilder(port, send);
       this.#models.set(port, models);
     }
     return models;

@@ -3,7 +3,8 @@
 //   - a role's instrument a rack of its cards, a pad each, its status the patch it plays; none with no cards;
 //   - its reset: every card of its patches put back, as the app's messages;
 //   - the test note: its pitch and velocity, MIDI 1.0's at the edge, its own values from their defaults, the starts handed
-//     in over them; played on a role's instrument while held, a little after now, let go as it's lifted;
+//     in over them; pressed on a role's instrument while held, a little after now, let go as it's lifted, as the app's
+//     messages;
 //   - which of the note's own values a role's instrument reads, and which instruments read one.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,10 +17,10 @@ const RISING = { ...CARD, node: { ...CARD.node, macros: [...CARD.node.macros, ma
 // the roles' instruments: a pluck playing on the tap, a drum rack's two pads on the hold, the trace with none
 const PATCHES = { tap: 'pluck', hold: 'kit', trace: undefined };
 const CARDS = {
-  tap: [{ patch: 'pluck', port: portOn(CARD) }],
+  tap: [{ patch: 'pluck', port: portOn(CARD), send: () => {} }],
   hold: [
-    { patch: 'pluck', key: 36, port: portOn(CARD) },
-    { patch: 'swell', key: 38, port: portOn(RISING) },
+    { patch: 'pluck', key: 36, port: portOn(CARD), send: () => {} },
+    { patch: 'swell', key: 38, port: portOn(RISING), send: () => {} },
   ],
 };
 
@@ -37,25 +38,15 @@ function portOn(plan) {
     readingOf: () => 0,
     copiesOf: () => [],
     slotOf: () => undefined,
-    send: () => {},
   };
 }
-// the racks on the tests' instruments, each test note played and each message sent kept
+// the racks on the tests' instruments, each message sent kept
 function racksOn() {
-  const played = [];
   const sent = [];
   const clock = { t: 10, now: () => clock.t };
-  const port = {
-    instruments: PATCHES,
-    cardsOf: (role) => CARDS[role] ?? [],
-    playTestNote: (role, note) => {
-      const playing = { role, note, released: null };
-      played.push(playing);
-      return { release: (at) => (playing.released = at) };
-    },
-  };
+  const port = { instruments: PATCHES, cardsOf: (role) => CARDS[role] ?? [] };
   const racks = new InstrumentRacks({ port, clock, send: (message) => sent.push(message), starts: { rise: 0.75 } });
-  return { racks, played, sent, clock };
+  return { racks, sent, clock };
 }
 
 test("a role's instrument a rack of its cards, a pad each, by its key and its patch, its status the patch it plays; none with no cards", () => {
@@ -87,19 +78,21 @@ test('its reset: every card of its patches put back, as the app asks it', () => 
   ]);
 });
 
-test("the test note: MIDI 1.0's pitch and velocity at the edge, its own values from their defaults, the starts handed in over them; held from a little after now until it's lifted", () => {
-  const { racks, played, clock } = racksOn();
+test("the test note: MIDI 1.0's pitch and velocity at the edge, its own values from their defaults, the starts handed in over them; held from a little after now until it's lifted, as the app's messages", () => {
+  const { racks, sent, clock } = racksOn();
   assert.deepEqual(racks.note, { pitch: 62, velocity: 127 });
   assert.equal(racks.values.rise, 0.75, 'a start handed in');
   assert.equal(racks.values.breath, 0, "the note's default");
   racks.note.velocity = 63.5;
   racks.press('tap');
-  assert.deepEqual(played[0].note, { pitch: 62, velocity: 0.5, t: 10.02, values: racks.values });
-  assert.notEqual(played[0].note.values, racks.values, 'its values as they were');
+  assert.deepEqual(sent, [
+    { type: 'test note', key: 'tap', note: { pitch: 62, velocity: 0.5, t: 10.02, values: racks.values } },
+  ]);
+  assert.notEqual(sent[0].note.values, racks.values, 'its values as they were');
   clock.t = 12;
   racks.lift();
   racks.lift();
-  assert.equal(played[0].released, 12.02, 'let go once');
+  assert.deepEqual(sent.slice(1), [{ type: 'test note released', key: 'tap', t: 12.02 }], 'let go once');
 });
 
 test("which of the note's own values a role's instrument reads; which instruments read one", () => {

@@ -1,7 +1,8 @@
 // The test notes (mockup/src/libs/build/voices/test-notes.ts), a device view's, played straight into an instrument of
 // their own for each key, made at its first test note, never through a sequencer, so never recorded:
 //   - each note a fresh index, phrased as its owner says, held at most 30 s;
-//   - let go as its button is: its note off at that time.
+//   - let go as its button is: its note off at that time;
+//   - pressed and let go as the app's messages, by its key.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TestNotes } from '../index.ts';
@@ -42,6 +43,20 @@ test("a test note on its key's instrument, made at its first note, once; a fresh
 test('let go as its button is: its note off at that time', () => {
   const { made, notes } = notesOn();
   notes.play('hold', NOTE).release(4);
+  assert.deepEqual(
+    made[0].received.map(({ type, index, t }) => [type, index, t]),
+    [
+      ['note on', 0, 2],
+      ['note off', 0, 4],
+    ],
+  );
+});
+
+test("pressed and let go as the app's messages: a key's test note let go by its key, once", () => {
+  const { made, notes } = notesOn();
+  notes.hear({ type: 'test note', key: 'hold', note: NOTE });
+  notes.hear({ type: 'test note released', key: 'hold', t: 4 });
+  notes.hear({ type: 'test note released', key: 'hold', t: 5 });
   assert.deepEqual(
     made[0].received.map(({ type, index, t }) => [type, index, t]),
     [

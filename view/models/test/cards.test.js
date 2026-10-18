@@ -8,9 +8,10 @@
 //     reading it; planned again as the bank's changes.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { InstrumentCards, ViewBuilder } from '../index.ts';
+import { InstrumentCards } from '../index.ts';
 import { instrumentsOf, LiveBank } from '../../../plan/synth/index.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
+import { cardModels } from './card.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
 
@@ -40,7 +41,7 @@ test("a card for each patch an instrument plays: the patch alone; a rack's pads,
 test("a card's values its preset's, those from outside over its own where its card has them; set by the note, by what the values say, else live", () => {
   const { cards } = cardsOn();
   const knobs = { values: () => ({ 'amp/decay': 0.7, release: 2 }), source: 'the panel' };
-  const models = new ViewBuilder(cards.of('bright', knobs)[0].port);
+  const models = cardModels(cards.of('bright', knobs)[0]);
   assert.equal(models.control(['osc 1', 'tune']).value, 12, "its preset's");
   assert.deepEqual(models.control(['osc 1', 'tune']).role, { by: 'live' });
   assert.equal(models.control(['amp', 'decay']).value, 0.7, 'from outside, over its own');
@@ -51,7 +52,7 @@ test("a card's values its preset's, those from outside over its own where its ca
 
 test("a value and a setting set on a card: sent as the app's messages, the bank's preset changed by whoever hears them, the card reading it; planned again as the bank's changes", () => {
   const { bank, sent, cards } = cardsOn();
-  const models = new ViewBuilder(cards.of('rtlprnf')[0].port);
+  const models = cardModels(cards.of('rtlprnf')[0]);
   models.control(['osc 1', 'tune']).set(3);
   models.control(['osc 1', 'osc', 'wave']).choose('square');
   assert.deepEqual(sent, [

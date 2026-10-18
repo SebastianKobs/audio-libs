@@ -17,17 +17,19 @@ const LOOK = { route: 'to master', sendLabel: (to) => `${to}!`, level: 0.5 };
 
 // the small desk's view models, its values and roles by address, live unless said; the slots' words by address
 function viewsOn({ values = {}, roles = {}, slots = {} } = {}) {
-  return new ViewBuilder({
-    plan: STUDIO,
-    valueOf: (address) => values[addressText(address)],
-    startOf: () => undefined,
-    roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: (address) => slots[addressText(address)],
-    send: () => {},
-  });
+  return new ViewBuilder(
+    {
+      plan: STUDIO,
+      valueOf: (address) => values[addressText(address)],
+      startOf: () => undefined,
+      roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: () => [],
+      slotOf: (address) => slots[addressText(address)],
+    },
+    () => {},
+  );
 }
 
 test('a knob drawn: its label, its bar by its taper, a gain its unity marked, its text; live, marked with its address and its hint; a pan from its middle; one that does nothing', () => {
@@ -149,16 +151,18 @@ test("a setting with a range shown as a knob only where it's live: a room's leng
     },
   };
   const devicesOn = (by) =>
-    new ViewBuilder({
-      plan: room,
-      valueOf: () => undefined,
-      startOf: () => undefined,
-      roleOf: () => ({ by }),
-      peakOf: () => 0,
-      copiesOf: () => [],
-      slotOf: () => undefined,
-      send: () => {},
-    }).device([]);
+    new ViewBuilder(
+      {
+        plan: room,
+        valueOf: () => undefined,
+        startOf: () => undefined,
+        roleOf: () => ({ by }),
+        peakOf: () => 0,
+        copiesOf: () => [],
+        slotOf: () => undefined,
+      },
+      () => {},
+    ).device([]);
   const look = { status: 'room', hintOf: () => '' };
   assert.match(deviceHtml(devicesOn('live'), look).text, /<span>length \(s\)<\/span>/);
   assert.doesNotMatch(deviceHtml(devicesOn('fixed'), look).text, /length/);
@@ -187,17 +191,19 @@ const ECHO = {
 };
 // the delay's device, its values by address
 function echoOn(values = {}) {
-  return new ViewBuilder({
-    plan: ECHO,
-    valueOf: (address) => values[addressText(address)],
-    startOf: () => undefined,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: () => undefined,
-    send: () => {},
-  }).device([]);
+  return new ViewBuilder(
+    {
+      plan: ECHO,
+      valueOf: (address) => values[addressText(address)],
+      startOf: () => undefined,
+      roleOf: () => ({ by: 'live' }),
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: () => [],
+      slotOf: () => undefined,
+    },
+    () => {},
+  ).device([]);
 }
 
 test("a device's switch drawn on or off, marked for a click; a choice as a list of its options, the one it is chosen; its time by its sync, the note while synced, the ms while free", () => {

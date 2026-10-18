@@ -14,17 +14,19 @@ import { STUDIO } from '../../models/test/desk.js';
 
 // the small desk's view models, its values and roles by address, live unless said
 function viewsOn({ values = {}, roles = {}, copies = {} } = {}) {
-  return new ViewBuilder({
-    plan: STUDIO,
-    valueOf: (address) => values[addressText(address)],
-    startOf: () => undefined,
-    roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
-    slotOf: () => undefined,
-    send: () => {},
-  });
+  return new ViewBuilder(
+    {
+      plan: STUDIO,
+      valueOf: (address) => values[addressText(address)],
+      startOf: () => undefined,
+      roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
+      peakOf: () => 0,
+      readingOf: () => 0,
+      copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
+      slotOf: () => undefined,
+    },
+    () => {},
+  );
 }
 const NO_LEVEL = () => 0;
 
