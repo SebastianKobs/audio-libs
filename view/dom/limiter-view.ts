@@ -9,6 +9,7 @@
 import { gainOf } from '../../params/index.ts';
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
 import { Knob, type Device, type ViewBuilder } from '../models/index.ts';
+import { sizedCanvas } from './canvas.ts';
 import { html, type Html } from './elements.ts';
 import { meterPosition } from './meter-view.ts';
 
@@ -69,7 +70,7 @@ export class LimiterView {
     const look = this.#look;
     const block = [...device, BLOCK];
     const { width, height, column } = HISTORY;
-    const context = sizedContext(canvas);
+    const context = sizedCanvas(canvas, HISTORY); // asked once
     const columns = Array.from({ length: width }, (): Peaks => ({ in: 0, out: 0, gr: 0 }));
     let held: Peaks = { in: 0, out: 0, gr: 0 };
     let spent = 0; // the column being gathered
@@ -99,16 +100,6 @@ export class LimiterView {
     const ceiling = this.#views.control([...device, 'ceiling']);
     return ceiling instanceof Knob ? ceiling.value : 0;
   }
-}
-// the history's canvas sized for the screen's pixels, and its context, asked once
-function sizedContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-  const { width, height } = HISTORY;
-  const pixelRatio = devicePixelRatio || 1;
-  const context = canvas.getContext('2d')!; // a canvas's own, asked once
-  Object.assign(canvas, { width: width * pixelRatio, height: height * pixelRatio });
-  Object.assign(canvas.style, { width: `${width}px`, height: `${height}px` });
-  context.scale(pixelRatio, pixelRatio);
-  return context;
 }
 // each column: what came out, and on it, in red, what it cut
 function drawColumns(context: CanvasRenderingContext2D, columns: Peaks[], color: string): void {

@@ -13,7 +13,11 @@
 //   - strip-view.ts: a strip drawn, its slots, its mute and solo;
 //   - section-view.ts: a section of a view, its strips in a row, folding, its light;
 //   - mixer-view.ts: a mixer drawn, its strips side by side in its sections, the groups of
-//     tracks it's handed, its level bars and its lights.
+//     tracks it's handed, its level bars and its lights;
+//   - canvas.ts: a canvas sized for the screen's pixels;
+//   - arrangement/: the arrangement on the page, its names beside its time, drawn on canvases,
+//     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
+//     a drag and a wheel handed to its model.
 export { appendHtml, Html, html, makeElement, setHtml } from './elements.ts';
 export { choiceHtml, switchHtml } from './choice-view.ts';
 export { controlsHtml, deviceHtml, type DeviceLook } from './device-view.ts';
@@ -34,3 +38,8 @@ export {
   type MixerLook,
   type MixerTrack,
 } from './mixer-view.ts';
+export {
+  ArrangementView,
+  type ArrangementColors,
+  type Drawn as ArrangementDrawn,
+} from './arrangement/arrangement-view.ts';
