@@ -1,6 +1,6 @@
 // ---------- gestures/shared: what every part of the gesture tracker uses: its events, what's handed in, the pointers that are down ----------
 // The gesture tracker: all pointer input, read in one place. It only tells: everything else reacts to its events. The page's adapter
-// (tool/page/input.ts) hands it each pointer's down, move, up and cancel (tracker.ts), and play/ and the page react to what it emits. It
+// (app/page/input.ts) hands it each pointer's down, move, up and cancel (tracker.ts), and play/ and the page react to what it emits. It
 // knows nothing of the DOM, the 3D scene or the scales: each input brings the floor point under the pointer (g, null off the floor), and
 // the screen's height and the scale step under a floor point are handed in (configure). Each pointer has a state:
 // - the left button, or any but the right: pressed, then dragging once it's moved past the drag threshold, or holding once it's stayed
@@ -61,7 +61,7 @@ export type GestureEvents = {
 export type EventType = keyof GestureEvents;
 // what an event adds to the pointer's: its own, and where a pair's or a tick's differs
 export type Extra<Type extends EventType> = Partial<GestureEvent> & Omit<GestureEvents[Type][0], keyof GestureEvent>;
-// an input, as the page hands it (tool/page/input.ts): the pointer's id, its button (down only), screen x, y, its own time t, on the clock's timeline, and the
+// an input, as the page hands it (app/page/input.ts): the pointer's id, its button (down only), screen x, y, its own time t, on the clock's timeline, and the
 // floor point g under it
 export interface PointerInput {
   id: number;
@@ -120,7 +120,7 @@ export interface Pointer {
   mate?: Pointer | null;
 }
 
-// handed in at start: the screen's height in px (tool/page/input.ts), and the scale step under a floor point (play/gestures.ts)
+// handed in at start: the screen's height in px (app/page/input.ts), and the scale step under a floor point (play/gestures.ts)
 export interface HandedIn {
   height: number;
   pitchAt: (point: FloorPoint) => number | null;

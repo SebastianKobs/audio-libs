@@ -39,6 +39,6 @@ onTick((t) => space.update(t));                            // the emitter follow
 - No lag with distance, and no Doppler: a lag would push far notes off the beat. Left and right only.
 - A change is handed on once the level or room is 0.002 off, or the cutoff 1% (`moved()`).
 
-**Its user in the app:** the garden's space, its view the listener (`garden-surface/hearing.ts`), ticked once the audio has started; each replay track's emitter, its values sent as the track's controllers (`garden-surface/messages/replay-track.ts`).
+**Its user in the app:** the garden's space, its view the listener (`garden/hearing.ts`), ticked once the audio has started; each replay track's emitter, its values sent as the track's controllers (`garden/messages/replay-track.ts`).
 
 Tested in node (`test/spatial-audio.test.js`): the model against `shared/test-vectors/space/hearing.json`, and the space and its emitters, what each hears handed on as values, with a listener of the test's own. The garden's settings reaching the model and its tick are the garden's tests (`mockup/test/unit/hearing.test.js`); what the garden plays from it is held to the recordings (`shared/test-vectors/instruments/`, `shared/test-vectors/sequencer/`).
