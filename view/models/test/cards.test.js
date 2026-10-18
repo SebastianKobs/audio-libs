@@ -4,19 +4,26 @@
 //   - its preset on its voice card, read through a port: each value its preset's, values from outside over its own
 //     where its card has them;
 //   - how each is set: a note's source by the note, a value from outside by what it says, the rest live;
-//   - a value or a setting set: the bank's preset changed, the card reading it; planned again as the bank's changes.
+//   - a value or a setting set: sent as the app's message (SHAPE3b), the bank's preset changed by whoever hears it, the card
+//     reading it; planned again as the bank's changes.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentCards, ViewBuilder } from '../index.ts';
-import { instrumentsOf } from '../../../plan/synth/index.ts';
+import { edited, instrumentsOf } from '../../../plan/synth/index.ts';
 import { LiveCopies } from '../../../util/index.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
 
+// the cards on a bank, each edit sent, then made on the bank as the studio makes it
 function cardsOn() {
   const bank = new LiveCopies(INSTRUMENTS.patches);
-  return { bank, cards: new InstrumentCards({ instruments: INSTRUMENTS, bank }) };
+  const sent = [];
+  const send = (message) => {
+    sent.push(message);
+    bank.set(message.patch, edited(bank.current(message.patch), message));
+  };
+  return { bank, sent, cards: new InstrumentCards({ instruments: INSTRUMENTS, bank, send }) };
 }
 
 test("a card for each patch an instrument plays: the patch alone; a rack's pads, each its key and its patch", () => {
@@ -43,11 +50,15 @@ test("a card's values its preset's, those from outside over its own where its ca
   assert.equal(models.control(['release']), undefined, 'one its card has none of: not planned with it');
 });
 
-test("a value and a setting set on a card: the bank's preset changed, the card reading it; planned again as the bank's changes", () => {
-  const { bank, cards } = cardsOn();
+test("a value and a setting set on a card: sent as the app's messages, the bank's preset changed by whoever hears them, the card reading it; planned again as the bank's changes", () => {
+  const { bank, sent, cards } = cardsOn();
   const models = new ViewBuilder(cards.of('rtlprnf')[0].port);
   models.control(['osc 1', 'tune']).set(3);
   models.control(['osc 1', 'osc', 'wave']).choose('square');
+  assert.deepEqual(sent, [
+    { type: 'preset edited', patch: 'rtlprnf', of: 'values', address: ['osc 1', 'tune'], value: 3 },
+    { type: 'preset edited', patch: 'rtlprnf', of: 'settings', address: ['osc 1', 'osc', 'wave'], value: 'square' },
+  ]);
   const preset = bank.current('rtlprnf');
   assert.deepEqual(
     [preset.values['osc 1/tune'], preset.settings['osc 1/osc/wave']],

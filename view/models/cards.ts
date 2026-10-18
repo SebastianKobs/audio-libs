@@ -8,7 +8,8 @@
 //   - each value its preset's, those from outside over its own;
 //   - how each is set: a note's source by the note, a value from outside by what it says, the
 //     rest live;
-//   - a value or a setting changed: the bank's preset changed.
+//   - a value or a setting changed: sent as the app's message (PresetMessage), its owner
+//     changing the bank's preset as it hears it.
 import {
   addressOf,
   addressText,
@@ -18,7 +19,7 @@ import {
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
 import type { Preset } from '../../plan/planner/index.ts';
-import { cardPlanner, edited, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../plan/synth/index.ts';
+import { cardPlanner, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../plan/synth/index.ts';
 import { entryOf, type LiveCopies } from '../../util/index.ts';
 import type { Command } from './command.ts';
 import type { ModelPort, Role } from './model.ts';
@@ -44,16 +45,27 @@ const NONE: CardValues = { values: () => ({}), source: '' };
 export class InstrumentCards {
   readonly #instruments: Instruments;
   readonly #bank: LiveCopies<Preset>;
+  readonly #send: (message: PresetMessage) => void;
   readonly #ports = new Map<string, ModelPort>();
   // each patch's voice card planned at its preset alone, which says what values it has
   readonly #bare = new Map<string, Plan>();
   // each patch's voice card, planned at its preset and the values from outside, as they were
   readonly #plans = new Map<string, { over: string; plan: Plan }>();
 
-  // instruments: the file the patches are in; bank: its patches as they play, edited in place by name
-  constructor({ instruments, bank }: { instruments: Instruments; bank: LiveCopies<Preset> }) {
+  // instruments: the file the patches are in; bank: its patches as they play, read by name;
+  // send(): an edit sent on the app's bus, the bank changed by whoever hears it
+  constructor({
+    instruments,
+    bank,
+    send,
+  }: {
+    instruments: Instruments;
+    bank: LiveCopies<Preset>;
+    send: (message: PresetMessage) => void;
+  }) {
     this.#instruments = instruments;
     this.#bank = bank;
+    this.#send = send;
     bank.onSet((name) => {
       this.#bare.delete(name);
       this.#plans.delete(name);
@@ -78,7 +90,7 @@ export class InstrumentCards {
         values: () => ({ ...valuesOf(preset()), ...over.values() }),
         start: () => valuesOf(this.#bank.start(name)!), // the bank has it
         roleOf: (address) => roleOf(address, over),
-        changed: (command) => this.#bank.set(name, edited(preset(), editOf(name, command))),
+        changed: (command) => this.#send(editOf(name, command)),
       });
     });
   }
