@@ -5,7 +5,7 @@
 // The param a delay line's time, in seconds, or an oscillator's frequency, in Hz.
 // A change to one lands as its event does, now, at a time, ramping or gliding, the param moved
 // alike. While synced, a new tempo followed, gliding.
-import { timeSeconds } from '../../../clock/index.ts';
+import { timeSeconds } from '../../../params/index.ts';
 import { NOTE_VALUES } from '../../../params/index.ts';
 import type { When } from '../../../automation/index.ts';
 import type { Automatable } from '../param-units.ts';

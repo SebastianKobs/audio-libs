@@ -21,7 +21,7 @@ import {
   type ValuesByAddress,
 } from '../format/index.ts';
 import type { Block } from '../blocks/index.ts';
-import type { ParamSpec } from '../../params/index.ts';
+import { choiceAt, freeAt, timeParamsIn, type ParamSpec, type RangedSpec } from '../../params/index.ts';
 import { monoOrStereo, type LooseJack } from './mono-stereo.ts';
 import { problemsInAll } from './check.ts';
 import { extendedAll } from './extend.ts';
@@ -30,18 +30,23 @@ import type { Form } from './form.ts';
 import { Catalog } from './catalog.ts';
 import type { Preset, Template, TemplateChild, TemplateMacro, WrittenTemplate } from './template.ts';
 
-// what a plan is asked with: its top node's name, its kind's unless given; values and settings
-// changed by their addresses, a preset's
+// What a plan is asked with:
+//   - its top node's name, its kind's unless given;
+//   - values and settings changed by their addresses, a preset's;
+//   - the beat it's planned at, a beat's length in seconds: each synced time's free value
+//     where its note is then, where none is given. A plan has no tempo of its own.
 export interface Asked {
   readonly name?: string;
   readonly values?: ValuesByAddress;
   readonly settings?: ValuesByAddress;
+  readonly beat?: number;
 }
 // what a node is planned with: the values and settings it's given, by their addresses within it,
-// and where it is, for a failure to name
+// the beat it's planned at, and where it is, for a failure to name
 interface Given {
   readonly values: ValuesByAddress;
   readonly settings: ValuesByAddress;
+  readonly beat: number | undefined;
   readonly at: Address;
 }
 
@@ -73,7 +78,7 @@ export class Planner {
   }
   // a plan for a template, its top node named as asked
   // a plan for a template, its top node named as asked; what it's asked for at an address it hasn't refused
-  plan(kind: string, { name = kind, values = {}, settings = {} }: Asked = {}): Plan {
+  plan(kind: string, { name = kind, values = {}, settings = {}, beat }: Asked = {}): Plan {
     if (!this.#catalog.template(kind)) {
       throw new Error(`no template ${kind}`);
     }
@@ -88,22 +93,25 @@ export class Planner {
     if (missing.length) {
       throw new Error([`${kind}: asked for what it has not:`, ...missing].join('\n  '));
     }
-    return { version: VERSION, node: this.#node({ name, kind }, { values, settings, at: [] }) };
+    return { version: VERSION, node: this.#node({ name, kind }, { values, settings, beat, at: [] }) };
   }
 
   // a child planned: a block, or its template; the values its template writes, those given over them
   #node(child: TemplateChild, given: Given): Node {
     const values = { ...child.values, ...given.values };
     const settings = { ...child.settings, ...given.settings };
+    const { beat, at } = given;
     const block = this.#catalog.block(child.kind);
     if (block) {
-      return blockNode(child, block, { values, settings, at: given.at });
+      const timed = { ...values, ...freeTime(block.params, (name) => values[name], beat) };
+      return blockNode(child, block, { values: timed, settings, beat, at });
     }
-    return this.#composite(child, this.#catalog.template(child.kind)!, { values, settings, at: given.at }); // a kind the check found
+    const template = this.#catalog.template(child.kind)!; // a kind the check found
+    return this.#composite(child, template, { values: this.#timed(template, values, beat), settings, beat, at });
   }
   // a template planned: its macros at their values, onto their targets; its children, its pools
-  #composite(child: TemplateChild, template: Template, { values, settings, at }: Given): Node {
-    const macros = (template.macros ?? []).map((macro) => this.#macro(template, macro, { values, settings, at }));
+  #composite(child: TemplateChild, template: Template, { values, settings, beat, at }: Given): Node {
+    const macros = (template.macros ?? []).map((macro) => this.#macro(template, macro, { values, settings, beat, at }));
     const moved = macros.flatMap((macro) =>
       macroValues(macro).map(({ to, value }) => [addressText(to), value] as const),
     );
@@ -112,6 +120,7 @@ export class Planner {
       this.#node(each, {
         values: under(inside, each.name),
         settings: under(settings, each.name),
+        beat,
         at: [...at, each.name],
       });
     const children = monoOrStereo((template.children ?? []).map(planned), this.#loose(template), {
@@ -137,6 +146,14 @@ export class Planner {
       macros,
       pools,
     };
+  }
+  // a template's values, its macros' synced time's free value worked out where none is given
+  #timed(template: Template, values: ValuesByAddress, beat: number | undefined): ValuesByAddress {
+    const macros = template.macros ?? [];
+    const specs = macros.map((macro) => this.#catalog.macroSpec(template, macro)!); // a spec or a target, as the check found
+    const written = (name: string): number | string | undefined =>
+      values[name] ?? macros.find((macro) => macro.name === name)?.value;
+    return { ...values, ...freeTime(specs, written, beat) };
   }
   // a macro planned: its spec, its own or its first target's; its value given, or written, or its default
   #macro(template: Template, macro: TemplateMacro, { values, at }: Given): Macro {
@@ -209,4 +226,25 @@ function under(values: ValuesByAddress, name: string): ValuesByAddress {
       .filter(([address]) => address.startsWith(prefix))
       .map(([address, value]) => [address.slice(prefix.length), value]),
   );
+}
+// A synced time's free value, where none is given and it's planned at a beat: where its note is
+// then. Its three params found among the specs by their names; none where they aren't there.
+function freeTime(
+  specs: readonly ParamSpec[],
+  given: (name: string) => number | string | undefined,
+  beat: number | undefined,
+): ValuesByAddress {
+  const time = timeParamsIn(specs.map(({ name }) => name));
+  if (beat === undefined || !time || given(time.free) !== undefined) {
+    return {};
+  }
+  const specOf = (name: string): ParamSpec => specs.find((spec) => spec.name === name)!; // found by its name
+  const sync = given(time.sync) ?? specOf(time.sync).default;
+  if (!sync) {
+    return {};
+  }
+  const noteSpec = specOf(time.note);
+  const note = given(time.note) ?? noteSpec.default!; // a choice has its default
+  const written = typeof note === 'number' ? choiceAt(noteSpec, note) : note;
+  return { [time.free]: freeAt(written, beat, specOf(time.free) as RangedSpec) }; // a free time is ranged
 }

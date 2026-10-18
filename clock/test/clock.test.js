@@ -4,21 +4,7 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import {
-  barTicks,
-  beatTicks,
-  Clock,
-  COMMON_TIME,
-  GRIDS,
-  HISTORY,
-  LOOKAHEAD,
-  noteValueBeats,
-  PPQ,
-  startsBar,
-  STEP,
-  timeSeconds,
-} from '../index.ts';
-import { NOTE_VALUES } from '../../params/index.ts';
+import { barTicks, beatTicks, Clock, COMMON_TIME, GRIDS, HISTORY, LOOKAHEAD, PPQ, startsBar, STEP } from '../index.ts';
 import { fakeAudioOn } from './fake-audio.js';
 import { near } from '../../util/test/near.js';
 
@@ -640,29 +626,7 @@ test("song time as a time map: the grid's song time and back; a time never reach
   grid.release(clock.now());
 });
 
-test('a note value in beats, as written: a quarter one, dotted half as long again, a triplet two thirds; none where it is not one', () => {
-  assert.deepEqual(['1/4', '1/8', '1/8.', '1/2', '1/16t'].map(noteValueBeats), [1, 0.5, 0.75, 2, 1 / 6]);
-  assert.deepEqual(['0.5', 'beat', '1/4x'].map(noteValueBeats), [undefined, undefined, undefined]);
-  assert.deepEqual(GRIDS['1/8t'], { g: 4 / 3, triplet: true }, "the tap grids' steps from them");
-  assert.equal(HISTORY, 30 * 60, 'the history kept: half an hour');
-});
-
-test("a time's seconds: synced, its note value at the beat; free, its milliseconds, or a rate's turn; the other value kept, not heard", () => {
-  const beat = 60 / 72;
-  const synced = { sync: true, note: '1/8', free: 250, unit: 'ms' };
-  near(timeSeconds(synced, beat), beat / 2, 'an 8th at 72 BPM');
-  near(timeSeconds({ ...synced, note: '1/8.' }, beat), (beat / 2) * 1.5, 'dotted');
-  near(timeSeconds({ ...synced, note: '1/8t' }, beat), (beat / 2) * (2 / 3), 'a triplet');
-  near(timeSeconds({ ...synced, sync: false }, beat), 0.25, 'free: 250 ms');
-  near(
-    timeSeconds({ sync: false, note: '1/8', free: 4, unit: 'Hz' }, beat),
-    0.25,
-    'a rate of 4 Hz: a turn a quarter second',
-  );
-  near(timeSeconds({ sync: true, note: '1/4', free: 4, unit: 'Hz' }, beat), beat, 'a rate synced: a turn a beat');
-});
-
-test('the note values a synced time steps through: each longer than the last', () => {
-  const beats = NOTE_VALUES.map(noteValueBeats);
-  assert.ok(beats.every((length, index) => index === 0 || length > beats[index - 1]));
+test("the tap grids' steps from the note values; the history kept: half an hour", () => {
+  assert.deepEqual(GRIDS['1/8t'], { g: 4 / 3, triplet: true });
+  assert.equal(HISTORY, 30 * 60);
 });

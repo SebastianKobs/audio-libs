@@ -680,3 +680,30 @@ test("a form's counts and rules over its pools too: a pool counting as one of it
     'a pool of masters: one more master',
   );
 });
+
+test("a synced time's free value worked out where none is given, as planned at a beat: where its note is then, a block's or a macro's onto its targets; one given, or free, kept; none worked out with no beat", () => {
+  const onto = (to) => [{ to, factor: 1, offset: 0 }];
+  const echo = {
+    kind: 'Echo',
+    inputs: [{ name: 'in', channels: 1 }],
+    outputs: [{ name: 'out', channels: 1 }],
+    children: [{ name: 'line', kind: 'delay' }],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'line', input: 'in' } },
+      { from: { node: 'line', output: 'out' }, to: { output: 'out' } },
+    ],
+    macros: ['sync', 'note', 'ms'].map((name) => ({ name, maps: onto(['line', name]) })),
+  };
+  const timed = new Planner([LOOP, echo]);
+  const beat = 60 / 72;
+  const ms = (plan) => [paramAt(plan, ['ms']).value, paramAt(plan, ['line', 'ms']).value];
+  assert.equal(paramAt(timed.plan('Loop', { beat: 0.5 }), ['delay', 'ms']).value, 250, "a block's: its 8th at 120 BPM");
+  assert.deepEqual(
+    ms(timed.plan('Echo', { beat, values: { note: '1/8.' } })),
+    [625, 625],
+    "a macro's: a dotted 8th at 72",
+  );
+  assert.deepEqual(ms(timed.plan('Echo', { beat, values: { note: '1/4', ms: 300 } })), [300, 300], 'one given kept');
+  assert.deepEqual(ms(timed.plan('Echo', { beat: 0.5, values: { sync: 0 } })), [417, 417], 'free: its default kept');
+  assert.deepEqual(ms(timed.plan('Echo', { values: { note: '1/4' } })), [417, 417], 'no beat: none worked out');
+});

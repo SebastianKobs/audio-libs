@@ -1,6 +1,6 @@
 // ---------- clock/quantizer: the grids a time can snap to, and where it lands on one ----------
 import type { BeatGrid } from './beat-grid.ts';
-import { noteValueBeats } from './note-values.ts';
+import { noteValueBeats } from '../params/index.ts';
 
 // the grids a time can snap to: note values on the beat grid, in 16ths. Triplets are always straight
 // a grid's step in 16ths, and whether it's a triplet; off, none

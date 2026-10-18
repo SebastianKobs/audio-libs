@@ -7,7 +7,9 @@
 //   - the specs modules share: a fader's gain, a pan, a switch (common.ts);
 //   - a channel strip's own: its volume, pan, mute and solo, a send's amount (strip.ts);
 //   - a time with a sync switch, its three params, found among a part's keys, and the note values it
-//     steps through (time.ts).
+//     steps through (time.ts);
+//   - a note value in beats, a time with a sync switch in seconds by a beat's length
+//     (note-values.ts).
 // The synth's blocks, the FX modules and a desk's strips declare theirs on it.
 export {
   choiceAt,
@@ -32,3 +34,4 @@ export {
   type TimeParams,
   type TimeSpecs,
 } from './time.ts';
+export { freeAt, noteValueBeats, timeSeconds } from './note-values.ts';
