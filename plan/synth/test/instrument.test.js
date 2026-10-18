@@ -7,7 +7,7 @@
 //   - a bank: patches by name, in order; a program change picks one by its place.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Bank, changesFrom, instrumentOf, MODULE_TEMPLATES, SYNTH_FORMS } from '../index.ts';
+import { Bank, changesFrom, edited, instrumentOf, MODULE_TEMPLATES, SYNTH_FORMS } from '../index.ts';
 import { Planner } from '../../planner/index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { PLUCK } from './pluck.js';
@@ -101,6 +101,20 @@ test("a preset changed: each value and setting that differs, by its address; one
     () => changesFrom(BRIGHT, { kind: 'Pad' }, pluck),
     /another architecture, Pad for Pluck: another instrument/,
   );
+});
+
+test('a preset edited, as a message says: a value or a setting by its address, the rest as it was, the preset handed in left alone', () => {
+  const edit = (address, value, of) => ({ type: 'preset edited', patch: 'bright', of, address, value });
+  assert.deepEqual(edited(BRIGHT, edit(['osc 1', 'tune'], 7, 'values')), {
+    kind: 'Pluck',
+    values: { 'osc 1/tune': 7, 'amp/decay': 0.8 },
+    settings: { 'osc 1/osc/wave': 'triangle' },
+  });
+  assert.deepEqual(edited({ kind: 'Pluck' }, edit(['osc 1', 'osc', 'wave'], 'square', 'settings')), {
+    kind: 'Pluck',
+    settings: { 'osc 1/osc/wave': 'square' },
+  });
+  assert.equal(BRIGHT.values['osc 1/tune'], 12, 'left alone');
 });
 
 test('a bank: patches by name, in order; a program change picks one by its place, from 0; none past its end', () => {

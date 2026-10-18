@@ -26,6 +26,7 @@ const { at, on } = clock.snap(clock.now(), { nearest: true, late: 0.05 });   // 
 | `timeSeconds(time, beat)` | a time with a sync switch (`libs/params/`'s `Time`) in seconds, by the beat's length (`note-values.ts`, LAY3a): synced, its note value at the beat; free, its milliseconds, or a rate's one turn at its hertz |
 | `noteValueBeats(written)` | a note value as written, `'1/4'`, dotted `'1/8.'`, a triplet `'1/8t'`, in beats (`note-values.ts`): the tap grids' steps, the synth's times (DRY2) |
 | `snap(t, { straight, nearest, late, grid })`, `quantize()` | where a time lands on a grid (`quantizer.ts`, `GRIDS`: off, 1/4, 1/4t, 1/8, 1/8t, 1/16, 1/16t; triplets always straight): `{ at, on }` |
+| `TempoMessage`, `{ type: 'tempo', bpm }` | the tempo told, as the app's bus carries it: the beat grid's tempo now, as the settings it reads have it; what follows the tempo follows it as it hears it (`messages.ts`, SHAPE3a) |
 | `useAudio(context)`; `audio`: `started()`, `toContext(t)`, `fromContext(c)`, `contextNow()`, `soonest()`, `latency()`, `settled()` | the edge to Web Audio (`audio-clock.ts`, `AudioClock`), from when its context is handed over: the offset to the context's time, found on every tick, never mapping into the audio's past; while the context doesn't run, its time standing still, mapping to where it stands |
 | `useFake(t0)`, `advance(s, { ticks })`, `faking()` | fake mode, for tests: time moves only when told, and every tick and step of the time passed runs in order |
 

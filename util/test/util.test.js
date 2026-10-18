@@ -5,6 +5,7 @@ import {
   addressOf,
   addressText,
   approach,
+  Bus,
   clamp,
   DueQueue,
   entryOf,
@@ -111,6 +112,26 @@ test('a listener that stops listening as it is called: the others still hear tha
   emit('step', 1);
   emit('step', 2);
   assert.deepEqual(heard, ['once', 1, 2]);
+});
+
+test('a bus: a message sent, a value with its type, reaches whoever listens to its type, as it was sent; a listener stops; send and on work handed on alone', () => {
+  const bus = new Bus();
+  const { send, on } = bus; // as main.ts hands the views send() alone
+  const heard = [];
+  on('clip launched', (message) => heard.push(['first', message]));
+  const stop = on('clip launched', (message) => heard.push(['second', message.slot]));
+  on('stop', (message) => heard.push(['stopped', message]));
+  const launch = { type: 'clip launched', slot: 'flowers 1' };
+  send(launch);
+  stop();
+  send({ type: 'clip launched', slot: 'vines 1' });
+  send({ type: 'tempo', bpm: 90 }); // none listens
+  assert.deepEqual(heard, [
+    ['first', launch],
+    ['second', 'flowers 1'],
+    ['first', { type: 'clip launched', slot: 'vines 1' }],
+  ]);
+  assert.equal(heard[0][1], launch, 'the very value sent: it could be kept as it is');
 });
 
 // mulberry32 (Tommy Ettinger's): a 32-bit seed in, a repeatable run of numbers in [0, 1) out; its first draws for seed 1 as the

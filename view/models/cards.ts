@@ -18,7 +18,7 @@ import {
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
 import type { Preset } from '../../plan/planner/index.ts';
-import { cardPlanner, NOTE_SOURCES, type Instruments } from '../../plan/synth/index.ts';
+import { cardPlanner, edited, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../plan/synth/index.ts';
 import { entryOf, type LiveCopies } from '../../util/index.ts';
 import type { Command } from './command.ts';
 import type { ModelPort, Role } from './model.ts';
@@ -78,7 +78,7 @@ export class InstrumentCards {
         values: () => ({ ...valuesOf(preset()), ...over.values() }),
         start: () => valuesOf(this.#bank.start(name)!), // the bank has it
         roleOf: (address) => roleOf(address, over),
-        changed: (command) => this.#bank.set(name, changedBy(preset(), command)),
+        changed: (command) => this.#bank.set(name, edited(preset(), editOf(name, command))),
       });
     });
   }
@@ -118,11 +118,10 @@ function roleOf(address: Address, over: CardValues): Role | undefined {
   }
   return undefined;
 }
-// a preset changed by what's done: a param's value, or a setting
-function changedBy(preset: Preset, { type, address, value }: Command): Preset {
-  const text = addressText(address);
+// What's done on a patch's card as the bank's message: a param's value, or a setting.
+function editOf(patch: string, { type, address, value }: Command): Extract<PresetMessage, { type: 'preset edited' }> {
   if (type === 'setting') {
-    return { ...preset, settings: { ...preset.settings, [text]: value } };
+    return { type: 'preset edited', patch, of: 'settings', address, value };
   }
-  return { ...preset, values: { ...preset.values, [text]: value } };
+  return { type: 'preset edited', patch, of: 'values', address, value };
 }

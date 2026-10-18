@@ -6,7 +6,8 @@
 //   - architecture-form.ts: what a voice card is, its modules' forms by their jobs, an
 //     instrument's;
 //   - instrument.ts: an instrument, a pool of voices, or a drum rack, a pool for each pad;
-//   - preset.ts: a preset changed, each value and setting that differs, by its address;
+//   - preset.ts: a preset changed, each value and setting that differs, by its address; edited as
+//     the app's messages ask (PresetMessage);
 //   - bank.ts: patches by name, a program change picking one;
 //   - instruments-file.ts: a file of instruments, patches and racks, as a person writes it, read;
 //   - patch-plans.ts: a patch's instrument planned from a file of instruments, by its name, and
@@ -19,7 +20,7 @@ export { NOTE_SETTINGS, NOTE_SOURCES, type NoteSource } from './note.ts';
 export { Bank } from './bank.ts';
 export { instrumentOf, type Chain } from './instrument.ts';
 export { instrumentsOf, type Instruments, type RackPad } from './instruments-file.ts';
-export { changesFrom, type Changes } from './preset.ts';
+export { changesFrom, edited, type Changes, type PresetMessage } from './preset.ts';
 export {
   ARCHITECTURE_FORM,
   INSTRUMENT_FORM,
