@@ -18,11 +18,19 @@
 // heard feed counted too.
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
-import { shortName, type BusGroup, type Control, type Strip, type Toggles, type ViewBuilder } from '../models/index.ts';
+import {
+  Meters,
+  shortName,
+  type BusGroup,
+  type Control,
+  type Strip,
+  type Toggles,
+  type ViewBuilder,
+} from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import { html, makeElement, setHtml, type Html } from './elements.ts';
 import { KnobDrag } from './knob-view.ts';
-import { Levels, meterPosition } from './meter-view.ts';
+import { meterPosition } from './meter-view.ts';
 import { SectionView } from './section-view.ts';
 import { stripHtml, type StripLook } from './strip-view.ts';
 
@@ -69,7 +77,7 @@ export class MixerView {
   readonly #look: MixerLook;
   readonly #changed: () => void;
   readonly #events = new Events<{ open: Opened }>();
-  readonly #levels = new Levels();
+  readonly #levels = new Meters(); // each level bar's, falling
   readonly #tracks: SectionView;
   readonly #buses: SectionView;
   readonly #returns: SectionView;

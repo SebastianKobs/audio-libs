@@ -7,7 +7,7 @@
 //   - each strip's level, falling as a peak meter's.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deskHtml, fedBy, html, Levels, trackHtml } from '../index.ts';
+import { deskHtml, fedBy, html, trackHtml } from '../index.ts';
 import { ViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
@@ -78,13 +78,4 @@ test('what the strips heard feed, for the lights: each through its way out, and 
   assert.deepEqual([...fedBy(up, new Set(['tap']))].sort(), ['reverb', 'tap', 'you']);
   assert.deepEqual([...fedBy(viewsOn(), new Set(['tap']))].sort(), ['tap', 'you'], 'its send down');
   assert.deepEqual([...fedBy(viewsOn(), new Set(['clips tap']))], ['clips tap'], 'a name not on the desk kept');
-});
-
-test("each strip's level, by its key: up at once to its peak, then falling as a peak meter's; 0 for one never heard", () => {
-  const levels = new Levels();
-  assert.equal(levels.of('you'), 0);
-  assert.equal(levels.fall('you', 0.5, 0.1), 0.5, 'up at once');
-  const fallen = levels.fall('you', 0, 0.75);
-  assert.ok(fallen < 0.5 && fallen > 0.05, `10 dB down after 0.75 s: ${fallen}`);
-  assert.equal(levels.of('you'), fallen, 'kept');
 });

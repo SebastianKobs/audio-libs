@@ -44,7 +44,7 @@ export { CompositeView, type Composite, type CompositeLook, type Rack } from './
 export { matrixHtml } from './matrix-view.ts';
 export { faderHtml, KnobDrag, knobHtml, refreshKnobs, stillPanHtml } from './knob-view.ts';
 export { LimiterView, type LimiterLook } from './limiter-view.ts';
-export { Levels, meterFall, meterHtml, meterPosition } from './meter-view.ts';
+export { meterHtml, meterPosition } from './meter-view.ts';
 export { muteSoloHtml, slotsHtml, stripHtml, type StripLook } from './strip-view.ts';
 export { SectionView } from './section-view.ts';
 export { ClipTracksView } from './clip-tracks-view.ts';

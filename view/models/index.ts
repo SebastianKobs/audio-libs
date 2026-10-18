@@ -22,6 +22,8 @@
 //     what holds it, lit as it sounds, in its own words;
 //   - toggles.ts: keys turned from where each starts, a section folded, a group unfolded;
 //   - views.ts: the session view and the arrangement, which one is open;
+//   - meters.ts: a level bar's fall, as a DIN peak meter's;
+//   - limiter-history.ts: the limiter's history, a column each interval, the loudest of its frames;
 //   - chosen.ts: what's chosen in the composites a view shows, a rack's pad, a group's tab;
 //   - device-view.ts: the device view, what's open in it, by a kind and what of it, its chain;
 //   - transport-lane.ts: the transport as its lane shows it, whether it plays, bar and beat;
@@ -34,6 +36,8 @@ export { Session, type GroupShown, type TrackShown } from './session.ts';
 export { TransportLane } from './transport-lane.ts';
 export { DeviceView, type Opened } from './device-view.ts';
 export { Chosen } from './chosen.ts';
+export { meterFall, Meters } from './meters.ts';
+export { LimiterHistory, type Peaks } from './limiter-history.ts';
 export { Toggles } from './toggles.ts';
 export { Views, type ViewName } from './views.ts';
 export type { Command } from './command.ts';

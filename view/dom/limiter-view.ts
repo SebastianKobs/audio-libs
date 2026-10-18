@@ -5,17 +5,16 @@
 //   - its history: what comes out, and on it, in red, what it cut, up to what went in after
 //     its gain, scrolling right to left, on the meters' scale (meterPosition()), its ceiling a
 //     line.
-// Its levels and its reduction read from the limiter block inside the device, by its address.
+// Its levels and its reduction read from the limiter block inside the device, by its address;
+// its history's columns a model's (LimiterHistory, libs/view/models/meters.ts).
 import { gainOf } from '../../params/index.ts';
 import type { Address } from '../../plan/format/index.ts';
-import { Knob, type Device, type ViewBuilder } from '../models/index.ts';
+import { Knob, LimiterHistory, type Device, type Peaks, type ViewBuilder } from '../models/index.ts';
 import { sizedCanvas } from './canvas.ts';
 import type { CustomView } from './custom-view.ts';
 import { html, type Html } from './elements.ts';
 import { meterPosition } from './meter-view.ts';
 
-// a column's: the loudest in and out, and the most it took away
-type Peaks = { in: number; out: number; gr: number };
 // What it's drawn with, the view's: the colors of what comes out and of its ceiling; this
 // frame's step in seconds, what its history scrolls by.
 export interface LimiterLook {
@@ -56,33 +55,27 @@ export class LimiterView implements CustomView {
       return history();
     };
   }
-  // the history's columns, one pushed each `column` s of the clock's frames, each the loudest of them, drawn on every frame
+  // the history, a column each `column` s of the clock's frames, its model's; drawn on every frame
   #history(canvas: HTMLCanvasElement, device: Address): () => boolean {
     const views = this.#views;
     const look = this.#look;
     const block = [...device, BLOCK];
     const { width, height, column } = HISTORY;
     const context = sizedCanvas(canvas, HISTORY); // asked once
-    const columns = Array.from({ length: width }, (): Peaks => ({ in: 0, out: 0, gr: 0 }));
-    let held: Peaks = { in: 0, out: 0, gr: 0 };
-    let spent = 0; // the column being gathered
+    const history = new LimiterHistory({ columns: width, column });
     return () => {
       if (!canvas.isConnected) {
         return false; // its device closed: no more drawing
       }
-      held = {
-        in: Math.max(held.in, views.peakOf(block, 'in')),
-        out: Math.max(held.out, views.peakOf(block, 'out')),
-        gr: Math.max(held.gr, views.readingOf(block, 'reduction')),
+      const peaks = {
+        in: views.peakOf(block, 'in'),
+        out: views.peakOf(block, 'out'),
+        gr: views.readingOf(block, 'reduction'),
       };
-      for (spent += look.frameStep(); spent >= column; spent -= column) {
-        columns.shift();
-        columns.push(held);
-        held = { in: 0, out: 0, gr: 0 };
-      }
+      history.heard(peaks, look.frameStep());
       const { accent, soft } = look.colors();
       context.clearRect(0, 0, width, height);
-      drawColumns(context, columns, accent);
+      drawColumns(context, history.columns, accent);
       drawCeiling(context, this.#ceiling(device), soft);
       return true;
     };
@@ -94,7 +87,7 @@ export class LimiterView implements CustomView {
   }
 }
 // each column: what came out, and on it, in red, what it cut
-function drawColumns(context: CanvasRenderingContext2D, columns: Peaks[], color: string): void {
+function drawColumns(context: CanvasRenderingContext2D, columns: readonly Peaks[], color: string): void {
   const { height } = HISTORY;
   columns.forEach((peaks, pixel) => {
     const out = height * meterPosition(peaks.out);
