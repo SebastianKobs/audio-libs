@@ -5,8 +5,10 @@
 import { timeSpecs } from '../../params/index.ts';
 import type { Block } from './block.ts';
 
-// its time's three params: synced to an 8th to start; free, up to its longest time
-export const DELAY_TIME = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
+// Its time's three params: synced to an 8th to start; free, up to its longest time.
+// Its free time set at its time, never glided: a line's time moving bends its pitch.
+const TIME = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
+export const DELAY_TIME = Object.freeze({ ...TIME, ms: { ...TIME.ms, glides: false } as const });
 
 export default {
   kind: 'delay',

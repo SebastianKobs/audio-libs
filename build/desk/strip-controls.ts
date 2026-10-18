@@ -14,7 +14,8 @@
 // When, each held on the clock's cues:
 //   - one that glides: until its lead ahead of its time, as the 16ths are, then set at its
 //     time, gliding;
-//   - a switch, a choice and an FX channel's own time: until its time.
+//   - a switch, a choice and a param its spec says never glides (a delay line's time): until
+//     its time.
 // Each checked as it comes: an address the desk hasn't refused, naming it.
 import type { TimedValue, When } from '../../automation/index.ts';
 import { Cues, LOOKAHEAD, type Clock } from '../../clock/index.ts';
@@ -48,38 +49,33 @@ export function whenOf({ t, glide }: Pick<Change, 't' | 'glide'>, { now, at }: C
 export class StripControls {
   readonly #desk: Pick<DeskState<DeskBuilt>, 'plan' | 'specOf' | 'set'>;
   readonly #mix: Mix;
-  readonly #ownTime: (address: Address) => boolean;
   readonly #channels: { control(strip: string, change: Change): boolean };
   readonly #clock: Pick<Clock, 'now' | 'onTick'>;
   readonly #at: (t: number) => number;
   readonly #stripTracks: ReadonlySet<string>; // the strips that are tracks of their own (isStripTrack())
   // the changes held, by when they're set:
   //   ahead: those that glide, set their lead ahead;
-  //   due: switches, choices and an FX channel's own time, set at their time
+  //   due: switches, choices and a param that never glides, set at their time
   readonly #held: Readonly<Record<'ahead' | 'due', Cues<Change>>>;
 
   // desk: the desk, whose own channels are tracks of their own;
-  // ownTime: whether a key is an FX channel's own time (a delay's sync, note and ms);
   // channels: the tracks' channels, a change their notes set on them;
   // clock: its time now and its ticks; at(): a time on it on the audio's clock
   constructor({
     desk,
     mix,
-    ownTime,
     channels,
     clock,
     at,
   }: {
     desk: Pick<DeskState<DeskBuilt>, 'plan' | 'specOf' | 'set'>;
     mix: Mix;
-    ownTime: (address: Address) => boolean;
     channels: { control(strip: string, change: Change): boolean };
     clock: Pick<Clock, 'now' | 'onTick'>;
     at: (t: number) => number;
   }) {
     this.#desk = desk;
     this.#mix = mix;
-    this.#ownTime = ownTime;
     this.#channels = channels;
     this.#clock = clock;
     this.#at = at;
@@ -100,12 +96,12 @@ export class StripControls {
     return this.#stripTracks.has(track);
   }
   // Whether a control glides there, as a knob's move is smoothed: not a switch, as its param
-  // is declared (a mute, a solo), nor a choice, nor an FX channel's own time, which land at
-  // their time. One no strip has glides, refused as it comes.
+  // is declared (a mute, a solo), nor a choice, nor a param its spec says never glides (a delay
+  // line's time), which land at their time. One no strip has glides, refused as it comes.
   glides(strip: string, controller: string): boolean {
     const address = controlAddress(strip, controller);
     const spec = this.#desk.specOf(address);
-    return !spec || !this.#atItsTime(address, spec);
+    return !spec || !atItsTime(spec);
   }
   // A strip's controller set on time, as a change to its key, gliding by its time constant
   // where it has one: on its track's channel where its notes set it, else held for the desk.
@@ -125,13 +121,8 @@ export class StripControls {
       const { child, within } = splitAtChild(change.address);
       throw new Error(`no controller ${addressText(within)} on strip ${addressText(child)}`);
     }
-    const due = this.#atItsTime(change.address, spec);
+    const due = atItsTime(spec);
     this.#held[due ? 'due' : 'ahead'].cue(change, this.#clock.now());
-  }
-  // whether a change is set at its time, not glided there: a switch, a choice, or an FX
-  // channel's own time
-  #atItsTime(address: Address, spec: ParamSpec): boolean {
-    return isSwitch(spec) || spec.choices !== undefined || this.#ownTime(address);
   }
   // A change set by its address's shape, when it says:
   //   - a strip's own mute or solo (strip/mute): the live mix's switch;
@@ -152,4 +143,9 @@ export class StripControls {
     }
     this.#mix.setSolo(strip, on);
   }
+}
+// whether a change is set at its time, not glided there: a switch, a choice, or a param its
+// spec says never glides
+function atItsTime(spec: ParamSpec): boolean {
+  return isSwitch(spec) || spec.choices !== undefined || spec.glides === false;
 }

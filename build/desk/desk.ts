@@ -7,10 +7,10 @@
 //   - the live mix's mute and solo (mix.ts), applied as it's built and as each track's channel
 //     is added; set by a strip's mute and solo controllers.
 // Its owner hands in, once: its plan, its setup's rules, the clock and a time on it on what's
-// built's, and which of its params are an FX channel's own time.
+// built's.
 import type { Clock } from '../../clock/index.ts';
 import type { Controller } from '../../midi/index.ts';
-import type { Address, Plan } from '../../plan/format/index.ts';
+import type { Plan } from '../../plan/format/index.ts';
 import { DeskState, type DeskBuilt } from './desk-state.ts';
 import { Mix } from './mix.ts';
 import type { DeskSetup } from './setup.ts';
@@ -20,14 +20,12 @@ import { TrackChannels, type ChannelInput } from './track-channels.ts';
 // What a desk is made with:
 //   - plan: the desk's plan; setup: its rules, the strips a mute takes along, which tracks are
 //     set live, what a track's notes set;
-//   - clock: the clock's time now and its ticks; at(): a time on it on what's built's clock;
-//   - ownTime: whether an address is an FX channel's own time, set at its time, not glided.
+//   - clock: the clock's time now and its ticks; at(): a time on it on what's built's clock.
 export interface DeskMaking {
   readonly plan: Plan;
   readonly setup: Pick<DeskSetup, 'mutedWith' | 'isLive' | 'setByNotes'>;
   readonly clock: Pick<Clock, 'now' | 'onTick'>;
   readonly at: (t: number) => number;
-  readonly ownTime: (address: Address) => boolean;
 }
 
 export class Desk<B extends DeskBuilt> extends DeskState<B> {
@@ -35,13 +33,13 @@ export class Desk<B extends DeskBuilt> extends DeskState<B> {
   readonly #channels: TrackChannels<B>;
   readonly #controls: StripControls;
 
-  constructor({ plan, setup, clock, at, ownTime }: DeskMaking) {
+  constructor({ plan, setup, clock, at }: DeskMaking) {
     super({ plan });
     this.#mix = new Mix({ desk: this, mutedWith: setup.mutedWith });
     // a track's channel muted as it's added, where it or what takes it along is
     const made = (): void => this.#mix.apply();
     this.#channels = new TrackChannels({ desk: this, clock, at, made, setup });
-    this.#controls = new StripControls({ desk: this, mix: this.#mix, ownTime, channels: this.#channels, clock, at });
+    this.#controls = new StripControls({ desk: this, mix: this.#mix, channels: this.#channels, clock, at });
   }
   // built as its state is, the mute and solo set before applied
   override build(make: (plan: Plan) => B): B {

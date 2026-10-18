@@ -41,10 +41,10 @@ class DeskBuiltStandIn {
 // A setup of the test's own: a mute taking nothing along, no track live, nothing set by notes.
 const SETUP = { mutedWith: (muted) => new Set(muted), isLive: () => false, setByNotes: () => false };
 
-// A desk on a plan, made with a setup, a clock, a time on what's built's clock and its own times, the tests' own unless
+// A desk on a plan, made with a setup, a clock, a time on what's built's clock, the tests' own unless
 // given; what's built of it once built, and what it's handed to build, kept.
-export function deskOn(Desk, plan, { setup = SETUP, clock = clockAt(0), at = (t) => t, ownTime = () => false } = {}) {
-  const desk = new Desk({ plan, setup: { ...SETUP, ...setup }, clock, at, ownTime });
+export function deskOn(Desk, plan, { setup = SETUP, clock = clockAt(0), at = (t) => t } = {}) {
+  const desk = new Desk({ plan, setup: { ...SETUP, ...setup }, clock, at });
   const built = new DeskBuiltStandIn();
   const handed = [];
   const build = () =>

@@ -18,6 +18,9 @@ export interface ParamSpec {
   readonly default?: number | string;
   readonly dB?: true;
   readonly taper?: Taper;
+  // false for a param set at its time, never glided there: a delay line's time, whose glide
+  // would bend the pitch
+  readonly glides?: false;
   readonly parts?: ParamSpecs;
 }
 // a param on a control, a slider or a knob: one with its range

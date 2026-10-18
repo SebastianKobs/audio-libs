@@ -23,7 +23,7 @@ An input's or an output's channels are given where the block fixes them; elsewhe
 |---|---|
 | `Block`, `Jack` | a block: its kind, its inputs and outputs, each a jack, its name and its channels where the block fixes them; its params' and its settings' specs (`block.ts`) |
 | `BLOCKS`, `BlockKind` | every block by its kind, frozen all the way down: the list each builder checks itself against (`blocks.ts`) |
-| `DELAY_TIME` | a delay's time, its three params, synced to an 8th to start, free up to 4 s; the synth's delay and the tool's FX channels on it (`delay.ts`) |
+| `DELAY_TIME` | a delay's time, its three params, synced to an 8th to start, free up to 4 s, its free time never glided, as its pitch would bend; the synth's delay and the tool's FX channels on it (`delay.ts`) |
 | `ENVELOPE_SPECS` | an envelope's knobs by name, its amount in its target's units, its stages' times, its sustain; the synth's envelopes on it (`envelope.ts`) |
 | `LIMITER_SPECS` | a limiter's gain, ceiling and release; the synth's limiter and the Limiter insert on it (`limiter.ts`) |
 | `WAVE`, `DETUNE`, `TUNE_DETUNE` | an oscillator's wave and its detune; the synth's oscillators on them; a detune wide enough for a voice card's tune, an oscillator's and a filter's (`oscillator.ts`, LAY13a) |

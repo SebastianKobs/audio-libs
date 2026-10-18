@@ -4,7 +4,7 @@
 // it's recorded on that track's lanes, as every controller is, and reaches the desk the way
 // they do.
 //   - The controller: its param's address on the strip (volume, send/reverb, utility/level).
-//   - Gliding there, but a switch, a choice or an FX channel's own time (the desk's glides()).
+//   - Gliding there, but a switch, a choice or a delay line's time (the desk's glides()).
 //   - The stream's label for the strip's track its owner's, handed in.
 //   - Each move told to whoever listens: the transport passing that lane over while it plays
 //     back.

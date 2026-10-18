@@ -1,9 +1,9 @@
 // A strip's controls set on the desk (mockup/src/libs/build/desk/strip-controls.ts), the desk's own, on the desk on a
 // stand-in for what's built (test/built.js), the desk library's small studio and a clock of the test's own:
 //   - a controller as its param's address on the strip: a track's channel's where its notes set it;
-//   - else held for the desk: one that glides set its lead ahead of its time, a choice and its own time at its time;
+//   - else held for the desk: one that glides set its lead ahead of its time, a choice and a delay line's time at its time, as its spec says;
 //   - a strip's mute and solo the live mix's; one no strip has refused;
-//   - whether a control glides there, as a knob's move is smoothed: not a switch, a choice, nor its own time;
+//   - whether a control glides there, as a knob's move is smoothed: not a switch, a choice, nor a delay line's time;
 //   - which tracks are the desk's own strips.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,12 +13,9 @@ import { planned } from '../../../plan/desk/test/desks.js';
 import { LOOKAHEAD } from '../../../clock/index.ts';
 
 const PLAN = planned();
-// a delay's ms its own time
-const ownTime = (address) => address.at(-2) === 'delay' && address.at(-1) === 'ms';
-
 function controlsOn() {
   const setup = { setByNotes: (address) => address.includes('air') };
-  const on = deskOn(Desk, PLAN, { setup, ownTime });
+  const on = deskOn(Desk, PLAN, { setup });
   on.build();
   return on;
 }
@@ -36,7 +33,7 @@ test("a controller as its param's address on its strip: a track's channel's wher
   assert.deepEqual(built.told, [['my tap/3/air/cutoff', 500, { at: 1 }]]);
 });
 
-test('else held for the desk: one that glides set its lead ahead of its time; a choice, and its own time, at its time', () => {
+test("else held for the desk: one that glides set its lead ahead of its time; a choice, and a delay line's time, at its time", () => {
   const { desk, built, clock } = controlsOn();
   desk.control('tap', controller('volume', 0.5, 5, 0.02));
   clock.tick(4.9 - LOOKAHEAD);
@@ -63,7 +60,7 @@ test("a strip's mute and solo the live mix's; one no strip has refused; which tr
   assert.deepEqual([desk.isStripTrack('tap'), desk.isStripTrack('my tap/3')], [true, false]);
 });
 
-test("whether a control glides there, as a knob's move is smoothed: not a switch, a choice, nor an FX channel's own time; one no strip has glides, refused as it comes", () => {
+test("whether a control glides there, as a knob's move is smoothed: not a switch, a choice, nor a delay line's time, as its spec says; one no strip has glides, refused as it comes", () => {
   const { desk } = controlsOn();
   assert.deepEqual(
     [
