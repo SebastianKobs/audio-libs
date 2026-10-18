@@ -11,7 +11,8 @@
 //   - param-units.ts: a param in a plan's units, moving the Web Audio params behind it;
 //   - buffers.ts: the buffers a noise or a reverb plays, each made once;
 //   - meters.ts: a meter on a node, its peak; output.ts, the output after what's built, faded in and out;
-//   - power.ts: the audio's power, the output faded out and the context suspended, and back on;
+//   - power.ts: the audio's power: started, what's built into the output, the clock on its time;
+//     the output faded out and the context suspended, and back on;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
 export { ClockedContext, type ClockedContextOptions } from './context.ts';
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
