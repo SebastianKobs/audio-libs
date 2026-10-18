@@ -116,11 +116,13 @@ function controlsOf(node: Node): Address[] {
   const own = [...(node.macros ?? []), ...node.params].map(({ spec }) => [spec.name]);
   return [...own, ...settingsWithin(node)];
 }
-// a node's settings and its children's, by their addresses within it
+// A node's settings and its children's, by their addresses within it; a child's that one of
+// the node's own stands for left out, as it's set through that one.
 function settingsWithin(node: Node): Address[] {
   const own = node.settings.map(({ spec }) => [spec.name]);
+  const stoodFor = new Set(node.settings.flatMap(({ to }) => (to ? [addressText(to)] : [])));
   const children = (node.children ?? []).flatMap((child) =>
     child.settings.map(({ spec }) => under(child.name, [spec.name])),
   );
-  return [...own, ...children];
+  return [...own, ...children.filter((address) => !stoodFor.has(addressText(address)))];
 }

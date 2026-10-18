@@ -68,7 +68,12 @@ test("the Delay's note a choice through its macro, onto its line; the Utility's 
   );
   const utility = planner.plan('Utility', { settings: { 'pan/law': 'pan pot' } });
   assert.equal(settingAt(utility, ['pan', 'law']).value, 'pan pot');
-  assert.equal(settingAt(planner.plan('Reverb'), ['room', 'length']).value, 3.5);
+  assert.equal(settingAt(planner.plan('Reverb'), ['length']).value, 3.5);
+  assert.equal(
+    settingAt(planner.plan('Reverb', { settings: { length: 2 } }), ['room', 'length']).value,
+    2,
+    "the room's, its own stands for",
+  );
 });
 
 test("each effect's label, the name a device shows it by, where it isn't its kind: the Filter a lowpass, the Tape delay its own over the Delay's none (LAY12d1)", () => {

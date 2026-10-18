@@ -1,7 +1,7 @@
 // ---------- plan/planner/extend: a template built on another ----------
 // A template names the one it's built on (extends), as a rack is saved on another:
 //   - its base's jacks, form and label, where it writes none of its own;
-//   - its base's children, wires, macros and pools first, then its own.
+//   - its base's children, wires, macros, settings and pools first, then its own.
 // A base built on another is merged first, down to one built on none.
 // Merged before the planner's checks, so the checks see one template and a plan comes out flat.
 // What keeps it from merging said: a base not handed in, a block's kind among them; a loop.
@@ -57,12 +57,20 @@ function extended(template: Template, byKind: ReadonlyMap<string, Template>): Te
     ...joined(base, template),
   };
 }
-// a base's children, wires, macros and pools first, then the template's own
-function joined(base: Template, template: Template): Pick<Template, 'children' | 'wires' | 'macros' | 'pools'> {
+// a base's children, wires, macros, settings and pools first, then the template's own
+function joined(
+  base: Template,
+  template: Template,
+): Pick<Template, 'children' | 'wires' | 'macros' | 'settings' | 'pools'> {
   return {
-    children: [...(base.children ?? []), ...(template.children ?? [])],
-    wires: [...(base.wires ?? []), ...(template.wires ?? [])],
-    macros: [...(base.macros ?? []), ...(template.macros ?? [])],
-    pools: [...(base.pools ?? []), ...(template.pools ?? [])],
+    children: both(base.children, template.children),
+    wires: both(base.wires, template.wires),
+    macros: both(base.macros, template.macros),
+    settings: both(base.settings, template.settings),
+    pools: both(base.pools, template.pools),
   };
+}
+// a base's list, then the template's own
+function both<Item>(base: readonly Item[] = [], own: readonly Item[] = []): Item[] {
+  return [...base, ...own];
 }

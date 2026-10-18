@@ -83,7 +83,9 @@ function settingChanged(node: Node, [name, ...rest]: Address, value: number | st
       throw new Error(`${whole}: no setting`);
     }
     const settings = node.settings.map((setting) => (setting.spec.name === name ? { ...setting, value } : setting));
-    return { ...node, settings };
+    const own = { ...node, settings };
+    const to = node.settings.find((setting) => setting.spec.name === name)!.to; // found above
+    return to ? settingChanged(own, to, value, whole) : own; // the child's it stands for
   }
   if (!isComposite(node)) {
     throw new Error(`${whole}: no setting`);

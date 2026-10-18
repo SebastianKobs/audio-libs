@@ -582,11 +582,11 @@ test("a value or a setting asked for at an address the template doesn't have, re
 test("presets read from data, as a theme's YAML writes them: each by a name of its own, what it's on by that thing's word (an effect, a desk), made a template's kind; its values and settings by address; their shape checked", () => {
   const written = {
     delay: { effect: 'Delay', values: { feedback: 0.45 } },
-    rtlprnf: { effect: 'Reverb', settings: { 'room/length': 3.5 } },
+    rtlprnf: { effect: 'Reverb', settings: { length: 3.5 } },
   };
   assert.deepEqual(presetsOf(written, 'effects.yaml', 'effect'), {
     delay: { kind: 'Delay', values: { feedback: 0.45 } },
-    rtlprnf: { kind: 'Reverb', settings: { 'room/length': 3.5 } },
+    rtlprnf: { kind: 'Reverb', settings: { length: 3.5 } },
   });
   assert.deepEqual(presetsOf({ studio: { desk: 'Studio' } }, 'desk.yaml', 'desk'), { studio: { kind: 'Studio' } });
   assert.throws(() => presetsOf({ delay: { kind: 'Delay', values: [] }, room: 'Reverb' }, 'bent.yaml', 'effect'), {
@@ -706,4 +706,34 @@ test("a synced time's free value worked out where none is given, as planned at a
   assert.deepEqual(ms(timed.plan('Echo', { beat, values: { note: '1/4', ms: 300 } })), [300, 300], 'one given kept');
   assert.deepEqual(ms(timed.plan('Echo', { beat: 0.5, values: { sync: 0 } })), [417, 417], 'free: its default kept');
   assert.deepEqual(ms(timed.plan('Echo', { values: { note: '1/4' } })), [417, 417], 'no beat: none worked out');
+});
+
+test("a template's own setting, as a macro is a param: its spec the child's setting's under its name; its value given by its name, or the child's as written, onto the child's; one onto no setting refused", () => {
+  const roomOf = (settings) => ({
+    kind: 'Room',
+    inputs: [{ name: 'in', channels: 2 }],
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [{ name: 'room', kind: 'reverb', settings: { length: 2 } }],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'room', input: 'in' } },
+      { from: { node: 'room', output: 'out' }, to: { output: 'out' } },
+    ],
+    settings,
+  });
+  const rooms = new Planner([roomOf([{ name: 'length', to: ['room', 'length'] }])]);
+  const lengths = (plan) => [settingAt(plan, ['length']), settingAt(plan, ['room', 'length']).value];
+  const [own, child] = lengths(rooms.plan('Room'));
+  assert.deepEqual(
+    [own.spec, own.value, own.to, child],
+    [BLOCKS.reverb.settings[0], 2, ['room', 'length'], 2],
+    'as written',
+  );
+  assert.deepEqual(
+    lengths(rooms.plan('Room', { settings: { length: 5 } })).map((each) => each.value ?? each),
+    [5, 5],
+  );
+  assert.throws(
+    () => new Planner([roomOf([{ name: 'length', to: ['room', 'width'] }])]),
+    /setting length: room\/width is no setting/,
+  );
 });

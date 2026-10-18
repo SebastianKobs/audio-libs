@@ -18,6 +18,7 @@ import {
   type Node,
   type Param,
   type Plan,
+  type Setting,
   type ValuesByAddress,
 } from '../format/index.ts';
 import type { Block } from '../blocks/index.ts';
@@ -28,7 +29,7 @@ import { extendedAll } from './extend.ts';
 import { withPresets } from './presets.ts';
 import type { Form } from './form.ts';
 import { Catalog } from './catalog.ts';
-import type { Preset, Template, TemplateChild, TemplateMacro, WrittenTemplate } from './template.ts';
+import type { Preset, Template, TemplateChild, TemplateMacro, TemplateSetting, WrittenTemplate } from './template.ts';
 
 // What a plan is asked with:
 //   - its top node's name, its kind's unless given;
@@ -109,17 +110,19 @@ export class Planner {
     const template = this.#catalog.template(child.kind)!; // a kind the check found
     return this.#composite(child, template, { values: this.#timed(template, values, beat), settings, beat, at });
   }
-  // a template planned: its macros at their values, onto their targets; its children, its pools
+  // a template planned: its macros at their values, onto their targets; its own settings, onto
+  // the children's they stand for; its children, its pools
   #composite(child: TemplateChild, template: Template, { values, settings, beat, at }: Given): Node {
     const macros = (template.macros ?? []).map((macro) => this.#macro(template, macro, { values, settings, beat, at }));
     const moved = macros.flatMap((macro) =>
       macroValues(macro).map(({ to, value }) => [addressText(to), value] as const),
     );
     const inside = { ...values, ...Object.fromEntries(moved) }; // a param a macro moves is the macro's
+    const { own, settled } = this.#ownSettings(template, { settings, at });
     const planned = (each: TemplateChild): Node =>
       this.#node(each, {
         values: under(inside, each.name),
-        settings: under(settings, each.name),
+        settings: under(settled, each.name),
         beat,
         at: [...at, each.name],
       });
@@ -140,7 +143,7 @@ export class Planner {
       inputs: template.inputs ?? [],
       outputs: template.outputs ?? [],
       params: [],
-      settings: [],
+      settings: own,
       children,
       wires: template.wires ?? [],
       macros,
@@ -154,6 +157,30 @@ export class Planner {
     const written = (name: string): number | string | undefined =>
       values[name] ?? macros.find((macro) => macro.name === name)?.value;
     return { ...values, ...freeTime(specs, written, beat) };
+  }
+  // A template's own settings planned, and the settings within it, a child's its own stands for
+  // its own.
+  #ownSettings(
+    template: Template,
+    given: Pick<Given, 'settings' | 'at'>,
+  ): { own: Setting[]; settled: ValuesByAddress } {
+    const own = (template.settings ?? []).map((setting) => this.#setting(template, setting, given));
+    const stoodFor = own.map(({ to, value }) => [addressText(to!), value] as const); // each its own stands for
+    return { own, settled: { ...given.settings, ...Object.fromEntries(stoodFor) } };
+  }
+  // A setting of a template's own planned: its spec the child's it stands for, under its name;
+  // its value given by its name, or by the child's address, or the child's as written, or its
+  // spec's default.
+  #setting(
+    template: Template,
+    { name, to, hint }: TemplateSetting,
+    { settings, at }: Pick<Given, 'settings' | 'at'>,
+  ): Setting {
+    const spec = this.#catalog.settingSpecIn(template.kind, [name])!; // a child's setting, as the check found
+    const [childName = '', ...within] = to;
+    const written = template.children?.find((each) => each.name === childName)?.settings?.[addressText(within)];
+    const given = settings[name] ?? settings[addressText(to)] ?? written;
+    return { ...valued(spec, given, [...at, name]), to, ...(hint !== undefined && { hint }) };
   }
   // a macro planned: its spec, its own or its first target's; its value given, or written, or its default
   #macro(template: Template, macro: TemplateMacro, { values, at }: Given): Macro {

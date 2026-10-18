@@ -92,6 +92,37 @@ test("a device's label, its node's, else its kind; what it does in its slot and 
   assert.equal(builderOn(UTILITY).views.device([]).slot, undefined);
 });
 
+test("a composite's own setting among its controls, the child's it stands for left out", () => {
+  const length = { name: 'length', unit: 's', range: [0.2, 8, 0.1] };
+  const room = {
+    name: 'room',
+    kind: 'reverb',
+    inputs: [],
+    outputs: [],
+    params: [],
+    settings: [{ spec: length, value: 3 }],
+  };
+  const reverb = {
+    version: 1,
+    node: {
+      ...room,
+      name: 'reverb',
+      kind: 'Reverb',
+      settings: [{ spec: length, value: 3, to: ['room', 'length'] }],
+      children: [room],
+      wires: [],
+      macros: [],
+      pools: [],
+    },
+  };
+  assert.deepEqual(
+    builderOn(reverb)
+      .views.device([])
+      .controls.map(({ address }) => addressText(address)),
+    ['length'],
+  );
+});
+
 test("a block as a device, its params as knobs; a device under its parent's address; none where nothing's there", () => {
   const { views } = builderOn(UTILITY);
   assert.deepEqual(

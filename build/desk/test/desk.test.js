@@ -13,7 +13,7 @@ import { planned } from '../../../plan/desk/test/desks.js';
 import { settingAt } from '../../../plan/format/index.ts';
 
 const PLAN = planned();
-const ROOM = 'reverb/reverb/room/length';
+const ROOM = 'reverb/reverb/length';
 
 test('built from its plan by the function handed in, the settings changed before in it; a way into each of its own inputs, by name; the values set before told it', () => {
   const { desk, built, handed, build } = deskOn(Desk, PLAN);
@@ -68,7 +68,7 @@ test("settings changed: kept, what's built built again with them; a new beat tol
   build();
   desk.settings({ [ROOM]: 1.5 });
   assert.deepEqual(built.presets, [[{}, { [ROOM]: 1.5 }]]);
-  assert.equal(desk.valueOf(['reverb', 'reverb', 'room', 'length']), 1.5);
+  assert.equal(desk.valueOf(['reverb', 'reverb', 'length']), 1.5);
   desk.tempo(0.5);
   desk.tempo(0.5);
   desk.tempo(0.6);

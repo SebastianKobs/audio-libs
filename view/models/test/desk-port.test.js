@@ -92,6 +92,6 @@ test("a pool's copies added; what's done: a param played as a controller on its 
     ['my tap/3', 'send/reverb', 0.4],
     ['delay 1', 'delay/note', 1],
   ]);
-  port.send({ type: 'setting', address: ['reverb', 'reverb', 'room', 'length'], value: 2 });
-  assert.deepEqual(built.presets, [[{}, { 'reverb/reverb/room/length': 2 }]]);
+  port.send({ type: 'setting', address: ['reverb', 'reverb', 'length'], value: 2 });
+  assert.deepEqual(built.presets, [[{}, { 'reverb/reverb/length': 2 }]]);
 });

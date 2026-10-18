@@ -156,3 +156,26 @@ test("a plan's settings changed by address, a new plan, the old as it was: a chi
   assert.throws(() => withSettings(SYNTH, { 'voice/2/oscillator/wave': 'square' }), /a copy's settings are its pool's/);
   assert.throws(() => withSettings(UTILITY, { 'gain/law': 'x' }), /gain\/law: no setting/);
 });
+
+test("a composite's own setting changed by its address: it and the child's it stands for, together", () => {
+  const length = { name: 'length', unit: 's', range: [0.2, 8, 0.1] };
+  const room = {
+    version: 1,
+    node: {
+      name: 'reverb',
+      kind: 'Reverb',
+      inputs: [],
+      outputs: [],
+      params: [],
+      settings: [{ spec: length, value: 3.5, to: ['room', 'length'] }],
+      children: [
+        { name: 'room', kind: 'reverb', inputs: [], outputs: [], params: [], settings: [{ spec: length, value: 3.5 }] },
+      ],
+      wires: [],
+      macros: [],
+      pools: [],
+    },
+  };
+  const longer = withSettings(room, { length: 5 });
+  assert.deepEqual([settingAt(longer, ['length']).value, settingAt(longer, ['room', 'length']).value], [5, 5]);
+});

@@ -4,12 +4,13 @@
 //     it changes, by their addresses within it;
 //   - its own inputs, outputs, wires and pools as the plan has them;
 //   - a macro by its name, its spec its first target's where it writes none;
+//   - a setting of its own by its name, standing for a child's (to), its spec that one's;
 //   - its child's role in it, and the form it fulfils, where it has one;
 //   - its label and a child's, the name a view shows what's made of it by, where it has one,
 //     a child's over its template's; a child's short label, the name in little room.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
-import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
+import type { Address, Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
 import { fromData, type Shape } from '../../util/index.ts';
 
 // a child as a template writes it
@@ -43,6 +44,13 @@ export interface TemplateMacro {
   readonly hint?: string;
   readonly maps: readonly MacroTarget[];
 }
+// A setting a template declares of its own, as a macro is a param: its name, the child's
+// setting it stands for by its address within the template, its spec that one's.
+export interface TemplateSetting {
+  readonly name: string;
+  readonly to: Address;
+  readonly hint?: string;
+}
 // a pool as a template writes it: its child, the wires each copy is wired by; a voice's note,
 // and its key, a drum rack's pad's
 export interface TemplatePool {
@@ -63,6 +71,7 @@ export interface Template {
   readonly children?: readonly TemplateChild[];
   readonly wires?: readonly Wire[];
   readonly macros?: readonly TemplateMacro[];
+  readonly settings?: readonly TemplateSetting[];
   readonly pools?: readonly TemplatePool[];
 }
 // A template as written, read from data or handed to the planner: each child by its kind or by a preset.
@@ -72,7 +81,8 @@ export interface WrittenTemplate extends Omit<Template, 'children'> {
 
 // A template's shape, as read from data: its kind; its form and its base, words;
 // what its lists' items need: a jack its name, a child its name and its kind or a preset,
-// a wire its two ends, a macro its targets, a pool its child and its wires.
+// a wire its two ends, a macro its targets, a setting its name and the child's it stands for,
+// a pool its child and its wires.
 const TEMPLATE_SHAPE: Shape = {
   fields: {
     kind: 'word',
@@ -84,6 +94,7 @@ const TEMPLATE_SHAPE: Shape = {
     children: { listOf: { needs: ['name', ['kind', 'preset']] } },
     wires: { listOf: { needs: ['from', 'to'] } },
     macros: { listOf: { needs: ['maps'] } },
+    settings: { listOf: { needs: ['name', 'to'] } },
     pools: { listOf: { needs: ['child', 'wires'] } },
   },
   needs: ['kind'],

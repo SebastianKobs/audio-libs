@@ -48,7 +48,7 @@ export class Catalog {
       inputs: (template.inputs ?? []).map((jack) => jack.name),
       outputs: (template.outputs ?? []).map((jack) => jack.name),
       params: (template.macros ?? []).map((macro) => macro.name),
-      settings: [],
+      settings: (template.settings ?? []).map((setting) => setting.name),
     };
   }
   // whether an address within a node of a kind reaches a param of it, or of a child inside
@@ -82,6 +82,20 @@ export class Catalog {
     const target = maps[0] && this.paramSpecIn(template.kind, maps[0].to);
     return target && { ...target, name };
   }
+  // A setting's spec by its address within a node of a kind: a block's own, or a template's
+  // own, the child's it stands for under its name. None where it isn't there.
+  settingSpecIn(kind: string, [name, ...rest]: Address): ParamSpec | undefined {
+    const template = this.template(kind);
+    if (rest.length) {
+      const child = template && this.childrenOf(template).find((each) => each.name === name);
+      return child && this.settingSpecIn(child.kind, rest);
+    }
+    const block = this.block(kind);
+    if (block) {
+      return block.settings.find((spec) => spec.name === name);
+    }
+    return template && name !== undefined ? this.#ownSettingSpec(template, name) : undefined;
+  }
   // a template's children, a pool's among them
   childrenOf(template: Template): TemplateChild[] {
     return [...(template.children ?? []), ...(template.pools ?? []).map((pool) => pool.child)];
@@ -98,5 +112,11 @@ export class Catalog {
     const template = this.template(kind);
     const child = template && this.childrenOf(template).find((each) => each.name === name);
     return child !== undefined && this.#reaches(child.kind, rest, which);
+  }
+  // a template's own setting's spec: the child's it stands for, under its name
+  #ownSettingSpec(template: Template, name: string): ParamSpec | undefined {
+    const own = template.settings?.find((each) => each.name === name);
+    const target = own && this.settingSpecIn(template.kind, own.to);
+    return target && { ...target, name };
   }
 }

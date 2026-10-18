@@ -5,7 +5,7 @@
 //   2. the values and settings a child changes there inside it;
 //   3. each wire's ends there: an input, an output, a param;
 //   4. each macro named, its targets params inside, one at least where it has no spec of its own;
-//      a voice's note's addresses params inside too.
+//      a voice's note's addresses params inside too; each setting of its own a child's setting;
 // Then, once every template is, a spec followed down safely, past no template holding itself:
 //   5. each macro onto a choice: its choices the choice's own, as it moves it by position;
 //   6. each sound wired into a macro: no map on its way holding it to a range.
@@ -63,6 +63,7 @@ function wellFormedProblems(template: Template, catalog: Catalog): string[] {
     ...children.flatMap((child) => childProblems(child, template, catalog)),
     ...wiresOf(template).flatMap((wire) => wireProblems(wire, template, catalog)),
     ...macroProblems(template, catalog),
+    ...settingProblems(template, catalog),
     ...noteProblems(template, catalog),
   ];
 }
@@ -161,6 +162,12 @@ function macroProblems(template: Template, catalog: Catalog): string[] {
       .map((target) => `macro ${macro.name}: ${addressText(target.to)} is no param`);
   });
 }
+// each setting of its own standing for a child's setting
+function settingProblems(template: Template, catalog: Catalog): string[] {
+  return (template.settings ?? [])
+    .filter(({ to }) => !settingInside(to, template, catalog))
+    .map(({ name, to }) => `setting ${name}: ${addressText(to)} is no setting`);
+}
 // Each macro onto a choice: its own choices the same, in the same order.
 // It moves a choice by position: another list, or none, would land on other words.
 function choiceProblems(template: Template, catalog: Catalog): string[] {
@@ -232,4 +239,9 @@ function noteProblems(template: Template, catalog: Catalog): string[] {
 function paramInside([name, ...rest]: readonly string[], template: Template, catalog: Catalog): boolean {
   const child = catalog.childrenOf(template).find((each) => each.name === name);
   return child !== undefined && catalog.paramIn(child.kind, rest);
+}
+// the same for a setting
+function settingInside([name, ...rest]: readonly string[], template: Template, catalog: Catalog): boolean {
+  const child = catalog.childrenOf(template).find((each) => each.name === name);
+  return child !== undefined && catalog.settingIn(child.kind, rest);
 }
