@@ -7,7 +7,7 @@
 //   - each strip's level, falling as a peak meter's.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deskHtml, fedBy, html, trackHtml } from '../index.ts';
+import { deskHtml, fedBy, trackHtml } from '../index.ts';
 import { ViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
@@ -54,16 +54,18 @@ test("a send's knob labelled by its return's short label; each strip's level bar
   assert.match(buses.text, /<i class="meter" data-meter="tap"/);
 });
 
-test("a track's strip drawn: the name it's handed, what plays on it; empty while it plays nothing, but where it's set live", () => {
+test("a track's strip drawn: the name it's handed, what plays on it, its cell lit while it sounds, dimmed while it waits; empty while it plays nothing, but where it's set live", () => {
   const roles = { 'my tap/1/volume': { by: 'automated', source: 'notes' } };
   const views = viewsOn({ roles, copies: { 'my tap': [1] } });
-  const track = { address: ['my tap', '1'], name: 'flowers 1', now: html`<div class="cell">flower 3</div>` };
+  const track = { address: ['my tap', '1'], name: 'flowers 1', now: { text: 'flower 3', lit: true, waiting: false } };
   const playing = trackHtml(views, { ...track, playing: true }, NO_LEVEL).text;
   assert.match(
     playing,
-    /data-open="my tap\/1" data-title="flowers 1">flowers 1<\/div><div class="route">to my tap<\/div><div class="cell">flower 3<\/div>/,
+    /data-open="my tap\/1" data-title="flowers 1">flowers 1<\/div><div class="route">to my tap<\/div><div class="cell lit">flower 3<\/div>/,
   );
   assert.doesNotMatch(playing, /—/, 'its values shown');
+  const waiting = { ...track, now: { text: 'flower 3', lit: false, waiting: true }, playing: true };
+  assert.match(trackHtml(views, waiting, NO_LEVEL).text, /<div class="cell waiting">flower 3<\/div>/);
   assert.match(trackHtml(views, { ...track, playing: false }, NO_LEVEL).text, /<b class="val">—<\/b>/, 'empty');
   const live = viewsOn({ copies: { 'my tap': [1] } });
   assert.doesNotMatch(

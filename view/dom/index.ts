@@ -48,15 +48,7 @@ export { meterHtml, meterPosition } from './meter-view.ts';
 export { muteSoloHtml, slotsHtml, stripHtml, type StripLook } from './strip-view.ts';
 export { SectionView } from './section-view.ts';
 export { ClipTracksView } from './clip-tracks-view.ts';
-export {
-  deskHtml,
-  fedBy,
-  MixerView,
-  trackHtml,
-  type MixerGroup,
-  type MixerLook,
-  type MixerTrack,
-} from './mixer-view.ts';
+export { deskHtml, fedBy, MixerView, trackHtml, type MixerLook } from './mixer-view.ts';
 export {
   ArrangementView,
   type ArrangementColors,

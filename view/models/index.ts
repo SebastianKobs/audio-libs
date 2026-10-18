@@ -20,6 +20,8 @@
 //     control surface, its ▶, and its × asking first;
 //   - session.ts: what the session view shows of what's played, each track of a group and
 //     what holds it, lit as it sounds, in its own words;
+//   - session-tracks.ts: the session's tracks as its mixer shows them, in the control
+//     surface's groups, and what sounded since the last look;
 //   - toggles.ts: keys turned from where each starts, a section folded, a group unfolded;
 //   - views.ts: the session view and the arrangement, which one is open;
 //   - meters.ts: a level bar's fall, as a DIN peak meter's;
@@ -33,6 +35,7 @@
 export { Choice } from './choice.ts';
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export { Session, type GroupShown, type TrackShown } from './session.ts';
+export { SessionTracks, type SessionGroup, type SessionTrack, type TrackNow } from './session-tracks.ts';
 export { TransportLane } from './transport-lane.ts';
 export { DeviceView, type Opened } from './device-view.ts';
 export { Chosen } from './chosen.ts';

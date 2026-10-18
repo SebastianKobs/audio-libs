@@ -23,8 +23,11 @@ import {
   shortName,
   type BusGroup,
   type Control,
+  type SessionGroup,
+  type SessionTrack,
   type Strip,
   type Toggles,
+  type TrackNow,
   type ViewBuilder,
 } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
@@ -34,23 +37,6 @@ import { meterPosition } from './meter-view.ts';
 import { SectionView } from './section-view.ts';
 import { stripHtml, type StripLook } from './strip-view.ts';
 
-// A track as the view hands it:
-//   - its channel's address, and the name it's shown by;
-//   - what plays on it now (its cell), and whether anything does.
-export interface MixerTrack {
-  readonly address: Address;
-  readonly name: string;
-  readonly now: Html;
-  readonly playing: boolean;
-}
-// A group of tracks as the view hands it: its key, its header's name, whether it's the
-// player's own (marked so), and its tracks.
-export interface MixerGroup {
-  readonly key: string;
-  readonly name: string;
-  readonly mine: boolean;
-  readonly tracks: readonly MixerTrack[];
-}
 // How a view shows its mixer:
 //   - labels: each section's label;
 //   - tracksShown(): how many tracks a group's box shows before it scrolls; 0 shows all.
@@ -117,7 +103,7 @@ export class MixerView {
   // what a click on a strip's name or slot opens, to whoever listens
   readonly onOpen = (listener: (...opened: Opened) => void): (() => void) => this.#events.on('open', listener);
   // Drawn: the groups of tracks handed in, then the desk's own channels.
-  draw(groups: readonly MixerGroup[]): void {
+  draw(groups: readonly SessionGroup[]): void {
     const levelOf: LevelOf = (key) => this.#levels.of(key);
     this.#placeGroups(groups, levelOf);
     const { buses, returns, master } = deskHtml(this.#models, levelOf);
@@ -196,7 +182,7 @@ export class MixerView {
   //   2. A new group gets a box of its own, in its place among the others.
   //   3. A group no longer handed in is taken out.
   // Box: as wide as the tracks the look shows, scrolling sideways on its own.
-  #placeGroups(groups: readonly MixerGroup[], levelOf: LevelOf): void {
+  #placeGroups(groups: readonly SessionGroup[], levelOf: LevelOf): void {
     const row = this.#tracks.row;
     const kept = new Map(
       [...row.querySelectorAll<HTMLElement>('.group')].map((group) => [group.dataset.group!, group]), // each has its key
@@ -256,10 +242,14 @@ function lookOf(models: ViewBuilder, strip: Strip, name: string, levelOf: LevelO
 }
 // A track's strip drawn: the name the view gives it, what plays on it now.
 // Empty while it plays nothing, its values a dash, but where it's set live.
-export function trackHtml(models: ViewBuilder, track: MixerTrack, levelOf: LevelOf): Html {
+export function trackHtml(models: ViewBuilder, track: SessionTrack, levelOf: LevelOf): Html {
   const strip = models.strip(track.address)!; // a track's channel, on the desk
   const empty = !track.playing && !strip.volume.live;
-  return stripHtml(strip, { ...lookOf(models, strip, track.name, levelOf), now: track.now, empty });
+  return stripHtml(strip, { ...lookOf(models, strip, track.name, levelOf), now: cellHtml(track.now), empty });
+}
+// what a track plays now, its cell: lit while it sounds, dimmed while its replay waits
+function cellHtml({ text, lit, waiting }: TrackNow): Html {
+  return html`<div class="cell${lit ? ' lit' : ''}${waiting ? ' waiting' : ''}">${text}</div>`;
 }
 // What the strips heard feed, they among it, for the lights: each through its way out, and
 // through a send while it's turned up. A name not on the desk kept, not followed.

@@ -54,10 +54,13 @@ export interface Recording {
   regions(now: Seconds): readonly RecordedRegion[];
   lanes(now: Seconds): readonly RecordedLane[];
 }
-// A group of tracks: its key, and the name on its header.
+// A group of tracks: its key, the name on its header, whose clips its tracks play (kind), and
+// whether it's yours, your playing's pool, apart from the replays.
 export interface TrackGroup {
   group: string;
   name: string;
+  kind: string;
+  mine: boolean;
 }
 // The tracks, in groups, as the control surface that played them names them:
 //   - groups: in the order shown;
