@@ -3,11 +3,12 @@
 //   - with a face, as its look says: its own device as a group, its children grouped by role in tabs, in the look's order, its matrix;
 //   - a rack of them, a pad each, the chosen one's shown;
 //   - flat, its controls in a device of its own, as a strip's insert is;
-//   - its state: the chosen pad and tabs, a box's reset.
+//   - the chosen pad and tabs read from their model, handed in; a box's reset.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CompositeView, controlHint, deviceHtml, groupHtml, html, matrixHtml } from '../index.ts';
 import { builderOn, CARD } from '../../models/test/card.js';
+import { Chosen } from '../../models/index.ts';
 
 const hintOf = controlHint; // one wording, the composite view's
 const GROUPS = new Map([
@@ -36,7 +37,7 @@ const LOOK = {
 };
 
 test("a rack: its bar, its status, its buttons and its reset; a pad each, the first shown; its face: its own device as a group, its children's groups by role in the look's order, its matrix", () => {
-  const view = new CompositeView();
+  const view = new CompositeView({ chosen: new Chosen() });
   const { pads } = rack();
   const models = pads[0].composite.models;
   const group = (title, role) =>
@@ -56,10 +57,11 @@ test("a rack: its bar, its status, its buttons and its reset; a pad each, the fi
   );
 });
 
-test('the chosen pad and tab kept: drawn again, the pad chosen shown, its group on the tab chosen; a rack of one, no pads', () => {
-  const view = new CompositeView();
-  view.choosePad('tap', 'pluck b');
-  view.chooseTab('pluck b', 'sources', 'osc');
+test("the chosen pad and tab its model's, handed in: drawn again, the pad chosen shown, its group on the tab chosen; a rack of one, no pads", () => {
+  const chosen = new Chosen();
+  const view = new CompositeView({ chosen });
+  chosen.choosePad('tap', 'pluck b');
+  chosen.chooseTab('pluck b', 'sources', 'osc');
   const drawn = view.rackHtml(rack(), LOOK).text;
   assert.match(drawn, /<button class="chosen" data-pad="pluck b">/);
   assert.match(drawn, /<div class="face" data-card="pluck b">/);
@@ -68,7 +70,7 @@ test('the chosen pad and tab kept: drawn again, the pad chosen shown, its group 
 });
 
 test("flat, as a strip's insert: its controls in a device of its own, its status and its reset; the reset run by its key", () => {
-  const view = new CompositeView();
+  const view = new CompositeView({ chosen: new Chosen() });
   const models = builderOn(CARD);
   const vca = { key: 'vca', models, address: ['vca'] };
   const ran = [];
@@ -95,7 +97,7 @@ function within(own) {
 }
 
 test("a view of its own, by its device's kind: drawn before its controls, marked; once in the page, redrawn on every frame until it's gone", () => {
-  const view = new CompositeView();
+  const view = new CompositeView({ chosen: new Chosen() });
   const shown = [];
   let there = true;
   view.register('gain', {

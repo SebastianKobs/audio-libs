@@ -33,8 +33,8 @@ export class DeviceViewPanel {
   readonly #strip: HTMLDivElement;
   readonly #heads = new Map<string, HTMLElement>(); // each chain's head, by its kind
   readonly #bound = new Bound<Control>(CONTROL_MARKS); // each control drawn, its model
-  // instruments and inserts drawn as composites, the chosen pads and tabs kept
-  readonly #composites = new CompositeView({ bound: this.#bound });
+  // instruments and inserts drawn as composites, their chosen pads and tabs the model's
+  readonly #composites: CompositeView;
   readonly #title = makeElement('span', 'devtitle');
   readonly #row = makeElement('div', 'devrow');
 
@@ -50,8 +50,9 @@ export class DeviceViewPanel {
     strip: HTMLDivElement;
     custom: Readonly<Record<string, CustomView>>;
   }) {
-    for (const [kind, view] of Object.entries(custom)) {
-      this.#composites.register(kind, view);
+    this.#composites = new CompositeView({ chosen: view.chosen, bound: this.#bound });
+    for (const [kind, own] of Object.entries(custom)) {
+      this.#composites.register(kind, own);
     }
     this.#view = view;
     this.#strip = strip;

@@ -2,8 +2,10 @@
 // As Ableton's detail view: below the tracks, a track's own devices left to right.
 // Opened by what its owner asks, a kind and what of it, as 'strip:' and a strip's address.
 // Each kind a chain of devices, handed in, which fills it (its drawer's to use).
-// What a device shows is its own models': this holds only what's open, and tells it.
+// What a device shows is its own models': this holds what's open, and tells it, and what's
+// chosen in the composites it shows, kept as it's opened and closed (chosen).
 import { Events } from '../../util/index.ts';
+import { Chosen } from './chosen.ts';
 
 // What's open: its title, its kind and what of it, the slot marked, -1 for none.
 export interface Opened {
@@ -14,6 +16,7 @@ export interface Opened {
 }
 
 export class DeviceView<Chain> {
+  readonly chosen = new Chosen(); // each rack's pad, each group's tab
   readonly #chains: Readonly<Record<string, Chain>>;
   readonly #events = new Events<{ change: [] }>();
   #opened: Opened | null = null;
