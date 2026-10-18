@@ -15,7 +15,10 @@
 //     edited in the bank;
 //   - desk-port.ts: a port for a desk as it plays (libs/build/desk/), its meters, its mix;
 //   - command.ts: what's done in a view, by address;
-//   - custom.ts: a view of its own, registered by kind.
+//   - custom.ts: a view of its own, registered by kind;
+//   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
+//     view and the playhead, in 16ths; its port in its own words (ports.ts); a region's notes'
+//     and a lane's shapes, as they're drawn; what the desk declares, read from its view models.
 export { Choice } from './choice.ts';
 export type { Command } from './command.ts';
 export { CustomViews } from './custom.ts';
@@ -30,3 +33,20 @@ export { InstrumentCards, type CardValues, type InstrumentCard } from './cards.t
 export { deskPort } from './desk-port.ts';
 export { Strip, shortName, shownName } from './strip.ts';
 export { ViewBuilder, type MatrixRow } from './view-builder.ts';
+export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';
+export { declaredBy } from './arrangement/declared.ts';
+export { laneLine, type Corner } from './arrangement/lane-shapes.ts';
+export { noteShape, pitchRange, type NoteShape } from './arrangement/note-shapes.ts';
+export type { Row } from './arrangement/rows.ts';
+export type {
+  ArrangedStrip,
+  ArrangementClock,
+  Declared,
+  Playhead,
+  RecordedLane,
+  RecordedNote,
+  RecordedRegion,
+  Recording,
+  TrackGroup,
+  Tracks,
+} from './arrangement/ports.ts';
