@@ -128,7 +128,7 @@ test("a device drawn: its bar, its status and its reset; its knobs by their name
   );
   assert.match(
     text,
-    /<div class="controls"><canvas class="history"><\/canvas><div class="knob" data-knob="tap\/utility\/level" data-set="tap\/utility\/level" title="level!"><span>level \(dB\)<\/span>/,
+    /<div class="controls" data-own="tap\/utility"><canvas class="history"><\/canvas><div class="knob" data-knob="tap\/utility\/level" data-set="tap\/utility\/level" title="level!"><span>level \(dB\)<\/span>/,
   );
   assert.match(text, /<div class="knob automated" data-knob="tap\/utility\/pan" title="pan!"><span>pan<\/span>/);
   assert.doesNotMatch(text, /law/, "its pan's law, fixed, left out");

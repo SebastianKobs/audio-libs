@@ -16,10 +16,12 @@ import { PlanMoves, type Move } from './moves.ts';
 // How a value is set, as the tool says:
 //   - live: set here, in a view;
 //   - automated: by what its track plays, its source where it names one (distance);
+//     recorded where its automation is in the arrangement's lanes;
 //   - fixed: as it was built.
 export interface Role {
   readonly by: 'live' | 'automated' | 'fixed';
   readonly source?: string;
+  readonly recorded?: true;
 }
 // What a device does in its slot (job), and what sets it there, where its notes or the
 // tool do (setBy), as the tool says.

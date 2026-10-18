@@ -5,13 +5,17 @@
 //   - flat: its controls in a device of its own (a strip's insert, an effect).
 // A rack of composites gets a pad each, the chosen one's box shown (a drum rack).
 // Its bar: its status line, the owner's buttons, and a reset where its look gives one.
+// Each control's hint in one wording (controlHint()); a device's view of its own by its kind,
+// registered once (register()), redrawn on every frame while it's shown (redraw()).
 // Its state, its own: the chosen pad of each rack, the chosen tab of each group, each reset.
-import { addressText, type Address } from '../../plan/format/index.ts';
-import type { Control, ViewBuilder } from '../models/index.ts';
+import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
+import { CustomViews, type Control, type Device, type ViewBuilder } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
+import type { CustomView } from './custom-view.ts';
 import { deviceHtml } from './device-view.ts';
 import { appendHtml, html, type Html } from './elements.ts';
 import { groupHtml, type GroupLook } from './group-view.ts';
+import { controlHint } from './hint.ts';
 import { matrixHtml } from './matrix-view.ts';
 
 // A composite as a view shows it: what its chosen tabs are kept by, its models, its address.
@@ -36,9 +40,8 @@ export interface Reset {
 //   - status: its bar's line; buttons: its owner's, beside its reset;
 //   - own: its own device's group title, shown with a face; none, not shown;
 //   - groups: with a face, its children's groups by role, in order, each its title; none, flat;
-//   - matrix: with a face, whether its matrix is shown;
-//   - hintOf(), ownOf(): a control's hint, a child's view of its own.
-export interface CompositeLook extends GroupLook {
+//   - matrix: with a face, whether its matrix is shown.
+export interface CompositeLook {
   readonly kind?: string;
   readonly status: string;
   readonly buttons?: Html;
@@ -53,21 +56,36 @@ export interface CompositeLook extends GroupLook {
 export class CompositeView {
   readonly #chosen = new Map<string, string>(); // a rack's pad by its key, a group's tab by its composite's and its title
   readonly #resets = new Map<string, () => void>(); // each reset drawn, by its key
+  readonly #custom = new CustomViews<CustomView>();
+  readonly #redraws = new Set<() => boolean>(); // each view of its own shown
+  // each control's hint, each device's view of its own
+  readonly #look: GroupLook = { hintOf: controlHint, ownOf: (device) => this.#custom.of(device)?.html(device) };
   readonly #bound: Bound<Control>;
 
   // bound: where each control drawn is bound to its model
   constructor({ bound = new Bound<Control>(CONTROL_MARKS) }: { bound?: Bound<Control> } = {}) {
     this.#bound = bound;
   }
+  // a view of its own for a device's kind, once
+  register(kind: string, view: CustomView): void {
+    this.#custom.register(kind, view);
+  }
+  // every view of its own shown redrawn, one gone from the page let go: on every frame
+  redraw(): void {
+    for (const redraw of this.#redraws) {
+      if (!redraw()) {
+        this.#redraws.delete(redraw);
+      }
+    }
+  }
   // A composite drawn at the end of an element, its controls bound; its box handed back.
   append(within: Element, composite: Composite, look: CompositeLook): Element {
     return this.#appended(within, composite, this.html(composite, look));
   }
-  // A rack drawn at the end of an element, the shown composite's controls bound; its box and
-  // the composite shown handed back.
-  appendRack(within: Element, rack: Rack, look: CompositeLook): { box: Element; shown: Composite } {
-    const shown = this.#shownOf(rack);
-    return { box: this.#appended(within, shown, this.rackHtml(rack, look)), shown };
+  // A rack drawn at the end of an element, the shown composite's controls bound; its box
+  // handed back.
+  appendRack(within: Element, rack: Rack, look: CompositeLook): Element {
+    return this.#appended(within, this.#shownOf(rack), this.rackHtml(rack, look));
   }
   // A composite's box: flat, or with a face, as its look says.
   html(composite: Composite, look: CompositeLook): Html {
@@ -75,10 +93,10 @@ export class CompositeView {
     if (!look.groups) {
       const key = addressText(device.address);
       this.#keepReset(key, look.reset);
-      const own = look.ownOf?.(device);
+      const own = this.#look.ownOf?.(device);
       return deviceHtml(device, {
         status: look.status,
-        hintOf: look.hintOf,
+        hintOf: controlHint,
         ...(look.reset && { reset: look.reset.label }),
         ...(own && { own }),
       });
@@ -128,11 +146,21 @@ export class CompositeView {
     this.chooseTab(composite, group, tab);
     return true;
   }
+  // Drawn at the end of an element: its controls bound, its views of their own shown.
   #appended(within: Element, composite: Composite, drawn: Html): Element {
     appendHtml(within, drawn);
     const box = within.lastElementChild!; // drawn above
     this.#bound.bind(box, (address) => composite.models.control(address));
+    for (const element of box.querySelectorAll<HTMLElement>('[data-own]')) {
+      this.#show(element, composite.models.device(addressOf(element.dataset.own!))); // marked with it
+    }
     return box;
+  }
+  #show(element: Element, device: Device | undefined): void {
+    const view = device && this.#custom.of(device);
+    if (view) {
+      this.#redraws.add(view.shown(element, device));
+    }
   }
   // the pad chosen, else the first
   #shownOf({ key, pads }: Rack): Composite {
@@ -153,16 +181,16 @@ export class CompositeView {
   #faceHtml({ key, models, address }: Composite, look: CompositeLook): Html {
     const groups = look.groups ?? new Map<string, string>();
     const own =
-      look.own ? groupHtml({ title: look.own, devices: [models.device(address)!], chosen: '' }, look) : html``;
+      look.own ? groupHtml({ title: look.own, devices: [models.device(address)!], chosen: '' }, this.#look) : html``;
     const order = [...groups.keys()];
     const children = models
       .groups(address)
       .map(({ role, devices }) => ({ order: order.indexOf(role), title: groups.get(role) ?? role, devices }))
       .sort((one, other) => one.order - other.order)
       .map(({ title, devices }) =>
-        groupHtml({ title, devices, chosen: this.#chosen.get(`${key}/${title}`) ?? '' }, look),
+        groupHtml({ title, devices, chosen: this.#chosen.get(`${key}/${title}`) ?? '' }, this.#look),
       );
-    const matrix = look.matrix ? matrixGroupHtml(models, address, look) : html``;
+    const matrix = look.matrix ? matrixGroupHtml(models, address, this.#look) : html``;
     return html`${own}${children}${matrix}`;
   }
   #keepReset(key: string, reset: Reset | undefined): void {

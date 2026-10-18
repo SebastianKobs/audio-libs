@@ -28,7 +28,7 @@ test("a group of a composite's children: its title, a tab each where it has more
   const drawn = groupHtml({ title: 'sounds', devices: [osc, vca], chosen: 'vca' }, { ...LOOK, ownOf: own }).text;
   assert.equal(
     drawn,
-    `<div class="group" data-group="sounds"><div class="group-title">sounds</div><div class="group-tabs"><button data-tab="osc">osc</button><button class="chosen" data-tab="vca">vca</button></div><div class="group-body"><div class="controls"><em>own</em>${knobHtml('gain', vca.controls[0], { title: 'about gain' }).text}</div></div></div>`,
+    `<div class="group" data-group="sounds"><div class="group-title">sounds</div><div class="group-tabs"><button data-tab="osc">osc</button><button class="chosen" data-tab="vca">vca</button></div><div class="group-body"><div class="controls" data-own="vca"><em>own</em>${knobHtml('gain', vca.controls[0], { title: 'about gain' }).text}</div></div></div>`,
   );
   const alone = groupHtml({ title: 'sounds', devices: [osc], chosen: 'nothing' }, LOOK).text;
   assert.doesNotMatch(alone, /group-tabs/, 'one alone: no tabs');

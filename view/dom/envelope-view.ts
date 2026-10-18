@@ -4,11 +4,14 @@
 //   - its delay's end dotted, where its attack starts;
 //   - the note's end dashed, none for a trigger's.
 // Every curve at one time scale, so a short one is short and a long one runs on, a scroll away.
-import type { EnvelopeDrawing } from '../models/index.ts';
-import { html, type Html } from './elements.ts';
+// As a device's view of its own (EnvelopeView), drawn before its knobs, redrawn as they're set.
+import { envelopeDrawing, type Device, type EnvelopeDrawing } from '../models/index.ts';
+import type { CustomView } from './custom-view.ts';
+import { html, setHtml, type Html } from './elements.ts';
 
 const PER_SECOND = 60; // px across for a second
 const HEIGHT = 40; // px
+const STEPS = 120; // a device's curve: a level a step
 
 // An envelope's curve drawn as SVG.
 export function envelopeHtml({ levels, step, delay, noteOff }: EnvelopeDrawing): Html {
@@ -19,7 +22,33 @@ export function envelopeHtml({ levels, step, delay, noteOff }: EnvelopeDrawing):
   const offMark = noteOff === null ? html`` : markHtml('off', noteOff);
   return html`<svg class="envelope-curve" viewBox="0 0 ${width} ${HEIGHT}" width="${width}" height="${HEIGHT}" preserveAspectRatio="none"><polygon class="area" points="${area}"></polygon><polyline class="line" points="${line}"></polyline>${delayMark}${offMark}</svg>`;
 }
+// An envelope generator's view of its own: its curve as it's played, drawn again on a frame
+// its knobs changed it.
+export class EnvelopeView implements CustomView {
+  html(device: Device): Html {
+    return html`<div class="envelope">${curveHtml(device)}</div>`;
+  }
+  shown(within: Element, device: Device): () => boolean {
+    const element = within.querySelector('.envelope')!; // drawn with its device's controls
+    let drawn = curveHtml(device).text;
+    return () => {
+      if (!element.isConnected) {
+        return false; // its device closed: no more drawing
+      }
+      const curve = curveHtml(device);
+      if (curve.text !== drawn) {
+        drawn = curve.text;
+        setHtml(element, curve);
+      }
+      return true;
+    };
+  }
+}
 
+// a device's curve, as it's played now
+function curveHtml(device: Device): Html {
+  return envelopeHtml(envelopeDrawing(device, { steps: STEPS }));
+}
 // a time marked by a line top to bottom
 function markHtml(kind: string, t: number): Html {
   const x = xOf(t);

@@ -50,10 +50,18 @@ test("the desk's plan; a value as it plays, its start; a strip's mute and solo t
 test("how a param is set: a strip's own live, on a live track or where its notes don't set it, by its notes where they do; an insert's as its slot's role says, fixed where it sets none of it; what a slot does there", () => {
   const { port } = portOn();
   assert.deepEqual(port.roleOf(['tap', 'volume']), { by: 'live' }, "the desk's own");
-  assert.deepEqual(port.roleOf(['my tap', '3', 'volume']), { by: 'automated' }, 'its notes');
+  assert.deepEqual(
+    port.roleOf(['my tap', '3', 'volume']),
+    { by: 'automated', recorded: true },
+    'its notes, its lane recorded',
+  );
   assert.deepEqual(port.roleOf(['replay tower', '1', 'volume']), { by: 'live' }, 'a live track');
   assert.deepEqual(port.roleOf(['my tap', '3', 'mute']), { by: 'live' }, 'its mute');
-  assert.deepEqual(port.roleOf(['my tap', '3', 'air', 'cutoff']), { by: 'automated', source: 'distance' });
+  assert.deepEqual(port.roleOf(['my tap', '3', 'air', 'cutoff']), {
+    by: 'automated',
+    source: 'distance',
+    recorded: true,
+  });
   assert.deepEqual(port.roleOf(['tap', 'utility', 'level']), { by: 'live' });
   assert.deepEqual(port.roleOf(['tap', 'utility', 'pan']), { by: 'fixed' }, 'one its slot sets none of');
   assert.deepEqual(port.slotOf(['my tap', '3', 'air', 'cutoff']), { job: 'the air', setBy: 'distance' });

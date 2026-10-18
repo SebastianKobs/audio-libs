@@ -29,7 +29,7 @@ type MeteredDesk = Desk<DeskBuilt & Metered>;
 type Control = (strip: string, controller: string, value: number) => void;
 
 const LIVE: Role = { by: 'live' };
-const AUTOMATED: Role = { by: 'automated' };
+const AUTOMATED: Role = { by: 'automated', recorded: true }; // a desk's automation, in its lanes
 const FIXED: Role = { by: 'fixed' };
 // a strip's own switches, the live mix's
 const SWITCHES: readonly string[] = ['mute', 'solo'];
@@ -99,7 +99,11 @@ function roleOn(
   if (!role || (role.sets && !role.sets.includes(addressText(inSlot)))) {
     return FIXED;
   }
-  return { by: role.by, ...(role.source !== undefined && { source: role.source }) };
+  return {
+    by: role.by,
+    ...(role.source !== undefined && { source: role.source }),
+    ...(role.by === 'automated' && { recorded: true }),
+  };
 }
 // A strip's own param or send: its mute and solo live; its volume, pan and sends live on a
 // live strip, else by its notes where they set it.

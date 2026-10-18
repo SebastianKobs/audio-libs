@@ -7,9 +7,10 @@
 //     line.
 // Its levels and its reduction read from the limiter block inside the device, by its address.
 import { gainOf } from '../../params/index.ts';
-import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
+import type { Address } from '../../plan/format/index.ts';
 import { Knob, type Device, type ViewBuilder } from '../models/index.ts';
 import { sizedCanvas } from './canvas.ts';
+import type { CustomView } from './custom-view.ts';
 import { html, type Html } from './elements.ts';
 import { meterPosition } from './meter-view.ts';
 
@@ -29,40 +30,31 @@ const BLOCK = 'limiter';
 const HISTORY_HINT =
   "The last 6 seconds, on the meters' scale. Bright: what comes out of the limiter. Red, on it: what it cut, up to what went in after its gain. The line: its ceiling.";
 
-// The limiter's view of its own: drawn before its knobs (html()), started once it's in the page
-// (attach()), and drawn on every frame while its device is open (draw()).
-export class LimiterView {
+// The limiter's view of its own: drawn before its knobs (html()), and once it's in the page
+// (shown()), its history and what it takes away now drawn on every frame while it's there.
+export class LimiterView implements CustomView {
   readonly #views: ViewBuilder;
   readonly #look: LimiterLook;
-  readonly #live = new Set<() => boolean>(); // what draws on every frame while its device is open
 
   constructor({ views, look }: { views: ViewBuilder; look: LimiterLook }) {
     this.#views = views;
     this.#look = look;
   }
-  // its history, and what it takes away now, each marked with its device's address
-  html(device: Device): Html {
-    const key = addressText(device.address);
-    return html`<canvas class="history" data-limiter="${key}" title="${HISTORY_HINT}"></canvas><div class="reading" title="What the limiter takes away now, in dB."><span>reduction (dB)</span><b data-reduction="${key}">0.00</b></div>`;
+  // its history, and what it takes away now, marked
+  html(): Html {
+    return html`<canvas class="history" title="${HISTORY_HINT}"></canvas><div class="reading" title="What the limiter takes away now, in dB."><span>reduction (dB)</span><b data-reduction>0.00</b></div>`;
   }
-  // once drawn within an element: its history drawn on every frame while it's there
-  attach(within: Element): void {
-    for (const canvas of within.querySelectorAll<HTMLCanvasElement>('canvas[data-limiter]:not([data-drawn])')) {
-      canvas.dataset.drawn = '';
-      this.#live.add(this.#history(canvas, addressOf(canvas.dataset.limiter!))); // marked with it
-    }
-  }
-  // what draws on every frame while its device is open: its history, what it takes away now
-  draw(): void {
-    for (const draw of this.#live) {
-      if (!draw()) {
-        this.#live.delete(draw);
-      }
-    }
-    for (const reading of document.querySelectorAll<HTMLElement>('[data-reduction]')) {
-      const block = [...addressOf(reading.dataset.reduction!), BLOCK]; // marked with it
+  // Once in the page, what draws on every frame while it's there: its history, what it takes
+  // away now.
+  shown(within: Element, device: Device): () => boolean {
+    const canvas = within.querySelector<HTMLCanvasElement>('canvas.history')!; // drawn with its controls
+    const reading = within.querySelector<HTMLElement>('[data-reduction]')!;
+    const history = this.#history(canvas, device.address);
+    const block = [...device.address, BLOCK];
+    return () => {
       reading.textContent = this.#views.readingOf(block, 'reduction').toFixed(2);
-    }
+      return history();
+    };
   }
   // the history's columns, one pushed each `column` s of the clock's frames, each the loudest of them, drawn on every frame
   #history(canvas: HTMLCanvasElement, device: Address): () => boolean {

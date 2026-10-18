@@ -6,10 +6,10 @@
 //   - its state: the chosen pad and tabs, a box's reset.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CompositeView, deviceHtml, groupHtml, html, matrixHtml } from '../index.ts';
+import { CompositeView, controlHint, deviceHtml, groupHtml, html, matrixHtml } from '../index.ts';
 import { builderOn, CARD } from '../../models/test/card.js';
 
-const hintOf = (control) => `about ${control.name}`;
+const hintOf = controlHint; // one wording, the composite view's
 const GROUPS = new Map([
   ['source', 'sources'],
   ['stage', 'stages'],
@@ -80,4 +80,42 @@ test("flat, as a strip's insert: its controls in a device of its own, its status
   assert.equal(view.reset('vca'), true);
   assert.equal(view.reset('nothing'), false, 'no reset drawn by that key');
   assert.deepEqual(ran, ['vca']);
+});
+
+// what a composite is drawn into, of the test's own: what's drawn kept as text; its box, the element a view of its own is in
+function within(own) {
+  const box = { querySelectorAll: (selector) => (selector === '[data-own]' ? [own] : []) };
+  return {
+    drawn: [],
+    insertAdjacentHTML(where, text) {
+      this.drawn.push(text);
+    },
+    lastElementChild: box,
+  };
+}
+
+test("a view of its own, by its device's kind: drawn before its controls, marked; once in the page, redrawn on every frame until it's gone", () => {
+  const view = new CompositeView();
+  const shown = [];
+  let there = true;
+  view.register('gain', {
+    html: (device) => html`<em>${device.name}</em>`,
+    shown: (element, device) => {
+      shown.push([element.dataset.own, device.name]);
+      return () => {
+        shown.push('redrawn');
+        return there;
+      };
+    },
+  });
+  const models = builderOn(CARD);
+  const into = within({ dataset: { own: 'vca' } });
+  view.append(into, { key: 'vca', models, address: ['vca'] }, { status: 'vca' });
+  assert.match(into.drawn[0], /<div class="controls" data-own="vca"><em>vca<\/em>/);
+  assert.deepEqual(shown, [['vca', 'vca']], 'shown once drawn');
+  view.redraw();
+  there = false;
+  view.redraw();
+  view.redraw();
+  assert.deepEqual(shown.slice(1), ['redrawn', 'redrawn'], 'gone: no more');
 });
