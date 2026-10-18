@@ -65,6 +65,8 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   readonly #launcher: ClipLauncher<Track | Slot, ClipNote>;
   readonly #slots = new Map<Slot, Clip<Track>>(); // in the order put
   readonly #playing = new Map<Track | Slot, Playing<Track, Slot>>(); // by its track, or its slot where lent
+  readonly #sounding = new Map<Slot, Seconds>(); // a clip played once: when its last note ends, from its start
+  #now: Seconds = -Infinity; // the last 16th's time
 
   // key: the key a clip's steps are pitched in, read as it's launched
   constructor({ input, grid, key }: { input: Input<Track>; grid: ClipGrid; key: () => Key }) {
@@ -74,7 +76,7 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
     this.#launcher = new ClipLauncher<Track | Slot, ClipNote>({
       grid,
       play: (track, note, at) => this.#send(track, note, at),
-      started: (track, launch, span) => this.#lend(track, launch, span),
+      started: (track, launch, span) => this.#started(track, launch, span),
       ended: (track) => this.#playing.delete(track),
     });
   }
@@ -85,6 +87,7 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   // a slot emptied: its clip gone, stopped where it plays
   remove(slot: Slot): void {
     this.#slots.delete(slot);
+    this.#sounding.delete(slot);
     for (const [track, playing] of this.#playing) {
       if (playing.slot === slot) {
         this.#launcher.stop(track);
@@ -117,18 +120,36 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
     this.#playing.set(track, playing);
   }
   stop(track: Track): void {
+    const playing = this.#playing.get(track);
+    if (playing) {
+      this.#sounding.delete(playing.slot);
+    }
     this.#launcher.stop(track);
     this.#playing.delete(track);
   }
+  // Whether a slot's clip plays, as of the last 16th:
+  //   - one played once: from its start until its last note ends, or as long as its track
+  //     is lent, its ring-out among it;
+  //   - a looping one: from its launch until it's stopped.
+  playing(slot: Slot): boolean {
+    if ((this.#sounding.get(slot) ?? -Infinity) > this.#now) {
+      return true;
+    }
+    return [...this.#playing.values()].some((playing) => playing.slot === slot && !playing.clip.once);
+  }
   step(i: number, t: Seconds): void {
+    this.#now = t;
     this.#launcher.step(i, t);
   }
-  // a lent clip as it starts: the track its owner lends it for its span, its notes carrying its region
-  #lend(track: Track | Slot, region: number, span: Span): void {
+  // A clip played once as it starts:
+  //   - a lent one on the track its owner lends it for its span, its notes carrying its region;
+  //   - sounding until its span's end, or as long as its track is lent, its ring-out among it.
+  #started(track: Track | Slot, region: number, span: Span): void {
     const playing = this.#playing.get(track)!; // told only of a clip launched
     if (playing.clip.lend) {
       playing.to = inRegion(playing.clip.lend(playing.clip.to, span), region);
     }
+    this.#sounding.set(playing.slot, Math.max(span.until, playing.to?.play?.until ?? -Infinity));
   }
   // a note due, at its time and velocity, its note on and its note off together; left out
   // where its velocity is none

@@ -14,6 +14,8 @@
 //   - section-view.ts: a section of a view, its strips in a row, folding, its light;
 //   - mixer-view.ts: a mixer drawn, its strips side by side in its sections, the groups of
 //     tracks it's handed, its level bars and its lights;
+//   - clip-tracks-view.ts: the clip tracks drawn, a column each, a chip a clip, lit while it
+//     sounds, its ▶ and its × handed to its model;
 //   - canvas.ts: a canvas sized for the screen's pixels;
 //   - arrangement/: the arrangement on the page, its names beside its time, drawn on canvases,
 //     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
@@ -29,6 +31,7 @@ export { LimiterView, type LimiterLook } from './limiter-view.ts';
 export { Levels, meterFall, meterHtml, meterPosition } from './meter-view.ts';
 export { muteSoloHtml, slotsHtml, stripHtml, type StripLook } from './strip-view.ts';
 export { SectionView } from './section-view.ts';
+export { ClipTracksView } from './clip-tracks-view.ts';
 export {
   deskHtml,
   fedBy,

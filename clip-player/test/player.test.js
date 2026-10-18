@@ -243,3 +243,47 @@ test('a slot emptied: its clip gone from its track, stopped where it plays', () 
     'the other still plays',
   );
 });
+
+test("whether a slot's clip plays: a looping one from its launch until it's stopped; one played once from its start until its last note ends, as the 16ths come", () => {
+  const clips = new ClipPlayer({ input: input(), grid, key: () => KEY });
+  clips.put('groove', { to: to('drums'), pattern });
+  assert.equal(clips.playing('groove'), false, 'put, not launched');
+  clips.launch('groove');
+  assert.equal(clips.playing('groove'), true, 'launched to loop');
+  clips.stop('drums');
+  assert.equal(clips.playing('groove'), false, 'stopped');
+  const phrase = { bars: 1, events: [{ start: 0, duration: 2 * STEP, pitch: 50 }] };
+  const flower = { kind: 'tap' };
+  clips.put(flower, { to: { track: 'tap', clip: flower, live: false }, pattern: phrase, once: true });
+  clips.launch(flower);
+  clips.step(2, 2 * SIXTEENTH);
+  assert.equal(clips.playing(flower), false, 'launched, before its beat');
+  clips.step(4, 4 * SIXTEENTH);
+  assert.equal(clips.playing(flower), true, 'started on the beat');
+  clips.step(5, 5 * SIXTEENTH + SWING);
+  assert.equal(clips.playing(flower), true, 'its last note handed on, still sounding');
+  clips.step(6, 6 * SIXTEENTH);
+  assert.equal(clips.playing(flower), false, 'its last note ended');
+  clips.launch(flower);
+  clips.step(8, 8 * SIXTEENTH);
+  clips.remove(flower);
+  assert.equal(clips.playing(flower), false, 'its slot emptied');
+});
+
+test('a clip played once on a lent track plays for as long as the track is lent, its ring-out among it', () => {
+  const clips = new ClipPlayer({ input: input(), grid, key: () => KEY });
+  const lend = (where, span) => ({
+    ...where,
+    track: 'my tap/1',
+    play: { ...where.play, until: span.until + SIXTEENTH * 3 },
+  });
+  const phrase = { bars: 1, events: [{ start: 0, duration: STEP, pitch: 50 }] };
+  const flower = { kind: 'tap' };
+  clips.put(flower, { to: { track: 'tap', clip: flower, live: false }, pattern: phrase, once: true, lend });
+  clips.launch(flower);
+  clips.step(0, 0);
+  clips.step(2, 2 * SIXTEENTH);
+  assert.equal(clips.playing(flower), true, 'its last note ended, ringing out');
+  clips.step(4, 4 * SIXTEENTH);
+  assert.equal(clips.playing(flower), false, 'its track let go');
+});

@@ -16,10 +16,13 @@
 //   - desk-port.ts: a port for a desk as it plays (libs/build/desk/), its meters, its mix;
 //   - command.ts: what's done in a view, by address;
 //   - custom.ts: a view of its own, registered by kind;
+//   - clip-tracks.ts: the clip tracks, each clip read from what holds it, a clip player or the
+//     control surface, its ▶, and its × asking first;
 //   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
 //     view and the playhead, in 16ths; its port in its own words (ports.ts); a region's notes'
 //     and a lane's shapes, as they're drawn; what the desk declares, read from its view models.
 export { Choice } from './choice.ts';
+export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export type { Command } from './command.ts';
 export { CustomViews } from './custom.ts';
 export { Control, type Device } from './device.ts';
