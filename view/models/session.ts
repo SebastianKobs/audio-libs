@@ -11,6 +11,8 @@
 // The plays are read in the session's own words (HeardPlay): the MIDI sequencer's stream fits
 // them by their shape.
 import { entryOf } from '../../util/index.ts';
+import type { TracksReadout } from '../control-surface/index.ts';
+import { placedOn } from './placed.ts';
 
 // A play as the session hears it:
 //   - owner: what plays it, a plant; clip: the clip it names, a visitor's motif;
@@ -76,11 +78,11 @@ export interface GroupShown {
 }
 
 export class Session {
-  readonly #groupOf: (kind: string, live: boolean) => string | null;
+  readonly #tracks: Pick<TracksReadout, 'groupOf'>;
   readonly #groups = new Map<string, Group>();
 
-  constructor({ groupOf }: { groupOf: (kind: string, live: boolean) => string | null }) {
-    this.#groupOf = groupOf;
+  constructor(tracks: Pick<TracksReadout, 'groupOf'>) {
+    this.#tracks = tracks;
   }
   heard(play: HeardPlay): void {
     if (!play.notes.length && !play.ends?.length) {
@@ -102,11 +104,11 @@ export class Session {
   // Your playing goes on its kind's pool, where it has one; a replay on its group.
   // A play on no track goes nowhere.
   #placed(play: HeardPlay): { group: Group; track: number; yours: boolean } | null {
-    const group = this.#groupOf(play.kind, play.live === true);
-    if (group === null || play.track == null) {
+    const placed = placedOn(this.#tracks, play);
+    if (!placed) {
       return null;
     }
-    return { group: this.#groupNamed(group), track: play.track, yours: play.live === true };
+    return { group: this.#groupNamed(placed.group), track: placed.track, yours: play.live === true };
   }
   // A group by its name, made the first time a play goes on it.
   #groupNamed(name: string): Group {

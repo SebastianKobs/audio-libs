@@ -17,6 +17,7 @@
 //   - custom.ts: a view of its own, registered by kind;
 //   - clip-tracks.ts: the clip tracks, each clip read from what holds it, a clip player or the
 //     control surface, its ▶, and its × asking first;
+//   - placed.ts: where a play goes, its group and its track, the session's and the arrangement's;
 //   - session.ts: what the session view shows of what's played, each track of a group and
 //     what holds it, lit as it sounds, in its own words;
 //   - session-tracks.ts: the session's tracks as its mixer shows them, in the control

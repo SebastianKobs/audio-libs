@@ -1,6 +1,7 @@
 // ---------- view/models/arrangement/rows: the arrangement's rows and their lanes ----------
 import type { RecordedLane, RecordedRegion, TracksReadout } from '../../control-surface/index.ts';
 import type { Mixer } from '../mixer.ts';
+import { placedOn } from '../placed.ts';
 import { SEND } from '../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../plan/format/index.ts';
 import { entryOf } from '../../../util/index.ts';
@@ -72,11 +73,11 @@ export function rowsOf(
 // Played live, on the group it was played on; played back, on its kind's.
 // None when the region has no group or no track.
 export function rowKeyOf(region: RecordedRegion, tracks: TracksReadout): string | null {
-  const group = tracks.groupOf(region.kind, region.live);
-  if (group === null || region.track === null) {
+  const placed = placedOn(tracks, region);
+  if (!placed) {
     return null;
   }
-  return `${group} ${region.track}`;
+  return `${placed.group} ${placed.track}`;
 }
 // The row a lane goes on.
 // A lane with a track number: that track in its group. This covers replay tracks,
@@ -85,8 +86,8 @@ export function rowKeyOf(region: RecordedRegion, tracks: TracksReadout): string 
 // None for a strip that has no row.
 export function laneRowOf(lane: RecordedLane, tracks: TracksReadout, strips: readonly ArrangedStrip[]): string | null {
   if (lane.track !== null) {
-    const group = tracks.groupOf(lane.kind, false);
-    return group === null ? null : `${group} ${lane.track}`;
+    const placed = placedOn(tracks, lane);
+    return placed && `${placed.group} ${placed.track}`;
   }
   if (strips.some(({ strip }) => strip === lane.kind)) {
     return `strip ${lane.kind}`;
@@ -151,15 +152,11 @@ function tracksUsed(
   tracks: TracksReadout,
 ): Map<string, number> {
   const used = new Map<string, number>();
-  const placed = [
-    ...regions.map((region) => ({ group: tracks.groupOf(region.kind, region.live), track: region.track })),
-    ...lanes.map((lane) => ({ group: tracks.groupOf(lane.kind, false), track: lane.track })),
-  ];
-  for (const { group, track } of placed) {
-    if (group === null || track === null) {
-      continue;
+  for (const play of [...regions, ...lanes]) {
+    const placed = placedOn(tracks, play);
+    if (placed) {
+      used.set(placed.group, Math.max(used.get(placed.group) ?? 0, placed.track + 1));
     }
-    used.set(group, Math.max(used.get(group) ?? 0, track + 1));
   }
   return used;
 }
