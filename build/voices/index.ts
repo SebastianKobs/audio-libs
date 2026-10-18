@@ -6,7 +6,9 @@
 //   - instrument.ts: one instrument playing one patch from a file of instruments, its voices,
 //     built by the builder handed in, its edits glided or built again;
 //   - sound-module.ts: a multitimbral sound module, a part for each track, each playing a
-//     patch from its bank, an edit reaching every part that plays it.
+//     patch from its bank, an edit reaching every part that plays it;
+//   - test-notes.ts: a device view's test note, an instrument of its own for each key.
 export { Voices } from './voices.ts';
 export { Instrument, type InstrumentMaking } from './instrument.ts';
 export { SoundModule, type PartMaking } from './sound-module.ts';
+export { TestNotes, type TestNote, type HeldTestNote, type PhrasedTestNote } from './test-notes.ts';

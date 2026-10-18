@@ -13,6 +13,7 @@
 //   - meters.ts: a meter on a node, its peak; output.ts, the output after what's built, faded in and out;
 //   - power.ts: the audio's power: started, what's built into the output, the clock on its time;
 //     the output faded out and the context suspended, and back on;
+//   - engine-building.ts: the Web Audio builder in the engine's context, its buffers shared;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
 export { ClockedContext, type ClockedContextOptions } from './context.ts';
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
@@ -28,4 +29,5 @@ export { panOf, type PanLaw } from './blocks/pan.ts';
 export { meterOn, type PeakMeter } from './meters.ts';
 export { FADE_IN, FADE_OUT, Output } from './output.ts';
 export { AudioPower, type BrowserAudio, type EngineOnceStarted } from './power.ts';
+export { EngineBuilding, buildingIn, type BuildingIn } from './engine-building.ts';
 export { Copies, type Editable } from './copies.ts';

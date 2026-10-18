@@ -1,0 +1,60 @@
+// ---------- build/voices/test-notes: a device view's test note ----------
+// An instrument of its own for each key, made at its first test note, played straight into it:
+//   - not a track's: a sequencer hands out its own note numbers, which the test note's would
+//     meet;
+//   - not through a sequencer, so it isn't recorded.
+// Each note a fresh index (MIDI 2.0's note rotation), phrased as its owner says, held at most
+// its longest; let go as its button is.
+import { NoteRotation, type Message, type Receiver } from '../../midi/index.ts';
+import { entryOf } from '../../util/index.ts';
+
+// A test note as a device view sets it: its pitch, velocity, 0 to 1, and time; its own values
+// by the note's sources' names.
+export interface TestNote {
+  readonly pitch: number;
+  readonly velocity: number;
+  readonly t: number;
+  readonly values: Readonly<Record<string, number>>;
+}
+// a test note as it sounds: let go as its button is
+export interface HeldTestNote {
+  release(at: number): void;
+}
+// a test note as it's phrased: its length, its longest, its button's let go lost
+export interface PhrasedTestNote extends TestNote {
+  readonly duration: number;
+}
+
+const LONGEST = 30; // s: a test note held at most this long
+
+export class TestNotes<Key> {
+  readonly #instrumentFor: (key: Key) => Receiver;
+  readonly #phrase: (key: Key, note: PhrasedTestNote, index: number) => Message[];
+  readonly #made = new Map<Key, Receiver>();
+  readonly #rotation = new NoteRotation();
+
+  // instrumentFor(): a key's instrument, made at its first test note;
+  // phrase(): a note's messages as its owner plays one of that key's
+  constructor({
+    instrumentFor,
+    phrase,
+  }: {
+    instrumentFor: (key: Key) => Receiver;
+    phrase: (key: Key, note: PhrasedTestNote, index: number) => Message[];
+  }) {
+    this.#instrumentFor = instrumentFor;
+    this.#phrase = phrase;
+  }
+  // A test note on a key's instrument, from its time until it's let go, at most its longest.
+  play(key: Key, note: TestNote): HeldTestNote {
+    const instrument = entryOf(this.#made, key, () => this.#instrumentFor(key));
+    const index = this.#rotation.noteOn();
+    instrument.receive(this.#phrase(key, { ...note, duration: LONGEST }, index));
+    return {
+      release: (at) => {
+        instrument.receive([{ type: 'note off', index, t: at }]);
+        this.#rotation.noteOff(index);
+      },
+    };
+  }
+}
