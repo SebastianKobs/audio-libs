@@ -22,7 +22,7 @@
 //     tracks it's handed, its level bars and its lights;
 //   - clip-tracks-view.ts: the clip tracks drawn, a column each, a chip a clip, lit while it
 //     sounds, its ▶ and its × handed to its model;
-//   - device-view-panel.ts: the device view drawn below the tracks from its model, what's open,
+//   - device-panel-view.ts: the device view drawn below the tracks from its model, what's open,
 //     each kind a chain of devices filling it, its knobs dragged and brought up to date;
 //   - instrument-devices.ts: each role's instrument a device, a rack of its cards, the test
 //     note's button held as long as it is, its reset; its words and the test note's row its
@@ -59,7 +59,7 @@ export {
   type ArrangementColors,
   type Drawn as ArrangementDrawn,
 } from './arrangement/arrangement-view.ts';
-export { DeviceViewPanel, type DeviceChain } from './device-view-panel.ts';
+export { DevicePanelView, type DeviceChain } from './device-panel-view.ts';
 export { InsertDevices } from './insert-devices.ts';
 export { InstrumentDevices, type InstrumentLook } from './instrument-devices.ts';
 export { TransportLaneView, type TransportHints } from './transport-lane-view.ts';

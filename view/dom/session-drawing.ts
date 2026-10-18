@@ -2,9 +2,9 @@
 // What it draws is its drawers': the clip tracks', the mixer's, the device view's.
 // What it shows of the session is its models': what the stream played (Session), the groups of
 // tracks and what sounded (SessionTracks).
-import type { DeviceView, Session, SessionTracks, Views } from '../models/index.ts';
+import type { DevicePanel, Session, SessionTracks, Views } from '../models/index.ts';
 import type { ClipTracksView } from './clip-tracks-view.ts';
-import type { DeviceViewPanel } from './device-view-panel.ts';
+import type { DevicePanelView } from './device-panel-view.ts';
 import type { MixerView } from './mixer-view.ts';
 
 // The clock as the drawing reads it: its time, its 16ths, a beat's length at the tempo now.
@@ -34,7 +34,7 @@ export class SessionDrawing {
     section: Pick<ClipTracksView['section'], 'light'>;
   };
   readonly #mixer: Pick<MixerView, 'draw' | 'drawLevels' | 'light'>;
-  readonly #devicePanel: Pick<DeviceViewPanel, 'refresh'>;
+  readonly #devicePanelView: Pick<DevicePanelView, 'refresh'>;
   #lastLook = -Infinity;
   #pressed = false; // a pointer pressed on the view
 
@@ -47,8 +47,8 @@ export class SessionDrawing {
     tracks,
     clipTracks,
     mixer,
-    deviceView,
     devicePanel,
+    devicePanelView,
     flow,
     page,
   }: {
@@ -60,8 +60,8 @@ export class SessionDrawing {
     tracks: Pick<SessionTracks, 'groups' | 'sounded'>; // in their groups, as the mixer shows them
     clipTracks: Pick<ClipTracksView, 'setBeat' | 'draw'> & { section: Pick<ClipTracksView['section'], 'light'> };
     mixer: Pick<MixerView, 'draw' | 'drawLevels' | 'light'>;
-    deviceView: Pick<DeviceView<unknown>, 'close'>; // closed as both views hide
-    devicePanel: Pick<DeviceViewPanel, 'refresh'>;
+    devicePanel: Pick<DevicePanel<unknown>, 'close'>; // closed as both views hide
+    devicePanelView: Pick<DevicePanelView, 'refresh'>;
     flow: EventTarget; // the session view's sections, a press on it held
     page: EventTarget; // where a press ends, anywhere: the window
   }) {
@@ -73,7 +73,7 @@ export class SessionDrawing {
     this.#tracks = tracks;
     this.#clipTracks = clipTracks;
     this.#mixer = mixer;
-    this.#devicePanel = devicePanel;
+    this.#devicePanelView = devicePanelView;
     flow.addEventListener('pointerdown', () => {
       this.#pressed = true;
     });
@@ -85,7 +85,7 @@ export class SessionDrawing {
     clock.onStep((i) => this.#onStep(i));
     views.onShow((view) => {
       if (view === null) {
-        deviceView.close();
+        devicePanel.close();
       }
       this.#lookFromABeatBack();
     });
@@ -116,7 +116,7 @@ export class SessionDrawing {
       return;
     }
     this.#drawPlayingBack();
-    this.#devicePanel.refresh(); // its knobs as they play, its views of their own
+    this.#devicePanelView.refresh(); // its knobs as they play, its views of their own
     this.#mixer.drawLevels(this.#frameStep());
   }
   // Playing back, the live grid is held and hands out no 16ths, so no beat draws the view.

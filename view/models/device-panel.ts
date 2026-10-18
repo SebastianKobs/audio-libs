@@ -1,4 +1,4 @@
-// ---------- view/models/device-view: the device view, what's open in it. Pure ----------
+// ---------- view/models/device-panel: the device view, what's open in it. Pure ----------
 // As Ableton's detail view: below the tracks, a track's own devices left to right.
 // Opened by what its owner asks, a kind and what of it, as 'strip:' and a strip's address.
 // Each kind a chain of devices, handed in, which fills it (its drawer's to use).
@@ -15,7 +15,7 @@ export interface Opened {
   readonly mark: number;
 }
 
-export class DeviceView<Chain> {
+export class DevicePanel<Chain> {
   readonly chosen = new Chosen(); // each rack's pad, each group's tab
   readonly #chains: Readonly<Record<string, Chain>>;
   readonly #events = new Events<{ change: [] }>();

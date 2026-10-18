@@ -1,12 +1,12 @@
-// ---------- view/dom/device-view-panel: the device view drawn, below the tracks ----------
-import { Choice, Knob, type Control, type DeviceView } from '../models/index.ts';
+// ---------- view/dom/device-panel-view: the device view drawn, below the tracks ----------
+import { Choice, Knob, type Control, type DevicePanel } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import { CompositeView } from './composite-view.ts';
 import type { CustomView } from './custom-view.ts';
 import { makeElement } from './elements.ts';
 import { KnobDrag, refreshKnobs } from './knob-view.ts';
 
-// The device view drawn from its model (DeviceView, libs/view/models/device-view.ts), as
+// The device view drawn from its model (DevicePanel, libs/view/models/device-panel.ts), as
 // Ableton's detail view: below the tracks, a track's own devices left to right, drawn again as
 // its model changes. Each kind of opening a chain of devices (DeviceChain):
 //   - the owner's: a clip track's instruments, by their roles;
@@ -28,8 +28,8 @@ export interface DeviceChain {
 
 // The device view's panel, made as the view starts: below the tracks, its title, each chain's
 // head, its row of devices, its close.
-export class DeviceViewPanel {
-  readonly #view: DeviceView<DeviceChain>;
+export class DevicePanelView {
+  readonly #view: DevicePanel<DeviceChain>;
   readonly #strip: HTMLDivElement;
   readonly #heads = new Map<string, HTMLElement>(); // each chain's head, by its kind
   readonly #bound = new Bound<Control>(CONTROL_MARKS); // each control drawn, its model
@@ -46,7 +46,7 @@ export class DeviceViewPanel {
     strip,
     custom,
   }: {
-    view: DeviceView<DeviceChain>;
+    view: DevicePanel<DeviceChain>;
     strip: HTMLDivElement;
     custom: Readonly<Record<string, CustomView>>;
   }) {

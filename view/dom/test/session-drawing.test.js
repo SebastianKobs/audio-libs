@@ -53,8 +53,8 @@ function drawing({ playingBack = false } = {}) {
       section: { light: (heard) => asked.lit.push([...heard]) },
     },
     mixer: { draw: () => {}, drawLevels: (dt) => asked.levels.push(dt), light: () => {} },
-    deviceView: { close: () => asked.closed++ },
-    devicePanel: { refresh: () => asked.refreshed++ },
+    devicePanel: { close: () => asked.closed++ },
+    devicePanelView: { refresh: () => asked.refreshed++ },
     flow,
     page,
   });

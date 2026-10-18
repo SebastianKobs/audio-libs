@@ -1,5 +1,5 @@
 // ---------- view/dom/instrument-devices: each role's instrument as a device ----------
-// A chain of the device view's (DeviceChain, device-view-panel.ts), opened by a clip track's
+// A chain of the device view's (DeviceChain, device-panel-view.ts), opened by a clip track's
 // roles, drawn from the instruments' model (InstrumentRacks, libs/view/models/) as a synth's
 // panel:
 //   1. its bar: what it is, the test note's button, held as long as it is, and its reset;
@@ -9,7 +9,7 @@
 // instruments are shown each time one is (shown()), to grey the values none of them reads.
 import type { InstrumentRacks } from '../models/index.ts';
 import type { CompositeLook, CompositeView } from './composite-view.ts';
-import type { DeviceChain } from './device-view-panel.ts';
+import type { DeviceChain } from './device-panel-view.ts';
 import { html } from './elements.ts';
 
 // How an instrument is shown, in its owner's words:

@@ -29,7 +29,7 @@
 //   - meters.ts: a level bar's fall, as a DIN peak meter's;
 //   - limiter-history.ts: the limiter's history, a column each interval, the loudest of its frames;
 //   - chosen.ts: what's chosen in the composites a view shows, a rack's pad, a group's tab;
-//   - device-view.ts: the device view, what's open in it, by a kind and what of it, its chain;
+//   - device-panel.ts: the device view, what's open in it, by a kind and what of it, its chain;
 //   - transport-lane.ts: the transport as its lane shows it, whether it plays, bar and beat;
 //   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
 //     view and the playhead, in 16ths; its port in its own words (ports.ts); a region's notes'
@@ -39,7 +39,7 @@ export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export { Session, type GroupShown, type TrackShown } from './session.ts';
 export { SessionTracks, type SessionGroup, type SessionTrack, type TrackNow } from './session-tracks.ts';
 export { TransportLane } from './transport-lane.ts';
-export { DeviceView, type Opened } from './device-view.ts';
+export { DevicePanel, type Opened } from './device-panel.ts';
 export { Chosen } from './chosen.ts';
 export { meterFall, Meters } from './meters.ts';
 export { LimiterHistory, type Peaks } from './limiter-history.ts';

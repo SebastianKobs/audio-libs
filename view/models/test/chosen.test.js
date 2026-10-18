@@ -2,7 +2,7 @@
 // tab, by its composite's key and the group's title; none until chosen; the device view's own, for the composites it shows
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Chosen, DeviceView } from '../index.ts';
+import { Chosen, DevicePanel } from '../index.ts';
 
 test("a rack's pad and a group's tab, none until chosen, each kept apart by its keys", () => {
   const chosen = new Chosen();
@@ -19,7 +19,7 @@ test("a rack's pad and a group's tab, none until chosen, each kept apart by its 
 });
 
 test("the device view's own, for the composites it shows, kept as it's opened and closed", () => {
-  const view = new DeviceView({ chains: {} });
+  const view = new DevicePanel({ chains: {} });
   view.chosen.choosePad('tap', 'pluck b');
   view.open('tap', 'instruments:tap');
   view.close();
