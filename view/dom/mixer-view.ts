@@ -7,7 +7,8 @@
 // Its clicks, its own:
 //   - a strip's name or slot: told to whoever listens, by the strip's address (onOpen());
 //   - M mutes, S solos it alone, with shift adds it or lets it go;
-//   - a group's header folds it to its first track, with shift every group;
+//   - a group's header folds it to its first track, with shift every group, which are
+//     unfolded a model's (Toggles), drawn from it;
 //   - a knob dragged, set back by a double-click (KnobDrag), each bound to its model as it's
 //     drawn (Bound).
 // After each, the view is told to draw it again (changed()).
@@ -17,7 +18,7 @@
 // heard feed counted too.
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
-import { shortName, type BusGroup, type Control, type Strip, type ViewBuilder } from '../models/index.ts';
+import { shortName, type BusGroup, type Control, type Strip, type Toggles, type ViewBuilder } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import { html, makeElement, setHtml, type Html } from './elements.ts';
 import { KnobDrag } from './knob-view.ts';
@@ -73,27 +74,32 @@ export class MixerView {
   readonly #buses: SectionView;
   readonly #returns: SectionView;
   readonly #master: SectionView;
+  readonly #unfolded: Toggles; // the groups unfolded, each folded to its first track until it is
 
+  // folding: which sections are folded, these and those beside them, and which groups unfolded;
   // changed(): told after a click or a drag changed what it draws
   constructor({
     within,
     models,
     look,
+    folding,
     changed,
   }: {
     within: HTMLElement;
     models: ViewBuilder;
     look: MixerLook;
+    folding: { readonly sections: Toggles; readonly groups: Toggles };
     changed: () => void;
   }) {
     this.#models = models;
     this.#look = look;
+    this.#unfolded = folding.groups;
     this.#changed = changed;
-    const folded = changed;
-    this.#tracks = new SectionView(within, look.labels.tracks, { folded });
-    this.#buses = new SectionView(within, look.labels.buses, { folded });
-    this.#returns = new SectionView(within, look.labels.returns, { folded });
-    this.#master = new SectionView(within, look.labels.master, { folds: false });
+    const folds = { folding: folding.sections, folded: changed };
+    this.#tracks = new SectionView(within, look.labels.tracks, folds);
+    this.#buses = new SectionView(within, look.labels.buses, folds);
+    this.#returns = new SectionView(within, look.labels.returns, folds);
+    this.#master = new SectionView(within, look.labels.master);
     this.sections = [this.#tracks, this.#buses, this.#returns, this.#master];
     for (const section of this.sections) {
       section.row.addEventListener('click', (event) => this.#clicked(event));
@@ -145,7 +151,7 @@ export class MixerView {
     const header = target.closest<HTMLElement>('[data-subfold]');
     const button = target.closest<HTMLElement>('[data-mute], [data-solo]');
     if (header) {
-      this.#foldGroup(header.parentElement!, event.shiftKey); // its group
+      this.#foldGroup(header.parentElement as HTMLElement, event.shiftKey); // its group
     } else if (button) {
       this.#muteOrSolo(button, event.shiftKey);
     } else {
@@ -154,14 +160,18 @@ export class MixerView {
     this.#changed();
   }
   // A group folded to its first track, or unfolded; with shift every group, as this one goes.
-  #foldGroup(group: Element, all: boolean): void {
-    const folded = group.classList.toggle('folded');
-    if (!all) {
-      return;
+  // Each group then drawn as its folding says.
+  #foldGroup(group: HTMLElement, all: boolean): void {
+    const groups = [...this.#tracks.row.querySelectorAll<HTMLElement>('.group')];
+    const every = groups.map((each) => each.dataset.group!); // each has its key
+    this.#unfolded.turn(group.dataset.group!, all ? every : [group.dataset.group!]);
+    for (const each of groups) {
+      this.#drawFolded(each);
     }
-    for (const other of this.#tracks.row.querySelectorAll('.group')) {
-      other.classList.toggle('folded', folded);
-    }
+  }
+  // a group folded to its first track until it's unfolded
+  #drawFolded(group: HTMLElement): void {
+    group.classList.toggle('folded', !this.#unfolded.has(group.dataset.group!)); // each has its key
   }
   // M mutes or unmutes. S solos the strip alone; with shift, adds it or lets it go.
   #muteOrSolo(button: HTMLElement, adding: boolean): void {
@@ -194,6 +204,7 @@ export class MixerView {
       if (there !== group) {
         row.insertBefore(group, there);
       }
+      this.#drawFolded(group);
       lightGroup(group);
     });
     for (const gone of kept.values()) {
@@ -253,10 +264,10 @@ function sendUp(models: ViewBuilder, from: string, to: string): boolean {
   return (send?.value ?? 0) > 0;
 }
 // A group, new: its header, the group's name with a dot as a section's, and its box.
-// Folded at first, to its first track; a click on its header folds and unfolds it (#clicked()).
+// Folded as its folding says (#drawFolded()); a click on its header folds and unfolds it.
 // Scrolled, its dot shows at once whether tracks are out of sight.
 function newGroup(key: string, name: string): HTMLElement {
-  const group = makeElement('div', 'group folded');
+  const group = makeElement('div', 'group');
   group.dataset.group = key;
   const head = makeElement('div', 'subhead', `${name} →`); // an arrow, as a section's label
   Object.assign(head.dataset, { subfold: '', title: FOLD_GROUP });

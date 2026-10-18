@@ -2,7 +2,10 @@
 // As a mixer's sections stand side by side: a label, then its strips in a row.
 // A section that folds: a click on its label folds it to its first strip, and back.
 //   - With shift: every section beside it that folds, as this one goes.
+//   - Which are folded is a model's (Toggles), by each section's label, every section beside it
+//     reading the same one; drawn from it.
 //   - Folded, its light shows while a hidden strip sounds.
+import type { Toggles } from '../models/index.ts';
 import { makeElement } from './elements.ts';
 
 // what a click on a folding section's label does, as its hint says
@@ -16,25 +19,27 @@ export class SectionView {
   readonly row = makeElement('div', 'row');
   readonly #dot: HTMLElement | null = null;
 
-  // label: as the view names it;
-  // folds: whether a click on it folds it, an arrow after it;
+  // label: as the view names it, and its key among the sections folded;
+  // folding: which sections are folded, where a click on it folds it, an arrow after it;
   // folded(): told after a click folded it or the sections beside it.
   constructor(
     within: HTMLElement,
     label: string,
-    { folds = true, folded = () => {} }: { folds?: boolean; folded?: () => void } = {},
+    { folding, folded = () => {} }: { folding?: Toggles; folded?: () => void } = {},
   ) {
-    const head = makeElement('div', 'seclabel', folds ? `${label} →` : label);
+    const head = makeElement('div', 'seclabel', folding ? `${label} →` : label);
     this.element.append(head, this.row);
     within.appendChild(this.element);
-    if (!folds) {
+    if (!folding) {
       return;
     }
     this.#dot = makeElement('i', 'dot');
     head.append(this.#dot);
+    this.element.dataset.section = label;
+    this.element.classList.toggle('folded', folding.has(label));
     Object.assign(head.dataset, { fold: '', title: FOLD });
     head.addEventListener('click', (event) => {
-      fold(this.element, within, event.shiftKey);
+      fold(label, within, folding, event.shiftKey);
       folded();
     });
   }
@@ -52,13 +57,12 @@ export class SectionView {
 }
 
 // A section folded to its first strip, or unfolded; with every section beside it that folds,
-// as this one goes.
-function fold(section: HTMLElement, within: HTMLElement, all: boolean): void {
-  const folded = section.classList.toggle('folded');
-  if (!all) {
-    return;
-  }
-  for (const head of within.querySelectorAll(':scope > .sec > [data-fold]')) {
-    head.parentElement!.classList.toggle('folded', folded); // a label's section
+// as this one goes. Each section beside it then drawn as its folding says.
+function fold(label: string, within: HTMLElement, folding: Toggles, all: boolean): void {
+  const sections = [...within.querySelectorAll<HTMLElement>(':scope > .sec[data-section]')];
+  const every = sections.map((section) => section.dataset.section!); // selected by it
+  folding.turn(label, all ? every : [label]);
+  for (const section of sections) {
+    section.classList.toggle('folded', folding.has(section.dataset.section!));
   }
 }

@@ -26,8 +26,8 @@
 //     each kind a chain of devices filling it, its knobs dragged and brought up to date;
 //   - insert-devices.ts: a strip's inserts, each a composite drawn flat, a reset for what's live;
 //   - transport-lane-view.ts: the transport's lane drawn, ▶ and ■ sent, bar and beat;
-//   - views.ts: the session view and the arrangement, one open at a time in the strip along the
-//     bottom, a tab each;
+//   - view-strip.ts: the strip along the bottom, the session view and the arrangement, drawn
+//     from which one is open;
 //   - canvas.ts: a canvas sized for the screen's pixels;
 //   - arrangement/: the arrangement on the page, its names beside its time, drawn on canvases,
 //     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
@@ -65,4 +65,4 @@ export {
 export { DeviceViewPanel, type DeviceChain } from './device-view-panel.ts';
 export { InsertDevices } from './insert-devices.ts';
 export { TransportLaneView, type TransportHints } from './transport-lane-view.ts';
-export { Views, type ViewName } from './views.ts';
+export { ViewStrip } from './view-strip.ts';

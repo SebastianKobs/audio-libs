@@ -3,7 +3,7 @@
 // A chip lights while its clip sounds; a played track's chips have ▶ and ×.
 // Its clicks are handed to its model (libs/view/models/clip-tracks.ts).
 import type { ClipTrack } from '../control-surface/index.ts';
-import type { ClipTracks, ShownClip } from '../models/index.ts';
+import type { ClipTracks, ShownClip, Toggles } from '../models/index.ts';
 import { makeElement } from './elements.ts';
 import { SectionView } from './section-view.ts';
 
@@ -32,23 +32,26 @@ export class ClipTracksView {
   // within: what its section is made at the end of, its clicks listened to;
   // opens(): what a clip track's name opens, if anything;
   // open(): what it opens opened, by its title;
+  // folding: which sections are folded, its own and those beside it;
   // folded(): told after a click folded it
   constructor({
     within,
     clips,
     opens,
     open,
+    folding,
     folded,
   }: {
     within: HTMLElement;
     clips: ClipTracks;
     opens: (track: ClipTrack) => string | null;
     open: (title: string, what: string) => void;
+    folding: Toggles;
     folded: () => void;
   }) {
     this.#clips = clips;
     this.#open = open;
-    this.section = new SectionView(within, 'clip', { folded });
+    this.section = new SectionView(within, 'clip', { folding, folded });
     within.addEventListener('click', (event) => this.#clicked(event));
     for (const track of clips.tracks) {
       this.#tracks.set(track.key, this.#trackOf(track, opens(track)));

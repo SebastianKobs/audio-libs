@@ -15,11 +15,11 @@
 import { GridMap, HISTORY, type Seconds, type TimeMap } from '../../../clock/index.ts';
 import { SEND_PARAM, type ParamSpec } from '../../../params/index.ts';
 import type { TimedValue } from '../../../automation/index.ts';
-import { toggleIn } from '../../../util/index.ts';
 import { keptWhole } from './note-shapes.ts';
 import { playheadAt } from './playhead.ts';
 import { laneKeyOf, laneRowOf, rowKeyOf, rowsOf, stripOf, type Row } from './rows.ts';
 import { TimeWindow } from './time-window.ts';
+import { Toggles } from '../toggles.ts';
 import type {
   ArrangedStrip,
   ArrangementClock,
@@ -61,8 +61,8 @@ export class Arrangement {
   readonly #clock: ArrangementClock;
   readonly #cue: (t: Seconds | null) => void;
   readonly #window = new TimeWindow();
-  readonly #unfolded = new Set<string>(); // the groups unfolded, each folded until it is
-  readonly #opened = new Set<string>(); // the tracks whose lanes are open, by their rows' keys (G5a)
+  readonly #unfolded = new Toggles(); // the groups unfolded, each folded until it is
+  readonly #opened = new Toggles(); // the tracks whose lanes are open, by their rows' keys (G5a)
   #rows: Row[] = [];
   #regions: PlacedRegion[] = [];
   #lanes: PlacedLane[] = [];
@@ -159,21 +159,21 @@ export class Arrangement {
     const regions = this.#recording.regions(now);
     const lanes = this.#recording.lanes(now);
     const controllersOf = (strip: string): readonly string[] => this.#declared.controllersOf(strip);
-    const beside = { strips: this.#strips, lanes, opened: this.#opened, controllersOf };
-    this.#rows = rowsOf(regions, this.#tracks, this.#unfolded, beside);
+    const beside = { strips: this.#strips, lanes, opened: this.#opened.keys, controllersOf };
+    this.#rows = rowsOf(regions, this.#tracks, this.#unfolded.keys, beside);
     this.#lanes = lanes.flatMap((lane) => this.#placedLane(lane));
     this.#regions = this.#placedRegions(regions);
   }
   // a track's lanes opened or closed; every: every track's, as this one goes
   toggleLanes(track: string, every: boolean): void {
     const tracks = this.#rows.filter((row) => row.open !== undefined && !row.header).map((row) => row.key);
-    toggled(this.#opened, track, every ? tracks : [track]);
+    this.#opened.turn(track, every ? tracks : [track]);
     this.look();
   }
   // a group unfolded, or folded to its first track; every: every group, as this one goes
   toggleGroup(group: string, every: boolean): void {
     const groups = this.#rows.filter((row) => row.header).map((row) => row.group);
-    toggled(this.#unfolded, group, every ? groups : [group]);
+    this.#unfolded.turn(group, every ? groups : [group]);
     this.look();
   }
   // a press in the ruler: the playhead placed there, until it's let go
@@ -271,11 +271,4 @@ function keptWholeIn(region: RecordedRegion, song: TimeMap): { notes: RecordedNo
   const notes = region.notes.map((note) => keptWhole(note, song));
   const ends = notes.map((note) => (note.duration === undefined ? -Infinity : note.t + note.duration));
   return { notes, to: Math.max(region.to, ...ends) };
-}
-// a set's keys turned as the one clicked goes: each in, if it was out, or each out
-function toggled(keys: Set<string>, clicked: string, each: readonly string[]): void {
-  const adding = !keys.has(clicked);
-  for (const key of each) {
-    toggleIn(keys, key, adding);
-  }
 }
