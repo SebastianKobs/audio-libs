@@ -61,7 +61,8 @@ export function keptDraws(random: () => number): { random: () => number; again: 
 }
 
 // A source of random draws, seeded as it's made, so a run is drawn again from its seed:
-// its own draws (random()), and a play's (play()), a seed of its own drawn from it,
+// its own draws (random(), what plays: the conductor's picks, a plant's contour and a tower's rhythm, a visitor's wish),
+// and a play's (play()), a seed of its own drawn from it,
 // with a generator made from that seed, so a play is drawn again from its seed alone;
 // seeded again from the start (reseed()).
 export class Draws {
@@ -79,7 +80,7 @@ export class Draws {
     const seed = Math.floor(this.#random() * SEEDS);
     return { seed, random: seeded(seed) };
   }
-  // seeded again, as from the start: the tests' and the recorders', a case at a time
+  // seeded again, as from the start: the tests' and the recorders', a case at a time, on one garden whose frames run on between them
   reseed(seed: number): void {
     this.#random = seeded(seed);
   }
