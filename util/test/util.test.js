@@ -11,6 +11,7 @@ import {
   entryOf,
   Events,
   firstAfter,
+  Draws,
   keptDraws,
   lastAtOrBefore,
   LiveCopies,
@@ -19,11 +20,13 @@ import {
   sameData,
   seeded,
   SETTLED,
+  pickWeighted,
   smoothstep,
   stepToward,
   toggleIn,
   under,
   updateInPlace,
+  valueAt,
 } from '../index.ts';
 import { isNear, near } from './near.js';
 
@@ -206,6 +209,20 @@ test('the first of a list rising by its key later than a time, by halves; the la
   );
 });
 
+test('a value at a time between timed points: a line between each two, held before the first and after the last', () => {
+  const points = [
+    { t: 0, v: 0 },
+    { t: 2, v: 4 },
+    { t: 3, v: 4 },
+  ];
+  const timeOf = (point) => point.t;
+  const valueOf = (point) => point.v;
+  assert.deepEqual(
+    [1, 2, -1, 5].map((time) => valueAt(points, time, timeOf, valueOf)),
+    [2, 4, 0, 4],
+  );
+});
+
 test("a map's entry for a key, made the first time it's asked for, the same one after", () => {
   const lists = new Map();
   const made = [];
@@ -237,6 +254,19 @@ test('an item picked from a list, each as likely, by a random of its own or Math
   );
 });
 
+test("an item picked from a list, each as likely as its weight; the last where the weights' sum is left over; none from an empty one", () => {
+  const list = ['a', 'b'];
+  const weightOf = (item) => (item === 'a' ? 1 : 3);
+  assert.deepEqual(
+    [0.2, 0.3, 0.999].map((drawn) => pickWeighted(list, weightOf, () => drawn)),
+    ['a', 'b', 'b'],
+  );
+  assert.equal(
+    pickWeighted([], weightOf, () => 0.5),
+    undefined,
+  );
+});
+
 test('random draws kept as they are drawn: drawn again, the same in turn, then fresh ones once they have run out', () => {
   const random = seeded(3);
   const draws = keptDraws(seeded(3));
@@ -246,6 +276,29 @@ test('random draws kept as they are drawn: drawn again, the same in turn, then f
   assert.deepEqual([again(), again(), again()], [...first, random()], 'the same in turn, then fresh');
   const twice = draws.again();
   assert.deepEqual([twice(), twice()], first, 'each time again from the first');
+});
+
+const draw = (random, count = 8) => Array.from({ length: count }, () => random());
+
+test('a seeded source of draws: its own as seeded; each play a seed of its own, a 32-bit one, its draws again from it alone', () => {
+  const draws = new Draws({ seed: 5 });
+  assert.deepEqual(
+    draw(() => draws.random()),
+    draw(seeded(5)),
+    'its own, as seeded',
+  );
+  const play = draws.play();
+  assert.ok(Number.isInteger(play.seed) && play.seed >= 0 && play.seed < 2 ** 32, "a play's seed, 32 bits");
+  assert.deepEqual(draw(play.random), draw(seeded(play.seed)), 'drawn again from its seed alone');
+  assert.notEqual(draws.play().seed, play.seed, 'the next play another');
+});
+
+test('a seeded source of draws seeded again, a case at a time, as the tests and the recorders hand one in', () => {
+  const draws = new Draws({ seed: 5 });
+  const first = [draws.random(), draws.play().seed];
+  draws.random();
+  draws.reseed(5);
+  assert.deepEqual([draws.random(), draws.play().seed], first, 'as from the start');
 });
 
 test('things due at a time: kept in their time order, after those at the same time; those whose time has come taken in it', () => {
