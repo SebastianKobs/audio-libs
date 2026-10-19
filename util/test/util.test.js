@@ -20,6 +20,7 @@ import {
   seeded,
   SETTLED,
   smoothstep,
+  stepToward,
   toggleIn,
   under,
   updateInPlace,
@@ -181,6 +182,13 @@ test("a value approaching its target by a time constant, as Web Audio's setTarge
     isNear(approach(1, 0, SETTLED * 0.1, 0.1), 0, 0.01),
     'settled after SETTLED time constants: within 1 % of the way',
   );
+});
+
+test('a value stepped toward its target a frame at a time: the step over the time of the way, all of it once the step is the time or more', () => {
+  assert.equal(stepToward(0, 2, 0.05, 0.1), 1, 'half the time: half the way');
+  assert.equal(stepToward(4, 0, 0.025, 0.1), 3, 'a quarter of the time: a quarter of the way down');
+  assert.equal(stepToward(1, 3, 0.2, 0.1), 3, 'a step past the time: all of the way');
+  assert.equal(stepToward(1, 3, 0, 0.1), 1, 'no time passed: no step');
 });
 
 test('the first of a list rising by its key later than a time, by halves; the last at or before it', () => {

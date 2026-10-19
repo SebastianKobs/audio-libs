@@ -1,4 +1,4 @@
-// ---------- util/maths: a value clamped, eased, approaching a target; an angle or a place wrapped ----------
+// ---------- util/maths: a value clamped, eased, approaching a target or stepped toward it; an angle or a place wrapped ----------
 
 // time constants after which an approach counts as settled: e^-5, within 1 % of the way
 export const SETTLED = 5;
@@ -24,6 +24,11 @@ export function modulo(value: number, size: number): number {
 // each moment the same fraction of the way left
 export function approach(from: number, target: number, elapsed: number, timeConstant: number): number {
   return target + (from - target) * Math.exp(-elapsed / timeConstant);
+}
+// a value a frame's step toward its target: elapsed / time of the way, all of it once that's 1;
+// a straight share of the step, unlike approach()
+export function stepToward(value: number, target: number, elapsed: number, time: number): number {
+  return value + (target - value) * Math.min(1, elapsed / time);
 }
 export function wrapAngle(a: number): number {
   return Math.atan2(Math.sin(a), Math.cos(a)); // angle difference into -pi..pi
