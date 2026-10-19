@@ -78,3 +78,8 @@ export class TrackPool {
     return until !== undefined && until <= from;
   }
 }
+
+// a pool of tracks for each key, as a polysynth's voices for each part
+export function poolsFor<Key extends string>(keys: readonly Key[]): Record<Key, TrackPool> {
+  return Object.fromEntries(keys.map((key) => [key, new TrackPool()])) as Record<Key, TrackPool>;
+}

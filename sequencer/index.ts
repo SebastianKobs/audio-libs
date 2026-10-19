@@ -18,7 +18,7 @@ export { upcoming, whole, due, liveEvents, underWayAt, rescaled, place, placeOn 
 export type { Grid } from './playing.ts';
 export { ClipLauncher } from './launcher.ts';
 export type { ClipGrid, ClipsTold, LaunchedClip, PlayEvent, Span } from './launcher.ts';
-export { TrackPool } from './track-pool.ts';
+export { TrackPool, poolsFor } from './track-pool.ts';
 export { Holding } from './holding.ts';
 export { Phrases } from './phrases.ts';
 export type { DueEvent } from './phrases.ts';

@@ -2,7 +2,7 @@
 // polysynth's notes go on its voices, one play at a time on each, free again once its tail has died away
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TrackPool } from '../track-pool.ts';
+import { TrackPool, poolsFor } from '../track-pool.ts';
 
 const flower = (n) => ({ kind: 'tap', n }); // an owner: any object, as a plant is
 
@@ -96,4 +96,12 @@ test("joined, a play held open keeps the track until it's ended, and one ringing
   const again = r.place(a, 7, Infinity, { join: true });
   r.end(again, 7.5);
   assert.equal(r.tracks[0].until, 8, 'two held open, each ended: the latest end of all');
+});
+
+test("a pool for each key, each its own: a play on one leaves the others' tracks free", () => {
+  const pools = poolsFor(['a', 'b']);
+  const owner = flower(1);
+  assert.equal(pools.a.place(owner, 0, 1), 0);
+  assert.equal(pools.b.place(owner, 0, 1), 0);
+  assert.deepEqual(Object.keys(pools), ['a', 'b']);
 });
