@@ -6,4 +6,13 @@ export { shifted, type Position } from './position.ts';
 export { Place, type Lifetime, type Move, type Perceiving } from './place.ts';
 export { Places, type Placed } from './places.ts';
 export { WrapAround } from './wrap-around.ts';
-export { boxAround, contains, distanceToBox, overlaps, type Box, type FloorPoint } from './floor.ts';
+export {
+  boxAround,
+  circleCrossings,
+  contains,
+  distanceToBox,
+  overlaps,
+  pointAlong,
+  type Box,
+  type FloorPoint,
+} from './floor.ts';
