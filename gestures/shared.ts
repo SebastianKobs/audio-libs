@@ -20,11 +20,8 @@
 // - takeback: a second finger made a pair of the first: what the first started goes
 // The stroke's shape is read in stroke.ts, and whether it loops in loop.ts, from the same samples
 
-// a point on the floor, under a pointer
-export interface FloorPoint {
-  x: number;
-  z: number;
-}
+import type { Box, FloorPoint } from '../spatial/index.ts';
+
 // what a pointer is doing: pressed, then dragging (looping once it winds) or holding; panning (the right button); one of a pair of
 // fingers; or done, the one left of a pair, until it's lifted
 export type PointerState = 'pressed' | 'dragging' | 'holding' | 'looping' | 'panning' | 'pair' | 'done';
@@ -92,14 +89,7 @@ export interface Stroke {
     lowest: number;
     highest: number;
   };
-  floor: FloorBox | null;
-}
-// the floor a stroke covers
-export interface FloorBox {
-  minX: number;
-  maxX: number;
-  minZ: number;
-  maxZ: number;
+  floor: Box | null;
 }
 // a pointer that's down: where it was pressed (none for a pair's second), where it is, its stroke, its hand's speed, and a pair's pan and
 // mate

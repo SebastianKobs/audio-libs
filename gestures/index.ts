@@ -6,7 +6,6 @@
 // fingers, a pair that pans (pair.ts), the tracker itself (tracker.ts)
 export { GestureTracker } from './tracker.ts';
 export {
-  type FloorPoint,
   type GestureEvent,
   type GestureEvents,
   type PointerInput,

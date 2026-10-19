@@ -32,7 +32,7 @@ export function noticeLoop(
     return;
   }
   const floor = stroke.floor;
-  if (!floor || Math.max(floor.maxX - floor.minX, floor.maxZ - floor.minZ) > tracking.settings.circleSize) {
+  if (!floor || Math.max(floor.x1 - floor.x0, floor.z1 - floor.z0) > tracking.settings.circleSize) {
     return;
   }
   loopOnFloor(tracking, pointer, stretch);

@@ -10,7 +10,8 @@
 // Whether it loops is read from the same samples (loop.ts)
 import { wrapAngle } from '../util/index.ts';
 import { radians } from './shared.ts';
-import type { FloorPoint, Pointer, Stroke, StrokeShape, Tracking } from './shared.ts';
+import type { FloorPoint } from '../spatial/index.ts';
+import type { Pointer, Stroke, StrokeShape, Tracking } from './shared.ts';
 import { noticeLoop } from './loop.ts';
 
 const SAMPLE_PX = 10;
@@ -113,11 +114,11 @@ function sampleAlong(tracking: Tracking, pointer: Pointer, stroke: Stroke): void
   }
 }
 function coverFloor(stroke: Stroke, point: FloorPoint): void {
-  const box = stroke.floor || (stroke.floor = { minX: point.x, maxX: point.x, minZ: point.z, maxZ: point.z });
-  box.minX = Math.min(box.minX, point.x);
-  box.maxX = Math.max(box.maxX, point.x);
-  box.minZ = Math.min(box.minZ, point.z);
-  box.maxZ = Math.max(box.maxZ, point.z);
+  const box = stroke.floor || (stroke.floor = { x0: point.x, x1: point.x, z0: point.z, z1: point.z });
+  box.x0 = Math.min(box.x0, point.x);
+  box.x1 = Math.max(box.x1, point.x);
+  box.z0 = Math.min(box.z0, point.z);
+  box.z1 = Math.max(box.z1, point.z);
 }
 // a sample of the stroke, every SAMPLE_PX along it: its direction over the last 30 px, its corners and bends, its shape, and whether it
 // loops
