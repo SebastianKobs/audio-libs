@@ -4,7 +4,8 @@
 //     the first time it's asked for, then kept, its voices sounding counted;
 //   - a patch edited in the bank: every part that plays it edited, its own or a pad's of its rack; one made after an
 //     edit made as edited;
-//   - a new tempo told every part, one unchanged passed over.
+//   - a new tempo told every part, one unchanged passed over;
+//   - a param's spec in a patch, from its voice card planned by its preset's kind.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SoundModule } from '../index.ts';
@@ -72,4 +73,11 @@ test('a part made after an edit made as edited; a new tempo told every part, one
   module.tempo(0.4);
   module.tempo(0.5);
   assert.deepEqual(built.tempi, [0.4, 0.5]);
+});
+
+test("a param's spec in a patch, from its voice card; none for a patch or a param it hasn't", () => {
+  const { module } = moduleOn();
+  assert.equal(module.specOf('bright', ['osc 1', 'tune']).name, 'tune');
+  assert.equal(module.specOf('bright', ['osc 1', 'nothing']), undefined);
+  assert.equal(module.specOf('nobody', ['osc 1', 'tune']), undefined);
 });

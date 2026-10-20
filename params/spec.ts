@@ -6,6 +6,7 @@
 // theirs (U2c4a). A value written either as itself or by its parts (a cutoff, or { key, max }) has both. A surface only decides how to
 // draw one: a slider or a knob. What's structure has no spec: a condition, where a sound goes, what a modulator moves, the chain, a switch.
 import { clamp } from '../util/index.ts';
+import { isSwitch } from './standard-specs.ts';
 
 // a param's taper, how a position on a control, a lane or a CC maps to its value (taper.ts)
 export type Taper = 'fader' | 'octaves' | 'line';
@@ -68,4 +69,9 @@ export function choiceAt({ choices = [] }: ParamSpec, index: number): string {
 // and back: a choice's index among its param's choices
 export function choiceIndex({ choices = [] }: ParamSpec, choice: string): number {
   return choices.indexOf(choice);
+}
+// whether a change is set at its time, not glided there: a switch, a choice, or a param its
+// spec says never glides
+export function atItsTime(spec: ParamSpec): boolean {
+  return isSwitch(spec) || spec.choices !== undefined || spec.glides === false;
 }

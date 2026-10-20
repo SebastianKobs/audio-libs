@@ -11,7 +11,7 @@ valueAt(level, 1);      // 2: +6 dB at the top
 
 | File | What it does |
 |---|---|
-| [`spec.ts`](spec.ts) | `ParamSpec`: a param's name, unit, range, choices, default, whether a gain shown in dB, its taper, whether it's set at its time, never glided (`glides: false`, a delay line's time); `specAt()`, a value's spec by its path; `isParamSpec()`, a param's, not a part's; a choice by its index, as a controller carries it, and back (`choiceAt()`, `choiceIndex()`) |
+| [`spec.ts`](spec.ts) | `ParamSpec`: a param's name, unit, range, choices, default, whether a gain shown in dB, its taper, whether it's set at its time, never glided (`glides: false`, a delay line's time); `specAt()`, a value's spec by its path; `isParamSpec()`, a param's, not a part's; a choice by its index, as a controller carries it, and back (`choiceAt()`, `choiceIndex()`); `atItsTime()`, whether a change is set at its time, not glided: a switch, a choice, a param that never glides |
 | `ParamSpecs`, `RangedSpec`, `Taper` (`spec.ts`) | a module's params, or a part's, by their keys, a nested part's under its own; a param on a control, one with its range; a taper, how a position on a control, a lane or a CC maps to its value: `fader`, `octaves`, `line` |
 | [`taper.ts`](taper.ts) | A position on a knob, a lane or a CC turned into a value and back, by the param's taper: the fader law, octaves or a line; a param with choices a step each, by its index |
 | `faderGain(position, top)`, `faderPosition(gain, top)` (`taper.ts`) | the fader law: a position, 0 to 1, to its gain by dB, unity two thirds up with a top of 2, the bottom silence; and back |

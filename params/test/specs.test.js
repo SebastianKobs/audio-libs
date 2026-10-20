@@ -3,6 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  atItsTime,
   choiceAt,
   choiceIndex,
   dBOf,
@@ -51,4 +52,11 @@ test('a param with choices, as a controller carries it: a choice by its index am
   assert.equal(choiceAt(spec, 1.4), '1/8', 'rounded');
   assert.equal(choiceAt(spec, 7), '1/4', 'at the end');
   assert.equal(choiceAt(spec, -1), '1/16');
+});
+
+test('a change set at its time, not glided: a switch, a choice, a param that never glides; a knob glides', () => {
+  assert.equal(atItsTime(SWITCH), true);
+  assert.equal(atItsTime({ name: 'note', choices: ['1/4', '1/8'] }), true);
+  assert.equal(atItsTime({ name: 'time', range: [0, 1, 0.01], glides: false }), true);
+  assert.equal(atItsTime(PAN), false);
 });

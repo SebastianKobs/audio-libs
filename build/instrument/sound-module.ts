@@ -6,9 +6,12 @@
 //   - A patch edited in the bank: every part that plays it edited, its own or a pad's of its
 //     rack; a part made after an edit made as edited.
 //   - A new tempo told every part, one unchanged passed over.
+//   - A param's spec in a patch, from its voice card planned by its preset's kind.
 import type { Preset } from '../../plan/planner/index.ts';
-import type { Instruments } from '../../plan/instrument/index.ts';
-import { entryOf, type LiveCopies } from '../../util/index.ts';
+import { paramAt, type Plan } from '../../plan/format/index.ts';
+import type { ParamSpec } from '../../params/index.ts';
+import { cardPlanner, type Instruments } from '../../plan/instrument/index.ts';
+import { entryOf, type Address, type LiveCopies } from '../../util/index.ts';
 import { Instrument, type InstrumentMaking } from './instrument.ts';
 
 // where a part is made, and how: all an instrument's making but its file and its patch
@@ -19,6 +22,7 @@ export class SoundModule<Into> {
   readonly #bank: LiveCopies<Preset>;
   readonly #parts = new Map<string, Instrument<Into>>(); // by patch, made once
   readonly #edited = new Set<string>(); // the patches edited, by name
+  readonly #cards = new Map<string, Plan>(); // each kind's voice card planned, made once
   #beat: number | undefined; // the beat last told, none at first
 
   // instruments: the file the patches are in, as it began; bank: its patches as they play,
@@ -35,6 +39,16 @@ export class SoundModule<Into> {
   // the voices a patch's part sounds now, 0 for one not made yet
   sounding(patch: string): number {
     return this.#parts.get(patch)?.sounding ?? 0;
+  }
+  // a param's spec in a patch: its voice card's, planned by its preset's kind; none for a
+  // patch the bank hasn't or an address its card hasn't
+  specOf(patch: string, address: Address): ParamSpec | undefined {
+    const preset = this.#bank.current(patch);
+    if (!preset) {
+      return undefined;
+    }
+    const card = entryOf(this.#cards, preset.kind, () => cardPlanner(this.#instruments).plan(preset.kind));
+    return paramAt(card, address)?.spec;
   }
   // a part made as its patch is edited now: the edits replayed onto it
   #make(patch: string, making: PartMaking<Into>): Instrument<Into> {

@@ -23,7 +23,7 @@
 // Each checked as it comes: an address the desk hasn't refused, naming it.
 import { Cues, LOOKAHEAD, type Clock } from '../../../clock/index.ts';
 import type { Controller } from '../../../midi/index.ts';
-import { isSwitch, type ParamSpec } from '../../../params/index.ts';
+import { atItsTime } from '../../../params/index.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';
 import { splitAtChild } from '../../../plan/format/index.ts';
 import { addressText } from '../../../util/index.ts';
@@ -136,9 +136,4 @@ export class DeskAutomation {
     }
     this.#desk.solo(strip, on);
   }
-}
-// whether a change is set at its time, not glided there: a switch, a choice, or a param its
-// spec says never glides
-function atItsTime(spec: ParamSpec): boolean {
-  return isSwitch(spec) || spec.choices !== undefined || spec.glides === false;
 }
