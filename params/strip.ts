@@ -8,7 +8,7 @@
 //   - mute and solo: switches, off 0 or on 1.
 // Each starts as a strip does: at unity, centred, unmuted, unsoloed, its sends at 0.
 import { frozen } from '../util/index.ts';
-import { FADER_GAIN, PAN, SWITCH } from './common.ts';
+import { FADER_GAIN, PAN, SWITCH } from './standard-specs.ts';
 import type { ParamSpec } from './spec.ts';
 
 // a channel's own params, by name, as a strip's

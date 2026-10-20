@@ -18,7 +18,7 @@
 //   - what a block says of itself, by name: a limiter's reduction;
 //   - what a node is built as, for who names it or listens to it: its jacks' nodes; every
 //     node under it.
-// Each its own part, made here: feeding.ts, readings.ts, lookup.ts.
+// Each its own part, made here: fed-sounds.ts, readings.ts, lookup.ts.
 // Times are the context's.
 import { eventOf, timedAt, type Automation, type When } from '../../automation/index.ts';
 import { choiceIndex } from '../../params/index.ts';
@@ -37,7 +37,7 @@ import {
 } from '../../plan/format/index.ts';
 import type { Built } from '../contract/index.ts';
 import { automate } from './automation.ts';
-import { FedSounds } from './feeding.ts';
+import { FedSounds } from './fed-sounds.ts';
 import { BuiltLookup } from './lookup.ts';
 import { BuiltParts, type PoolHolder } from './parts.ts';
 import { BuiltReadings } from './readings.ts';

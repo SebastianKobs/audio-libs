@@ -8,7 +8,7 @@
 // Each value is handed on now, from a note's time, or gliding there as you move.
 // A follower is a value of the caller's set from what it hears, by its law (a delay send).
 // It builds nothing and knows no clock: its times are the caller's.
-import type { Heard } from './model.ts';
+import type { Heard } from './hearing.ts';
 import type { Place, Placed, Position } from '../spatial/index.ts';
 import type { When } from '../automation/index.ts';
 

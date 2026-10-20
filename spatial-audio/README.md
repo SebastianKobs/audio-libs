@@ -30,7 +30,7 @@ onTick((t) => space.update(t));                            // the emitter follow
 
 **Its emitters' places, and positions,** are [`libs/spatial/`](../spatial/README.md)'s: the space's emitters are on a `Places<Heard>`, perceived by the model below and `moved()`, each emitter's place a `Place<Heard>`.
 
-**The model** (`model.ts`, pure), like sound outdoors:
+**The model** (`hearing.ts`, pure), like sound outdoors:
 - Within the range everything plays at full level.
 - Beyond it, the direct sound drops 6 dB for every doubling of distance at `falloff` 1. That's Web Audio's inverse distance model, from the range.
 - It loses its top: the cutoff halves every 6 units at `dull` 1.

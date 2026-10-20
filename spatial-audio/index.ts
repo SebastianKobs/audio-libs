@@ -7,16 +7,16 @@
 // The caller hands the space:
 //   - listener: how far a place is from where you listen, and which side, -1 left to 1 right,
 //     so a world that wraps round, or has height, stays the caller's;
-//   - settings, read live: range, hearing, falloff, dull, room and limit (model.ts),
+//   - settings, read live: range, hearing, falloff, dull, room and limit (hearing.ts),
 //     and width, how far a sound is panned at most.
 // It knows no clock: lifetimes and update(t) are in the caller's time.
 // It builds nothing: no Web Audio in it.
 // Its parts:
 //   - the space and its listener (space.ts);
 //   - an emitter, which hands on what it hears (emitter.ts);
-//   - how a sound is heard at a distance (model.ts).
+//   - how a sound is heard at a distance (hearing.ts).
 export { Space } from './space.ts';
 export type { Listener } from './space.ts';
 export { Emitter } from './emitter.ts';
 export type { Law, EmitterOptions, Follower, Hears, HeardValue } from './emitter.ts';
-export type { Heard, SpaceSettings } from './model.ts';
+export type { Heard, SpaceSettings } from './hearing.ts';

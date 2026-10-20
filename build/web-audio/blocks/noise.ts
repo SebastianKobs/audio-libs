@@ -7,7 +7,7 @@ import type { Node } from '../../../plan/format/index.ts';
 import { BuiltNode, webAudioNode } from '../built-node.ts';
 import { settingOf, valueOf, type Making } from '../making.ts';
 import { toldParam } from '../param-units.ts';
-import { SourceTimes } from './source.ts';
+import { SourceTimes } from './source-times.ts';
 
 export function noise(node: Node, making: Making): BuiltNode {
   const made = making.kept(making.context.createBufferSource());

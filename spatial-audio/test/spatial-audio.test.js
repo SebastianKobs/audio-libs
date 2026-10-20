@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { hearing, hearMax, moved } from '../model.ts';
+import { hearing, hearMax, moved } from '../hearing.ts';
 import { Space } from '../index.ts';
 
 const vectors = JSON.parse(

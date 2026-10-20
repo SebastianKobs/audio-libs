@@ -8,7 +8,7 @@
 //   - choice.ts: a param or a setting with choices;
 //   - device.ts: a node as a device, its controls in order, what every control has;
 //   - envelope.ts: an envelope's curve from its knobs, as a view draws it, the curve played;
-//   - custom.ts: a view of its own, registered by kind;
+//   - custom-views.ts: a view of its own, registered by kind;
 //   - meters.ts: a level bar's fall, as a DIN peak meter's;
 //   - limiter-history.ts: the limiter's history, a column each interval, the loudest of its frames;
 //   - chosen.ts: what's chosen in the composites a view shows, a rack's pad, a group's tab;
@@ -18,7 +18,7 @@ export { DevicePanel, type Opened } from './device-panel.ts';
 export { Chosen } from './chosen.ts';
 export { meterFall, Meters } from './meters.ts';
 export { LimiterHistory, type Peaks } from './limiter-history.ts';
-export { CustomViews } from './custom.ts';
+export { CustomViews } from './custom-views.ts';
 export { Control, type Device } from './device.ts';
 export { envelopeDrawing, type EnvelopeDrawing } from './envelope.ts';
 export { Knob, textOf, type Ring } from './knob.ts';

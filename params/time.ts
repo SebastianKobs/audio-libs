@@ -6,7 +6,7 @@
 //   sync, a switch; note, the note value; its free value, named by its unit (ms, hz).
 // Its seconds are the clock's, by the tempo.
 import type { ParamSpec, RangedSpec } from './spec.ts';
-import { SWITCH } from './common.ts';
+import { SWITCH } from './standard-specs.ts';
 
 // what a time's free value is in: a length in milliseconds, or a rate in hertz
 export type FreeUnit = 'ms' | 'Hz';

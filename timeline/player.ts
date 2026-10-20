@@ -4,7 +4,7 @@
 // out, so a hold is played past at once; one under way where it starts chased, started at once from there, its points before passed over;
 // stopped, what's under way ended then; played to the end, what's under way ringing out as it lies along the timeline. An event that holds
 // until the next of its own told as it comes due, the one in effect where playback starts picked up from there, never ended. The
-// sequencer's recording player maps it onto notes and a track's controllers (libs/midi-sequencer/playback.ts)
+// sequencer's recording player maps it onto notes and a track's controllers (libs/midi-sequencer/recording-player.ts)
 import type { Seconds, TimeMap } from '../clock/index.ts';
 import { timeOf, type TimedEvent } from './timeline.ts';
 import { ALONG_THE_CLOCK, type PlayedFrom } from './timeline-time.ts';

@@ -1,4 +1,4 @@
-// ---------- libs/spatial-audio/model: how a sound is heard from where you listen. Pure ----------
+// ---------- libs/spatial-audio/hearing: how a sound is heard from where you listen. Pure ----------
 // Like sound outdoors:
 //   - within the range, everything plays at full level;
 //   - beyond it, the direct sound drops 6 dB for every doubling of distance (falloff 1,

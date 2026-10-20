@@ -1,4 +1,4 @@
-// ---------- view/device/models/custom: a view of its own, where a view is more than its params ----------
+// ---------- view/device/models/custom-views: a view of its own, where a view is more than its params ----------
 // Registered by a node's kind, a block's (gain) or a composite's (Limiter): a meter, the
 // limiter's reduction, an envelope's curve. The rest built from their params.
 // The view itself the views': these hold whatever a view library registers.

@@ -1,4 +1,4 @@
-// ---------- build/web-audio/blocks/source: a source's start and stop ----------
+// ---------- build/web-audio/blocks/source-times: a source's start and stop ----------
 // A source started at its time: its copy's, as its note starts, or as it's built.
 // Stopped its stop after it starts, where it has one; at 0 none, playing until it's let go.
 // A stop changed once it's started moves it, never taking one back.

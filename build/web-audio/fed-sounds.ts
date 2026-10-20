@@ -1,4 +1,4 @@
-// ---------- build/web-audio/feeding: sounds fed into what's built, by address ----------
+// ---------- build/web-audio/fed-sounds: sounds fed into what's built, by address ----------
 // Each kept, to feed what's built anew; the ways in it made, a gain each, taken apart with it.
 import { addressText, type Address } from '../../util/index.ts';
 import type { BuiltLookup } from './lookup.ts';

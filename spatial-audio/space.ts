@@ -1,8 +1,8 @@
 // ---------- libs/spatial-audio/space: where you listen, and the emitters it keeps, each heard from there ----------
 import { Emitter } from './emitter.ts';
 import type { EmitterOptions } from './emitter.ts';
-import { hearMax, hearing, moved } from './model.ts';
-import type { Heard, SpaceSettings } from './model.ts';
+import { hearMax, hearing, moved } from './hearing.ts';
+import type { Heard, SpaceSettings } from './hearing.ts';
 import { Places, type Position } from '../spatial/index.ts';
 
 // where you listen, the caller's: how far a place is, and which side of you, -1 left to 1 right

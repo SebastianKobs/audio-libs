@@ -6,7 +6,7 @@
 import type { Node } from '../../../plan/format/index.ts';
 import { BuiltNode, webAudioNode } from '../built-node.ts';
 import { settingOf, valueOf, type Making } from '../making.ts';
-import { SourceTimes } from './source.ts';
+import { SourceTimes } from './source-times.ts';
 import { timeHeld, TimeWithSync } from './time-with-sync.ts';
 
 export function oscillator(node: Node, making: Making): BuiltNode {

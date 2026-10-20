@@ -1,4 +1,4 @@
-// ---------- midi-sequencer/playback: the recording played back from a time, its regions' notes as heard, its lanes with them (P3a, P4b) ----------
+// ---------- midi-sequencer/recording-player: the recording played back from a time, its regions' notes as heard, its lanes with them (P3a, P4b) ----------
 // As Ableton plays its arrangement: each region's notes sent into the input as they come due, offset
 // from the recording's time to now, to the track it was recorded on, by name, with its clip, live or not, marked played back
 // and left out of the recording, its sender its own, so its notes don't meet another sender's on a track. A note's start, its glides, its

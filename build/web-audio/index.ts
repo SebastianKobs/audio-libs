@@ -3,7 +3,7 @@
 // Its parts:
 //   - builder.ts: the builder, a plan built, its blocks made, its composites opened, its placeholders said;
 //   - built.ts: what it hands back, its front panel; parts.ts, the parts it's taken apart by;
-//   - feeding.ts, readings.ts, lookup.ts: what's built's parts: sounds fed in, meters and readings, lookups by address;
+//   - fed-sounds.ts, readings.ts, lookup.ts: what's built's parts: sounds fed in, meters and readings, lookups by address;
 //   - making.ts: what a block's maker is handed; wiring.ts, a node's jacks, a composite's wires made;
 //   - placeholder.ts: a block it can't make, passed through;
 //   - rebuild.ts: what's built built again, the old ringing out, faded where it makes sound of its own;
