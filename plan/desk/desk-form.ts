@@ -6,7 +6,7 @@
 //   - the master, exactly one: the last sum, its way out the desk's.
 // Its wires and rules:
 //   - a way out into a bus or the master, a send into a return;
-//   - no loops, but through a send between returns, those that can close one delayed (desk.ts);
+//   - no loops, but through a send between returns, those that can close one delayed (desk-templates.ts);
 //   - every way out ending in the master.
 import type { Form } from '../planner/index.ts';
 import { frozen } from '../../util/index.ts';
