@@ -1,6 +1,7 @@
 // ---------- clock/grid-map: where a time lies on the grid as it was played, the tempo as it was then ----------
 import type { Clock } from './clock.ts';
-import { HISTORY, type BeatGrid } from './beat-grid.ts';
+import type { BeatGrid } from './beat-grid.ts';
+import { HISTORY } from './song-time.ts';
 import { firstAfter } from '../util/index.ts';
 
 // what it reads of the grid: where a time lies on it and back, its bars and beats, a hold, song time

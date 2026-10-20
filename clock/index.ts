@@ -10,11 +10,12 @@
 // the grid snap() uses unless told another (GRIDS). A frame time is the caller's: faking() says whether time is the fake one.
 // It needs no browser: in fake mode (the unit tests) time moves only when told, and the ticks and steps of the time passed run in order
 
-// Its parts: the clock, its timeline, ticks and scheduler (clock.ts, Clock); the beat grid and its swing (beat-grid.ts, BeatGrid); the
-// edge to Web Audio (audio-clock.ts, AudioClock); the grids a time snaps to (quantizer.ts); time in ticks, a meter's bars and beats
+// Its parts: the clock, its timeline, ticks and scheduler (clock.ts, Clock); the beat grid (beat-grid.ts, BeatGrid), its swing (swing.ts),
+// its song time (song-time.ts, SongTime); the edge to Web Audio (audio-clock.ts, AudioClock); the grids a time snaps to (quantizer.ts); time in ticks, a meter's bars and beats
 // (ticks.ts); items held until a tick brings their time (cues.ts); where each 16th fell as it was heard (grid-map.ts); the tempo told (messages.ts)
 export { Clock, LOOKAHEAD, type ClockSettings, type Seconds } from './clock.ts';
-export { BeatGrid, HISTORY, type GridSettings, type TimeMap } from './beat-grid.ts';
+export { BeatGrid, type GridSettings } from './beat-grid.ts';
+export { HISTORY, type TimeMap } from './song-time.ts';
 export { PPQ, STEP, COMMON_TIME, barTicks, beatTicks, startsBar, type Meter, type Ticks } from './ticks.ts';
 export { Cues } from './cues.ts';
 export { GridMap, type HeardGrid } from './grid-map.ts';
