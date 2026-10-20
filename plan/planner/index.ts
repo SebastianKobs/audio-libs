@@ -1,6 +1,6 @@
 // ---------- plan/planner: templates made into plans ----------
-// A plan for whatever is asked, once, before anything plays; used by the tool, and by an
-// editor later, never by a builder or a view.
+// A plan for whatever is asked, once, before anything plays; used by whoever plans,
+// an editor among them, never by a builder or a view.
 // Its parts:
 //   - template.ts: a composite's description, written short, and a preset on one, either read
 //     from data, its shape checked (libs/util/'s fromData()); extend.ts, a template built on

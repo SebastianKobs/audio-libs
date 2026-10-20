@@ -1,4 +1,4 @@
-// ---------- plan/synth/test-note: a test note, as a device view sets it and the app's message ----------
+// ---------- plan/synth/test-note: a test note, as a device view sets it, and its message on a bus ----------
 // Played on an instrument of its own for each key (libs/build/voices/'s TestNotes).
 
 // A test note as a device view sets it: its pitch, velocity, 0 to 1, and time; its own values
@@ -10,7 +10,7 @@ export interface TestNote {
   readonly values: Readonly<Record<string, number>>;
 }
 
-// A test note pressed on a key's instrument, or let go, as the app's message.
+// A test note pressed on a key's instrument, or let go, as a message on a bus.
 export type TestNoteMessage<Key = string> =
   | { readonly type: 'test note'; readonly key: Key; readonly note: TestNote }
   | { readonly type: 'test note released'; readonly key: Key; readonly t: number };

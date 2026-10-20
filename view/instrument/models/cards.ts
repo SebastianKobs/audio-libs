@@ -8,7 +8,7 @@
 //   - each value its preset's, those from outside over its own;
 //   - how each is set: a note's source by the note, a value from outside by what it says, the
 //     rest live;
-//   - a value or a setting changed: sent as the app's message (PresetMessage), its owner
+//   - a value or a setting changed: sent as a message on a bus (PresetMessage), its owner
 //     changing the bank's preset as it hears it.
 import { paramAt, type Plan, type ValuesByAddress } from '../../../plan/format/index.ts';
 import type { Preset } from '../../../plan/planner/index.ts';
@@ -39,7 +39,7 @@ export class InstrumentCards {
   readonly #plans = new Map<string, { over: string; plan: Plan }>();
 
   // instruments: the file the patches are in; bank: its patches as they play, read by name;
-  // send(): an edit sent on the app's bus, the bank changed by whoever hears it
+  // send(): an edit sent on a bus, the bank changed by whoever hears it
   constructor({
     instruments,
     bank,

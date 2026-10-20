@@ -4,7 +4,7 @@
 //   - each value that differs set by its address, glided there;
 //   - each setting that differs, what's built built again with it.
 // A value or a setting a preset lets go of goes back to its architecture's start.
-// Edited as the app's messages ask (PresetMessage): a value or a setting set, or the patch
+// Edited as messages on a bus ask (PresetMessage): a value or a setting set, or the patch
 // reset to where it started; not recorded unless a kind asks to be.
 import { paramAt, settingAt, type Plan, type ValuesByAddress } from '../format/index.ts';
 import { addressOf, addressText, type Address } from '../../util/index.ts';

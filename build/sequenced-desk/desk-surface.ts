@@ -8,7 +8,7 @@
 //   - The stream's label for the strip's track its owner's, handed in.
 //   - Each move told to whoever listens: the transport passing that lane over while it plays
 //     back.
-// A desk's edit by address, as the app's message (a view's knob turned):
+// A desk's edit by address, as a message on a bus (a view's knob turned):
 //   - a param: played in as its strip's controller, a choice by its index;
 //   - a setting: the desk built again with it, not recorded, as a rebuild isn't automation.
 import { SMOOTHING } from '../../automation/index.ts';

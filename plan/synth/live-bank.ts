@@ -1,7 +1,7 @@
 // ---------- plan/synth/live-bank: a bank's patches as they play, edited as asked ----------
 // As a synth's edit buffer holds its programs as you tweak them: each patch a live copy of its
-// start (LiveCopies), edited or reset as the app's messages ask (PresetMessage), each change
-// told to whoever plays it.
+// start (LiveCopies), edited or reset as messages on a bus ask (PresetMessage),
+// each change told to whoever plays it.
 import type { Preset } from '../planner/index.ts';
 import { LiveCopies } from '../../util/index.ts';
 import { edited, type PresetMessage } from './preset.ts';

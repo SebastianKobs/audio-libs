@@ -87,7 +87,7 @@ The plan of scenario 1 handed to the Web Audio builder: `build/web-audio`, no cl
 
 ```js
 // Scenario 2: the voice planned in code (plan-in-code.js) built for Web Audio, as a library's user
-// writes it: into an audio context handed in, run with no view, no clock and no engine of the app's.
+// writes it: into an audio context handed in, run with no view, no clock and no engine.
 import { planVoice } from './plan-in-code.js';
 import { WebAudioBuilder } from '../../src/libs/build/web-audio/index.ts';
 

@@ -7,8 +7,9 @@
 //     instrument's;
 //   - instrument.ts: an instrument, a pool of voices, or a drum rack, a pool for each pad;
 //   - preset.ts: a preset changed, each value and setting that differs, by its address; edited as
-//     the app's messages ask (PresetMessage);
-//   - live-bank.ts: a bank's patches as they play, edited or reset as the app's messages ask;
+//     messages on a bus ask (PresetMessage);
+//   - live-bank.ts: a bank's patches as they play, edited or reset
+//     as messages on a bus ask;
 //   - instruments-file.ts: a file of instruments, patches and racks, as a person writes it, read;
 //   - patch-plans.ts: a patch's instrument planned from a file of instruments, by its name, and
 //     the planner of its voice cards;

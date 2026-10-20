@@ -10,7 +10,7 @@ import type { Role, Slot } from '../readout/index.ts';
 
 // A node as a device:
 //   - its address, its name, its kind, its label as shown, its node's, else its kind;
-//   - what it does in its slot and what sets it there, where the tool says;
+//   - what it does in its slot and what sets it there, where the readout says;
 //   - its controls: a composite's macros, in its template's order, then the settings within
 //     it; a block's params, then its settings.
 export interface Device {

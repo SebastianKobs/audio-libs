@@ -6,8 +6,9 @@
 //   - a node's level as the implementation hears it, the only one that hears the sound, at
 //     one of its points where it has several; a reading, a limiter's reduction;
 //   - a pool's copies added so far;
-//   - what a node does in its slot and what sets it there, the tool's words.
-// What's done sent as a command, through the send handed in: the app's message for the plan.
+//   - what a node does in its slot and what sets it there, the readout's words.
+// What's done sent as a command, through the send handed in:
+// a message on a bus for the plan.
 // And what moves each param, worked out from the plan alone (PlanMoves).
 import { paramAt, PlanMoves, settingAt, type Move, type Param, type Plan } from '../../../plan/format/index.ts';
 import type { Address } from '../../../util/index.ts';
@@ -25,7 +26,7 @@ export class Model {
   readonly #send: (command: Command) => void;
   readonly #moves = new PlanMoves();
 
-  // send(): what's done, as the app's message for the plan
+  // send(): what's done, as a message on a bus for the plan
   constructor(planReadout: PlanReadout, send: (command: Command) => void) {
     this.#in = planReadout;
     this.#send = send;
@@ -46,7 +47,8 @@ export class Model {
   valueOf(address: Address, { param }: Found): number | string {
     return this.#in.valueOf(address) ?? param.value;
   }
-  // a value as it starts, which a reset brings back; the plan's where the tool has none
+  // a value as it starts, which a reset brings back;
+  // the plan's where the readout has none
   startOf(address: Address, { param }: Found): number | string {
     return this.#in.startOf(address) ?? param.value;
   }

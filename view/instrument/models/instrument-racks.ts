@@ -11,7 +11,7 @@ import type { InstrumentCard, InstrumentsReadout } from '../readout/index.ts';
 import type { PlanReadout } from '../../device/readout/index.ts';
 import { ViewBuilder } from '../../device/models/index.ts';
 
-// what the racks send on the app's bus: a role's reset, its test note pressed and let go
+// what the racks send on a bus: a role's reset, its test note pressed and let go
 type RackMessage = PresetMessage | TestNoteMessage;
 // A role's instrument as a rack: its status, the patch it plays; a pad for each card, by its
 // key and its patch, its models.
@@ -34,7 +34,7 @@ export class InstrumentRacks {
   readonly #models = new WeakMap<PlanReadout, ViewBuilder>(); // each card's, made as first asked for
   #pressed: string | null = null; // the role whose test note is held, for as long as its button is
 
-  // send(): a reset and the test note sent on the app's bus
+  // send(): a reset and the test note sent on a bus
   // starts: the test note's own values as it starts, by their names, over their defaults
   constructor({
     instrumentsReadout,

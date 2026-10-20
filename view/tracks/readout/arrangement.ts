@@ -3,7 +3,7 @@
 //   - the recording (RecordingReadout): a MIDI sequencer's recorder (libs/midi-sequencer/), its regions and lanes;
 //   - the tracks (TracksReadout): the control surface that played them, its groups and its clips' names;
 //     the session's tracks read them too;
-//   - the playhead (PlayheadReadout): the transport, a cue sent on the app's bus;
+//   - the playhead (PlayheadReadout): the transport, a cue sent on a bus;
 //   - the declarations (DeclaredReadout): the desk's view models (declaredBy());
 //   - the clock: the one clock (libs/clock/), its time, its 16ths and its grid.
 import type { TimedValue } from '../../../automation/index.ts';
@@ -75,7 +75,7 @@ export interface TracksReadout {
   clipName(clip: unknown, group: string): string;
   hasClip(clip: unknown, group: string): boolean;
 }
-// The transport, as the arrangement's playhead reads it; a cue is sent on the app's bus.
+// The transport, as the arrangement's playhead reads it; a cue is sent on a bus.
 // playhead(): where the playhead is; it moves while the recording plays back.
 export interface PlayheadReadout {
   readonly playingBack: boolean;

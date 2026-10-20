@@ -5,7 +5,8 @@
 //   - not through a sequencer, so it isn't recorded.
 // Each note a fresh index (MIDI 2.0's note rotation), phrased as its owner says, held at most
 // its longest; let go as its button is.
-// Pressed and let go as the app's messages too, a key's note held until its key's is let go.
+// Pressed and let go as messages on a bus too,
+// a key's note held until its key's is let go.
 import { NoteRotation, type Message, type Receiver } from '../../midi/index.ts';
 import type { TestNote, TestNoteMessage } from '../../plan/synth/index.ts';
 import { entryOf } from '../../util/index.ts';

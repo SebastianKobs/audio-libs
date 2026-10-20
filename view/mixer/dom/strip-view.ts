@@ -60,8 +60,8 @@ function mixHtml(strip: Strip, look: StripLook, key: string): Html {
   return html`<div class="mix">${sends}${pan}
   <div class="vol">${faderHtml(strip.volume, empty)}${meterHtml(key, look.level)}<b class="val">${value}</b>${muteSolo}</div></div>`;
 }
-// An insert's slot: its device's label, and what sets it, as the tool says; a live device
-// with a level its gain as it plays.
+// An insert's slot: its device's label, and what sets it, as the readout says;
+// a live device with a level its gain as it plays.
 function slotOf(device: Device): [device: string, by: string] {
   if (device.slot?.setBy !== undefined) {
     return [device.label, device.slot.setBy];

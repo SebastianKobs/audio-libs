@@ -2,7 +2,7 @@
 // Types only. Readout: the plan as it plays, by address (PlanReadout), how each value is set
 // (Role), what a device does in its slot (Slot).
 // Out: what's done, a command. A view never plays into the sound itself. It sends a command,
-// as the app's message for the plan, and the tool:
+// as a message on a bus for the plan, and whoever owns the plan:
 //   - a param's: records it through the sequencer and sets it, as every move is;
 //   - a setting's: builds what's built again with it, not recorded, as a rebuild isn't
 //     automation.
@@ -15,7 +15,7 @@ export interface Command {
   readonly address: Address;
   readonly value: number | string;
 }
-// How a value is set, as the tool says:
+// How a value is set, as the readout says:
 //   - live: set here, in a view;
 //   - automated: by what its track plays, its source where it names one (distance);
 //     recorded where its automation is in the arrangement's lanes;
@@ -25,14 +25,14 @@ export interface Role {
   readonly source?: string;
   readonly recorded?: true;
 }
-// What a device does in its slot (job), and what sets it there, where its notes or the
-// tool do (setBy), as the tool says.
+// What a device does in its slot (job), and what sets it there, where its notes or its
+// owner do (setBy), as the readout says.
 export interface Slot {
   readonly job: string;
   readonly setBy?: string;
 }
 // What the views read of a plan as it plays, by address: its values, starts, roles, slots,
-// copies and meters; a readout, what's done going out on the app's bus.
+// copies and meters; a readout, what's done going out on a bus.
 export interface PlanReadout {
   readonly plan: Plan;
   valueOf(address: Address): number | string | undefined;

@@ -1,4 +1,4 @@
-// ---------- build/desk/desk-edit: a desk's edit, as the app's message ----------
+// ---------- build/desk/desk-edit: a desk's edit, as a message on a bus ----------
 // By its address, as a view's knob asks it; played in by whoever owns the desk.
 import type { Address } from '../../util/index.ts';
 

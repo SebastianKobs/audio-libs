@@ -22,8 +22,8 @@ export interface MatrixRow {
   readonly amount?: Control;
 }
 
-// The view models of a plan, read through the plan's readout, what's done sent as the app's
-// message for the plan.
+// The view models of a plan, read through the plan's readout, what's done sent as a
+// message on a bus for the plan.
 export class ViewBuilder {
   readonly #model: Model;
 
