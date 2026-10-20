@@ -1,6 +1,7 @@
 // ---------- view/dom/mixer-view: a mixer drawn, its strips side by side ----------
 // Its sections in one row, as the sound flows:
-//   1. the tracks, in the groups the view hands it, each group in a box of its own;
+//   1. the tracks, in the groups the view hands it, or the desk's own channels as one,
+//      each group in a box of its own;
 //   2. the buses, the desk's, a bus with the buses that go into it in a box;
 //   3. the FX busses, the desk's returns;
 //   4. the master.
@@ -20,10 +21,11 @@ import { addressOf, addressText, type Address } from '../../plan/format/index.ts
 import { Events } from '../../util/index.ts';
 import { Meters, type Control } from '../device/models/index.ts';
 import {
+  channelGroups,
   shortName,
   type BusGroup,
-  type SessionGroup,
-  type SessionTrack,
+  type MixerGroup,
+  type MixerTrack,
   type Strip,
   type Toggles,
   type TrackNow,
@@ -99,10 +101,11 @@ export class MixerView {
   }
   // what a click on a strip's name or slot opens, to whoever listens
   readonly onOpen = (listener: (...opened: Opened) => void): (() => void) => this.#events.on('open', listener);
-  // Drawn: the groups of tracks handed in, then the desk's own channels.
-  draw(groups: readonly SessionGroup[]): void {
+  // Drawn: the groups of tracks handed in, else the desk's own channels as one;
+  // then the desk's own buses, returns and master.
+  draw(groups?: readonly MixerGroup[]): void {
     const levelOf: LevelOf = (key) => this.#levels.of(key);
-    this.#placeGroups(groups, levelOf);
+    this.#placeGroups(groups ?? channelGroups(this.#models.mixer(), this.#look.labels.tracks), levelOf);
     const { buses, returns, master } = deskHtml(this.#models, levelOf);
     setHtml(this.#buses.row, buses);
     setHtml(this.#returns.row, returns);
@@ -179,7 +182,7 @@ export class MixerView {
   //   2. A new group gets a box of its own, in its place among the others.
   //   3. A group no longer handed in is taken out.
   // Box: as wide as the tracks the look shows, scrolling sideways on its own.
-  #placeGroups(groups: readonly SessionGroup[], levelOf: LevelOf): void {
+  #placeGroups(groups: readonly MixerGroup[], levelOf: LevelOf): void {
     const row = this.#tracks.row;
     const kept = new Map(
       [...row.querySelectorAll<HTMLElement>('.group')].map((group) => [group.dataset.group!, group]), // each has its key
@@ -239,7 +242,7 @@ function lookOf(models: MixerViewBuilder, strip: Strip, name: string, levelOf: L
 }
 // A track's strip drawn: the name the view gives it, what plays on it now.
 // Empty while it plays nothing, its values a dash, but where it's set live.
-export function trackHtml(models: MixerViewBuilder, track: SessionTrack, levelOf: LevelOf): Html {
+export function trackHtml(models: MixerViewBuilder, track: MixerTrack, levelOf: LevelOf): Html {
   const strip = models.strip(track.address)!; // a track's channel, on the desk
   const empty = !track.playing && !strip.volume.live;
   return stripHtml(strip, { ...lookOf(models, strip, track.name, levelOf), now: cellHtml(track.now), empty });

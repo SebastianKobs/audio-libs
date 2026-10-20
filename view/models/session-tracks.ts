@@ -6,32 +6,11 @@
 //      the desk, with what it plays now;
 //   3. what sounded since the last look, for the folded sections' lights: a replay group's
 //      clips, and each lit track's channel.
-import { addressOf, type Address } from '../../plan/format/index.ts';
+import { addressOf } from '../../plan/format/index.ts';
+import type { MixerGroup, MixerTrack } from './mixer-groups.ts';
 import type { TracksReadout } from '../control-surface/index.ts';
 import type { GroupShown, TrackShown } from './session.ts';
 
-// What a track plays now, as its cell shows it: the clip, a visitor's motif named after it, a
-// dash with none; lit while it sounds; waiting while a replay waits for its first note.
-export interface TrackNow {
-  readonly text: string;
-  readonly lit: boolean;
-  readonly waiting: boolean;
-}
-// A track with notes: its channel's address on the desk, its name, what it plays now, and
-// whether anything holds it.
-export interface SessionTrack {
-  readonly address: Address;
-  readonly name: string;
-  readonly now: TrackNow;
-  readonly playing: boolean;
-}
-// a group of tracks with notes: its key, its header's name, whether it's yours, its tracks
-export interface SessionGroup {
-  readonly key: string;
-  readonly name: string;
-  readonly mine: boolean;
-  readonly tracks: readonly SessionTrack[];
-}
 // a track's place, a group's key and its number from 0, onto its channel's address on the desk
 type TrackAt = (place: { kind: string; track: number }) => string;
 
@@ -44,7 +23,7 @@ export class SessionTracks {
     this.#trackAt = trackAt;
   }
   // the tracks with notes, in their groups, in the control surface's order
-  groups(seen: Readonly<Record<string, GroupShown>>): SessionGroup[] {
+  groups(seen: Readonly<Record<string, GroupShown>>): MixerGroup[] {
     return this.#tracks.groups
       .filter(({ group }) => seen[group]?.tracks.length)
       .map(({ group, name, kind, mine }) => ({
@@ -75,7 +54,7 @@ export class SessionTracks {
 
   // A track of a group: named from the group's name, numbered from 1.
   // kind: whose clips it plays, as the control surface names them.
-  #track(group: string, kind: string, name: string, shown: TrackShown, index: number): SessionTrack {
+  #track(group: string, kind: string, name: string, shown: TrackShown, index: number): MixerTrack {
     const playing = shown.owner ?? shown.waiting;
     return {
       address: addressOf(this.#trackAt({ kind: group, track: index })),

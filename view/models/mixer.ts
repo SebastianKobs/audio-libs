@@ -6,6 +6,7 @@
 // A solo click, as Ableton's: that strip alone, the others let go; again, none; with shift,
 // added or let go. A pool's copies among them, as they're added.
 // What strips feed, for a view's lights: each through its way out, the sends said to be up.
+// Its channels, as a desk alone shows them.
 import {
   addressOf,
   addressText,
@@ -31,6 +32,7 @@ type MixerViews = Pick<ViewBuilder, 'plan' | 'copiesOf'>;
 const BUS = 'bus';
 const RETURN = 'return';
 const MASTER = 'master';
+const CHANNEL = 'channel';
 
 // A desk as a mixer: its strips by role, in the plan's order.
 export class Mixer {
@@ -63,6 +65,12 @@ export class Mixer {
     }
   }
 
+  // The desk's channels, as a desk alone shows them: its own of the channel role, then each
+  // pool's copies added so far.
+  channels(): Strip[] {
+    return [...this.#own().filter(({ role }) => role === CHANNEL), ...this.#copyStrips()];
+  }
+
   // Everything the named strips feed, they among it: each through its way out, and its sends
   // sendsUp() says are up; over the desk's wires, its pools' copies added so far among them.
   // The master left out, where every way ends.
@@ -87,7 +95,11 @@ export class Mixer {
   }
   // every strip on the desk now: its own, then each pool's copies added so far
   #all(): Strip[] {
-    return [...this.#own(), ...this.#copies().flatMap((copy) => this.#strip(copy) ?? [])];
+    return [...this.#own(), ...this.#copyStrips()];
+  }
+  // each pool's copies added so far, as strips
+  #copyStrips(): Strip[] {
+    return this.#copies().flatMap((copy) => this.#strip(copy) ?? []);
   }
   // each pool's copies added so far, pool by pool
   #copies(): Address[] {

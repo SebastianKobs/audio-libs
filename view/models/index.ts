@@ -5,6 +5,7 @@
 //   - mixer-view-builder.ts: a desk's view models, its strips and its mixer;
 //   - strip.ts: a channel as a strip, by its form, its name as shown;
 //   - mixer.ts: a desk as a mixer, its strips by role, a solo click;
+//   - mixer-groups.ts: the groups of tracks a mixer shows, a desk's channels as one;
 //   - cards.ts: an instrument's patches as the device view edits them, a preset's readout each, the
 //     patch edited in the bank;
 //   - instrument-racks.ts: the instruments as the device view shows them, a rack of cards each,
@@ -24,7 +25,8 @@
 //     and a lane's shapes, as they're drawn; what the desk declares, read from its view models.
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export { Session, type GroupShown, type TrackShown } from './session.ts';
-export { SessionTracks, type SessionGroup, type SessionTrack, type TrackNow } from './session-tracks.ts';
+export { SessionTracks } from './session-tracks.ts';
+export { channelGroups, type MixerGroup, type MixerTrack, type TrackNow } from './mixer-groups.ts';
 export { TransportLane } from './transport-lane.ts';
 export { Toggles } from './toggles.ts';
 export { Views, type ViewName } from './views.ts';

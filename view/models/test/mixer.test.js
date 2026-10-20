@@ -7,7 +7,7 @@
 //   - a solo click: that strip alone, or added with shift, each change a command on its strip.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MixerViewBuilder, shortName } from '../index.ts';
+import { channelGroups, MixerViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from './desk.js';
 
@@ -100,6 +100,27 @@ test("a desk as a mixer, in the plan's order: its buses, each with the buses tha
     ['reverb'],
   );
   assert.equal(mixer.master.name, 'master');
+});
+
+test("a desk's channels, as a desk alone shows them: its own of the channel role, then each pool's copies added so far; one group of tracks for a mixer drawn with no session, none with none", () => {
+  const mixer = mixerOn({ copies: { 'my tap': [1, 2] } }).views.mixer();
+  assert.deepEqual(
+    mixer.channels().map(({ name }) => name),
+    ['my tap 1', 'my tap 2'],
+  );
+  const nothing = { text: '—', lit: false, waiting: false };
+  assert.deepEqual(channelGroups(mixer, 'replay'), [
+    {
+      key: 'channels',
+      name: 'replay',
+      mine: false,
+      tracks: [
+        { address: ['my tap', '1'], name: 'my tap 1', now: nothing, playing: true },
+        { address: ['my tap', '2'], name: 'my tap 2', now: nothing, playing: true },
+      ],
+    },
+  ]);
+  assert.deepEqual(channelGroups(mixerOn().views.mixer(), 'replay'), []);
 });
 
 test("a solo click: that strip alone, the others let go first; again, none; with shift, added or let go; a pool's copy among them; each change a command on its strip's solo", () => {
