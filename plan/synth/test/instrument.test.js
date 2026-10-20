@@ -1,14 +1,13 @@
-// An instrument, a preset's changes and a bank (mockup/src/libs/plan/synth), in node, on the tests' voice card (pluck.js):
+// An instrument, a preset's changes and a live bank (mockup/src/libs/plan/synth), in node, on the tests' voice card (pluck.js):
 //   - an instrument of one patch: a pool of voices, each a copy of its voice card, the patch's preset on its
 //     architecture; the note's addresses its sources' macros; of the instrument's form;
 //   - a drum rack: a pool for each pad, played by its key, each its own patch;
 //   - refused: two chains with no key, a key twice, an architecture not handed in;
 //   - a preset changed: each value and setting that differs, by its address, one let go back to its start;
-//   - a bank: patches by name, in order; a program change picks one by its place;
 //   - a live bank: its patches as they play, edited or reset as the app's messages ask.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Bank, changesFrom, edited, instrumentOf, LiveBank, MODULE_TEMPLATES, SYNTH_FORMS } from '../index.ts';
+import { changesFrom, edited, instrumentOf, LiveBank, MODULE_TEMPLATES, SYNTH_FORMS } from '../index.ts';
 import { Planner } from '../../planner/index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { PLUCK } from './pluck.js';
@@ -116,13 +115,6 @@ test('a preset edited, as a message says: a value or a setting by its address, t
     settings: { 'osc 1/osc/wave': 'square' },
   });
   assert.equal(BRIGHT.values['osc 1/tune'], 12, 'left alone');
-});
-
-test('a bank: patches by name, in order; a program change picks one by its place, from 0; none past its end', () => {
-  const bank = new Bank({ bright: BRIGHT, soft: { kind: 'Pluck', values: { 'amp/decay': 1.2 } } });
-  assert.deepEqual(bank.names, ['bright', 'soft']);
-  assert.equal(bank.patch('bright'), BRIGHT);
-  assert.deepEqual([bank.program(1), bank.program(2), bank.patch('none')], ['soft', undefined, undefined]);
 });
 
 test("a live bank: its patches as they play, a value or a setting edited as the app's message asks, reset to its start; each told", () => {

@@ -8,7 +8,6 @@
 //   - instrument.ts: an instrument, a pool of voices, or a drum rack, a pool for each pad;
 //   - preset.ts: a preset changed, each value and setting that differs, by its address; edited as
 //     the app's messages ask (PresetMessage);
-//   - bank.ts: patches by name, a program change picking one;
 //   - live-bank.ts: a bank's patches as they play, edited or reset as the app's messages ask;
 //   - instruments-file.ts: a file of instruments, patches and racks, as a person writes it, read;
 //   - patch-plans.ts: a patch's instrument planned from a file of instruments, by its name, and
@@ -18,7 +17,6 @@
 // Each read as it loads, its shape checked, every failure said, naming its file.
 // Handed to the planner, with the forms.
 export { NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, type NoteSource } from './note.ts';
-export { Bank } from './bank.ts';
 export { LiveBank } from './live-bank.ts';
 export { instrumentOf, type Chain } from './instrument.ts';
 export { instrumentsOf, type Instruments, type RackPad } from './instruments-file.ts';
