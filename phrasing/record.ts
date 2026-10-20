@@ -35,8 +35,9 @@ export function phrases(record: PatternNote[], from: string | undefined, rand: (
   const end = starts[firstPhrase + len] ?? record.length; // the next phrase's start, or the record's end
   return [first, end - first];
 }
-// the notes a replay unmutes, the pattern running on silently where it was played: from the next one at a place on, a random number of
-// them, 1 up to all, round the loop. One draw
+// the notes a play of a record unmutes, the pattern running on silently where it was
+// played: from the next one at a place on, a random number of them, 1 up to all, round
+// the loop. One draw
 export function unmute(pat: NotePattern, at: number, rand: () => number, meter: Meter = COMMON_TIME): PatternNote[] {
   return upcoming(pat, at, 1 + Math.floor(rand() * pat.events.length), meter);
 }

@@ -13,9 +13,12 @@ export type HeardGrid = Pick<
 const KEEP = HISTORY + 60; // s: the history kept, and a minute more
 const TRIM_EVERY = 1024; // 16ths: what's past let go this often, not on every one
 
-// where each 16th fell as the grid played it, heard as it's scheduled, so a time long past lies where it was played after the tempo has
-// changed, the bars lined up (views.md): the grid itself knows only the tempo now. Straight, so a swung note lies where it sounded. In
-// song time, so a hold, a stop's or the live garden's while the arrangement played back, where no 16th fell, takes no room (P3b)
+// Where each 16th fell as the grid played it, heard as it's scheduled:
+//   - a time long past lies where it was played after the tempo has changed,
+//     the bars lined up; the grid itself knows only the tempo now;
+//   - straight, so a swung note lies where it sounded;
+//   - in song time, so a hold (a stop's, or live play's while a recording
+//     played back), where no 16th fell, takes no room.
 export class GridMap {
   readonly #grid: HeardGrid;
   readonly #steps: number[] = []; // each 16th's number, in the order played

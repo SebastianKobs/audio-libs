@@ -56,8 +56,10 @@ export function due<Event extends PatternEvent>(pat: Pattern<Event>, i: number, 
     return offset < STEP ? [{ ...event, offset }] : [];
   });
 }
-// a rhythm played live, as a tower's while you circle: looping from where it started (start, in ticks from the grid's start), at a time
-// scale (2: double time, 0.5: half), its events whose places fall from a place up to another, each where it falls, as long as it lasts then
+// a rhythm played live, as a gesture plays one: looping from where it started (start,
+// in ticks from the grid's start), at a time scale (2: double time, 0.5: half), its
+// events whose places fall from a place up to another, each where it falls, as long as
+// it lasts then
 export function liveEvents<Event extends PatternEvent>(
   pat: Pattern<Event>,
   start: number,

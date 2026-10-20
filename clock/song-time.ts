@@ -39,9 +39,10 @@ export class SongTime {
   clear(): void {
     this.#holds.length = 0;
   }
-  // a clock time's song time, the time the music played up to it (P3b): the holds it went through taken out, a stop's or the live garden's
-  // while the arrangement played back, as the arrangement shows them, standing; within one, where it stood, at the 16th it was held at,
-  // those handed out before it played on; held now, all from it at it
+  // a clock time's song time, the time the music played up to it (P3b): the holds it
+  // went through taken out, a stop's, or live play's while the arrangement played back,
+  // as the arrangement shows them, standing; within one, where it stood, at the 16th it
+  // was held at, those handed out before it played on; held now, all from it at it
   songTime(t: number): number {
     if (t === Infinity) {
       return t; // never, held or not
