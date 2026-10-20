@@ -9,9 +9,22 @@
 //   - a controller on a strip as its param's address on the desk: the strip's address in front.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { channelOf, controlAddress, deskOf, deskTemplates, SEND, silenced } from '../index.ts';
+import {
+  channelOf,
+  channelTemplates,
+  CHANNEL_FORM,
+  controlAddress,
+  deskOf,
+  deskTemplates,
+  layered,
+  SEND,
+  silenced,
+} from '../index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../../params/index.ts';
 import { copyOf, nodeAt, paramAt, settingAt } from '../../format/index.ts';
+import { EFFECT_FORM } from '../../effects/index.ts';
+import { EFFECT_TEMPLATES } from '../../effects/content.ts';
+import { Planner } from '../../planner/index.ts';
 import { planned, STUDIO, TOWER } from './desks.js';
 // a param or a macro by its spec and value alone
 function specAndValue({ spec, value }) {
@@ -95,6 +108,33 @@ test("the master: its inserts and its fader alone, its volume the Output's (mast
   assert.deepEqual(
     master.outputs.map(({ name }) => name),
     ['out'],
+  );
+});
+
+test('a lone channel planned, apart from any desk: its parts layered, the base first, made into templates of the channel form, its macros its own', () => {
+  const parts = layered([{ inserts: [{ name: 'utility', kind: 'Utility' }], volume: 0.5 }, { pan: false }]);
+  assert.deepEqual(parts, { inserts: [{ name: 'utility', kind: 'Utility' }], pan: false, volume: 0.5, tap: 'post' });
+  const templates = channelTemplates(parts, { kind: 'Lone', master: false, sends: [] });
+  assert.deepEqual(
+    templates.map(({ kind, form }) => [kind, form]),
+    [['Lone', 'channel']],
+  );
+  const plan = new Planner([...EFFECT_TEMPLATES, ...templates], [EFFECT_FORM, CHANNEL_FORM]).plan('Lone');
+  assert.deepEqual(
+    plan.node.children.map(({ name, role }) => [name, role]),
+    [
+      ['utility', 'insert'],
+      ['cut', 'mute'],
+      ['fader', 'fader'],
+    ],
+  );
+  assert.deepEqual(
+    plan.node.macros.map(({ spec, value }) => [spec.name, value]),
+    [
+      ['volume', 0.5],
+      ['mute', 0],
+      ['solo', 0],
+    ],
   );
 });
 
