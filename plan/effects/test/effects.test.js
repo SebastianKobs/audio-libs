@@ -4,7 +4,8 @@
 //   - the Delay's note a choice through its macro; the Utility's pan pot a setting; the Reverb's length one.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { EFFECT_FORM, EFFECT_TEMPLATES } from '../index.ts';
+import { EFFECT_FORM } from '../index.ts';
+import { EFFECT_TEMPLATES } from '../content.ts';
 import { Planner } from '../../planner/index.ts';
 import { BLOCKS } from '../../blocks/index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';

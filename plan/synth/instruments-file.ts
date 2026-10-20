@@ -18,8 +18,9 @@ export interface RackPad {
   readonly key: number;
   readonly patch: string;
 }
-// a file of instruments, read: their templates, the patches by name, the racks by name
+// a file of instruments, read: the modules its voice cards are made of, handed in; their templates, the patches by name, the racks by name
 export interface Instruments {
+  readonly modules: readonly WrittenTemplate[];
   readonly templates: readonly WrittenTemplate[];
   readonly patches: Readonly<Record<string, Preset>>;
   readonly racks: Readonly<Record<string, readonly RackPad[]>>;
@@ -50,12 +51,14 @@ const FILE_SHAPE: Shape = {
 };
 
 // A file of instruments read, as it is once it's of its shape; refused where it isn't.
-export function instrumentsOf(data: unknown, source: string): Instruments {
+// modules: the templates its voice cards are made of (content.ts' MODULE_TEMPLATES, or a user's own).
+export function instrumentsOf(data: unknown, source: string, modules: readonly WrittenTemplate[]): Instruments {
   const file = fromData<Written>(data, FILE_SHAPE, { source, what: 'instruments' });
   const patches = presetsOf(file.patches ?? {}, source, 'instrument');
   const racks = file.racks ?? {};
   refusedPads(racks, patches, source);
   return {
+    modules,
     templates: Object.entries(file.instruments ?? {}).map(([name, voiceCard]) =>
       templateOf(
         { kind: name, form: ARCHITECTURE_FORM.name, outputs: [{ name: 'out', channels: 1 }], ...voiceCard },

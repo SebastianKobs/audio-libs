@@ -10,10 +10,11 @@ import { SoundModule } from '../index.ts';
 import { BuiltStandIn } from './built.js';
 import { noteMessages } from '../../../midi/index.ts';
 import { instrumentsOf } from '../../../plan/synth/index.ts';
+import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
 import { LiveCopies } from '../../../util/index.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
 
-const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
+const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 
 // a module on the file's patches, and a part's making: its own stand-in for what's built
 function moduleOn() {

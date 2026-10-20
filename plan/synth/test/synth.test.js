@@ -6,14 +6,8 @@
 //     module's among them; the note's sources its macros; refused where it breaks its form, every failure said.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  ARCHITECTURE_FORM,
-  MODULE_TEMPLATES,
-  NOTE_SETTINGS,
-  NOTE_SOURCES,
-  OWN_NOTE_VALUES,
-  SYNTH_FORMS,
-} from '../index.ts';
+import { ARCHITECTURE_FORM, NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, SYNTH_FORMS } from '../index.ts';
+import { MODULE_TEMPLATES } from '../content.ts';
 import { Planner } from '../../planner/index.ts';
 import { isSwitch } from '../../../params/index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';

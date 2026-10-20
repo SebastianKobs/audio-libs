@@ -8,7 +8,8 @@
 // planned(): a desk written short, STUDIO unless another, planned with the effects, the forms and the presets.
 import { DESK_FORMS, deskTemplates } from '../index.ts';
 import { Planner } from '../../planner/index.ts';
-import { EFFECT_FORM, EFFECT_TEMPLATES } from '../../effects/index.ts';
+import { EFFECT_FORM } from '../../effects/index.ts';
+import { EFFECT_TEMPLATES } from '../../effects/content.ts';
 
 export const REPLAY = {
   kind: 'Replay',

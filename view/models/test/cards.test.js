@@ -10,10 +10,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentCards } from '../index.ts';
 import { instrumentsOf, LiveBank } from '../../../plan/synth/index.ts';
+import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
 import { cardModels } from './card.js';
 
-const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
+const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 
 // the cards on a live bank, each edit sent, then edited by the bank, as the studio's is
 function cardsOn() {

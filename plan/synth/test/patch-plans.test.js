@@ -6,14 +6,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cardPlanner, chainsOf, instrumentsOf, patchPlan } from '../index.ts';
+import { MODULE_TEMPLATES } from '../content.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { PLUCK_FILE } from './pluck.js';
 
-const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
+const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 
 test("the planner of a file's voice cards: a patch's voice card planned at its preset, on the modules' and the file's templates", () => {
   const { kind, values, settings } = INSTRUMENTS.patches.rtlprnf;
-  const plan = cardPlanner(INSTRUMENTS.templates).plan(kind, { values: { ...values, 'osc 1/tune': 7 }, settings });
+  const plan = cardPlanner(INSTRUMENTS).plan(kind, { values: { ...values, 'osc 1/tune': 7 }, settings });
   assert.equal(plan.node.kind, 'Pluck');
   assert.equal(paramAt(plan, ['osc 1', 'tune']).value, 7);
   assert.equal(settingAt(plan, ['osc 1', 'osc', 'wave']).value, 'triangle');

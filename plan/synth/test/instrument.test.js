@@ -7,7 +7,8 @@
 //   - a live bank: its patches as they play, edited or reset as the app's messages ask.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { changesFrom, edited, instrumentOf, LiveBank, MODULE_TEMPLATES, SYNTH_FORMS } from '../index.ts';
+import { changesFrom, edited, instrumentOf, LiveBank, SYNTH_FORMS } from '../index.ts';
+import { MODULE_TEMPLATES } from '../content.ts';
 import { Planner } from '../../planner/index.ts';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { PLUCK } from './pluck.js';

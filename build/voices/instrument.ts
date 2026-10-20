@@ -103,7 +103,7 @@ function changedValues(plan: Plan, before: Instruments, after: Instruments, name
   const changed: Record<string, number | string> = {};
   for (const [index, { patch }] of chainsOf(after, name).entries()) {
     const old = was[index]!.patch; // as many chains: presets alone edited
-    const architecture = cardPlanner(before.templates).plan(old.kind);
+    const architecture = cardPlanner(before).plan(old.kind);
     const { values, settings } = changesFrom(old, patch, architecture);
     if (Object.keys(settings).length) {
       return null;

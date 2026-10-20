@@ -4,7 +4,8 @@ The desk's forms, a desk written short, its mute and solo: a package of its own 
 
 ```ts
 import { DESK_FORMS, deskTemplates } from './index.ts';
-import { EFFECT_FORM, EFFECT_TEMPLATES } from '../effects/index.ts';
+import { EFFECT_FORM } from '../effects/index.ts';
+import { EFFECT_TEMPLATES } from '../effects/content.ts';
 import { Planner } from '../planner/index.ts';
 const templates = [...EFFECT_TEMPLATES, ...deskTemplates(desk, channels)];
 const plan = new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], presets).plan(desk.kind);

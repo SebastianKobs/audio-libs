@@ -11,10 +11,11 @@ import { Instrument } from '../index.ts';
 import { BuiltStandIn } from './built.js';
 import { noteMessages } from '../../../midi/index.ts';
 import { instrumentsOf, patchPlan } from '../../../plan/synth/index.ts';
+import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
 import { settingAt } from '../../../plan/format/index.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
 
-const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml');
+const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 
 // an instrument of a patch on the stand-in, its builder recording what it's handed
 function instrumentOf(patch, { at = (t) => t, cardValues } = {}) {

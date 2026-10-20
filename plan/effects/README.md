@@ -2,8 +2,11 @@
 
 The effects as templates, a package of its own since LAY9a: Utility, Filter, Limiter, Delay, Tape delay and Reverb, each a YAML file, its comments the reasons. The Tape delay is built on the Delay (`extends: Delay`), only its wobble written (LAY9b). Handed to the planner (`libs/plan/planner/`) with their form; a theme's or a desk's presets are values and settings on them, by address.
 
+Its face, `index.ts`, is the form alone; the six templates are its content, `content.ts`, imported apart, so a desk's forms load no YAML.
+
 ```ts
-import { EFFECT_FORM, EFFECT_TEMPLATES } from './index.ts';
+import { EFFECT_FORM } from './index.ts';
+import { EFFECT_TEMPLATES } from './content.ts';
 import { Planner } from '../planner/index.ts';
 const planner = new Planner(EFFECT_TEMPLATES, [EFFECT_FORM]);
 planner.plan('Delay', { name: 'delay', values: { note: '1/4', feedback: 0.6, tone: 1600 } });
@@ -25,7 +28,7 @@ A device shows an insert's macros with their hints, written in its template (LAY
 
 | | |
 |---|---|
-| `EFFECT_TEMPLATES` | the six, read from their YAML as the app is built, each checked for its shape as it loads (`templateOf()`), frozen (`index.ts`) |
+| `EFFECT_TEMPLATES` | the six, read from their YAML as the app is built, each checked for its shape as it loads (`templateOf()`), frozen (`content.ts`) |
 | `EFFECT_FORM` | what every effect is: one input and one output, its children free of roles (`form.ts`) |
 
 Tested in node, in its `test/` folder: the six of the effect's form, planned, the Tape delay the Delay's and its wobble; their macros at today's names and values; a macro's spec its target's; the Delay's note a choice through its macro, the Utility's pan pot and the Reverb's length settings (`test/effects.test.js`). Each held to today's FX module, built on the stand-in, node for node, and each theme's effects as presets on them held to the theme's modules, in `mockup/test/unit/effect-templates.test.js`, which can reach the old libraries.

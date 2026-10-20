@@ -113,7 +113,7 @@ export class InstrumentCards {
   }
   // a preset's voice card planned, the values given over its own
   #planAt({ kind, values = {}, settings = {} }: Preset, over: ValuesByAddress): Plan {
-    return cardPlanner(this.#instruments.templates).plan(kind, { values: { ...values, ...over }, settings });
+    return cardPlanner(this.#instruments).plan(kind, { values: { ...values, ...over }, settings });
   }
 }
 

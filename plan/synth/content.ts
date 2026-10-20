@@ -1,6 +1,7 @@
-// ---------- plan/synth/modules: the modules, a YAML template each ----------
+// ---------- plan/synth/content: the modules, a YAML template each ----------
 // As a synth's panel names them: VCO, Noise source, LFO, FM, Envelope generator, VCA, VCF,
 // Tremolo, Ring, Out. Each read as it loads, its shape checked, naming its file.
+// Handed to the planner with the synth's forms (index.ts), through a file of instruments (instrumentsOf()).
 import { templateOf, type WrittenTemplate } from '../planner/index.ts';
 import { frozen } from '../../util/index.ts';
 import envelopeGenerator from './modules/envelope-generator.yaml';
