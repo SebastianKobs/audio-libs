@@ -16,6 +16,7 @@ export interface ClockSettings extends GridSettings {
 type ClockEvents = {
   tick: [t: number];
   step: [i: number, t: number];
+  tempo: [beat: number];
 };
 
 const TICK = 0.025; // s between ticks
@@ -30,6 +31,7 @@ export class Clock {
   readonly #events = new Events<ClockEvents>(); // its ticks and 16ths, to whoever listens
   #fake: number | null = null; // the time in fake mode, else null
   #ticking = false;
+  #beatTold: number | null = null; // the beat the last tick found, none before the first
 
   constructor({
     settings = { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16', meter: COMMON_TIME },
@@ -56,6 +58,11 @@ export class Clock {
   // listener(i, t), every 16th of the grid, ahead of time: i its number, t when it sounds, swung
   onStep(listener: (i: number, t: number) => void): () => void {
     return this.#events.on('step', listener);
+  }
+  // listener(beat), each time the beat's length changes, as a tick finds it; the first tick's beat
+  // is where it starts, not told
+  onTempo(listener: (beat: number) => void): () => void {
+    return this.#events.on('tempo', listener);
   }
   // the ticks come from a worker: browsers slow a hidden tab's own timers to once a second or less, but not a worker's
   start(): void {
@@ -110,8 +117,19 @@ export class Clock {
   }
   #tick(): void {
     this.audio.sync();
+    this.#tellTempo();
     this.#events.emit('tick', this.now());
     this.#schedule();
+  }
+  // before the steps are scheduled, so the tempo's followers are set for the 16ths they play.
+  // The first tick only records the beat: a tempo the clock starts with is no change
+  #tellTempo(): void {
+    const beat = this.grid.beatDuration();
+    const was = this.#beatTold;
+    this.#beatTold = beat;
+    if (was !== null && beat !== was) {
+      this.#events.emit('tempo', beat);
+    }
   }
   // each tick: the 16ths due within the lookahead go to onStep's listeners. While the audio is suspended nothing is scheduled. If the
   // ticks lagged, the steps missed are skipped silently, and the grid keeps its place

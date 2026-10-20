@@ -630,3 +630,17 @@ test("the tap grids' steps from the note values; the history kept: half an hour"
   assert.deepEqual(GRIDS['1/8t'], { g: 4 / 3, triplet: true });
   assert.equal(HISTORY, 30 * 60);
 });
+
+test("its tempo told as a tick finds the beat's length changed: none at the first tick, then each change, none for a tick that finds it the same", () => {
+  const tempoSettings = { ...SETTINGS };
+  const own = new Clock({ settings: tempoSettings }); // its own, so its first tick is its first
+  own.useFake(0);
+  const told = [];
+  own.onTempo((beat) => told.push(beat));
+  own.advance(0.05); // two ticks: the first only records the beat as it is, telling nothing
+  tempoSettings.bpm = 120;
+  own.advance(0.05); // the change is told once, on the next tick
+  own.advance(0.05); // the same again: none
+  assert.equal(told.length, 1, 'the change only');
+  near(told[0], 0.5, 'the change');
+});
