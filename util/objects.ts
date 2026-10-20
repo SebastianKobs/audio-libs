@@ -1,4 +1,4 @@
-// ---------- util/objects: a key toggled, a map's entry made when asked, an object updated, frozen or compared ----------
+// ---------- util/objects: a key toggled, a map's entry made when asked, a chain followed through a map, an object updated, frozen or compared ----------
 
 // a map as entryOf() asks it: a Map, or a WeakMap
 interface Keyed<Key, Value> {
@@ -21,6 +21,26 @@ export function entryOf<Key, Value>(map: Keyed<Key, Value>, key: Key, make: () =
     map.set(key, make());
   }
   return map.get(key)!; // made just above, if it wasn't there
+}
+// The keys a chain leads through, from the first, each item naming the next (next()):
+//   - keys: in order, until one with no next or one not in the map, which is the last;
+//   - again: the key met a second time, where it loops; undefined where it doesn't.
+export function chainFrom<Item>(
+  first: string | undefined,
+  byKey: ReadonlyMap<string, Item>,
+  next: (item: Item) => string | undefined,
+): { keys: string[]; again: string | undefined } {
+  const keys: string[] = [];
+  let key = first;
+  while (key !== undefined) {
+    if (keys.includes(key)) {
+      return { keys, again: key };
+    }
+    keys.push(key);
+    const item = byKey.get(key);
+    key = item === undefined ? undefined : next(item);
+  }
+  return { keys, again: undefined };
 }
 // target given from's values in place, all the way down: each object or array in it that stays one is kept, so whatever holds a part of it
 // sees the change (a chain planned again from the module it holds); nothing is shared with from. Returns target

@@ -16,7 +16,7 @@
 // Each failure said at once, naming the desk.
 import { feeds, type Wire } from '../format/index.ts';
 import type { WrittenTemplate } from '../planner/index.ts';
-import { fromData, type Shape } from '../../util/index.ts';
+import { chainFrom, fromData, type Shape } from '../../util/index.ts';
 import {
   PARTS_FIELDS,
   TAPS,
@@ -146,23 +146,20 @@ function partsOn(desk: Desk, byKind: ReadonlyMap<string, Channel>, problems: str
 }
 // the channels a channel is written on, the nearest first; a missing one or a loop said
 function basesOf(written: DeskPool, byKind: ReadonlyMap<string, Channel>, problems: string[]): Channel[] {
-  const bases: Channel[] = [];
-  for (let kind = written.channel; kind !== undefined; kind = byKind.get(kind)?.extends) {
-    if (bases.some((base) => base.kind === kind)) {
-      const kinds = [...bases.map((base) => base.kind), kind];
-      problems.push(
-        `${written.name}: channel ${kinds[0]} built on ${kinds.slice(1).join(', which is built on ')}: a loop`,
-      );
-      return [];
-    }
-    const base = byKind.get(kind);
-    if (!base) {
-      problems.push(`${written.name}: no channel ${kind}`);
-      return [];
-    }
-    bases.push(base);
+  const { keys, again } = chainFrom(written.channel, byKind, (base) => base.extends);
+  if (again !== undefined) {
+    const kinds = [...keys, again];
+    problems.push(
+      `${written.name}: channel ${kinds[0]} built on ${kinds.slice(1).join(', which is built on ')}: a loop`,
+    );
+    return [];
   }
-  return bases;
+  const missing = keys.find((kind) => !byKind.has(kind));
+  if (missing !== undefined) {
+    problems.push(`${written.name}: no channel ${missing}`);
+    return [];
+  }
+  return keys.map((kind) => byKind.get(kind)!); // each there, as just found
 }
 // Each way out, the desk's channels' and its pools':
 //   - into a bus on the desk, else the master;

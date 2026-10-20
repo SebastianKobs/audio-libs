@@ -6,6 +6,7 @@ import {
   addressText,
   approach,
   Bus,
+  chainFrom,
   clamp,
   DueQueue,
   entryOf,
@@ -239,6 +240,25 @@ test("a map's entry for a key, made the first time it's asked for, the same one 
     7,
     'a weak map too',
   );
+});
+
+test('a chain of keys followed through a map: each item naming the next, to one with no next or one not there; one met again, where it loops', () => {
+  const byKey = new Map([
+    ['a', { next: 'b' }],
+    ['b', { next: 'c' }],
+    ['c', {}],
+    ['x', { next: 'y' }],
+    ['y', { next: 'x' }],
+  ]);
+  const next = (item) => item.next;
+  assert.deepEqual(chainFrom('a', byKey, next), { keys: ['a', 'b', 'c'], again: undefined });
+  assert.deepEqual(
+    chainFrom('b', new Map([['b', { next: 'gone' }]]), next),
+    { keys: ['b', 'gone'], again: undefined },
+    'one not there, the last',
+  );
+  assert.deepEqual(chainFrom('x', byKey, next), { keys: ['x', 'y'], again: 'x' });
+  assert.deepEqual(chainFrom(undefined, byKey, next), { keys: [], again: undefined });
 });
 
 test('an item picked from a list, each as likely, by a random of its own or Math.random; none from an empty one', () => {
