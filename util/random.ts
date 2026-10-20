@@ -1,6 +1,6 @@
 // ---------- util/random: a seeded generator, the same run of draws for a seed; a pick from a list, each as likely or by its weight; draws kept to draw again; a seeded source of draws, each play a seed of its own ----------
-// mulberry32 (Tommy Ettinger's): a 32-bit state, stepped and scrambled at each draw; small and fast, enough for the garden's choices, not
-// for anything secret (G0g, mockup/architecture/done.md)
+// mulberry32 (Tommy Ettinger's): a 32-bit state, stepped and scrambled at each draw.
+// Small and fast: enough for a game's or a sequencer's choices, not for anything secret.
 
 // a play's draws: its seed, and the generator made with it
 export interface PlayDraws {
@@ -61,7 +61,7 @@ export function keptDraws(random: () => number): { random: () => number; again: 
 }
 
 // A source of random draws, seeded as it's made, so a run is drawn again from its seed:
-// its own draws (random(), what plays: the conductor's picks, a plant's contour and a tower's rhythm, a visitor's wish),
+// its own draws (random(), what its owner plays: a pick, a contour, a rhythm),
 // and a play's (play()), a seed of its own drawn from it,
 // with a generator made from that seed, so a play is drawn again from its seed alone;
 // seeded again from the start (reseed()).
@@ -71,16 +71,17 @@ export class Draws {
   constructor({ seed }: { seed: number }) {
     this.#random = seeded(seed);
   }
-  // a draw of the garden's own, in [0, 1)
+  // a draw of its own, in [0, 1)
   random(): number {
     return this.#random();
   }
-  // a play's own seed, drawn from the garden's, and its generator
+  // a play's own seed, drawn from its own draws, and its generator
   play(): PlayDraws {
     const seed = Math.floor(this.#random() * SEEDS);
     return { seed, random: seeded(seed) };
   }
-  // seeded again, as from the start: the tests' and the recorders', a case at a time, on one garden whose frames run on between them
+  // seeded again, as from the start: a test's or a recorder's case at a time, on one
+  // owner that runs on between them
   reseed(seed: number): void {
     this.#random = seeded(seed);
   }
