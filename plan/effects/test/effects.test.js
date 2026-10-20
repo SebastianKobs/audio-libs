@@ -40,10 +40,10 @@ test("the six effects, each of the effect's form, one input and one output, each
   assert.deepEqual(tape.wires.at(-1), { from: { node: 'depth', output: 'out' }, to: { node: 'line', param: 'ms' } });
 });
 
-test("their params macros by today's names, at today's values as each starts: a desk's keys and its lanes' names kept", () => {
+test("their params macros by the names a desk keys them, each at its default as it starts: a desk's keys and its lanes' names kept", () => {
   assert.deepEqual(macrosOf('Utility'), { level: 1, pan: 0 });
-  assert.deepEqual(macrosOf('Filter'), { cutoff: 24000, q: 1.085 });
-  assert.deepEqual(macrosOf('Limiter'), { gain: 16, ceiling: -0.3, release: 0.3 });
+  assert.deepEqual(macrosOf('Filter'), { cutoff: 24000, q: 0.707 });
+  assert.deepEqual(macrosOf('Limiter'), { gain: 0, ceiling: -0.3, release: 0.3 });
   assert.deepEqual(macrosOf('Delay'), { sync: 1, note: '1/8', ms: 417, feedback: 0.45, tone: 2400 });
   assert.deepEqual(macrosOf('TapeDelay'), { ...macrosOf('Delay'), rate: 0.5, depth: 0.004 }, '0.5 Hz, 4 ms either way');
   assert.deepEqual(macrosOf('Reverb'), {}, 'its length a setting');

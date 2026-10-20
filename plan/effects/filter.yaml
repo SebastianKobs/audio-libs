@@ -1,4 +1,4 @@
-# The Filter: a lowpass, wide open to start.
+# The Filter: a lowpass, wide open to start, flat at its cutoff.
 # Its cutoff and its q macros onto the filter's frequency and resonance, their specs theirs.
 # Its slope a setting (filter/slope), 12 dB an octave unless a preset says 24.
 kind: Filter
@@ -14,13 +14,9 @@ wires:
 macros:
   - name: cutoff
     hint: >-
-      Its cutoff, in hertz: above it the sound is taken away. The air makes a far sound duller, and a
-      tower's dullness its replays.
+      Its cutoff, in hertz: the sound above it is taken away, so a lower cutoff sounds duller.
     maps: [{ to: [filter, frequency], factor: 1, offset: 0 }]
-  # a small bump at the cutoff, as it was when Web Audio read 0.707 in dB
   - name: q
-    value: 1.085
     hint: >-
-      Resonance: how much it rings at its cutoff, as an EQ's Q: 0.707 flat, more a bump there. The air's
-      1.085 and a tower's dullness, 1.059, a small bump.
+      Resonance: how much it rings at its cutoff, as an EQ's Q: 0.707 flat, more a bump there.
     maps: [{ to: [filter, resonance], factor: 1, offset: 0 }]

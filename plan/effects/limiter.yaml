@@ -9,21 +9,19 @@ children:
 wires:
   - { from: { input: in }, to: { node: limiter, input: in } }
   - { from: { node: limiter, output: out }, to: { output: out } }
-# 16 dB brings the garden at its busiest just under a ceiling of -0.3 dBFS;
-# the master volume after it brings it back down
+# Its values Ableton's to start: no gain, a ceiling of -0.3 dBFS, a release of 0.3 s.
 macros:
   - name: gain
-    value: 16
+    value: 0
     hint: >-
       The limiter: how much it lifts the sum before it, in dB. Each dB more is a dB louder, until it
-      reaches the ceiling, which holds it. 16 dB brings the garden at its busiest just under the
-      ceiling; the master volume, after it, brings it back down.
+      reaches the ceiling, which holds it.
     maps: [{ to: [limiter, gain], factor: 1, offset: 0 }]
   - name: ceiling
     value: -0.3
     hint: >-
       The limiter: where it acts, in dBFS, and the most that comes out, whatever goes in. The line in its
-      history. The master volume comes after it.
+      history.
     maps: [{ to: [limiter, ceiling], factor: 1, offset: 0 }]
   - name: release
     value: 0.3

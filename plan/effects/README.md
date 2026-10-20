@@ -20,9 +20,9 @@ A device shows an insert's macros with their hints, written in its template (LAY
 | Effect | Inside | Its macros | Its settings |
 |---|---|---|---|
 | `Utility` | a gain into a pan | level, the gain's, the fader's in dB; pan | `pan/law`: stereo, or a pan pot |
-| `Filter` | a filter | cutoff, the filter's frequency; q, its resonance, 1.085 | `filter/type`, `filter/slope` |
-| `Limiter` | a limiter | gain 16 dB, ceiling -0.3 dBFS, release 0.3 s | |
-| `Delay` | a delay line into a lowpass, the lowpass back into the line through a gain | sync, note, ms, the line's; feedback and tone, their specs its own, Glow's values to start | `line/longest` |
+| `Filter` | a filter | cutoff, the filter's frequency; q, its resonance, flat (0.707) to start | `filter/type`, `filter/slope` |
+| `Limiter` | a limiter | gain 0 dB, ceiling -0.3 dBFS, release 0.3 s, Ableton's | |
+| `Delay` | a delay line into a lowpass, the lowpass back into the line through a gain | sync, note, ms, the line's; feedback and tone, their specs its own, feedback 0.45, tone 2400 Hz to start | `line/longest` |
 | `TapeDelay` | the Delay's, and its wobble: a slow oscillator, its depth a gain, into the line's time by its ms, moving it in seconds | the Delay's; rate 0.5 Hz, depth 0.004 s, 4 ms either way | the Delay's |
 | `Reverb` | a room | | `length`, its own, the room's (`room/length`) |
 
