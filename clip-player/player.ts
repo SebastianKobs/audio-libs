@@ -14,7 +14,7 @@
 // The looping, and when each note comes due, are the sequencer's clip launcher's.
 import type { Seconds, Ticks } from '../clock/index.ts';
 import { ClipLauncher, type ClipGrid, type Pattern, type Span } from '../sequencer/index.ts';
-import type { Address, Input, PatternNote } from '../midi-sequencer/index.ts';
+import type { SentTo, Input, PatternNote } from '../midi-sequencer/index.ts';
 import { NoteRotation, noteMessages, type PerNoteValues } from '../midi/index.ts';
 import { degreeNote, type Key } from '../music-theory/index.ts';
 
@@ -36,19 +36,19 @@ export interface ClipNote extends PatternNote {
 // lend(): a track lent to a clip played once, as it starts, from its first note's time to its
 // last's end, handed its own address, its track the one it borrows from; else its own track.
 export type Clip<Track extends string> = {
-  to: Address<Track>;
+  to: SentTo<Track>;
   pattern: Pattern<ClipNote>;
   transpose?: number | undefined;
   straight?: boolean | undefined;
   velocity?: (() => number) | undefined;
 } & (
-  { once?: false | undefined; lend?: undefined } | { once: true; lend?(to: Address<Track>, span: Span): Address<Track> }
+  { once?: false | undefined; lend?: undefined } | { once: true; lend?(to: SentTo<Track>, span: Span): SentTo<Track> }
 );
 // A clip as it plays: its slot, and where its notes go, once a lent track is known.
 interface Playing<Track extends string, Slot> {
   clip: Clip<Track>;
   slot: Slot;
-  to?: Address<Track>;
+  to?: SentTo<Track>;
 }
 
 // The clip slots, and the clips playing, one a track.
@@ -170,7 +170,7 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
 }
 
 // an address, its notes carrying a launch's region
-function inRegion<Track extends string>(to: Address<Track>, region: number): Address<Track> {
+function inRegion<Track extends string>(to: SentTo<Track>, region: number): SentTo<Track> {
   return { ...to, play: { ...to.play, region } };
 }
 // a pattern's notes as pitches in a key, transposed; a held note's glides transposed with it

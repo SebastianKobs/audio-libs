@@ -10,4 +10,4 @@ export { Sequencer } from './input.ts';
 export { Recorder } from './recorder.ts';
 export type { Lane, Region } from './recorder.ts';
 export { RecordingPlayer } from './playback.ts';
-export type { Address, Input, NoteListener, NoteOffListener, Track } from './input.ts';
+export type { SentTo, Input, NoteListener, NoteOffListener, Track } from './input.ts';
