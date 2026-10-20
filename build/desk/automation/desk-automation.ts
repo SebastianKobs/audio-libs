@@ -1,5 +1,7 @@
-// ---------- build/desk/automation/cued-controls: a strip's controls, set on the desk on time ----------
-// The receiving end of a move: each controller taken as it comes back off a track, set on time.
+// ---------- build/desk/automation/desk-automation: the desk's automation, a package fitted to a desk ----------
+// A copy of whoever operates the desk: each controller taken as it comes back off a track, set on
+// the desk on time, the motors; a note's own controllers on its track's channel among them.
+// The desk works without it.
 // As its track's controllers name them: by their params' addresses on the strip, as the
 // views set them:
 //   - its fader's volume and pan, a send by its FX channel's name; its mute and solo;
@@ -9,7 +11,8 @@
 // On the desk, the strip's address in front (my tap/1/send/reverb).
 // Where each goes:
 //   1. one a track's notes set, where a note is heard from and what its phrase drew: its
-//      channel's (DeskChannels), at its time on the audio's clock;
+//      channel's, at its time on the audio's clock, the channel added as it comes (a live
+//      track's, which its instrument adds, not);
 //   2. a strip's mute and solo: the desk's mute() and solo();
 //   3. any other: the desk's, which keeps it.
 // When, each held on the clock's cues:
@@ -24,12 +27,14 @@ import { isSwitch, type ParamSpec } from '../../../params/index.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';
 import { splitAtChild } from '../../../plan/format/index.ts';
 import { addressText } from '../../../util/index.ts';
-import type { DeskBuilt, MixingDesk } from '../mixing/index.ts';
-import { whenOf, type Change } from '../../desk-channels/index.ts';
+import type { DeskBuilt, DeskSetup, MixingDesk } from '../mixing/index.ts';
+import { whenOf, type Change } from './change.ts';
 
-export class CuedControls {
-  readonly #desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
-  readonly #channels: { control(strip: string, change: Change): boolean };
+type AutomatedDesk = Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo' | 'channelOf'>;
+
+export class DeskAutomation {
+  readonly #desk: AutomatedDesk;
+  readonly #setup: Pick<DeskSetup, 'isLive' | 'setBy'>;
   readonly #clock: Pick<Clock, 'now' | 'onTick'>;
   readonly #at: (t: number) => number;
   readonly #stripTracks: ReadonlySet<string>; // the strips that are tracks of their own (isStripTrack())
@@ -38,22 +43,22 @@ export class CuedControls {
   //   due: switches, choices and a param that never glides, set at their time
   readonly #held: Readonly<Record<'ahead' | 'due', Cues<Change>>>;
 
-  // desk: the desk, whose own channels are tracks of their own;
-  // channels: the tracks' channels, a change their notes set on them;
+  // desk: the desk it's fitted to, whose own channels are tracks of their own;
+  // setup: its rules, which tracks are set live, what a track's notes set;
   // clock: its time now and its ticks; at(): a time on it on the audio's clock
   constructor({
     desk,
-    channels,
+    setup,
     clock,
     at,
   }: {
-    desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
-    channels: { control(strip: string, change: Change): boolean };
+    desk: AutomatedDesk;
+    setup: Pick<DeskSetup, 'isLive' | 'setBy'>;
     clock: Pick<Clock, 'now' | 'onTick'>;
     at: (t: number) => number;
   }) {
     this.#desk = desk;
-    this.#channels = channels;
+    this.#setup = setup;
     this.#clock = clock;
     this.#at = at;
     // a desk is a composite
@@ -85,10 +90,21 @@ export class CuedControls {
   control(strip: string, { controller, value, t, glide }: Controller): void {
     const address = controlAddress(strip, controller);
     const change: Change = { address, value, t, ...(glide === undefined ? {} : { glide }) };
-    if (this.#channels.control(strip, change)) {
+    if (this.#setByNotes(strip, change)) {
       return;
     }
     this.#hold(change);
+  }
+  // A change on a track's channel where its notes set it, at its time on the audio's clock.
+  // Its channel added as any controller comes but a live track's, which its instrument adds.
+  // Returns false for one it doesn't set: a live track's, a param not its notes', a track
+  // with no pool.
+  #setByNotes(track: string, change: Change): boolean {
+    if (this.#setup.isLive(track) || !this.#desk.channelOf(track) || this.#setup.setBy(change.address) === undefined) {
+      return false;
+    }
+    this.#desk.set(change.address, change.value, whenOf(change, { now: this.#clock.now(), at: this.#at }));
+    return true;
   }
 
   // A change for the desk, checked as it comes, held until it's set on time.

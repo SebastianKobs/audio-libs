@@ -3,6 +3,7 @@
 //   - built from its plan by the function handed in, the settings changed before in it; a way into each of its own inputs;
 //     the values set before told it;
 //   - a track's channel, its pool's copy, added the first time it's asked for once built, what was set on it before told;
+//   - a track's instrument's way into its channel, the channel added as its first note comes, once;
 //   - a value set by its address, kept, told where it plays; a choice by its index kept as its choice; read back;
 //   - settings changed as a preset; a new beat, one unchanged passed over; whether a strip is one of its own channels.
 import { test } from 'node:test';
@@ -45,6 +46,15 @@ test("a track's channel, its pool's copy, added the first time it's asked for on
   assert.ok(desk.wiring().children.length > PLAN.node.children.length, 'its copies among its channels');
   assert.equal(desk.channelOf('reverb'), null);
   assert.equal(desk.channelOf('nobody/1'), null);
+});
+
+test("a track's instrument's way into its channel, the channel added as its first note comes, once; none for a track with no pool", () => {
+  const { desk, built, build } = deskOn(MixingDesk, PLAN);
+  build();
+  assert.deepEqual(desk.inputOf('my tap/3'), { into: 'into my tap/3/in' });
+  assert.deepEqual(desk.inputOf('my tap/3'), { into: 'into my tap/3/in' });
+  assert.deepEqual(built.added, ['my tap/3']);
+  assert.equal(desk.inputOf('reverb'), null);
 });
 
 test('a value set: kept, told what plays it; a choice by its index kept as its choice; read back as set, or as the plan starts it', () => {

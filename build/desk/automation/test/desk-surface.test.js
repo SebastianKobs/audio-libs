@@ -8,19 +8,26 @@
 //     desk built again with it.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DeskSurface, SequencedDesk } from '../index.ts';
+import { DeskAutomation, DeskSurface } from '../index.ts';
+import { MixingDesk } from '../../mixing/index.ts';
 import { deskOn } from '../../mixing/test/built.js';
 import { planned } from '../../../../plan/desk/test/desks.js';
 import { SMOOTHING } from '../../../../automation/index.ts';
 
 function surfaceOn() {
-  const on = deskOn(SequencedDesk, planned());
+  const on = deskOn(MixingDesk, planned());
   const { desk, clock } = on;
+  const automation = new DeskAutomation({
+    desk,
+    setup: { isLive: () => false, setBy: () => undefined },
+    clock,
+    at: (t) => t,
+  });
   clock.time = 3;
   const sent = [];
   const input = { send: (to, messages) => sent.push([to, messages]) };
   const label = (strip) => (strip === 'my tap/3' ? { kind: 'tap', track: 3 } : undefined);
-  return { ...on, surface: new DeskSurface({ desk, clock, input, label }), sent };
+  return { ...on, surface: new DeskSurface({ desk, automation, clock, input, label }), sent };
 }
 
 test("played in as a controller on the strip's track, now, with its label, gliding where the desk says; a switch at once", () => {

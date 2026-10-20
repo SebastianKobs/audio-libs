@@ -55,7 +55,7 @@ export function deskOn(Desk, plan, { setup = SETUP, clock = clockAt(0), at = (t)
   return { desk, built, handed, build, clock };
 }
 // a clock of the test's own: its time now, and its ticks, each handed the time it's at
-export function clockAt(start) {
+function clockAt(start) {
   const listeners = [];
   const clock = {
     time: start,
