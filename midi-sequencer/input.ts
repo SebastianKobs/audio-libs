@@ -16,10 +16,15 @@ import {
 import type { Play, PlayedNote, PlayListener } from './stream.ts';
 import { entryOf, Events } from '../util/index.ts';
 
-// where messages go: the track they play on, the clip they're of (its element, by its kind), as notes are, whether they're played as you
-// play; and what the stream carries of a replay beside its notes (play: its replay track's number, until when, its draws), until G1 to G3
-// record it from the messages, and of a track's own controllers, its kind and number as its replays carry them (G3a); and who sends, kept
-// apart on a track from another sender, so two senders' notes of one index don't meet at its instrument (P3a)
+// Where messages go:
+//   - the track they play on;
+//   - the clip they're of (its owner, by its kind), as notes are;
+//   - whether they're played live;
+//   - what the stream carries of a play beside its notes (play: its track's
+//     number, until when), and of a track's own controllers, its kind and
+//     number as its other plays carry them;
+//   - who sends, kept apart on a track from another sender, so two senders'
+//     notes of one index don't meet at its instrument.
 export interface SentTo<Name extends string> {
   track: Name;
   clip?: { kind: string } | undefined;
@@ -32,7 +37,8 @@ export interface SentTo<Name extends string> {
 export interface Track extends Receiver {
   readonly role: string;
 }
-// a note passed on, handed back where it went: its track, any of the sequencer's, its clip, whether it's played as you play it
+// a note passed on, handed back where it went: its track, any of the
+// sequencer's, its clip, whether it's played live
 export type NoteListener = (to: SentTo<string>, note: SentNote) => void;
 // a note off sent after its note, a held note's, handed back where it went (G2b)
 export type NoteOffListener = (to: SentTo<string>, end: NoteOff) => void;
@@ -57,7 +63,8 @@ type SequencerEvents = {
   'note off': [to: SentTo<string>, end: NoteOff];
 };
 
-// each track, looked up by its name, as a replay track's is made the first time it's played on (G0d)
+// each track, looked up by its name, as a pool's track is made the first
+// time it's played on
 export class Sequencer<Name extends string> implements Input<Name> {
   readonly #tracks: (track: Name) => Track;
   readonly #events = new Events<SequencerEvents>(); // its own, so two sequencers are heard apart

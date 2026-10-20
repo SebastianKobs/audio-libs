@@ -1,5 +1,5 @@
 // ---------- plan/synth/instruments-file: a file of instruments, patches and racks, read ----------
-// As a person writes it (a theme's instruments.yaml):
+// As a person writes it (an instruments.yaml):
 //   - instruments by their names, each its voice card's children, wires and macros;
 //   - patches by names of their own, each the instrument it plays, its values and settings;
 //   - racks by their names, each its pads, a key and the patch it plays.

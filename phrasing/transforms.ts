@@ -1,7 +1,8 @@
 // ---------- phrasing/transforms: a pattern reshaped, as a player would. Pure ----------
 // Notes: { start, deg, sounds, pitchBend, and a phrase's duration, vibrato, phrase, shape, k }, start and duration in ticks (libs/sequencer/index.ts), sounds
 // in seconds; each transform changes them in place.
-// rand() is given, and each draws in a fixed order, so a seeded replay is always the same. Which a player picks, and how often, is its owner's
+// rand() is given, and each draws in a fixed order, so a phrase seeded again is always
+// the same. Which a player picks, and how often, is its owner's
 
 import { type Grid } from '../sequencer/index.ts';
 import { type NotePattern } from '../midi-sequencer/index.ts';

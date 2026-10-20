@@ -79,9 +79,9 @@ export function rowKeyOf(region: RecordedRegion, tracks: TracksReadout): string 
   return `${placed.group} ${placed.track}`;
 }
 // The row a lane goes on.
-// A lane with a track number: that track in its group. This covers replay tracks,
-// background tracks and your pool tracks; a pool's kind is the pool group's name.
-// A lane without one: the strip's own row, your kinds' channels included.
+// A lane with a track number: that track in its group. This covers every
+// pool's tracks; a pool's kind is the pool group's name.
+// A lane without one: the strip's own row, a bus's included.
 // None for a strip that has no row.
 export function laneRowOf(lane: RecordedLane, tracks: TracksReadout, strips: readonly ArrangedStrip[]): string | null {
   if (lane.track !== null) {

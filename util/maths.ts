@@ -42,5 +42,6 @@ export function smoothstep(low: number, high: number, value: number): number {
   return position * position * (3 - 2 * position);
 }
 export function wrapToTile(v: number, T: number): number {
-  return v - T * Math.round(v / T); // into -T/2..T/2: specks and spores tile round the view, so the floor never ends
+  // into -T/2..T/2: a thing tiled round the view, so a floor never ends
+  return v - T * Math.round(v / T);
 }

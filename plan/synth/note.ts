@@ -4,7 +4,7 @@
 //   - its volume, MIDI 2.0's per-note #7, at the voice card's output: a held note hushed;
 //   - its bend, in semitones, where it slides in from;
 //   - its per-note controllers, by MIDI's names where it has them: its vibrato's depth and
-//     rate, its breath, its decay time; its rise, how long a drone swells.
+//     rate, its breath, its decay time; its rise, how long a held note swells.
 // Each set on a voice by the macro of its name, as the note starts.
 // One a note sends none of: at its default, moving nothing.
 // The note's settings: how fast its pitch glides to a later pitch, its shortest, its longest.

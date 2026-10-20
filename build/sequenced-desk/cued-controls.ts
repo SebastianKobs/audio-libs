@@ -67,7 +67,7 @@ export class CuedControls {
     });
   }
   // Whether a track is a strip of the desk's alone, its instrument the strip itself: the buses,
-  // the FX busses and the master. Your channels, the background's and the replay tracks are
+  // the FX busses and the master. A pool's tracks are
   // tracks with instruments of their own, which pass a strip's controllers on.
   isStripTrack(track: string): boolean {
     return this.#stripTracks.has(track);

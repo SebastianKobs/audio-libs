@@ -1,14 +1,21 @@
-// ---------- midi-sequencer/stream: a play, the garden's and yours as you play it, as the sequencer hands it to whoever listens ----------
+// ---------- midi-sequencer/stream: a play, live or not, as the sequencer hands it to whoever listens ----------
 import type { Seconds } from '../clock/index.ts';
 import type { Controller, NoteOff, PerNoteController, PerNoteValues } from '../midi/index.ts';
 
-// a play, as the stream carries it: whose it is, its kind and role, whether it's played as you play it, its notes at clock times; the
-// replay track it's on and until when, the clip it's of (what a replay drew its track's controllers since LAY14b); the region it's of, a
-// number its source hands out (G1a): a replay's its own, your notes their gesture's, a loop's its launch's, a held part's its key's, so
-// the plays of one region are told apart from another's of the same element; the ends and glides of notes sent before it, a held note's,
-// by the note's index, as MIDI pairs a note off with its note on (G2a), a play with no notes of its own where nothing else came with them;
-// and the changes to their per-note controllers, as they're heard from their own place (G3a). A track's own controllers, its parameters
-// as they move, a play of their own on the track, no element's (owner null), its kind and number as its replays carry them (G3a)
+// A play, as the stream carries it:
+//   - whose it is (owner), its kind and role, whether it's played live, its
+//     notes at clock times;
+//   - the track it's on and until when, the clip it's of;
+//   - the region it's of: a number its source hands it out, so the plays of
+//     one region are told apart from another's of the same owner (a phrase's
+//     own, a gesture's, a loop's launch's, a held part's key's);
+//   - the ends and glides of notes sent before it, a held note's, by the
+//     note's index, as MIDI pairs a note off with its note on: a play with no
+//     notes of its own where nothing else came with them;
+//   - the changes to their per-note controllers.
+// A track's own controllers, its parameters as they move: a play of their own
+// on the track, no owner's (owner null), its kind and number as its other
+// plays carry them.
 export interface Play {
   owner: unknown;
   kind: string;
@@ -29,12 +36,16 @@ export interface Play {
   [more: string]: unknown;
 }
 // A note as the stream carries it, as MIDI's messages sent it (notesIn()):
-//   - when it sounds, a clock time, and how long, in seconds, where that came with it;
-//   - its pitch, a MIDI note number, a drum's its pad (the brushes', G0f), and its velocity, 0 to 1 (G3a);
-//   - its per-note controllers as it starts, by MIDI's names: its bend, its vibrato depth, how it's heard from its own place, its own
-//     values (G3a); its glides sent with it, each [when, pitch];
-//   - which part of its plant; its index, as its source handed it out, which a later end or change names it by (G2a).
-// A held note's end, the changes to its per-note controllers, its pitch among them, and a track's own controllers come as sent.
+//   - when it sounds, a clock time, and how long, in seconds, where that came
+//     with it;
+//   - its pitch, a MIDI note number, a drum's its pad, and its velocity, 0 to 1;
+//   - its per-note controllers as it starts, by MIDI's names: its bend, its
+//     vibrato depth, how it's heard from its own place, its own values; its
+//     glides sent with it, each [when, pitch];
+//   - which part of its owner sounds it (part); its index, as its source handed
+//     it out, which a later end or change names it by.
+// A held note's end, the changes to its per-note controllers, its pitch among
+// them, and a track's own controllers come as sent.
 export interface PlayedNote {
   t: Seconds;
   duration?: Seconds | undefined;

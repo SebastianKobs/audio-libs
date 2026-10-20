@@ -1,5 +1,6 @@
 // ---------- plan/planner/presets: a child written with a preset ----------
-// A preset is a template's kind, with values and settings by address, a theme's.
+// A preset is a template's kind, with values and settings by address,
+// as its owner writes them.
 // A child written with one takes the preset's kind, values and settings, its own over them.
 // Resolved first, before a template is merged or checked:
 // the rest sees each child by its kind.

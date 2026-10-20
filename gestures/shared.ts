@@ -120,9 +120,11 @@ export interface HandedIn {
   height: number;
   zoneAt: (point: FloorPoint) => number | null;
 }
-// what it reads live: how far a press moves before it drags, how long it stays before it holds, how a hand's speed is smoothed, two
-// fingers' window; the stroke's span, corners, bends and curves; what makes a loop (loop.ts). Its own since R13: a garden's settings
-// extend them
+// What it reads live:
+//   - how far a press moves before it drags, how long it stays before it holds;
+//   - how a hand's speed is smoothed, two fingers' window;
+//   - the stroke's span, corners, bends and curves; what makes a loop (loop.ts).
+// Its own; a user's settings may extend them.
 export interface TrackerSettings {
   moveThreshold: number;
   holdDelay: number;

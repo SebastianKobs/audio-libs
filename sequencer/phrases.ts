@@ -43,7 +43,7 @@ export class Phrases<To extends { clip?: unknown }, Event> {
   }
   // a phrase to its clip on its track, a region of its own, its events sent as their 16ths come;
   // those on a 16th the grid has handed out already sent at once,
-  // as a visitor's song begins between the 16ths, on the next one, within the grid's lookahead
+  // as a phrase begun between the 16ths, on the next one, within the grid's lookahead
   play(to: To, events: readonly DueEvent<Event>[]): void {
     const queue = new DueQueue<DueEvent<Event>>((due) => due.start);
     for (const due of events) {

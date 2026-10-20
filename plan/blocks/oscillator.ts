@@ -17,7 +17,7 @@ export const DETUNE = { name: 'detune', unit: 'cents', range: [-100, 100, 1] } a
 // a block's detune wide enough for a voice card's tune, four octaves either way: an
 // oscillator's, a filter's
 export const TUNE_DETUNE = { ...DETUNE, range: [-4800, 4800, 1], default: 0 } as const;
-// its rate's three params: free to start, at an A, as every oscillator and LFO the themes have;
+// its rate's three params: free to start, at an A, as an oscillator or an LFO starts;
 // its free one its frequency
 const RATE = timeSpecs({ unit: 'Hz', range: [0.01, 20000, 0.01], start: { sync: false, note: '1/4', free: 440 } });
 

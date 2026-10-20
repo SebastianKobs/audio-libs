@@ -65,7 +65,7 @@ export function updateInPlace<T extends object>(target: T, from: T): T {
   return target;
 }
 // data frozen all the way down, so a write throws (every module is strict); a module's namespace can't be frozen, and needn't be: nobody
-// can write its exports (out of the themes in Z2). Returns data
+// can write its exports. Returns data
 export function frozen<T extends object>(data: T): T {
   for (const v of Object.values(data)) {
     if (v !== null && typeof v === 'object' && !Object.isFrozen(v)) {

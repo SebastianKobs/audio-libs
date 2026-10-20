@@ -127,7 +127,8 @@ export class GestureTracker implements Tracking {
     if (pointer.state === 'dragging') {
       readStroke(this, pointer);
     } else if (pointer.state === 'looping') {
-      stillSince(pointer); // its shape is read no more, but how long it's been still is, for a tower's rhythm
+      // its shape is read no more, but how long it's been still is (restingFor())
+      stillSince(pointer);
     }
     this.emit('dragmove', pointer);
   }
@@ -196,9 +197,10 @@ export class GestureTracker implements Tracking {
       }
     }
   }
-  // how fast the hand moves, on the screen: screen heights a second, smoothed over about "hand smoothing", for a vine's energy. After a
-  // standstill the first move spans the rest, and the first of a drag comes from the press, so it isn't known (null) until the next, and
-  // then that move's own
+  // how fast the hand moves, on the screen: screen heights a second, smoothed over
+  // about "hand smoothing" (speedOf()). After a standstill the first move spans the
+  // rest, and the first of a drag comes from the press, so it isn't known (null) until
+  // the next, and then that move's own
   #handSpeed(pointer: Pointer, screenX: number, screenY: number, t: number): void {
     const dt = t - pointer.t;
     if (!(dt > 0)) {

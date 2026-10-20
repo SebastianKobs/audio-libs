@@ -1,9 +1,11 @@
 // ---------- gestures/loop: whether a drag winds into a loop, read from the stroke's samples (stroke.ts) ----------
-// A loop is read from the same samples: the latest stretch of the stroke that winds circleTurn, its turns added up as they come, but not
-// those back on itself (over circleReversal). It counts only if it turns one way, at least circleOneWay of all its turning; it's round,
-// enclosing at least circleRound of a circle its size; it's at least circleMin px across; and the whole stroke is at most circleSize on
-// the floor, so a long vine never vanishes into a tower. A scribble winds too, its turns adding up at random, but it turns both ways,
-// encloses little, or is too small
+// A loop is read from the same samples: the latest stretch of the stroke that winds
+// circleTurn, its turns added up as they come, but not those back on itself (over
+// circleReversal). It counts only if it turns one way, at least circleOneWay of all its
+// turning; it's round, enclosing at least circleRound of a circle its size; it's at least
+// circleMin px across; and the whole stroke is at most circleSize on the floor, so a long
+// stroke is never taken for a loop. A scribble winds too, its turns adding up at random,
+// but it turns both ways, encloses little, or is too small
 import { radians } from './shared.ts';
 import type { Pointer, Stroke, Tracking } from './shared.ts';
 

@@ -20,7 +20,8 @@ export class Html {
     this.text = text;
   }
 }
-// HTML from a template, each value in it as HTML (htmlOf()): a name from the theme, the desk or the garden stays text
+// HTML from a template, each value in it as HTML (htmlOf()):
+// a name from its owner's data or a plan stays text
 export function html(strings: TemplateStringsArray, ...values: unknown[]): Html {
   return new Html(strings.reduce((made, string, index) => made + htmlOf(values[index - 1]) + string));
 }
