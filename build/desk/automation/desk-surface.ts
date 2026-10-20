@@ -1,4 +1,4 @@
-// ---------- build/sequenced-desk/desk-surface: the desk's own control surface ----------
+// ---------- build/desk/automation/desk-surface: the desk's own control surface ----------
 // A strip's fader or knob moved by hand, on a view or a panel, played into the input handed in
 // (a sequencer) as a controller on the strip's track, as any control surface plays into it: so
 // it's recorded on that track's lanes, as every controller is, and reaches the desk the way
@@ -11,13 +11,13 @@
 // A desk's edit by address, as a message on a bus (a view's knob turned):
 //   - a param: played in as its strip's controller, a choice by its index;
 //   - a setting: the desk built again with it, not recorded, as a rebuild isn't automation.
-import { SMOOTHING } from '../../automation/index.ts';
-import type { Clock } from '../../clock/index.ts';
-import type { Controller } from '../../midi/index.ts';
-import { choiceIndex } from '../../params/index.ts';
-import { splitAtChild } from '../../plan/format/index.ts';
-import { addressText, Events, type Address } from '../../util/index.ts';
-import type { DeskBuilt, DeskMessage } from '../desk/index.ts';
+import { SMOOTHING } from '../../../automation/index.ts';
+import type { Clock } from '../../../clock/index.ts';
+import type { Controller } from '../../../midi/index.ts';
+import { choiceIndex } from '../../../params/index.ts';
+import { splitAtChild } from '../../../plan/format/index.ts';
+import { addressText, Events, type Address } from '../../../util/index.ts';
+import type { DeskBuilt, DeskMessage } from '../mixing/index.ts';
 import type { SequencedDesk } from './sequenced-desk.ts';
 
 // what the surface asks of the desk: what glides, a param's spec, its settings changed

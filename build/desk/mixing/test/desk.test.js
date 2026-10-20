@@ -9,8 +9,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MixingDesk } from '../index.ts';
 import { deskOn } from './built.js';
-import { planned } from '../../../plan/desk/test/desks.js';
-import { settingAt } from '../../../plan/format/index.ts';
+import { planned } from '../../../../plan/desk/test/desks.js';
+import { settingAt } from '../../../../plan/format/index.ts';
 
 const PLAN = planned();
 const ROOM = 'reverb/reverb/length';

@@ -1,5 +1,5 @@
 // ---------- view/desk/readout/desk: a desk as it plays, the plan's readout ----------
-// The plan's readout (PlanReadout) for a desk (libs/build/desk/), as PresetReadout is for a preset.
+// The plan's readout (PlanReadout) for a desk (libs/build/desk/mixing/), as PresetReadout is for a preset.
 // What the views' models read of the desk, by address:
 //   - a value as it plays, the desk's; a strip's mute and solo, its live mix's;
 //   - its start, the desk's, which a reset brings back;
@@ -13,7 +13,7 @@
 import { nodeAt, splitAtChild, type Node } from '../../../plan/format/index.ts';
 import { addressText, type Address } from '../../../util/index.ts';
 import { SEND } from '../../../plan/desk/index.ts';
-import type { DeskBuilt, DeskMessage, DeskSetup, MixingDesk } from '../../../build/desk/index.ts';
+import type { DeskBuilt, DeskMessage, DeskSetup, MixingDesk } from '../../../build/desk/mixing/index.ts';
 import type { Command, PlanReadout, Role, Slot } from '../../device/readout/index.ts';
 
 // What the desk's readout asks of what's built beyond the desk's: its meters, a level and a reading,

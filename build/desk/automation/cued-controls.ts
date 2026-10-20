@@ -1,4 +1,4 @@
-// ---------- build/sequenced-desk/cued-controls: a strip's controls, set on the desk on time ----------
+// ---------- build/desk/automation/cued-controls: a strip's controls, set on the desk on time ----------
 // The receiving end of a move: each controller taken as it comes back off a track, set on time.
 // As its track's controllers name them: by their params' addresses on the strip, as the
 // views set them:
@@ -18,14 +18,14 @@
 //   - a switch, a choice and a param its spec says never glides (a delay line's time): until
 //     its time.
 // Each checked as it comes: an address the desk hasn't refused, naming it.
-import { Cues, LOOKAHEAD, type Clock } from '../../clock/index.ts';
-import type { Controller } from '../../midi/index.ts';
-import { isSwitch, type ParamSpec } from '../../params/index.ts';
-import { controlAddress } from '../../plan/desk/index.ts';
-import { splitAtChild } from '../../plan/format/index.ts';
-import { addressText } from '../../util/index.ts';
-import type { DeskBuilt, MixingDesk } from '../desk/index.ts';
-import { whenOf, type Change } from '../desk-channels/index.ts';
+import { Cues, LOOKAHEAD, type Clock } from '../../../clock/index.ts';
+import type { Controller } from '../../../midi/index.ts';
+import { isSwitch, type ParamSpec } from '../../../params/index.ts';
+import { controlAddress } from '../../../plan/desk/index.ts';
+import { splitAtChild } from '../../../plan/format/index.ts';
+import { addressText } from '../../../util/index.ts';
+import type { DeskBuilt, MixingDesk } from '../mixing/index.ts';
+import { whenOf, type Change } from '../../desk-channels/index.ts';
 
 export class CuedControls {
   readonly #desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;

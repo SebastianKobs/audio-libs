@@ -1,6 +1,6 @@
-// ---------- build/desk/mix: the live mix's mute and solo ----------
-import { addressOf, toggleIn } from '../../util/index.ts';
-import { MUTE_GLIDE, silenced } from '../../plan/desk/index.ts';
+// ---------- build/desk/mixing/mix: the live mix's mute and solo ----------
+import { addressOf, toggleIn } from '../../../util/index.ts';
+import { MUTE_GLIDE, silenced } from '../../../plan/desk/index.ts';
 import type { DeskBuilt, DeskState } from './desk-state.ts';
 
 // The live mix's mute and solo, owned by the mixing desk (mixing-desk.ts).

@@ -5,8 +5,8 @@
 //   - a track's channel, its pool's copy, added as it's first asked for, the mix applied to it;
 //   - a strip muted or soloed, a mute taking along what feeds it.
 // No clock and no sequencer: what plays it on time is built on it.
-import type { Plan } from '../../plan/format/index.ts';
-import type { Address } from '../../util/index.ts';
+import type { Plan } from '../../../plan/format/index.ts';
+import type { Address } from '../../../util/index.ts';
 import { DeskState, type DeskBuilt } from './desk-state.ts';
 import { Mix } from './mix.ts';
 

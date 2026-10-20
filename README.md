@@ -10,7 +10,7 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 - **Music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would).
 - **Places and input:** `spatial` (places perceived from where you are, a world that wraps round), `spatial-audio` (hearing by distance, as values), `gestures` (pointer input in, gestures out).
 - **`plan/`, a sound as data, no audio:** `format` (what a plan is), `blocks` (the building blocks every builder makes), `planner` (templates made into plans), `effects`, `desk`, `instrument` (forms and templates of each, the templates their content).
-- **`build/`, a plan built:** `contract` (what every builder is and hands back), `web-audio` (the builder for Web Audio, the only code that makes Web Audio nodes), `web-audio-engine` (the audio's power, its context on the clock, building in the engine's context), `instrument` (MIDI's notes played into an instrument), `desk` (a desk built, set by address and mixed), `desk-channels` (a desk's channel for each track), `sequenced-desk` (a desk played from a sequencer).
+- **`build/`, a plan built:** `contract` (what every builder is and hands back), `web-audio` (the builder for Web Audio, the only code that makes Web Audio nodes), `web-audio-engine` (the audio's power, its context on the clock, building in the engine's context), `instrument` (MIDI's notes played into an instrument), `desk/mixing` (a desk built, set by address and mixed), `desk-channels` (a desk's channel for each track), `desk/automation` (a desk played from a sequencer).
 - **`view/`, by what's shown, each in layers** (`readout`, what a view reads; `models`, no DOM; `dom`, drawn), on `html` (HTML made safely): `device` (a plan's devices, knobs, choices, a composite), `desk` (a desk as its strips, by role), `instrument` (an instrument's patches and racks), `transport` (play, stop, where the music is), `tracks` (the session view, the clips, the arrangement).
 
 ## By layer
@@ -26,9 +26,9 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | 4 | `build/web-audio`, `midi-sequencer`, `plan/planner`, `view/device/models`, `view/instrument/readout`, `view/transport/dom` |
 | 5 | `build/web-audio-engine`, `clip-player`, `phrasing`, `plan/effects`, `plan/instrument`, `view/desk/models`, `view/device/dom` |
 | 6 | `build/instrument`, `plan/desk`, `view/desk/dom`, `view/instrument/models` |
-| 7 | `build/desk`, `view/instrument/dom`, `view/tracks/models` |
+| 7 | `build/desk/mixing`, `view/instrument/dom`, `view/tracks/models` |
 | 8 | `build/desk-channels`, `view/desk/readout`, `view/tracks/dom` |
-| 9 | `build/sequenced-desk` |
+| 9 | `build/desk/automation` |
 
 ## The sound's way through them
 
@@ -40,7 +40,7 @@ A sound is data until it's built, and built only by a builder:
 4. **Built** (`build/contract`, `build/web-audio`): a builder handed a plan hands back what's built (`Built`), set and automated by address, built again, taken apart.
 5. **Powered** (`build/web-audio-engine`): the audio context started on a first touch, what's built built into an output that fades in, the clock on the audio's time.
 6. **Played by notes** (`build/instrument`): MIDI's notes played into an instrument on what's built, a voice a pool's copy, a sound module an instrument for each patch, any number of tracks playing into it by an input of its own.
-7. **Mixed** (`build/desk`, `build/desk-channels`, `build/sequenced-desk`): a desk built, set by address, its mute and solo; a track's channel; played from a sequencer, a strip's controllers set on time (`CuedControls`).
+7. **Mixed** (`build/desk/mixing`, `build/desk-channels`, `build/desk/automation`): a desk built, set by address, its mute and solo; a track's channel; played from a sequencer, a strip's controllers set on time (`CuedControls`).
 8. **Patched** (`app/`'s wiring): a track's notes into its role's instrument by an input of its own, each voice into the track's channel, its controllers onto its strip.
 
 Beside it, `spatial-audio` hears a place from where you listen and hands on what it hears as values: a track's controllers, a strip's, a note's own. The notes come through `midi-sequencer` (its input plays the instruments and records what's heard), from a control surface, a clip (`clip-player`) or a recording played back.
@@ -124,7 +124,7 @@ export function drawEnvelope() {
 
 ### 4. A desk planned, built and mixed
 
-A desk planned from one written short (`plan/desk`, `plan/planner`), built for Web Audio (`build/web-audio`) and mixed by address (`build/desk`), with no clock, MIDI or sequencer.
+A desk planned from one written short (`plan/desk`, `plan/planner`), built for Web Audio (`build/web-audio`) and mixed by address (`build/desk/mixing`), with no clock, MIDI or sequencer.
 
 ```js
 // Scenario 4: a desk alone, as a library's user writes it: planned from a desk written short, built for
@@ -132,7 +132,7 @@ A desk planned from one written short (`plan/desk`, `plan/planner`), built for W
 import { DESK_FORMS, deskTemplates } from '../../src/libs/plan/desk/index.ts';
 import { Planner } from '../../src/libs/plan/planner/index.ts';
 import { WebAudioBuilder } from '../../src/libs/build/web-audio/index.ts';
-import { MixingDesk } from '../../src/libs/build/desk/index.ts';
+import { MixingDesk } from '../../src/libs/build/desk/mixing/index.ts';
 
 // a desk written short: two channels into the master
 const SMALL = {

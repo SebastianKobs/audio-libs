@@ -1,5 +1,5 @@
-// A strip's controls set on the desk (mockup/src/libs/build/sequenced-desk/cued-controls.ts), the desk's own, on the desk on a
-// stand-in for what's built (libs/build/desk/test/built.js), the desk library's small studio and a clock of the test's own:
+// A strip's controls set on the desk (mockup/src/libs/build/desk/automation/cued-controls.ts), the desk's own, on the desk on a
+// stand-in for what's built (libs/build/desk/mixing/test/built.js), the desk library's small studio and a clock of the test's own:
 //   - a controller as its param's address on the strip: a track's channel's where its notes set it;
 //   - else held for the desk: one that glides set its lead ahead of its time, a choice and a delay line's time at its time, as its spec says;
 //   - a strip's mute and solo the live mix's; one no strip has refused;
@@ -8,9 +8,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SequencedDesk } from '../index.ts';
-import { deskOn } from '../../desk/test/built.js';
-import { planned } from '../../../plan/desk/test/desks.js';
-import { LOOKAHEAD } from '../../../clock/index.ts';
+import { deskOn } from '../../mixing/test/built.js';
+import { planned } from '../../../../plan/desk/test/desks.js';
+import { LOOKAHEAD } from '../../../../clock/index.ts';
 
 const PLAN = planned();
 function controlsOn() {

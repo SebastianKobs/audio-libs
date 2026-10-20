@@ -1,5 +1,5 @@
-// ---------- build/sequenced-desk: a desk played from a sequencer ----------
-// A mixing desk (libs/build/desk/) and what plays it on time, on the clock:
+// ---------- build/desk/automation: a desk played from a sequencer ----------
+// A mixing desk (libs/build/desk/mixing/) and what plays it on time, on the clock:
 //   - sequenced-desk.ts: the desk as its owner holds it, its parts made with it;
 //   - cued-controls.ts: a strip's controller set on the desk on time, held on the clock's cues,
 //     a track's channel's where its notes set it, a strip's mute and solo the live mix's;

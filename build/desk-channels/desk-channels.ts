@@ -5,7 +5,7 @@
 //   - a live one's: as a view sets it, what was set before it's added told it then (the
 //     desk's).
 import { entryOf } from '../../util/index.ts';
-import type { DeskBuilt, DeskSetup, MixingDesk, WayIn } from '../desk/index.ts';
+import type { DeskBuilt, DeskSetup, MixingDesk, WayIn } from '../desk/mixing/index.ts';
 import { whenOf, type Change } from './change.ts';
 
 // Where a track's instrument plugs into the desk: its channel's way in.

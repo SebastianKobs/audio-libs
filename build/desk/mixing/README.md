@@ -1,4 +1,4 @@
-# build/desk
+# build/desk/mixing
 
 A desk built and set by address: what a desk does as it plays, on what any builder hands back (the contract's `Built`, `libs/build/contract/`), beyond it its ways in (`DeskBuilt`), with no clock and no sequencer. Its owner plans it (`libs/plan/desk/`), makes it once with its setup's rules, and hands it a function that builds the plan where it wants it: a builder of its owner's choice, the Web Audio builder (`libs/build/web-audio/`) among them. It knows no setup's names: a setup hands in its rules (`DeskSetup`). It imports `libs/automation/`, `libs/build/contract/`, `libs/params/`, `libs/plan/desk/`, `libs/plan/format/` and `libs/util/`.
 

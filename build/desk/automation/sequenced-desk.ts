@@ -1,16 +1,16 @@
-// ---------- build/sequenced-desk/sequenced-desk: a desk played from a sequencer, as its owner holds it ----------
+// ---------- build/desk/automation/sequenced-desk: a desk played from a sequencer, as its owner holds it ----------
 // A mixing desk (mixing-desk.ts) and its own parts, as a console has them, made with it:
 //   - its strips' controls, set on time (cued-controls.ts);
 //   - each track's channel, its instrument's way in, what its notes set on it
 //     (libs/build/desk-channels/).
 // Its owner hands in, once: its plan, its setup's rules, the clock and a time on it on what's
 // built's.
-import type { Clock } from '../../clock/index.ts';
-import type { Controller } from '../../midi/index.ts';
-import type { Plan } from '../../plan/format/index.ts';
-import { MixingDesk, type DeskBuilt, type DeskSetup } from '../desk/index.ts';
+import type { Clock } from '../../../clock/index.ts';
+import type { Controller } from '../../../midi/index.ts';
+import type { Plan } from '../../../plan/format/index.ts';
+import { MixingDesk, type DeskBuilt, type DeskSetup } from '../mixing/index.ts';
 import { CuedControls } from './cued-controls.ts';
-import { DeskChannels, type ChannelInput } from '../desk-channels/index.ts';
+import { DeskChannels, type ChannelInput } from '../../desk-channels/index.ts';
 
 // What a desk is made with:
 //   - plan: the desk's plan; setup: its rules, which tracks are set live, what a

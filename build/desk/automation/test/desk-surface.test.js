@@ -1,5 +1,5 @@
-// The desk's own control surface, a strip's control moved by hand (mockup/src/libs/build/sequenced-desk/desk-surface.ts), on the desk on a stand-in for what's built
-// (libs/build/desk/test/built.js) and the desk library's small studio, played into an input of the test's own:
+// The desk's own control surface, a strip's control moved by hand (mockup/src/libs/build/desk/automation/desk-surface.ts), on the desk on a stand-in for what's built
+// (libs/build/desk/mixing/test/built.js) and the desk library's small studio, played into an input of the test's own:
 //   - played in as a controller on the strip's track, now, with the stream's label its owner hands in, none for a
 //     strip of the desk's own;
 //   - gliding there where the desk says, a switch at once;
@@ -9,9 +9,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DeskSurface, SequencedDesk } from '../index.ts';
-import { deskOn } from '../../desk/test/built.js';
-import { planned } from '../../../plan/desk/test/desks.js';
-import { SMOOTHING } from '../../../automation/index.ts';
+import { deskOn } from '../../mixing/test/built.js';
+import { planned } from '../../../../plan/desk/test/desks.js';
+import { SMOOTHING } from '../../../../automation/index.ts';
 
 function surfaceOn() {
   const on = deskOn(SequencedDesk, planned());

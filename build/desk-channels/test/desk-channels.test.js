@@ -1,13 +1,13 @@
 // The tracks' channels on a mixing desk (mockup/src/libs/build/desk-channels/desk-channels.ts), on the desk
-// library's stand-in for what's built (libs/build/desk/test/built.js) and its small studio:
+// library's stand-in for what's built (libs/build/desk/mixing/test/built.js) and its small studio:
 //   - a track's instrument's way into its channel, the channel added as its first note comes, once;
 //   - a change its notes set on its channel at its time, its channel added as it comes; one they don't set, or a
 //     live track's, not its own.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DeskChannels } from '../index.ts';
-import { MixingDesk } from '../../desk/index.ts';
-import { clockAt, deskOn } from '../../desk/test/built.js';
+import { MixingDesk } from '../../desk/mixing/index.ts';
+import { clockAt, deskOn } from '../../desk/mixing/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
 
 const PLAN = planned();

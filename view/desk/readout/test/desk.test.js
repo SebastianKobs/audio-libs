@@ -1,5 +1,5 @@
 // The desk as the view models read it (mockup/src/libs/view/desk/readout/desk.ts), its readout as it plays, on the
-// desk library's desk and its stand-in for what's built (libs/build/desk/test/built.js), the desk library's small studio:
+// desk library's desk and its stand-in for what's built (libs/build/desk/mixing/test/built.js), the desk library's small studio:
 //   - its plan; a value as it plays, its start; a strip's mute and solo the live mix's;
 //   - how a param is set, worked out: a strip's own live, by its notes where they set it; an insert's own params and
 //     settings live on a live strip, by what sets it on a track; what a slot does there, its words where its plan has
@@ -10,8 +10,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deskEdited, deskReadout } from '../index.ts';
-import { MixingDesk } from '../../../../build/desk/index.ts';
-import { deskOn } from '../../../../build/desk/test/built.js';
+import { MixingDesk } from '../../../../build/desk/mixing/index.ts';
+import { deskOn } from '../../../../build/desk/mixing/test/built.js';
 import { planned } from '../../../../plan/desk/test/desks.js';
 
 const PLAN = planned();

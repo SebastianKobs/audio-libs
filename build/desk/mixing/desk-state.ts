@@ -1,4 +1,4 @@
-// ---------- build/desk/desk-state: a desk's state as it plays, by address ----------
+// ---------- build/desk/mixing/desk-state: a desk's state as it plays, by address ----------
 // What the desk's parts work on (desk.ts): its plan, its values, its channels, what's built.
 // Planned, then built as its sound starts, by the function handed in: what builds it is its
 // owner's, and where its sound goes (a Web Audio builder, into an output that fades in).
@@ -12,8 +12,8 @@
 //   - every value set by its address, and kept: the one owner of the desk's values as
 //     they play, what's built told each, the views reading copies;
 //   - the tempo followed; a setting changed by a preset, what's built built again.
-import type { When } from '../../automation/index.ts';
-import { choiceAt, type ParamSpec } from '../../params/index.ts';
+import type { When } from '../../../automation/index.ts';
+import { choiceAt, type ParamSpec } from '../../../params/index.ts';
 import {
   isCopyNumber,
   paramAt,
@@ -24,9 +24,9 @@ import {
   type Composite,
   type Plan,
   type ValuesByAddress,
-} from '../../plan/format/index.ts';
-import { addressOf, addressText, type Address } from '../../util/index.ts';
-import type { Built } from '../contract/index.ts';
+} from '../../../plan/format/index.ts';
+import { addressOf, addressText, type Address } from '../../../util/index.ts';
+import type { Built } from '../../contract/index.ts';
 
 // What the desk asks of what's built beyond what every builder hands back: a way into a
 // channel or into one of the desk's own inputs, by its address and its input.
