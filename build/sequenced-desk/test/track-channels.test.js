@@ -1,12 +1,12 @@
-// The tracks' channels on the desk (mockup/src/libs/build/desk/track-channels.ts), the desk's own, on the desk on a
-// stand-in for what's built (test/built.js) and the desk library's small studio:
+// The tracks' channels on the desk (mockup/src/libs/build/sequenced-desk/track-channels.ts), the desk's own, on the desk on a
+// stand-in for what's built (libs/build/desk/test/built.js) and the desk library's small studio:
 //   - a track's instrument's way into its channel, the channel added as its first note comes, once;
 //   - a controller its notes set on its channel at its time, its channel added as it comes; one they don't set, or a
 //     live track's, held for the desk instead.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Desk } from '../index.ts';
-import { clockAt, deskOn } from './built.js';
+import { SequencedDesk } from '../index.ts';
+import { clockAt, deskOn } from '../../desk/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
 
 const PLAN = planned();
@@ -18,7 +18,7 @@ const setup = {
 const cutoff = (value, t) => ({ type: 'controller', controller: 'air/cutoff', value, t });
 
 function channelsOn() {
-  const on = deskOn(Desk, PLAN, { setup, clock: clockAt(1), at: (t) => t + 10 });
+  const on = deskOn(SequencedDesk, PLAN, { setup, clock: clockAt(1), at: (t) => t + 10 });
   on.build();
   return on;
 }

@@ -7,7 +7,8 @@
 //   - none: a strip of the desk's own, a bus, an FX bus or the master, takes controllers alone;
 //     any other key is refused.
 import type { Receiver } from '../../midi/index.ts';
-import type { Desk, DeskBuilt, WayIn } from '../desk/index.ts';
+import type { DeskBuilt, WayIn } from '../desk/index.ts';
+import type { SequencedDesk } from '../sequenced-desk/index.ts';
 import { entryOf } from '../../util/index.ts';
 import { InstrumentChannel } from './instrument-channel.ts';
 
@@ -19,7 +20,7 @@ export interface Part<B extends DeskBuilt> {
 }
 
 export class InstrumentChannelFactory<B extends DeskBuilt> {
-  readonly #desk: Pick<Desk<B>, 'inputOf' | 'control' | 'isStripTrack'>;
+  readonly #desk: Pick<SequencedDesk<B>, 'inputOf' | 'control' | 'isStripTrack'>;
   readonly #partOf: (key: string) => Part<B> | null;
   readonly #made = new Map<string, InstrumentChannel>();
 
@@ -29,7 +30,7 @@ export class InstrumentChannelFactory<B extends DeskBuilt> {
     desk,
     partOf,
   }: {
-    desk: Pick<Desk<B>, 'inputOf' | 'control' | 'isStripTrack'>;
+    desk: Pick<SequencedDesk<B>, 'inputOf' | 'control' | 'isStripTrack'>;
     partOf: (key: string) => Part<B> | null;
   }) {
     this.#desk = desk;

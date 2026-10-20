@@ -1,4 +1,4 @@
-// The desk as it plays (mockup/src/libs/build/desk/desk.ts), on a stand-in for what's built (test/built.js) and the desk
+// The desk as it plays (mockup/src/libs/build/desk/mixing-desk.ts), on a stand-in for what's built (test/built.js) and the desk
 // library's small studio (libs/plan/desk/test/desks.js):
 //   - built from its plan by the function handed in, the settings changed before in it; a way into each of its own inputs;
 //     the values set before told it;

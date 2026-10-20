@@ -1,4 +1,5 @@
-// ---------- build/desk/strip-controls: a strip's controls, set on the desk on time ----------
+// ---------- build/sequenced-desk/cued-controls: a strip's controls, set on the desk on time ----------
+// The receiving end of a move: each controller taken as it comes back off a track, set on time.
 // As its track's controllers name them: by their params' addresses on the strip, as the
 // views set them:
 //   - its fader's volume and pan, a send by its FX channel's name; its mute and solo;
@@ -23,8 +24,7 @@ import type { Controller } from '../../midi/index.ts';
 import { isSwitch, type ParamSpec } from '../../params/index.ts';
 import { controlAddress } from '../../plan/desk/index.ts';
 import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
-import type { DeskBuilt } from './desk-state.ts';
-import type { MixingDesk } from './mixing-desk.ts';
+import type { DeskBuilt, MixingDesk } from '../desk/index.ts';
 
 // a change to a param by its address: its value, when it lands, its glide's time constant if any
 export interface Change extends TimedValue {
@@ -46,7 +46,7 @@ export function whenOf({ t, glide }: Pick<Change, 't' | 'glide'>, { now, at }: C
   return { ...atTime, glide };
 }
 
-export class StripControls {
+export class CuedControls {
   readonly #desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
   readonly #channels: { control(strip: string, change: Change): boolean };
   readonly #clock: Pick<Clock, 'now' | 'onTick'>;

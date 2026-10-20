@@ -1,4 +1,4 @@
-// ---------- build/desk/track-channels: the tracks' channels on the desk ----------
+// ---------- build/sequenced-desk/track-channels: the tracks' channels on the desk ----------
 // Each track's channel is its pool's copy on the desk, added the first time its track is
 // played on (the mixing desk's channelOf(), which applies the mix to it), the setup saying how it's set:
 //   - one its notes set: by them, at their times;
@@ -6,10 +6,8 @@
 //     desk's).
 import type { Clock } from '../../clock/index.ts';
 import { entryOf } from '../../util/index.ts';
-import type { DeskBuilt, WayIn } from './desk-state.ts';
-import type { MixingDesk } from './mixing-desk.ts';
-import type { DeskSetup } from './setup.ts';
-import { whenOf, type Change } from './strip-controls.ts';
+import type { DeskBuilt, DeskSetup, MixingDesk, WayIn } from '../desk/index.ts';
+import { whenOf, type Change } from './cued-controls.ts';
 
 // Where a track's instrument plugs into the desk: its channel's way in.
 export interface ChannelInput<B extends DeskBuilt> {

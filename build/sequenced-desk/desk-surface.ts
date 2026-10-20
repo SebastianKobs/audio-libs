@@ -1,4 +1,4 @@
-// ---------- build/desk/desk-surface: the desk's own control surface ----------
+// ---------- build/sequenced-desk/desk-surface: the desk's own control surface ----------
 // A strip's fader or knob moved by hand, on a view or a panel, played into the input handed in
 // (a sequencer) as a controller on the strip's track, as any control surface plays into it: so
 // it's recorded on that track's lanes, as every controller is, and reaches the desk the way
@@ -17,18 +17,11 @@ import type { Controller } from '../../midi/index.ts';
 import { choiceIndex } from '../../params/index.ts';
 import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
-import type { Desk } from './desk.ts';
-import type { DeskBuilt } from './desk-state.ts';
+import type { DeskBuilt, DeskMessage } from '../desk/index.ts';
+import type { SequencedDesk } from './sequenced-desk.ts';
 
-// A desk's edit, by its address: a param's value, or a setting.
-export interface DeskMessage {
-  readonly type: 'desk edited';
-  readonly of: 'values' | 'settings';
-  readonly address: Address;
-  readonly value: number | string;
-}
 // what the surface asks of the desk: what glides, a param's spec, its settings changed
-type SurfacedDesk = Pick<Desk<DeskBuilt>, 'glides' | 'specOf' | 'settings'>;
+type SurfacedDesk = Pick<SequencedDesk<DeskBuilt>, 'glides' | 'specOf' | 'settings'>;
 // Where a move is played: a controller sent to a strip's track, with its label.
 interface MoveInput<Label> {
   send(to: { track: string; play: Label | undefined }, messages: readonly Controller[]): void;

@@ -7,12 +7,13 @@
 // One kind of track; what's on it is given as it's made (instrument-channel-factory.ts).
 // A sequencer's track by its shape: a receiver with a role, the stream's label.
 import type { Message, Receiver } from '../../midi/index.ts';
-import type { Desk, DeskBuilt } from '../desk/index.ts';
+import type { DeskBuilt } from '../desk/index.ts';
+import type { SequencedDesk } from '../sequenced-desk/index.ts';
 
 export class InstrumentChannel implements Receiver {
   readonly role: string;
   readonly #strip: string;
-  readonly #desk: Pick<Desk<DeskBuilt>, 'control'>;
+  readonly #desk: Pick<SequencedDesk<DeskBuilt>, 'control'>;
   readonly #instrumentMade: (() => Receiver) | null;
   #instrument: Receiver | null = null;
 
@@ -27,7 +28,7 @@ export class InstrumentChannel implements Receiver {
   }: {
     strip: string;
     role: string;
-    desk: Pick<Desk<DeskBuilt>, 'control'>;
+    desk: Pick<SequencedDesk<DeskBuilt>, 'control'>;
     instrument?: (() => Receiver) | null;
   }) {
     this.#strip = strip;
