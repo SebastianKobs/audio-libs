@@ -1,6 +1,6 @@
 // ---------- plan/blocks/filter: a filter ----------
 // Its frequency, by octaves, wide open to start, and its resonance; its type a setting.
-// The three types the themes use; another added when a sound asks for it.
+// Three types; another added when a sound asks for it.
 // Its slope a setting: 12 dB an octave, or 24.
 // Its detune, in cents, moving its cutoff as a pitch moves: a sweep in semitones, a cutoff
 // following the keys at an offset.

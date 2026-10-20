@@ -6,7 +6,7 @@
 //     its macros.
 // The form it fulfils beside its kind (channel), and its role in its parent where the
 // parent's form gives one (insert, fader).
-// Its label: the name a view shows it by, where its template gives one (my playing).
+// Its label: the name a view shows it by, where its template gives one.
 // Its short label: the name a view shows it by in little room, where one is given (rev).
 // What it does there, in words, where its owner gives some (the air): a view's, else worked out.
 import type { Input, Output } from './input-output.ts';

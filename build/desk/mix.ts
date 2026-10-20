@@ -4,8 +4,8 @@ import { MUTE_GLIDE, silenced } from '../../plan/desk/index.ts';
 import type { DeskBuilt, DeskState } from './desk-state.ts';
 
 // The live mix's mute and solo, owned by the mixing desk (mixing-desk.ts).
-// They work as Ableton's, on every track by its own key, replay tracks too, whichever replay
-// lands on them:
+// They work as Ableton's, on every track by its own key, a pool's tracks too,
+// whichever play lands on them:
 //   - a mute takes along what feeds the strip muted, its sends among them;
 //   - a solo keeps what a soloed strip needs to be heard, its way out and what feeds it;
 //     it never silences an FX bus (libs/plan/desk/'s silenced());

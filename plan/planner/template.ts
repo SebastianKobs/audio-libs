@@ -30,8 +30,8 @@ export interface TemplateChild {
 export interface PresetChild extends Omit<TemplateChild, 'kind'> {
   readonly preset: string;
 }
-// A preset on a template, as a theme writes one: the template's kind, and the values and settings
-// it changes, by their addresses within it.
+// A preset on a template, as its owner writes one: the template's kind, and the values
+// and settings it changes, by their addresses within it.
 export interface Preset {
   readonly kind: string;
   readonly values?: ValuesByAddress;
@@ -106,7 +106,7 @@ const TEMPLATE_SHAPE: Shape = {
 export function templateOf(data: unknown, source: string): WrittenTemplate {
   return fromData(data, TEMPLATE_SHAPE, { source, what: 'a template' });
 }
-// Presets read from data, as a theme writes them:
+// Presets read from data, as their owner writes them:
 //   - each by a name of its own;
 //   - what it's on by that thing's word (on: effect, desk, instrument), made its template's kind;
 //   - its values and settings by address, each a number or a word.

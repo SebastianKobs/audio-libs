@@ -54,7 +54,7 @@ export class Planner {
   readonly #catalog: Catalog;
 
   // The templates, as each is written:
-  //   1. each child written with a preset given its kind, from the presets handed in (a theme's);
+  //   1. each child written with a preset given its kind, from the presets handed in;
   //   2. each merged with the one it's built on;
   //   3. checked well-formed and held to its form, then its macros onto choices.
   // Every failure said at once.
