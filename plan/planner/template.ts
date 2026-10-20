@@ -11,8 +11,8 @@
 //     child does there, in words, where its owner gives some.
 // The planner fills in the rest: the specs, a block's jacks, a child's template.
 import type { ParamSpec } from '../../params/index.ts';
-import type { Address, Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
-import { fromData, type Shape } from '../../util/index.ts';
+import type { Input, MacroTarget, NoteAddresses, Output, ValuesByAddress, Wire } from '../format/index.ts';
+import { fromData, type Address, type Shape } from '../../util/index.ts';
 
 // a child as a template writes it
 export interface TemplateChild {

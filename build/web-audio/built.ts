@@ -20,10 +20,8 @@
 // Times are the context's.
 import { eventOf, timedAt, type Automation, type When } from '../../automation/index.ts';
 import { choiceIndex } from '../../params/index.ts';
-import { entryOf, isUnder } from '../../util/index.ts';
+import { addressOf, addressText, entryOf, isUnder, type Address } from '../../util/index.ts';
 import {
-  addressOf,
-  addressText,
   copyOf,
   isCopyNumber,
   macroIn,
@@ -31,7 +29,6 @@ import {
   paramAt,
   settingAt,
   withSettings,
-  type Address,
   type Node,
   type Plan,
   type ValuesByAddress,

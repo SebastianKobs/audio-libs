@@ -14,10 +14,10 @@
 //      a select between its taps, then a gain, its amount (send/reverb);
 //      a delay after it where the send can close a loop: a return's into one after it.
 // The master: its inserts and its fader alone.
-import { addressOf, type Address, type Wire } from '../format/index.ts';
+import { type Wire } from '../format/index.ts';
 import type { PresetChild, Template, TemplateChild, TemplateMacro, WrittenTemplate } from '../planner/index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../params/index.ts';
-import { fromData, type Shape } from '../../util/index.ts';
+import { addressOf, fromData, type Address, type Shape } from '../../util/index.ts';
 
 // where a send is taken: after the mute, before the fader (pre); or after the pan (post)
 export type Tap = (typeof TAPS)[number];

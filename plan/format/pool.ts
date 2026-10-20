@@ -3,7 +3,7 @@
 // from 1, so its address is the pool's name and its number (my tap/3). Its wires the rule each
 // copy is wired by, written with the pool's name. A pool of voices holds the addresses its
 // notes set, and, as a drum rack's pad, the key that plays it.
-import { addressText, type Address } from './address.ts';
+import { addressText, type Address } from '../../util/index.ts';
 import type { Composite } from './node.ts';
 import type { Node } from './node.ts';
 import { renamedEnd, type Wire } from './wire.ts';

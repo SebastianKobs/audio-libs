@@ -4,8 +4,7 @@
 // plus its offset. That covers an Ableton macro's min and max.
 // A choice mapped by its index, as a builder holds it: a macro onto a delay's note.
 import { choiceIndex } from '../../params/index.ts';
-import { clamp } from '../../util/index.ts';
-import type { Address } from './address.ts';
+import { clamp, type Address } from '../../util/index.ts';
 import type { Param } from './param.ts';
 
 // one of a macro's targets: a child's param by its address within the composite, and how the

@@ -17,7 +17,8 @@
 //     a source silent; said, so it's seen, not only heard missing;
 //   - dispose(): taken apart, its sound stopped.
 import type { Automation, When } from '../../automation/index.ts';
-import type { Address, Plan, ValuesByAddress } from '../../plan/format/index.ts';
+import type { Plan, ValuesByAddress } from '../../plan/format/index.ts';
+import type { Address } from '../../util/index.ts';
 
 // what's built
 export interface Built {

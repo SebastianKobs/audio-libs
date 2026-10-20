@@ -15,19 +15,17 @@
 import type { When } from '../../automation/index.ts';
 import { choiceAt, type ParamSpec } from '../../params/index.ts';
 import {
-  addressOf,
-  addressText,
   isCopyNumber,
   paramAt,
   poolNamed,
   settingAt,
   withCopies,
   withSettings,
-  type Address,
   type Composite,
   type Plan,
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
+import { addressOf, addressText, type Address } from '../../util/index.ts';
 import type { Built } from '../contract/index.ts';
 
 // What the desk asks of what's built beyond what every builder hands back: a way into a

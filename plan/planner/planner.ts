@@ -9,11 +9,8 @@
 //   5. a pool's child ready, as each copy will be.
 // No note: a voice's note sets its params as it plays.
 import {
-  addressOf,
-  addressText,
   macroValues,
   VERSION,
-  type Address,
   type Macro,
   type Node,
   type Param,
@@ -23,7 +20,7 @@ import {
 } from '../format/index.ts';
 import type { Block } from '../blocks/index.ts';
 import { choiceAt, freeAt, timeParamsIn, type ParamSpec, type RangedSpec } from '../../params/index.ts';
-import { isUnder } from '../../util/index.ts';
+import { addressOf, addressText, isUnder, type Address } from '../../util/index.ts';
 import { monoOrStereo, type LooseJack } from './mono-stereo.ts';
 import { problemsInAll } from './check.ts';
 import { extendedAll } from './extend.ts';

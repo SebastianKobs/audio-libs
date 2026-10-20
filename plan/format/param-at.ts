@@ -5,7 +5,8 @@
 // None where nothing's there.
 // Settings changed by address: a new plan, the old as it was. A pool's child's by the pool's
 // name: every copy's, as they're built from it. A copy's, or a setting not there, refused.
-import { addressOf, type Address, type ValuesByAddress } from './address.ts';
+import { type ValuesByAddress } from './address.ts';
+import { addressOf, type Address } from '../../util/index.ts';
 import type { Macro } from './macro.ts';
 import { isComposite, type Node } from './node.ts';
 import type { Param, Setting } from './param.ts';

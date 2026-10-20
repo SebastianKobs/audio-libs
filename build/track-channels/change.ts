@@ -1,6 +1,6 @@
 // ---------- build/track-channels/change: a change to a param, and when it lands ----------
 import type { TimedValue, When } from '../../automation/index.ts';
-import type { Address } from '../../plan/format/index.ts';
+import type { Address } from '../../util/index.ts';
 
 // a change to a param by its address: its value, when it lands, its glide's time constant if any
 export interface Change extends TimedValue {

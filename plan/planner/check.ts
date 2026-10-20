@@ -10,7 +10,8 @@
 //   5. each macro onto a choice: its choices the choice's own, as it moves it by position;
 //   6. each sound wired into a macro: no map on its way holding it to a range.
 // Every failure said, plainly: its template, its child or wire, its rule.
-import { addressOf, addressText, type Address, type Wire, type WireFrom, type WireTo } from '../format/index.ts';
+import { type Wire, type WireFrom, type WireTo } from '../format/index.ts';
+import { addressOf, addressText, type Address } from '../../util/index.ts';
 import type { Form } from './form.ts';
 import { formProblems } from './form-check.ts';
 import type { Catalog } from './catalog.ts';

@@ -4,7 +4,7 @@
 //   - a param: edited or automated by its address as it plays;
 //   - a setting: chosen as it's built, a filter's type, a pan's law; a change a rebuild.
 import type { ParamSpec } from '../../params/index.ts';
-import type { Address } from './address.ts';
+import type { Address } from '../../util/index.ts';
 
 // a param: its spec (its name among it), its value as it starts, a number or one of its choices;
 // its hint, the words a view shows, where its template gives any

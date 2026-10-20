@@ -6,15 +6,8 @@
 // A value or a setting a preset lets go of goes back to its architecture's start.
 // Edited as the app's messages ask (PresetMessage): a value or a setting set, or the patch
 // reset to where it started; not recorded unless a kind asks to be.
-import {
-  addressOf,
-  addressText,
-  paramAt,
-  settingAt,
-  type Address,
-  type Plan,
-  type ValuesByAddress,
-} from '../format/index.ts';
+import { paramAt, settingAt, type Plan, type ValuesByAddress } from '../format/index.ts';
+import { addressOf, addressText, type Address } from '../../util/index.ts';
 import type { Preset } from '../planner/index.ts';
 
 // what a preset's change sets: its values and its settings, by address

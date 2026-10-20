@@ -4,7 +4,8 @@
 //   - a template's: its jacks, its macros as its params, no settings of its own.
 // And whether an address within a kind reaches a param or a setting inside it, and a param's spec.
 import { BLOCKS, type Block } from '../blocks/index.ts';
-import type { Address, Wire } from '../format/index.ts';
+import type { Wire } from '../format/index.ts';
+import type { Address } from '../../util/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
 import type { Template, TemplateChild, TemplateMacro } from './template.ts';
 

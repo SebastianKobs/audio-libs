@@ -6,7 +6,8 @@
 //      where it holds a pool, a copy added and let go later;
 //   4. its inputs fed from where they come from, its output into where it goes.
 // It knows no planner, channel, desk, effect or instrument: only the plan's format and its blocks.
-import { addressText, isComposite, type Address, type Node, type Plan } from '../../plan/format/index.ts';
+import { isComposite, type Node, type Plan } from '../../plan/format/index.ts';
+import { addressText, type Address } from '../../util/index.ts';
 import type { BlockKind } from '../../plan/blocks/index.ts';
 import type { Builder } from '../contract/index.ts';
 import { MAKERS } from './blocks/makers.ts';

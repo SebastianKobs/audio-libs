@@ -15,8 +15,8 @@ import { SMOOTHING } from '../../automation/index.ts';
 import type { Clock } from '../../clock/index.ts';
 import type { Controller } from '../../midi/index.ts';
 import { choiceIndex } from '../../params/index.ts';
-import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
-import { Events } from '../../util/index.ts';
+import { splitAtChild } from '../../plan/format/index.ts';
+import { addressText, Events, type Address } from '../../util/index.ts';
 import type { DeskBuilt, DeskMessage } from '../desk/index.ts';
 import type { SequencedDesk } from './sequenced-desk.ts';
 

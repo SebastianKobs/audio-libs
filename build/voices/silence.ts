@@ -9,17 +9,8 @@
 //      or FM with the sound it moves.
 // Its blocks' sound followed across its composites, through their macros.
 import { SILENCE } from '../../params/index.ts';
-import {
-  addressOf,
-  addressText,
-  isComposite,
-  macroIn,
-  nodeIn,
-  paramIn,
-  type Address,
-  type Composite,
-  type Node,
-} from '../../plan/format/index.ts';
+import { isComposite, macroIn, nodeIn, paramIn, type Composite, type Node } from '../../plan/format/index.ts';
+import { addressOf, addressText, type Address } from '../../util/index.ts';
 import type { Wire } from '../../plan/format/index.ts';
 
 // where a block's sound goes: another block's input, or one of its params; out of the voice, none

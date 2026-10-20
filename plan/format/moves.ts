@@ -4,7 +4,7 @@
 //   - a child wired into a param or into a child's macro: a modulator moving it, as CV; its
 //     reach its own amount or depth, where it has one, as an envelope's or an LFO's.
 // Every composite's, in the plan's order; a pool's child's within it.
-import { addressText, type Address } from './address.ts';
+import { addressText, type Address } from '../../util/index.ts';
 import type { MacroTarget } from './macro.ts';
 import { isComposite, type Composite, type Node } from './node.ts';
 import type { Plan } from './plan.ts';

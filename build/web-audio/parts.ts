@@ -2,7 +2,8 @@
 // Every node made, every source started, each block by its address, the placeholders put in, what
 // follows a new tempo: what's built is taken apart by them, set by its blocks' addresses, told a tempo.
 // Each node's jacks by its address too: where a sound is fed in, where a meter listens.
-import type { Address, Node } from '../../plan/format/index.ts';
+import type { Node } from '../../plan/format/index.ts';
+import type { Address } from '../../util/index.ts';
 import type { BuiltNode } from './built-node.ts';
 import type { StartAt, StopBy, TempoFollower } from './making.ts';
 import type { Jacks, OwnJacks } from './wiring.ts';

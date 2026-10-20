@@ -22,7 +22,8 @@ import { Cues, LOOKAHEAD, type Clock } from '../../clock/index.ts';
 import type { Controller } from '../../midi/index.ts';
 import { isSwitch, type ParamSpec } from '../../params/index.ts';
 import { controlAddress } from '../../plan/desk/index.ts';
-import { addressText, splitAtChild } from '../../plan/format/index.ts';
+import { splitAtChild } from '../../plan/format/index.ts';
+import { addressText } from '../../util/index.ts';
 import type { DeskBuilt, MixingDesk } from '../desk/index.ts';
 import { whenOf, type Change } from '../track-channels/index.ts';
 

@@ -19,16 +19,15 @@ import { SMOOTHING, type When } from '../../automation/index.ts';
 import { notesIn, type Message, type PerNoteController, type Receiver, type SentNote } from '../../midi/index.ts';
 import { mtof } from '../../music-theory/index.ts';
 import {
-  addressOf,
   isComposite,
   macroIn,
   paramAt,
-  type Address,
   type Composite,
   type Plan,
   type Pool,
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
+import { addressOf, type Address } from '../../util/index.ts';
 import { NOTE_SETTINGS } from '../../plan/synth/index.ts';
 import type { Built } from '../contract/index.ts';
 import { Silence } from './silence.ts';

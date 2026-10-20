@@ -7,7 +7,8 @@
 // A sound into a composite's macro goes to each of its targets through a gain at the map's factor,
 // as CV through attenuators; on into a child's macro, through its own.
 import { macroIn } from '../../plan/format/index.ts';
-import type { Address, Node, Wire, WireFrom, WireTo } from '../../plan/format/index.ts';
+import type { Node, Wire, WireFrom, WireTo } from '../../plan/format/index.ts';
+import type { Address } from '../../util/index.ts';
 import type { BuiltNode } from './built-node.ts';
 
 // where a sound can go: a node's input, or a param

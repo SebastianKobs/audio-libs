@@ -7,14 +7,8 @@
 // Made through what's built, or through its owner where the owner keeps the values (a studio).
 // The copies as they are when the edit is made: one added since is reached, one let go isn't.
 import type { When } from '../../automation/index.ts';
-import {
-  addressOf,
-  addressText,
-  paramAt,
-  type Address,
-  type Plan,
-  type ValuesByAddress,
-} from '../../plan/format/index.ts';
+import { paramAt, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
+import { addressOf, addressText, type Address } from '../../util/index.ts';
 
 // what an edit is made through: its plan, a value set by address, settings changed by address
 export interface Editable {
