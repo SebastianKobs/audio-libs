@@ -17,4 +17,5 @@ export default {
   outputs: [{ name: 'out' }],
   params: [DELAY_TIME.sync, DELAY_TIME.note, DELAY_TIME.ms],
   settings: [{ name: 'longest', unit: 's', range: [0.1, 10, 0.1], default: 4 }],
+  tail: true,
 } as const satisfies Block;

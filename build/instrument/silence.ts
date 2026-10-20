@@ -5,10 +5,13 @@
 //      sound goes; the voice's own output never, a block whose sound goes nowhere at once.
 //   3. A source nothing closes is silent as its note's last envelope fades: a gate's release, a
 //      trigger's run, which goes on past its note off.
-//   4. The voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO
+//   4. A sound into a stage's param (a filter's cutoff) is heard only while sound reaches that
+//      stage, no longer; a stage with a tail (a delay, a reverb) sounds on past its input.
+//   5. The voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO
 //      or FM with the sound it moves.
 // Its blocks' sound followed across its composites, through their macros.
 import { SILENCE } from '../../params/index.ts';
+import { BLOCKS, type Block, type BlockKind } from '../../plan/blocks/index.ts';
 import { isComposite, macroIn, nodeIn, paramIn, type Composite, type Node } from '../../plan/format/index.ts';
 import { addressOf, addressText, type Address } from '../../util/index.ts';
 import type { Wire } from '../../plan/format/index.ts';
@@ -69,11 +72,33 @@ export class Silence {
     }
     visiting.add(block);
     const onward = this.#edges.filter((edge) => edge.from === block);
-    const latest = Math.max(
-      ...onward.map(({ into }) => (into === null ? Infinity : this.#silent(into.block, fadedAt, visiting))),
-    );
+    const latest = Math.max(...onward.map(({ into }) => this.#heardInto(into, fadedAt, visiting)));
     visiting.delete(block);
     return Math.min(this.#closed(block, fadedAt), latest);
+  }
+  // Until when a sound is heard where it goes: out of the voice, always; into a block, as long as
+  // that block is; into a param, no longer than the block carries sound, a stage only what reaches it.
+  #heardInto(into: Into | null, fadedAt: (block: string) => number, visiting: Set<string>): number {
+    if (into === null) {
+      return Infinity;
+    }
+    const onward = this.#silent(into.block, fadedAt, visiting);
+    if (into.param === undefined) {
+      return onward;
+    }
+    return Math.min(onward, this.#carrying(into.block, fadedAt, new Set()));
+  }
+  // Until when a block's output carries sound: a source and a stage with a tail, always; any other
+  // stage no longer than sound reaches its inputs, and closed where a gain it is closes.
+  #carrying(block: string, fadedAt: (block: string) => number, visiting: Set<string>): number {
+    const node = this.#blocks.get(block)!; // one of its blocks
+    if (!node.inputs.length || hasTail(node) || visiting.has(block)) {
+      return Infinity;
+    }
+    visiting.add(block);
+    const feeding = this.#edges.filter(({ into }) => into?.block === block && into.param === undefined);
+    const reaching = Math.max(-Infinity, ...feeding.map(({ from }) => this.#carrying(from, fadedAt, visiting)));
+    return Math.min(this.#closed(block, fadedAt), reaching);
   }
   // when a gain resting at nothing closes, opened only by envelopes: once they have all faded; never else
   #closed(block: string, fadedAt: (block: string) => number): number {
@@ -116,6 +141,11 @@ export class Silence {
   }
 }
 
+// whether a block sounds on after its input stops, as its kind declares; one of no known kind passes its sound on
+function hasTail(node: Node): boolean {
+  const block: Block | undefined = BLOCKS[node.kind as BlockKind];
+  return block?.tail === true;
+}
 // The blocks whose sound a wire's start carries in a composite: a child block's; a child
 // composite's output's, followed inside; none for its own input, led in from outside.
 function soundsFrom(node: Composite, from: Wire['from'], at: Address): string[] {

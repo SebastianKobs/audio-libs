@@ -21,7 +21,8 @@ When a voice has rung out, worked out from its voice card's plan, as a synth sto
 1. a gain resting at nothing, opened only by envelopes, closes once they have all faded, what's built saying when each has (`Built.faded()`); one another source opens too, an LFO, never;
 2. a block is silent from where a gain it is closes, or as late as the latest of where its sound goes, followed across its composites and through their macros; the voice's own output never;
 3. a source nothing closes is silent as its note's last envelope fades: a gate's release, a trigger's run, which goes on past its note off (every struck sound, a tap, a chime, the brushes);
-4. the voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO or FM with the sound it moves.
+4. a sound into a stage's param, an envelope on a filter's cutoff after the gain, is heard only while sound reaches that stage; a stage with a tail, a delay, a reverb, sounds on past its input (its block's `tail`, `libs/plan/blocks/`);
+5. the voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO or FM with the sound it moves.
 
 | | |
 |---|---|

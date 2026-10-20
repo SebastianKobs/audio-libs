@@ -21,7 +21,7 @@ An input's or an output's channels are given where the block fixes them; elsewhe
 
 | | |
 |---|---|
-| `Block`, `Jack` | a block: its kind, its inputs and outputs, each a jack, its name and its channels where the block fixes them; its params' and its settings' specs (`block.ts`) |
+| `Block`, `Jack` | a block: its kind, its inputs and outputs, each a jack, its name and its channels where the block fixes them; its params' and its settings' specs; whether it sounds on after its input stops, a delay's echoes, a reverb's tail (`tail`) (`block.ts`) |
 | `BLOCKS`, `BlockKind` | every block by its kind, frozen all the way down: the list each builder checks itself against (`blocks.ts`) |
 | `DELAY_TIME` | a delay's time, its three params, synced to an 8th to start, free up to 4 s, its free time never glided, as its pitch would bend; a synth's delay and a desk's FX channels on it (`delay.ts`) |
 | `ENVELOPE_SPECS` | an envelope's knobs by name, its amount in its target's units, its stages' times, its sustain; a synth's envelopes on it (`envelope.ts`) |

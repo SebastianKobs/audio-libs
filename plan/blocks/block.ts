@@ -10,13 +10,15 @@ export interface Jack {
   readonly name: string;
   readonly channels?: Channels;
 }
-// a block: its kind, its inputs and outputs, its params and its settings, each a spec
+// a block: its kind, its inputs and outputs, its params and its settings, each a spec;
+// tail: whether it sounds on after its input stops, a delay's echoes, a reverb's tail
 export interface Block {
   readonly kind: string;
   readonly inputs: readonly Jack[];
   readonly outputs: readonly Jack[];
   readonly params: readonly ParamSpec[];
   readonly settings: readonly ParamSpec[];
+  readonly tail?: boolean;
 }
 
 // A source's stop, in s from the note's start: an oscillator's, a noise's.

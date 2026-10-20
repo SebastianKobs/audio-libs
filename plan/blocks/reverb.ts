@@ -11,4 +11,5 @@ export default {
   outputs: [{ name: 'out', channels: 2 }],
   params: [],
   settings: [REVERB_LENGTH],
+  tail: true,
 } as const satisfies Block;

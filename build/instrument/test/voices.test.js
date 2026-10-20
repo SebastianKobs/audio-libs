@@ -7,6 +7,7 @@
 //   - a voice let go once it has rung out: a source silent once a gain on its way out, resting at nothing and opened only
 //     by envelopes, has closed; one nothing closes as its note's last release fades; at once where its note is detached;
 //   - its sources stopped by then, told as its gate closes, where it's known;
+//   - a modulator on a stage's param heard only while sound reaches the stage, a delay's echoes ringing on;
 //   - a change of structure while notes sound: built again, each note's gate told again at its own time;
 //   - its voice card's own values, a knob's or an edit's: set on each voice as it's added; an edit on every voice sounding;
 //   - the voices sounding: those playing now, from their start until they are silent.
@@ -190,6 +191,48 @@ test("a trigger's envelope, running on past its note off: its voice silent once 
   clock.now = 5.5;
   voices.receive([]);
   assert.deepEqual(built.letGone, [], 'still running');
+});
+
+test("a modulator on a stage's param heard only while sound reaches the stage: an envelope on the cutoff of a filter after the gain, silent as the gain's envelope fades, though another envelope never does; on a delay's time, as long as its echoes ring", () => {
+  const [oscillator, vca, envelope] = SYNTH.node.pools[0].child.children;
+  const stage = (name, kind, param) => ({
+    name,
+    kind,
+    inputs: [{ name: 'in' }],
+    outputs: [{ name: 'out' }],
+    params: [{ spec: { name: param, range: [0, 20000, 1] }, value: 1000 }],
+    settings: [],
+  });
+  const moved = { ...envelope, name: 'moves' }; // the stage's envelope
+  const vibrato = { ...envelope, name: 'vibrato' }; // a fade that never ends, on the pitch
+  // the format's voice, its gain's sound through a stage the moving envelope moves, into its output
+  const through = (after) =>
+    synthWith({
+      children: [oscillator, vca, envelope, after, moved, vibrato],
+      wires: [
+        { from: { node: 'oscillator', output: 'out' }, to: { node: 'vca', input: 'in' } },
+        { from: { node: 'envelope', output: 'out' }, to: { node: 'vca', param: 'gain' } },
+        { from: { node: 'vca', output: 'out' }, to: { node: after.name, input: 'in' } },
+        { from: { node: 'moves', output: 'out' }, to: { node: after.name, param: after.params[0].spec.name } },
+        { from: { node: 'vibrato', output: 'out' }, to: { node: 'oscillator', param: 'frequency' } },
+        { from: { node: after.name, output: 'out' }, to: { output: 'out' } },
+      ],
+    });
+  const filtered = voicesOn(through(stage('filter', 'filter', 'cutoff')));
+  filtered.built.fadedAt.set('voice/1/envelope', 6.3);
+  filtered.built.fadedAt.set('voice/1/moves', 6.5);
+  played(filtered.voices, { pitch: 69, velocity: 1, t: 5, duration: 1 });
+  assert.deepEqual(filtered.built.stoppedBy.at(-1), ['voice/1', 6.3], "stopped as the gain's envelope fades");
+  filtered.clock.now = 6.4;
+  filtered.voices.receive([]);
+  assert.deepEqual(filtered.built.letGone, ['voice/1']);
+
+  const echoed = voicesOn(through(stage('delay', 'delay', 'ms')));
+  echoed.built.fadedAt.set('voice/1/envelope', 6.3);
+  echoed.built.fadedAt.set('voice/1/moves', 6.5);
+  echoed.built.fadedAt.set('voice/1/vibrato', 6.6);
+  played(echoed.voices, { pitch: 69, velocity: 1, t: 5, duration: 1 });
+  assert.deepEqual(echoed.built.stoppedBy.at(-1), ['voice/1', 6.6], "its echoes heard to its note's last release");
 });
 
 test('a gain resting at nothing that another source opens too, an LFO, never closed by its envelope fading: held, its voice kept', () => {
