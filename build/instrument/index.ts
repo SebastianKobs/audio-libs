@@ -7,9 +7,12 @@
 //     built by the builder handed in, its edits glided or built again;
 //   - sound-module.ts: a multitimbral sound module, a part for each patch, each playing a
 //     patch from its bank, an edit reaching every part that plays it;
+//   - instrument-automation.ts: the automation fitted to the bank: a patch's value set at its
+//     time, as the bank's edit;
 //   - test-notes.ts: a device view's test note, an input of its own on its role's instrument
 //     for each key, pressed and let go as messages on a bus too.
 export { Voices } from './voices.ts';
 export { Instrument, type InstrumentMaking } from './instrument.ts';
 export { SoundModule, type PartMaking } from './sound-module.ts';
 export { TestNotes, type HeldTestNote, type PhrasedTestNote } from './test-notes.ts';
+export { InstrumentAutomation } from './instrument-automation.ts';
