@@ -97,7 +97,7 @@ const strips = [
   { group: 'master', strip: 'master', name: 'master' },
 ];
 // the desk's sections as a view labels them
-const SECTIONS = { buses: 'bus', returns: 'fx', master: 'master' };
+const SECTIONS = { buses: 'bus', returns: 'fx', master: 'master', instruments: 'instruments' };
 
 // the desk they're from: each bus and those that go into it, the returns, the master
 const strip = (name, shown) => ({ address: [name], name: shown });
@@ -161,6 +161,7 @@ test("a pool's group shown once a lane of one of its tracks is recorded, as a re
 const ORDERS = {
   tap: ['air/cutoff', 'utility/level', 'utility/pan', 'dull/cutoff', 'send/reverb', 'volume', 'pan', 'mute', 'solo'],
   master: ['limiter/gain', 'limiter/ceiling', 'limiter/release', 'volume'],
+  'instrument rhodes': ['voice/cutoff', 'voice/decay'], // a patch's, in its cards' order
 };
 const controllersOf = (strip) => ORDERS[strip] ?? [];
 
@@ -561,7 +562,7 @@ test("a lane's param as the desk declares it, by its strip and its controller th
 });
 
 // The model itself, on a clock of the tests' own: 16ths a quarter of a second apart, from 0.
-function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack = false } = {}) {
+function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack = false, instruments = [] } = {}) {
   const steps = [];
   const clock = {
     t: 0,
@@ -601,6 +602,7 @@ function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack 
     declared,
     tracks,
     desk: DESK,
+    instruments,
     sections: SECTIONS,
     clock,
     cue,
@@ -654,6 +656,28 @@ test("a group's header unfolds it, with shift every group, as the one clicked go
   );
   arrangement.toggleLanes('tap 0', true);
   assert.deepEqual(arrangement.lanes, [], "shift: every track's closed, as tap 0 goes");
+});
+
+test("an instrument with no notes a row in its section, its lanes under it once opened, in its patch's order", () => {
+  const instruments = [{ group: 'instruments', strip: 'instrument rhodes', name: 'rhodes' }];
+  const lanes = [lane('instrument rhodes', null, 'voice/decay'), lane('instrument rhodes', null, 'voice/cutoff')];
+  const { arrangement } = arrangementOf({ lanes, instruments });
+  arrangement.show(true);
+  const instrumentRows = () => arrangement.rows.slice(arrangement.rows.findIndex(({ key }) => key === 'instruments'));
+  assert.deepEqual(
+    instrumentRows().map(({ key, name, header }) => (header ? `[${name}]` : `${key}: ${name}`)),
+    ['[instruments]', 'strip instrument rhodes: rhodes'],
+  );
+  arrangement.toggleLanes('strip instrument rhodes', false);
+  assert.deepEqual(
+    instrumentRows().map(({ key }) => key),
+    [
+      'instruments',
+      'strip instrument rhodes',
+      'strip instrument rhodes: voice/cutoff',
+      'strip instrument rhodes: voice/decay',
+    ],
+  );
 });
 
 test('a frame: the time in view following the present; scrolled back, held; a press in the ruler puts the playhead on the nearest beat, its release cueing its time, then the playback it starts followed again from there; a release with no press, nothing', () => {

@@ -41,7 +41,8 @@ export class Arrangement {
   #shown = false;
 
   // declared: each lane's param's declaration and each strip's controllers in order
-  // desk, sections: the desk's strips with no notes of their own, rows in the sections' groups
+  // desk, instruments, sections: the desk's strips and the instruments with no notes of their
+  // own, rows in the sections' groups, the instruments' after the desk's
   // cue: the playhead set back to a time, or on the present, as the transport is asked it
   constructor({
     recording,
@@ -49,6 +50,7 @@ export class Arrangement {
     declared,
     tracks,
     desk,
+    instruments,
     sections,
     clock,
     cue,
@@ -58,6 +60,7 @@ export class Arrangement {
     declared: DeclaredReadout;
     tracks: TracksReadout;
     desk: Pick<DeskModel, 'buses' | 'returns' | 'master'>;
+    instruments: readonly ArrangedStrip[];
     sections: SectionLabels;
     clock: ArrangementClock;
     cue: (t: Seconds | null) => void;
@@ -65,7 +68,7 @@ export class Arrangement {
     this.#recording = recording;
     this.#declared = declared;
     this.#tracks = tracks;
-    this.#strips = arrangedStrips(desk, sections);
+    this.#strips = [...arrangedStrips(desk, sections), ...instruments];
     this.#clock = clock;
     this.map = new GridMap({ clock });
     this.#folded = new FoldedRows({

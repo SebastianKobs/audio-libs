@@ -22,4 +22,4 @@ export type { PlacedLane, PlacedRegion } from './arrangement/regions.ts';
 export { declaredBy } from './arrangement/declared.ts';
 export { laneLine, type Corner } from './arrangement/lane-shapes.ts';
 export { noteShape, pitchRange, type NoteShape } from './arrangement/note-shapes.ts';
-export type { Row, SectionLabels } from './arrangement/rows.ts';
+export type { ArrangedStrip, Row, SectionLabels } from './arrangement/rows.ts';

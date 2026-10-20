@@ -17,18 +17,19 @@ export interface Row {
   open?: boolean;
   track?: string;
 }
-// One of the desk's strips that have no notes:
-//   - group: the session view's section, by its label: the buses', the returns', the master's;
-//   - strip: the name on the desk, which the strip's lanes have as their kind;
+// One of the desk's strips and the instruments that have no notes:
+//   - group: the session view's section, by its label: the buses', the returns', the master's,
+//     the instruments';
+//   - strip: the name on the desk, or an instrument's track's, which its lanes have as their kind;
 //   - name: the name the views show.
 export interface ArrangedStrip {
   group: string;
   strip: string;
   name: string;
 }
-// The desk's sections the arrangement shows, by the labels the session view gives them.
-export type SectionLabels = Readonly<Record<'buses' | 'returns' | 'master', string>>;
-// What shows beside the regions: the desk's strips that have no notes,
+// The sections the arrangement shows beside the tracks, by the labels the session view gives them.
+export type SectionLabels = Readonly<Record<'buses' | 'returns' | 'master' | 'instruments', string>>;
+// What shows beside the regions: the desk's strips and the instruments that have no notes,
 // the recorded lanes, and the tracks whose lanes are open.
 // controllersOf(): a strip's controllers in the order the sound goes through it.
 export interface Beside {
@@ -47,7 +48,8 @@ interface Group {
 // Rows mirror the session view's grouping:
 //   1. The tracks' groups, in the order the tracks give them: each once used by a
 //      region or a lane.
-//   2. The desk's strips with no notes: always, as the sections bus, fx and master.
+//   2. The desk's strips and the instruments with no notes: always, as the sections bus, fx,
+//      master and instruments.
 // A group has as many tracks as were ever used.
 // Folding: groups start folded to their first track. A header is marked where folding hides
 // a track.
@@ -117,7 +119,7 @@ function trackGroups(
       })), // the group is used, as filtered
     }));
 }
-// The desk's strips, each in its group, in the order given.
+// The desk's strips and the instruments, each in its group, in the order given.
 function stripGroups(strips: readonly ArrangedStrip[]): Group[] {
   const groups = new Map<string, Group>();
   for (const { group, strip, name } of strips) {
