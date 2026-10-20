@@ -1,33 +1,23 @@
-// ---------- clock/beat-grid: the 16ths on the clock, their swing, and the next one to schedule ----------
-// swing bends time within each 8th, counted in 16ths: the second 16th comes late, by a third of a 16th at swing 1 (a triplet swing), and
-// anything between the grid follows smoothly. With "swing on" 8ths it bends each beat instead, as jazz swings: the second 8th comes late,
-// by a third of an 8th at 1, and the 16ths in between follow. Phrases are kept straight, as places on the grid, and played with the swing as
+// ---------- clock/beat-grid: the 16ths on the clock, and the next one to schedule ----------
+// Phrases are kept straight, as places on the grid, and played with the swing as
 // it is now
 
 import { COMMON_TIME, STEP, type Meter, type Ticks } from './ticks.ts';
+import { SongTime, type TimeMap } from './song-time.ts';
+import { unwarp, warp, type SwingSettings } from './swing.ts';
 
-// a clock time to a time along a timeline, its holds taken out, and back: the grid's song time is one
-export interface TimeMap {
-  toTimeline(t: number): number;
-  fromTimeline(along: number): number;
-}
 // what the grid reads live: the tempo, the swing and what it swings, the time signature
-export interface GridSettings {
+export interface GridSettings extends SwingSettings {
   bpm: number;
-  swing: number;
-  swingOn: string;
   meter?: Meter;
 }
 
-// s: how far back the music's history is kept: the grid's holds, a timeline's events, an arrangement's view
-export const HISTORY = 30 * 60;
 const ROUNDING = 1e-9; // s: a 16th's time added up step by step and worked out at once may differ by as much (P3b)
-const KEEP_HOLDS = HISTORY + 60; // s: the holds kept for song time, the history and a minute more
 
 // the beat grid: 16ths at the settings' tempo, swung as they are now; it runs once the audio starts (start()), standing at its first 16th
 // until then, the next 16th to schedule its straight time on the clock (nextStepTime) and its number (nextStepNumber). Held, its place,
 // the song position, stays while the clock's time runs on, no 16th handed out, and released it goes on from there (hold(), release(), the
-// transport's stop, P1); its holds kept, so a time's song time, the time the music played, takes them out (songTime(), timeOfSong(), P3b)
+// transport's stop, P1); its holds kept, so a time's song time, the time the music played, takes them out (song-time.ts)
 export class BeatGrid {
   readonly #settings: GridSettings;
   #nextStepTime = 0;
@@ -35,9 +25,8 @@ export class BeatGrid {
   #running = false;
   #held: number | null = null; // the place it's held at, while held (P1)
   #heldAt = 0; // and the time it was held at: a time before it lies where it did (P2)
-  #stoodAt = 0; // and the time of the 16th it's held at, where the music stands, the 16ths handed out before it playing on: song time's
   #holdFrom: number | null = null; // the time it's to be held from, the 16ths before it handed out first (P3b)
-  readonly #holds: { from: number; to: number }[] = []; // each hold it went through, from when to when, in time order (P3b)
+  readonly #songTime = new SongTime(); // the holds the music went through, and where it stands while held
   // song time as a time map, for what plays along a timeline
   readonly song: TimeMap = {
     toTimeline: (t) => this.songTime(t),
@@ -107,7 +96,7 @@ export class BeatGrid {
   }
   // how late a 16th of the grid sounds
   swingAt(i: number): number {
-    return (this.#warp(i) - i) * this.stepDuration();
+    return (warp(i, this.#settings) - i) * this.stepDuration();
   }
   // where a time near now lies on the grid if nothing swung, in 16ths; while held, from the time it was held at, the place it's held at;
   // not started yet, its first 16th, where the music will start, whatever the time: not counted from the page's load
@@ -122,11 +111,11 @@ export class BeatGrid {
   }
   // where a time near now lies on the straight grid: the place that sounds then, swung
   stepAt(t: number): number {
-    return this.#unwarp(this.straightAt(t));
+    return unwarp(this.straightAt(t), this.#settings);
   }
   // when a place on the grid sounds, swung as it is now
   timeAt(place: number): number {
-    return this.#nextStepTime + (this.#warp(place) - this.#nextStepNumber) * this.stepDuration();
+    return this.#nextStepTime + (warp(place, this.#settings) - this.#nextStepNumber) * this.stepDuration();
   }
   // when a place on the grid sounds if nothing swung: what was played straight
   straightTime(place: number): number {
@@ -140,7 +129,7 @@ export class BeatGrid {
     }
     this.#held = Math.max(this.#nextStepNumber, this.straightAt(t));
     this.#heldAt = t;
-    this.#stoodAt = this.#running ? Math.max(t, this.straightTime(this.#held)) : t;
+    this.#songTime.stand(this.#running ? Math.max(t, this.straightTime(this.#held)) : t);
   }
   // held from a time on, the beat the arrangement plays back from (P3b): the 16ths before it handed out, none from it, its place held there,
   // so what played goes on up to it; held already, held as it is
@@ -158,40 +147,20 @@ export class BeatGrid {
       return;
     }
     this.#held = null;
-    this.#holds.push({ from: this.#stoodAt, to: Math.max(t, this.#stoodAt) });
-    while (this.#holds.length && this.#holds[0]!.to < t - KEEP_HOLDS) {
-      this.#holds.shift();
-    }
+    this.#songTime.goOn(t);
     this.#nextStepTime = t + (this.#nextStepNumber - held) * this.stepDuration();
   }
-  // a clock time's song time, the time the music played up to it (P3b): the holds it went through taken out, a stop's or the live garden's
-  // while the arrangement played back, as the arrangement shows them, standing; within one, where it stood, at the 16th it was held at,
-  // those handed out before it played on; held now, all from it at it
+  // a clock time's song time (song-time.ts)
   songTime(t: number): number {
-    if (t === Infinity) {
-      return t; // never, held or not
-    }
-    let song = t;
-    for (const { from, to } of this.#holdsSoFar()) {
-      if (t > from) {
-        song -= Math.min(t, to) - from;
-      }
-    }
-    return song;
+    return this.#songTime.songTime(t);
   }
-  // and back: the clock time a song time was played at, past the holds; where it's held now, there's none, never
+  // and back
   timeOfSong(song: number): number {
-    let t = song;
-    for (const { from, to } of this.#holdsSoFar()) {
-      if (t > from) {
-        t += to - from;
-      }
-    }
-    return t;
+    return this.#songTime.timeOfSong(song);
   }
   // the grid starts with the audio, its first 16th at `at`
   start(at: number): void {
-    this.#holds.length = 0;
+    this.#songTime.clear();
     this.#nextStepTime = at;
     this.#nextStepNumber = 0;
     this.#running = true;
@@ -217,30 +186,9 @@ export class BeatGrid {
     }
     if (holdFrom !== null && this.#nextStepTime >= holdFrom) {
       this.#held = this.#nextStepNumber;
-      this.#heldAt = this.#stoodAt = this.#nextStepTime;
+      this.#heldAt = this.#nextStepTime;
+      this.#songTime.stand(this.#nextStepTime);
       this.#holdFrom = null;
     }
-  }
-  // its holds, and one going on, held now, to never, each from where the music stood
-  #holdsSoFar(): { from: number; to: number }[] {
-    return this.#held === null ? this.#holds : [...this.#holds, { from: this.#stoodAt, to: Infinity }];
-  }
-  // in 16ths: half of what swings
-  #swingHalf(): number {
-    return this.#settings.swingOn === '8ths' ? 2 : 1;
-  }
-  #warp(place: number): number {
-    const late = this.#settings.swing / 3;
-    const half = this.#swingHalf();
-    const pairStart = 2 * half * Math.floor(place / (2 * half));
-    const into = place - pairStart;
-    return pairStart + (into < half ? into * (1 + late) : half * (1 + late) + (into - half) * (1 - late));
-  }
-  #unwarp(place: number): number {
-    const late = this.#settings.swing / 3;
-    const half = this.#swingHalf();
-    const pairStart = 2 * half * Math.floor(place / (2 * half));
-    const into = place - pairStart;
-    return pairStart + (into < half * (1 + late) ? into / (1 + late) : half + (into - half * (1 + late)) / (1 - late));
   }
 }

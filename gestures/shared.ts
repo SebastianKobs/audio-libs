@@ -1,8 +1,11 @@
 // ---------- gestures/shared: what every part of the gesture tracker uses: its events, what's handed in, the pointers that are down ----------
-// The gesture tracker: all pointer input, read in one place. It only tells: everything else reacts to its events. The page's adapter
-// (app/page/input.ts) hands it each pointer's down, move, up and cancel (tracker.ts), and play/ and the page react to what it emits. It
-// knows nothing of the DOM, the 3D scene or the scales: each input brings the floor point under the pointer (g, null off the floor), and
-// the screen's height and the scale step under a floor point are handed in (configure). Each pointer has a state:
+// The gesture tracker: all pointer input, read in one place. It only tells: everything else
+// reacts to its events.
+// A page hands it each pointer's down, move, up and cancel (tracker.ts), and reacts to what
+// it emits. It knows nothing of the DOM or a 3D scene: each input brings the floor point under
+// the pointer (g, null off the floor).
+// Handed in (configure()): the screen's height, and the zone under a floor point.
+// Each pointer has a state:
 // - the left button, or any but the right: pressed, then dragging once it's moved past the drag threshold, or holding once it's stayed
 //   pressed for holdDelay. Either is for good, until it's let go. A drag that winds into a small loop is looping from then on
 // - the right button: panning
@@ -13,7 +16,7 @@
 // Events, to on(type, fn), each fn(e) with the pointer's id, t, x, y, g and state, from the input that set them off:
 // - press: down. hold: still pressed after holdDelay, seen on the clock's tick
 // - dragstart: past the drag threshold (moveThreshold, px from where it was pressed). Then dragmove on each move, from that one on
-// - while dragging, before each dragmove, the shape of the stroke (stroke.ts): turn, shape, pitch, rest and move. And loop { centre, size }, once:
+// - while dragging, before each dragmove, the shape of the stroke (stroke.ts): turn, shape, zone, rest and move. And loop { centre, size }, once:
 //   the drag wound into a circle, centred there on the floor and that big. It's looping from then on, with only dragmove
 // - up: tap, then release, if it was only pressed; else release. cancel: interrupted instead, as when the tab is hidden
 // - panstart, panmove, panend: a right-button drag, from down to up or cancel; or two fingers, as the first, from the point between them
@@ -43,7 +46,7 @@ export type GestureEvents = {
   dragmove: [GestureEvent];
   turn: [GestureEvent & { kind: 'corner' | 'bend'; angle: number }];
   shape: [GestureEvent & { shape: StrokeShape; prev: StrokeShape }];
-  pitch: [GestureEvent & { deg: number | null; prev: number }];
+  zone: [GestureEvent & { zone: number | null; prev: number }];
   rest: [GestureEvent];
   move: [GestureEvent];
   loop: [GestureEvent & { centre: FloorPoint; size: number }];
@@ -58,8 +61,8 @@ export type GestureEvents = {
 export type EventType = keyof GestureEvents;
 // what an event adds to the pointer's: its own, and where a pair's or a tick's differs
 export type Extra<Type extends EventType> = Partial<GestureEvent> & Omit<GestureEvents[Type][0], keyof GestureEvent>;
-// an input, as the page hands it (app/page/input.ts): the pointer's id, its button (down only), screen x, y, its own time t, on the clock's timeline, and the
-// floor point g under it
+// An input, as the page hands it: the pointer's id, its button (down only), screen x and y,
+// its own time t on the clock's timeline, and the floor point g under it.
 export interface PointerInput {
   id: number;
   button?: number;
@@ -77,7 +80,7 @@ export interface Stroke {
   lastCorner: number;
   bending: number;
   shape: StrokeShape;
-  degree: number | null;
+  zone: number | null;
   lastMoved: number;
   lastX: number;
   lastY: number;
@@ -110,10 +113,12 @@ export interface Pointer {
   mate?: Pointer | null;
 }
 
-// handed in at start: the screen's height in px (app/page/input.ts), and the scale step under a floor point (play/gestures.ts)
+// Handed in (configure()), each with a default until it is:
+//   - height: the screen's height in px, 900 until the page hands its own;
+//   - zoneAt(): the zone under a floor point, a number its user gives, or none.
 export interface HandedIn {
   height: number;
-  pitchAt: (point: FloorPoint) => number | null;
+  zoneAt: (point: FloorPoint) => number | null;
 }
 // what it reads live: how far a press moves before it drags, how long it stays before it holds, how a hand's speed is smoothed, two
 // fingers' window; the stroke's span, corners, bends and curves; what makes a loop (loop.ts). Its own since R13: a garden's settings

@@ -12,12 +12,13 @@
 // music, the clock's grid handed in as a TimeMap
 import type { Seconds, TimeMap } from '../clock/index.ts';
 import { Player, type PlayedFrom } from '../timeline/index.ts';
-import type { Address, Input } from './input.ts';
+import type { SentTo, Input } from './input.ts';
 import { lastValueAt, laneValueAt, type LanePoint } from './lanes.ts';
 import { NoteRotation, noteMessages, type Message, type PerNoteControllerName } from '../midi/index.ts';
-import type { Lane, RecordedNote, Region } from './recorder.ts';
+import type { Region } from './recorder.ts';
+import type { Lane } from './track-lanes.ts';
+import { valuesAt, type RecordedNote } from './note-lanes.ts';
 import { timedValue, type TimedValue } from '../automation/index.ts';
-import { valuesAt } from './recorder.ts';
 
 // a note's point after its start: a change to one of its per-note controllers, its pitch's a glide, gliding there where it came with a
 // time constant
@@ -161,7 +162,7 @@ export class RecordingPlayer<Track extends string> {
   }
   #sendNote(note: RecordedNote, messages: Message[]): void {
     const region = this.#regions.get(note)!; // a note played has its region
-    const to: Address<Track> = {
+    const to: SentTo<Track> = {
       track: region.trackName as Track, // on a track, as filtered: the input's
       clip: region.clip as { kind: string },
       live: region.live,
@@ -192,7 +193,7 @@ export class RecordingPlayer<Track extends string> {
     if (this.#skip(track, lane.controller)) {
       return;
     }
-    const to: Address<Track> = {
+    const to: SentTo<Track> = {
       track,
       source: SENDER,
       play: { playback: true, unrecorded: true, kind: lane.kind, track: lane.track },

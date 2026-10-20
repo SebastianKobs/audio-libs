@@ -22,7 +22,8 @@ import { readStroke, REST, stillSince } from './stroke.ts';
 // a press's hold and a drag's rest, kept from its making until dispose()
 export class GestureTracker implements Tracking {
   readonly pointers = new Map<number, Pointer>(); // every pointer that's down, by id, and what it's doing. Written by the tracker's parts only
-  readonly handedIn: HandedIn = { height: 900, pitchAt: () => null };
+  // what's handed in, its defaults until it is (shared.ts)
+  readonly handedIn: HandedIn = { height: 900, zoneAt: () => null };
   readonly settings: TrackerSettings;
   readonly #clock: Clock;
   readonly #events = new Events<GestureEvents>();

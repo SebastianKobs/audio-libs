@@ -19,7 +19,7 @@ const EVERY_EVENT = {
   dragmove: true,
   turn: true,
   shape: true,
-  pitch: true,
+  zone: true,
   rest: true,
   move: true,
   loop: true,

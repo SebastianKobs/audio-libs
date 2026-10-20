@@ -2,7 +2,7 @@
 // its own length or held open until its release, and a pointer's pressure, events that hold until the next of their key
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Timeline, placed, thinned } from '../index.ts';
+import { Timeline, thinned } from '../index.ts';
 
 // a press: when, by which finger, and how long, none while it's held
 function press(t, finger, duration) {
@@ -102,15 +102,11 @@ test("an event that holds what the one before it of its key held, by the caller'
   assert.equal(everything.held('pressure').length, 5);
 });
 
-test('thinned(): events that change nothing left out once settled, the first against where it starts from, if given; placed(): one in time order, after those at its time', () => {
+test('thinned(): events that change nothing left out once settled, the first against where it starts from, if given', () => {
   assert.deepEqual(thinned([level(2, 0.3), level(3, 0.6), level(4, 0.6)], 10, sameLevel, level(1, 0.3)), [
     level(3, 0.6),
   ]);
   assert.deepEqual(thinned([level(2, 0.3), level(3, 0.3)], 2.5, sameLevel), [level(2, 0.3), level(3, 0.3)]);
-  const events = [level(1, 0), level(2, 0)];
-  placed(events, level(1, 1));
-  placed(events, level(0, 2));
-  assert.deepEqual(events, [level(0, 2), level(1, 0), level(1, 1), level(2, 0)]);
 });
 
 test("what's in effect at a time: an event under way, an open one, each key's latest by then; and what starts in a range, from its start, before its end", () => {

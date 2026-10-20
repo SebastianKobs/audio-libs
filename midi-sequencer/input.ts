@@ -20,7 +20,7 @@ import { entryOf, Events } from '../util/index.ts';
 // play; and what the stream carries of a replay beside its notes (play: its replay track's number, until when, its draws), until G1 to G3
 // record it from the messages, and of a track's own controllers, its kind and number as its replays carry them (G3a); and who sends, kept
 // apart on a track from another sender, so two senders' notes of one index don't meet at its instrument (P3a)
-export interface Address<Name extends string> {
+export interface SentTo<Name extends string> {
   track: Name;
   clip?: { kind: string } | undefined;
   live?: boolean | undefined;
@@ -33,9 +33,9 @@ export interface Track extends Receiver {
   readonly role: string;
 }
 // a note passed on, handed back where it went: its track, any of the sequencer's, its clip, whether it's played as you play it
-export type NoteListener = (to: Address<string>, note: SentNote) => void;
+export type NoteListener = (to: SentTo<string>, note: SentNote) => void;
 // a note off sent after its note, a held note's, handed back where it went (G2b)
-export type NoteOffListener = (to: Address<string>, end: NoteOff) => void;
+export type NoteOffListener = (to: SentTo<string>, end: NoteOff) => void;
 // what's sent after its note, a held note's: its note off, its glides, its other per-note controllers' changes (G2a, G3a)
 interface AfterTheirNotes {
   ends: NoteOff[];
@@ -44,7 +44,7 @@ interface AfterTheirNotes {
 // what a control surface plays into: its tracks' messages, each at its clock time; and the way back, each note as it's passed on, until
 // stopped (onNote() returns how): every surface's, on every track, as one sequencer has them all, a surface lighting its own (G0f)
 export interface Input<Name extends string> {
-  send(to: Address<Name>, messages: readonly Message[]): void;
+  send(to: SentTo<Name>, messages: readonly Message[]): void;
   onNote(listener: NoteListener): () => void;
   onNoteOff(listener: NoteOffListener): () => void;
 }
@@ -53,8 +53,8 @@ export interface Input<Name extends string> {
 // sent after its note (G2b)
 type SequencerEvents = {
   play: [play: Play];
-  note: [to: Address<string>, note: SentNote];
-  'note off': [to: Address<string>, end: NoteOff];
+  note: [to: SentTo<string>, note: SentNote];
+  'note off': [to: SentTo<string>, end: NoteOff];
 };
 
 // each track, looked up by its name, as a replay track's is made the first time it's played on (G0d)
@@ -66,7 +66,7 @@ export class Sequencer<Name extends string> implements Input<Name> {
   constructor({ tracks }: { tracks: (track: Name) => Track }) {
     this.#tracks = tracks;
   }
-  send(to: Address<Name>, messages: readonly Message[]): void {
+  send(to: SentTo<Name>, messages: readonly Message[]): void {
     const track = this.#tracks(to.track);
     track.receive(this.#keptApart(to, messages));
     const notes = notesIn(messages);
@@ -98,7 +98,7 @@ export class Sequencer<Name extends string> implements Input<Name> {
   // index don't meet there; the stream and the way back keep each sender's own (P3a, M's brought forward). A note off frees the track's
   // index for a new note, last in turn; what the sender sends for its note after, as it rings out, still goes to it, until the sender
   // detaches it or starts another note on its index
-  #keptApart(to: Address<Name>, messages: readonly Message[]): Message[] {
+  #keptApart(to: SentTo<Name>, messages: readonly Message[]): Message[] {
     const { rotation, indices } = entryOf(this.#apart, to.track, () => ({
       rotation: new NoteRotation(),
       indices: new Map<string, number>(),
@@ -126,7 +126,7 @@ export class Sequencer<Name extends string> implements Input<Name> {
 // the play messages make: of their clip, its element, by its kind; a track's own controllers of none, named by the track unless what's
 // carried names their kind (G3a); its notes, what's sent after them, and the track's controls, each where there are any
 function playOf(
-  to: Address<string>,
+  to: SentTo<string>,
   role: string,
   notes: readonly SentNote[],
   { ends, changes }: AfterTheirNotes,

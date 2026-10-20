@@ -7,15 +7,16 @@
 //   - pan: left -1 to right 1, centred at 0, in a line;
 //   - mute and solo: switches, off 0 or on 1.
 // Each starts as a strip does: at unity, centred, unmuted, unsoloed, its sends at 0.
+import { frozen } from '../util/index.ts';
 import { FADER_GAIN, PAN, SWITCH } from './common.ts';
 import type { ParamSpec } from './spec.ts';
 
 // a channel's own params, by name, as a strip's
-export const STRIP_PARAMS = Object.freeze({
-  volume: Object.freeze({ ...FADER_GAIN, name: 'volume', default: 1 }),
-  pan: Object.freeze({ ...PAN, default: 0 }),
-  mute: Object.freeze({ ...SWITCH, name: 'mute', default: 0 }),
-  solo: Object.freeze({ ...SWITCH, name: 'solo', default: 0 }),
-}) satisfies Readonly<Record<string, ParamSpec>>;
+export const STRIP_PARAMS = frozen({
+  volume: { ...FADER_GAIN, name: 'volume', default: 1 },
+  pan: { ...PAN, default: 0 },
+  mute: { ...SWITCH, name: 'mute', default: 0 },
+  solo: { ...SWITCH, name: 'solo', default: 0 },
+} as const) satisfies Readonly<Record<string, ParamSpec>>;
 // a send to a return, each by the return's name
-export const SEND_PARAM = Object.freeze({ ...FADER_GAIN, name: 'send', default: 0 }) satisfies ParamSpec;
+export const SEND_PARAM = frozen({ ...FADER_GAIN, name: 'send', default: 0 } as const) satisfies ParamSpec;

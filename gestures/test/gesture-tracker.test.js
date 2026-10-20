@@ -179,13 +179,13 @@ test('a curve and a wave read as curves, with a bend every 90° and no corners',
   assert.equal(turns(curve, 'corner').length + turns(wave, 'corner').length, 0);
 });
 
-test('a line straight up gives its pitch steps, one at a time', () => {
-  const steps = events('straight up').filter((e) => e.type === 'pitch');
+test('a line straight up crosses its zones, one at a time', () => {
+  const steps = events('straight up').filter((e) => e.type === 'zone');
   assert.deepEqual(
-    steps.map((e) => e.deg),
+    steps.map((e) => e.zone),
     [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   );
-  assert.ok(steps.every((e) => e.prev === e.deg - 1));
+  assert.ok(steps.every((e) => e.prev === e.zone - 1));
 });
 
 test('a drag that stays still rests after 0.1 s, then moves again', () => {

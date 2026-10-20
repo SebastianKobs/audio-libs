@@ -3,12 +3,13 @@
 // Each builder turns a synced note into seconds by the tempo. Its longest time a setting.
 // A signal wired into its ms moves its line in seconds, as Web Audio's does: a tape's wobble.
 import { timeSpecs } from '../../params/index.ts';
+import { frozen } from '../../util/index.ts';
 import type { Block } from './block.ts';
 
 // Its time's three params: synced to an 8th to start; free, up to its longest time.
 // Its free time set at its time, never glided: a line's time moving bends its pitch.
 const TIME = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
-export const DELAY_TIME = Object.freeze({ ...TIME, ms: { ...TIME.ms, glides: false } as const });
+export const DELAY_TIME = frozen({ ...TIME, ms: { ...TIME.ms, glides: false } } as const);
 
 export default {
   kind: 'delay',

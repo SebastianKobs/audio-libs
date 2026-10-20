@@ -5,37 +5,18 @@
 // runs from its first note to the end of its last; a held note open until its note off comes, a play of its own by the note's index, its
 // glides added to it (G2a); one still held as its element's next region begins, a held part's as its key changes, ends there and starts
 // again in the new region, as it sounds on. Kept for the last 30 minutes, in memory: a note ended before then let go, and a region with none.
-// And what moves as it's heard, as automation (G3b): a track's own controllers as its lanes, a lane a controller, by the track's kind and
-// number as its regions have them, launched or not; a note's changes after it on the note, its own lanes, as a DAW keeps poly aftertouch
-// with its note. Every change heard kept, in time order as Web Audio plays them, but a point that changes nothing, thinned once it's a
-// second past, as nothing comes that late; a lane's points before the 30 minutes let go but its last, its value as they start. On the
-// timeline since L1c2 (libs/timeline/): each note an event with its own length or open until its note off, each lane's point one that
+// What moves as it's heard: a track's lanes (track-lanes.ts), a note's own (note-lanes.ts).
+// On the timeline since L1c2 (libs/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import type { Seconds } from '../clock/index.ts';
-import { endOf, LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
-import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
-import type { NoteOff, PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
+import { endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
+import { samePoint, type LanePoint } from './lanes.ts';
+import type { NoteOff, PerNoteController } from '../midi/index.ts';
 import type { Play, PlayedNote } from './stream.ts';
 import { entryOf } from '../util/index.ts';
-import { timedValue } from '../automation/index.ts';
+import { changedOn, thinNote, valuesAt, type RecordedNote } from './note-lanes.ts';
+import { TrackLanes, type Lane } from './track-lanes.ts';
 
-// what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of; the track's
-// name, as its play was sent to it
-interface LaneOf {
-  kind: string;
-  track: number | null;
-  trackName: string | undefined;
-  controller: string;
-}
-// a track's lane (G3b): its kind, number and controller, and its points in time order
-export type Lane = LaneOf & { points: readonly LanePoint[] };
-// a note as recorded: as the stream carried it, and its changes after it, its own lanes, a per-note controller's points each (G3b);
-// held where it came with no length, its end told after it, at a time, as one sent with its length sounds that long whatever holds come
-// (P3c1)
-export interface RecordedNote extends PlayedNote {
-  lanes?: Partial<Record<PerNoteControllerName, LanePoint[]>>;
-  held?: true;
-}
 // a region as recorded: the element it's of and its clip, its kind and role, whether you played it, its replay track and until when it
 // holds it, as its first play had them; its notes, and from when to when, an open one's end never
 export interface Region {
@@ -62,7 +43,7 @@ export class Recorder {
   readonly #timeline: Timeline<RecordedNote, LanePoint>; // each note, and each lane's points, the events that hold until the next
   #kept: Kept[] = []; // in the order they began
   readonly #numbered = new Map<unknown, Map<number, Kept>>(); // each element's regions, by their number
-  readonly #lanes = new Map<string, Lane>(); // each track's, by its kind, number and controller, in the order they began
+  readonly #trackLanes: TrackLanes; // each track's lanes, as heard
   #leftOut: (play: Play) => boolean = () => false; // what its owner says to leave out
 
   constructor() {
@@ -70,6 +51,7 @@ export class Recorder {
       same: (before, after) => samePoint(before, after),
       onLetGo: (gone) => this.#forget(gone),
     });
+    this.#trackLanes = new TrackLanes(this.#timeline);
   }
   // a play the stream carries, into the region it's of; one its sender or its owner leaves out
   // of the recording, left out
@@ -79,7 +61,7 @@ export class Recorder {
     }
     this.#told(play.owner, play.ends ?? []);
     this.#changed(play.owner, play.changes ?? []);
-    this.#controlled(play);
+    this.#trackLanes.heard(play);
     if (!play.notes.length) {
       return; // only a held note's end, glides or changes, or a track's controllers, told above (G2a, G3b)
     }
@@ -101,10 +83,7 @@ export class Recorder {
   // each track's lanes at now, in the order they began, their points before the last 30 minutes let go but each one's last (G3b)
   lanes(now: Seconds): Lane[] {
     this.#settle(now);
-    for (const [key, lane] of this.#lanes) {
-      lane.points = this.#timeline.held(key);
-    }
-    return [...this.#lanes.values()];
+    return this.#trackLanes.lanes();
   }
   // the timeline as of now, the notes let go and their regions with them; the points that change nothing, once they're settled, left
   // out of every lane, a track's and a note's (G3b)
@@ -126,22 +105,12 @@ export class Recorder {
   }
   // a note's changes after it, as they come, on its element's latest note of that index, its own lanes (G3b)
   #changed(owner: unknown, changes: readonly PerNoteController[]): void {
-    for (const { index, controller, value, t, glide } of changes) {
-      const note = this.#noteOf(owner, index);
+    for (const change of changes) {
+      const note = this.#noteOf(owner, change.index);
       if (!note) {
         continue;
       }
-      const lanes = (note.lanes ??= {});
-      placed((lanes[controller] ??= []), timedValue(value, t, glide));
-    }
-  }
-  // a track's controllers, as they come, each into its lane, a point holding until the next of its lane (G3b)
-  #controlled(play: Play): void {
-    for (const { controller, value, t, glide } of play.controls ?? []) {
-      const of: LaneOf = { kind: play.kind, track: play.track ?? null, trackName: play.trackName, controller };
-      const key = JSON.stringify([of.kind, of.track, of.controller]);
-      entryOf(this.#lanes, key, () => ({ ...of, points: [] }));
-      this.#timeline.hold(key, timedValue(value, t, glide));
+      changedOn(note, change);
     }
   }
   // An element's latest note of an index, from the latest region back:
@@ -245,31 +214,3 @@ function carried(note: RecordedNote, begins: Seconds): RecordedNote {
   }
   return copy;
 }
-// a note's per-note controllers' values at a time: as it starts, each moved by its latest change by then
-export function valuesAt(note: RecordedNote, t: Seconds): PerNoteValues {
-  const values: PerNoteValues = { ...note.controllers };
-  for (const [controller, points] of Object.entries(note.lanes ?? {}) as [PerNoteControllerName, LanePoint[]][]) {
-    const latest = lastValueAt(points, t);
-    if (latest !== undefined) {
-      values[controller] = latest;
-    }
-  }
-  return values;
-}
-// a note's lanes thinned, each one's first against its value as it starts, a jump
-function thinNote(note: RecordedNote, settled: Seconds): void {
-  const { lanes } = note;
-  if (!lanes) {
-    return;
-  }
-  for (const [controller, points] of Object.entries(lanes) as [PerNoteControllerName, LanePoint[]][]) {
-    const start = note.controllers?.[controller];
-    lanes[controller] = thinned(
-      points,
-      settled,
-      samePoint,
-      start === undefined ? undefined : { t: note.t, value: start },
-    );
-  }
-}
-// where a note ends: at its length, or, held, never yet

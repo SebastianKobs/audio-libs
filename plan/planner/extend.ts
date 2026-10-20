@@ -5,6 +5,7 @@
 // A base built on another is merged first, down to one built on none.
 // Merged before the planner's checks, so the checks see one template and a plan comes out flat.
 // What keeps it from merging said: a base not handed in, a block's kind among them; a loop.
+import { chainFrom } from '../../util/index.ts';
 import type { Template } from './template.ts';
 
 // The templates, each merged with its base; or, where one can't be, what's wrong, each a line.
@@ -25,20 +26,12 @@ function extendProblems(template: Template, byKind: ReadonlyMap<string, Template
   if (!byKind.has(template.extends)) {
     return [`${template.kind}: extends ${template.extends}, no template handed in`];
   }
-  const bases = basesOf(template, byKind);
+  const bases = chainFrom(template.extends, byKind, (base) => base.extends).keys;
   const back = bases.indexOf(template.kind);
   if (back === -1) {
     return [];
   }
   return [`${template.kind}: extends ${bases.slice(0, back + 1).join(', which extends ')}: a loop`];
-}
-// the kinds a template's bases lead through, its own base first, until one built on none or one met again
-function basesOf(template: Template, byKind: ReadonlyMap<string, Template>): string[] {
-  const bases: string[] = [];
-  for (let base = template.extends; base !== undefined && !bases.includes(base); base = byKind.get(base)?.extends) {
-    bases.push(base);
-  }
-  return bases;
 }
 // a template merged with its base, its base merged first
 function extended(template: Template, byKind: ReadonlyMap<string, Template>): Template {

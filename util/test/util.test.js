@@ -6,6 +6,7 @@ import {
   addressText,
   approach,
   Bus,
+  chainFrom,
   clamp,
   DueQueue,
   entryOf,
@@ -17,6 +18,7 @@ import {
   LiveCopies,
   modulo,
   pickFrom,
+  placeInOrder,
   sameData,
   seeded,
   SETTLED,
@@ -26,7 +28,7 @@ import {
   toggleIn,
   under,
   updateInPlace,
-  valueAt,
+  valueBetween,
 } from '../index.ts';
 import { isNear, near } from './near.js';
 
@@ -218,7 +220,7 @@ test('a value at a time between timed points: a line between each two, held befo
   const timeOf = (point) => point.t;
   const valueOf = (point) => point.v;
   assert.deepEqual(
-    [1, 2, -1, 5].map((time) => valueAt(points, time, timeOf, valueOf)),
+    [1, 2, -1, 5].map((time) => valueBetween(points, time, timeOf, valueOf)),
     [2, 4, 0, 4],
   );
 });
@@ -239,6 +241,25 @@ test("a map's entry for a key, made the first time it's asked for, the same one 
     7,
     'a weak map too',
   );
+});
+
+test('a chain of keys followed through a map: each item naming the next, to one with no next or one not there; one met again, where it loops', () => {
+  const byKey = new Map([
+    ['a', { next: 'b' }],
+    ['b', { next: 'c' }],
+    ['c', {}],
+    ['x', { next: 'y' }],
+    ['y', { next: 'x' }],
+  ]);
+  const next = (item) => item.next;
+  assert.deepEqual(chainFrom('a', byKey, next), { keys: ['a', 'b', 'c'], again: undefined });
+  assert.deepEqual(
+    chainFrom('b', new Map([['b', { next: 'gone' }]]), next),
+    { keys: ['b', 'gone'], again: undefined },
+    'one not there, the last',
+  );
+  assert.deepEqual(chainFrom('x', byKey, next), { keys: ['x', 'y'], again: 'x' });
+  assert.deepEqual(chainFrom(undefined, byKey, next), { keys: [], again: undefined });
 });
 
 test('an item picked from a list, each as likely, by a random of its own or Math.random; none from an empty one', () => {
@@ -322,6 +343,33 @@ test('things due at a time: kept in their time order, after those at the same ti
     ['third', 'fourth'],
     'the rest kept',
   );
+});
+
+test('an item put in time order among others, after those at its time; things due before a time, not at it, taken in their order', () => {
+  const items = [
+    { t: 1, name: 'a' },
+    { t: 2, name: 'c' },
+  ];
+  placeInOrder(items, { t: 1, name: 'b' }, (item) => item.t);
+  placeInOrder(items, { t: 0, name: 'first' }, (item) => item.t);
+  assert.deepEqual(
+    items.map((item) => item.name),
+    ['first', 'a', 'b', 'c'],
+  );
+  const due = new DueQueue((item) => item.t);
+  for (const item of items) {
+    due.add(item);
+  }
+  assert.deepEqual(
+    due.takeBefore(1).map((item) => item.name),
+    ['first'],
+    'not at its time',
+  );
+  assert.deepEqual(
+    due.takeBefore(3).map((item) => item.name),
+    ['a', 'b', 'c'],
+  );
+  assert.deepEqual(due.items, []);
 });
 
 test("a number near another: within a float's rounding, or as asked", () => {

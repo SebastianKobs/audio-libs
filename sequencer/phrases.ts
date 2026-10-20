@@ -4,6 +4,7 @@
 // A hold or Stop hands out no 16th, so a phrase waits with the music,
 // and what's recorded has its events where they'd have been, in song time
 import { STEP, type BeatGrid } from '../clock/index.ts';
+import { DueQueue } from '../util/index.ts';
 
 // an event of a phrase: where it lies on the grid, in ticks (STEP a 16th),
 // and the event as it comes due, worked out then (event())
@@ -15,7 +16,7 @@ export interface DueEvent<Event> {
 interface Waiting<To, Event> {
   to: To;
   region: number;
-  events: DueEvent<Event>[];
+  events: DueQueue<DueEvent<Event>>;
 }
 
 // the phrases waiting (play()), each 16th's events sent as it comes (step()),
@@ -44,10 +45,13 @@ export class Phrases<To extends { clip?: unknown }, Event> {
   // those on a 16th the grid has handed out already sent at once,
   // as a visitor's song begins between the 16ths, on the next one, within the grid's lookahead
   play(to: To, events: readonly DueEvent<Event>[]): void {
-    const sorted = [...events].sort((first, second) => first.start - second.start);
-    const phrase: Waiting<To, Event> = { to, region: this.#region(), events: sorted };
+    const queue = new DueQueue<DueEvent<Event>>((due) => due.start);
+    for (const due of events) {
+      queue.add(due);
+    }
+    const phrase: Waiting<To, Event> = { to, region: this.#region(), events: queue };
     this.#sendBefore(phrase, this.#grid.nextStepNumber * STEP);
-    if (phrase.events.length) {
+    if (phrase.events.items.length) {
       this.#waiting.push(phrase);
     }
   }
@@ -55,10 +59,10 @@ export class Phrases<To extends { clip?: unknown }, Event> {
   // those of a 16th skipped as the ticks lagged left out, as the grid skips it
   step(i: number): void {
     for (const phrase of this.#waiting) {
-      phrase.events = phrase.events.filter((due) => due.start >= i * STEP);
+      phrase.events.takeBefore(i * STEP); // a 16th skipped as the ticks lagged: its events left out
       this.#sendBefore(phrase, (i + 1) * STEP);
     }
-    this.#waiting = this.#waiting.filter((phrase) => phrase.events.length);
+    this.#waiting = this.#waiting.filter((phrase) => phrase.events.items.length);
   }
   // whether a clip's phrase still has events to send
   playing(clip: unknown): boolean {
@@ -73,8 +77,7 @@ export class Phrases<To extends { clip?: unknown }, Event> {
   }
   // a phrase's events before a place sent, in one send, and the rest kept
   #sendBefore(phrase: Waiting<To, Event>, before: number): void {
-    const due = phrase.events.filter((item) => item.start < before);
-    phrase.events = phrase.events.filter((item) => item.start >= before);
+    const due = phrase.events.takeBefore(before);
     if (due.length) {
       this.#send(
         phrase.to,
