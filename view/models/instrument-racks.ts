@@ -6,9 +6,7 @@
 //   - held for as long as its button is, from a little after now, pressed and let go as the
 //     app's messages.
 // Which of the note's own values a role's instrument reads, for its row to grey the others.
-import { OWN_NOTE_VALUES, type PresetMessage } from '../../plan/synth/index.ts';
-import type { TestNoteMessage } from '../../build/voices/index.ts';
-import type { Clock } from '../../clock/index.ts';
+import { OWN_NOTE_VALUES, type PresetMessage, type TestNoteMessage } from '../../plan/synth/index.ts';
 import type { InstrumentCard, InstrumentsReadout } from '../control-surface/index.ts';
 import type { PlanReadout } from '../device/readout/index.ts';
 import { ViewBuilder } from '../device/models/index.ts';
@@ -31,7 +29,7 @@ export class InstrumentRacks {
   readonly note = { pitch: 62, velocity: 127 };
   readonly values: Record<string, number>; // the test note's own, by the note's sources' names
   readonly #instrumentsReadout: InstrumentsReadout;
-  readonly #clock: Pick<Clock, 'now'>;
+  readonly #clock: { now(): number };
   readonly #send: (message: RackMessage) => void;
   readonly #models = new WeakMap<PlanReadout, ViewBuilder>(); // each card's, made as first asked for
   #pressed: string | null = null; // the role whose test note is held, for as long as its button is
@@ -45,7 +43,7 @@ export class InstrumentRacks {
     starts,
   }: {
     instrumentsReadout: InstrumentsReadout;
-    clock: Pick<Clock, 'now'>;
+    clock: { now(): number };
     send: (message: RackMessage) => void;
     starts: Readonly<Record<string, number>>;
   }) {

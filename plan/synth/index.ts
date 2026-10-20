@@ -12,6 +12,7 @@
 //   - instruments-file.ts: a file of instruments, patches and racks, as a person writes it, read;
 //   - patch-plans.ts: a patch's instrument planned from a file of instruments, by its name, and
 //     the planner of its voice cards;
+//   - test-note.ts: a device view's test note, and its message, pressed and let go;
 //   - content.ts, modules/: the modules, VCO, Noise source, LFO, FM, Envelope generator,
 //     VCA, VCF, Tremolo, Ring, Out; none named as a block is; imported apart.
 // Its content read as it loads, its shape checked, every failure said, naming its file.
@@ -31,3 +32,4 @@ export {
   SYNTH_FORMS,
 } from './architecture-form.ts';
 export { cardPlanner, chainsOf, patchPlan } from './patch-plans.ts';
+export type { TestNote, TestNoteMessage } from './test-note.ts';

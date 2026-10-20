@@ -12,10 +12,4 @@
 export { Voices } from './voices.ts';
 export { Instrument, type InstrumentMaking } from './instrument.ts';
 export { SoundModule, type PartMaking } from './sound-module.ts';
-export {
-  TestNotes,
-  type TestNote,
-  type HeldTestNote,
-  type PhrasedTestNote,
-  type TestNoteMessage,
-} from './test-notes.ts';
+export { TestNotes, type HeldTestNote, type PhrasedTestNote } from './test-notes.ts';
