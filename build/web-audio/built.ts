@@ -26,8 +26,8 @@ import {
   addressText,
   copyOf,
   isCopyNumber,
+  macroIn,
   mapOnto,
-  nodeAt,
   paramAt,
   settingAt,
   withSettings,
@@ -100,9 +100,8 @@ export class WebAudioBuilt implements Built {
   // a param automated by its address, its events' times from a time, now unless given
   automate(address: Address, automation: readonly Automation[], from = this.#context().currentTime): void {
     this.#paramNamed(address);
-    const node = nodeAt(this.#now.plan, address.slice(0, -1))!; // a param's: its node is there
     const name = address.at(-1)!;
-    const macro = node.macros?.find((each) => each.spec.name === name);
+    const macro = macroIn(this.#now.plan.node, address);
     if (macro) {
       for (const target of macro.maps) {
         const mapped = automation.map((event) => mappedEvent(event, (value) => mapOnto(target, value)));

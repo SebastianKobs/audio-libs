@@ -6,6 +6,7 @@
 //   - with a pool: a node at each of its own jacks, where copies come and go, wired later by its pool's rule.
 // A sound into a composite's macro goes to each of its targets through a gain at the map's factor,
 // as CV through attenuators; on into a child's macro, through its own.
+import { macroIn } from '../../plan/format/index.ts';
 import type { Address, Node, Wire, WireFrom, WireTo } from '../../plan/format/index.ts';
 import type { BuiltNode } from './built-node.ts';
 
@@ -133,7 +134,7 @@ function attenuated(
   children: ReadonlyMap<string, Jacks>,
   attenuator: Attenuator,
 ): Destination[] {
-  const macro = (node.macros ?? []).find((each) => each.spec.name === name)!; // a well-formed plan's
+  const macro = macroIn(node, [name])!; // a well-formed plan's
   return macro.maps.map(({ to: [child, ...within], factor }) => {
     const gain = attenuator(factor);
     for (const destination of children.get(child!)!.paramsOf(within)) {

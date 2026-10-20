@@ -6,6 +6,7 @@
 // Settings changed by address: a new plan, the old as it was. A pool's child's by the pool's
 // name: every copy's, as they're built from it. A copy's, or a setting not there, refused.
 import { addressOf, type Address, type ValuesByAddress } from './address.ts';
+import type { Macro } from './macro.ts';
 import { isComposite, type Node } from './node.ts';
 import type { Param, Setting } from './param.ts';
 import type { Plan } from './plan.ts';
@@ -13,16 +14,11 @@ import { copyOf, isCopyNumber, poolNamed } from './pool.ts';
 
 // The node an address's names lead to; the plan's top for none.
 export function nodeAt(plan: Plan, names: Address): Node | undefined {
-  return walked(plan.node, names);
+  return nodeIn(plan.node, names);
 }
 // A param by its address: a node's own, or a composite's macro.
 export function paramAt(plan: Plan, address: Address): Param | undefined {
-  const node = nodeAt(plan, address.slice(0, -1));
-  const name = address.at(-1);
-  if (!node || name === undefined) {
-    return undefined;
-  }
-  return named(node.params, name) ?? named(node.macros ?? [], name);
+  return paramIn(plan.node, address);
 }
 // A setting by its address.
 export function settingAt(plan: Plan, address: Address): Setting | undefined {
@@ -33,12 +29,30 @@ export function settingAt(plan: Plan, address: Address): Setting | undefined {
   }
   return named(node.settings, name);
 }
+// A param by its address within a node: its own, or a composite's macro.
+export function paramIn(node: Node, address: Address): Param | undefined {
+  const found = nodeIn(node, address.slice(0, -1));
+  const name = address.at(-1);
+  if (!found || name === undefined) {
+    return undefined;
+  }
+  return named(found.params, name) ?? named(found.macros ?? [], name);
+}
+// A composite's macro by its address within a node; none for a block's param.
+export function macroIn(node: Node, address: Address): Macro | undefined {
+  const found = nodeIn(node, address.slice(0, -1));
+  const name = address.at(-1);
+  if (!found || name === undefined || !isComposite(found)) {
+    return undefined;
+  }
+  return named(found.macros, name);
+}
 
-// A node down its names, each in turn:
+// A node down its names from a node, each in turn:
 //   - a child by its name;
 //   - a pool's child by the pool's name; under it, a copy by its number, as it's built from the
 //     pool's child, or a part of the pool's child by its name.
-function walked(node: Node, [name, ...rest]: Address): Node | undefined {
+export function nodeIn(node: Node, [name, ...rest]: Address): Node | undefined {
   if (name === undefined) {
     return node;
   }
@@ -47,7 +61,7 @@ function walked(node: Node, [name, ...rest]: Address): Node | undefined {
   }
   const child = node.children.find((each) => each.name === name);
   if (child) {
-    return walked(child, rest);
+    return nodeIn(child, rest);
   }
   const pool = poolNamed(node, name);
   if (!pool) {
@@ -55,9 +69,9 @@ function walked(node: Node, [name, ...rest]: Address): Node | undefined {
   }
   const [copy, ...inCopy] = rest;
   if (copy !== undefined && isCopyNumber(copy)) {
-    return walked(copyOf(pool, Number(copy)).node, inCopy);
+    return nodeIn(copyOf(pool, Number(copy)).node, inCopy);
   }
-  return walked(pool.child, rest);
+  return nodeIn(pool.child, rest);
 }
 // a param or a setting by its spec's name
 function named<Item extends Param>(items: readonly Item[], name: string): Item | undefined {

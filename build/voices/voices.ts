@@ -21,6 +21,7 @@ import { mtof } from '../../music-theory/index.ts';
 import {
   addressOf,
   isComposite,
+  macroIn,
   paramAt,
   type Address,
   type Composite,
@@ -241,7 +242,7 @@ function playedOf(plan: Plan): Played[] {
 // a voice card's note settings: its own, macros with no targets, or their defaults
 function settingsOf(card: Composite): NoteSettings {
   const entries = Object.entries(NOTE_SETTINGS).map(([name, spec]) => {
-    const own = card.macros.find((macro) => macro.spec.name === name)?.value;
+    const own = macroIn(card, [name])?.value;
     return [name, typeof own === 'number' ? own : spec.default];
   });
   return Object.fromEntries(entries) as NoteSettings;

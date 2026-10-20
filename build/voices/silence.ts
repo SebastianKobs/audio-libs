@@ -13,6 +13,9 @@ import {
   addressOf,
   addressText,
   isComposite,
+  macroIn,
+  nodeIn,
+  paramIn,
   type Address,
   type Composite,
   type Node,
@@ -84,7 +87,7 @@ export class Silence {
   // when a gain resting at nothing closes, opened only by envelopes: once they have all faded; never else
   #closed(block: string, fadedAt: (block: string) => number): number {
     const node = this.#blocks.get(block)!; // one of its blocks
-    const level = node.params.find((param) => param.spec.name === 'gain')?.value;
+    const level = paramIn(node, ['gain'])?.value;
     if (node.kind !== 'gain' || typeof level !== 'number' || level > SILENCE) {
       return Infinity;
     }
@@ -128,7 +131,7 @@ function soundsFrom(node: Composite, from: Wire['from'], at: Address): string[] 
   if (!('node' in from)) {
     return [];
   }
-  const child = childOf(node, from.node);
+  const child = nodeIn(node, [from.node])!; // a well-formed plan's
   const address = [...at, child.name];
   if (!isComposite(child)) {
     return [addressText(address)];
@@ -144,7 +147,7 @@ function soundsInto(node: Composite, to: Wire['to'], at: Address, isCard: boolea
   if (!('node' in to)) {
     return isCard ? [null] : [];
   }
-  const child = childOf(node, to.node);
+  const child = nodeIn(node, [to.node])!; // a well-formed plan's
   const address = [...at, child.name];
   if (!isComposite(child)) {
     return [{ block: addressText(address), param: 'param' in to ? to.param : undefined }];
@@ -158,12 +161,12 @@ function soundsInto(node: Composite, to: Wire['to'], at: Address, isCard: boolea
 }
 // where a sound into a composite's macro goes: each of its maps' targets, followed down
 function macroInto(node: Composite, name: string, at: Address): Into[] {
-  const maps = node.macros.find((macro) => macro.spec.name === name)?.maps ?? [];
+  const maps = macroIn(node, [name])?.maps ?? [];
   return maps.flatMap(({ to }) => paramInto(node, to, at));
 }
 // a param by its address within a composite: a child block's own; a child composite's macro, followed down
 function paramInto(node: Composite, [name, ...rest]: Address, at: Address): Into[] {
-  const child = childOf(node, name!); // a well-formed plan's
+  const child = nodeIn(node, [name!])!; // a well-formed plan's
   const address = [...at, child.name];
   if (rest.length > 1 && isComposite(child)) {
     return paramInto(child, rest, address);
@@ -172,8 +175,4 @@ function paramInto(node: Composite, [name, ...rest]: Address, at: Address): Into
     return [{ block: addressText(address), param: rest[0] }];
   }
   return macroInto(child, rest[0]!, address);
-}
-// a composite's child by its name, a well-formed plan's
-function childOf(node: Composite, name: string): Node {
-  return node.children.find((child) => child.name === name)!;
 }

@@ -21,7 +21,7 @@ export { macroValues, mapOnto, type Macro, type MacroTarget } from './macro.ts';
 export { PlanMoves, type Move } from './moves.ts';
 export { isComposite, type BlockNode, type Composite, type Node } from './node.ts';
 export type { Param, Setting } from './param.ts';
-export { nodeAt, paramAt, settingAt, withSettings } from './param-at.ts';
+export { macroIn, nodeAt, nodeIn, paramAt, paramIn, settingAt, withSettings } from './param-at.ts';
 export type { Plan } from './plan.ts';
 export { copyOf, isCopyNumber, poolNamed, splitAtChild, withCopies, type NoteAddresses, type Pool } from './pool.ts';
 export { feeds, reached, wayOut } from './routing.ts';

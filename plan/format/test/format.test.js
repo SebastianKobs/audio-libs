@@ -11,10 +11,13 @@ import {
   VERSION,
   copyOf,
   feeds,
+  macroIn,
   macroValues,
   mapOnto,
   nodeAt,
+  nodeIn,
   paramAt,
+  paramIn,
   poolNamed,
   reached,
   settingAt,
@@ -64,6 +67,13 @@ test("found by its address from the plan's top: a child's param, a composite's m
   assert.equal(paramAt(SYNTH, ['voice', '03', 'oscillator', 'frequency']), undefined, 'a number with no leading 0');
   assert.equal(paramAt(UTILITY, ['gain', 'cutoff']), undefined);
   assert.equal(paramAt(UTILITY, ['delay', 'time']), undefined);
+});
+
+test("found from a node by an address within it, as from a plan's top: a node, a param, a composite's macro alone", () => {
+  assert.equal(nodeIn(UTILITY.node, ['pan'])?.kind, 'pan');
+  assert.equal(paramIn(UTILITY.node, ['gain', 'gain'])?.value, 1);
+  assert.equal(macroIn(UTILITY.node, ['level'])?.hint, 'How loud it comes out.');
+  assert.equal(macroIn(UTILITY.node, ['gain', 'gain']), undefined, "a block's param is no macro");
 });
 
 test("a macro's value onto its targets: each times its factor, held in its range, plus its offset", () => {
