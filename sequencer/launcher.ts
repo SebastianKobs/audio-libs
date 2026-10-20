@@ -95,7 +95,7 @@ export class ClipLauncher<Track, Event extends PatternEvent = PatternEvent> {
     const placed = playing.placed;
     const from = i * STEP;
     for (const event of placed.filter((each) => each.start >= from && each.start < from + STEP)) {
-      const inStep = { ...event, offset: event.start - from };
+      const inStep = dueOn(event, i);
       this.#play(clip.track, inStep, this.#timeOf(clip, inStep, i, t), launch);
     }
     const last = placed.at(-1);
@@ -127,7 +127,7 @@ export class ClipLauncher<Track, Event extends PatternEvent = PatternEvent> {
   // when an event placed in ticks from the grid's start falls, as #timeOf() times it on its 16th
   #placeTime(clip: LaunchedClip<Track, Event>, event: Event): Seconds {
     const i = Math.floor(event.start / STEP);
-    const inStep = { ...event, offset: event.start - i * STEP };
+    const inStep = dueOn(event, i);
     return this.#timeOf(clip, inStep, i, this.#grid.timeAt(i));
   }
   // when an event due on the 16th i falls: straight, the 16th's swing taken back, its offset on the straight grid; else on the swing, an
@@ -140,4 +140,9 @@ export class ClipLauncher<Track, Event extends PatternEvent = PatternEvent> {
     }
     return offset ? grid.timeAt(i + offset / STEP) : t;
   }
+}
+
+// an event as due on the 16th i: how many ticks into it it starts
+function dueOn<Event extends PatternEvent>(event: Event, i: number): Event {
+  return { ...event, offset: event.start - i * STEP };
 }

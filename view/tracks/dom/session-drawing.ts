@@ -8,11 +8,12 @@ import type { ClipTracksView } from './clip-tracks-view.ts';
 import type { DevicePanelView } from '../../device/dom/index.ts';
 import type { MixerView } from '../../mixer/dom/index.ts';
 
-// The clock as the drawing reads it: its time, its 16ths, a beat's length at the tempo now.
+// The clock as the drawing reads it: its time, its 16ths, a beat's length at the tempo
+//   now, and its 16ths.
 interface SessionClock {
   now(): number;
   onStep(listener: (i: number) => void): unknown;
-  readonly grid: { beatDuration(): number };
+  readonly grid: { beatDuration(): number; stepsPerBeat(): number };
 }
 
 // Drawing the session view while it's open:
@@ -93,10 +94,11 @@ export class SessionDrawing {
   }
   // on a beat while shown: the clip tracks told it, and drawn unless a pointer is pressed
   #onStep(i: number): void {
-    if (!this.#sessionShown() || i % 4 !== 0) {
+    const perBeat = this.#clock.grid.stepsPerBeat();
+    if (!this.#sessionShown() || i % perBeat !== 0) {
       return;
     }
-    this.#clipTracks.setBeat(i / 4);
+    this.#clipTracks.setBeat(i / perBeat);
     if (!this.#pressed) {
       this.draw();
     }

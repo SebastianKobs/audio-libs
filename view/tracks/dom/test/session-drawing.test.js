@@ -11,14 +11,14 @@ import { SessionDrawing } from '../index.ts';
 import { Views } from '../../models/index.ts';
 
 // a clock of the test's own: its time, a beat a second, its 16ths handed out by step()
-function testClock() {
+function testClock(stepsPerBeat = 4) {
   const listeners = [];
   return {
     t: 0,
     now() {
       return this.t;
     },
-    grid: { beatDuration: () => 1 },
+    grid: { beatDuration: () => 1, stepsPerBeat: () => stepsPerBeat },
     onStep: (listener) => listeners.push(listener),
     step(i) {
       listeners.forEach((listener) => listener(i, this.t));
@@ -27,8 +27,8 @@ function testClock() {
 }
 // The session view's drawing, its drawers recording what they're asked.
 // The session tells the window of time it's asked for, as what it saw.
-function drawing({ playingBack = false } = {}) {
-  const clock = testClock();
+function drawing({ playingBack = false, stepsPerBeat = 4 } = {}) {
+  const clock = testClock(stepsPerBeat);
   const views = new Views();
   const asked = { looks: [], beats: [], levels: [], refreshed: 0, closed: 0, lit: [] };
   const flow = new EventTarget();
@@ -72,6 +72,14 @@ test("on every beat while it's shown, the clip tracks told the beat, with what s
   assert.deepEqual(asked.beats, [2], 'only on a beat');
   assert.deepEqual(asked.looks.at(-1), [5, 0], 'since it was shown, a beat back');
   assert.deepEqual(asked.lit.at(-1), ['heard'], 'the clip tracks lit by what sounded');
+});
+
+test("in 6/8 a beat every two 16ths: the clip tracks told each beat, by the meter's unit", () => {
+  const { clock, views, asked } = drawing({ stepsPerBeat: 2 });
+  views.tab('session', true);
+  clock.step(5);
+  clock.step(6);
+  assert.deepEqual(asked.beats, [3]);
 });
 
 test('as it shows, drawn with what sounded in the last beat; the device view closed as both views hide', () => {
