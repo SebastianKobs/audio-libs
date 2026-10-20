@@ -4,7 +4,7 @@
 //   - a template's: its jacks, its macros as its params, no settings of its own.
 // And whether an address within a kind reaches a param or a setting inside it, and a param's spec.
 import { BLOCKS, type Block } from '../blocks/index.ts';
-import type { Address } from '../format/index.ts';
+import type { Address, Wire } from '../format/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
 import type { Template, TemplateChild, TemplateMacro } from './template.ts';
 
@@ -64,7 +64,7 @@ export class Catalog {
   paramSpecIn(kind: string, [name, ...rest]: Address): ParamSpec | undefined {
     const template = this.template(kind);
     if (rest.length) {
-      const child = template && this.childrenOf(template).find((each) => each.name === name);
+      const child = template && this.childOf(template, name);
       return child && this.paramSpecIn(child.kind, rest);
     }
     const block = this.block(kind);
@@ -87,7 +87,7 @@ export class Catalog {
   settingSpecIn(kind: string, [name, ...rest]: Address): ParamSpec | undefined {
     const template = this.template(kind);
     if (rest.length) {
-      const child = template && this.childrenOf(template).find((each) => each.name === name);
+      const child = template && this.childOf(template, name);
       return child && this.settingSpecIn(child.kind, rest);
     }
     const block = this.block(kind);
@@ -100,6 +100,33 @@ export class Catalog {
   childrenOf(template: Template): TemplateChild[] {
     return [...(template.children ?? []), ...(template.pools ?? []).map((pool) => pool.child)];
   }
+  // a template's child by its name, a pool's among them; none where there's no such child
+  childOf(template: Template, name: string | undefined): TemplateChild | undefined {
+    return this.childrenOf(template).find((each) => each.name === name);
+  }
+  // a template's wires, its pools' among them
+  wiresOf(template: Template): Wire[] {
+    return [...(template.wires ?? []), ...(template.pools ?? []).flatMap((pool) => pool.wires)];
+  }
+  // a node's kind by its path of children's names within a template; none where it isn't there
+  kindAt(template: Template, [name, ...rest]: Address): string | undefined {
+    const child = this.childOf(template, name);
+    if (!child || !rest.length) {
+      return child?.kind;
+    }
+    const inner = this.template(child.kind);
+    return inner && this.kindAt(inner, rest);
+  }
+  // whether an address within a template reaches a param of a child inside it
+  paramInside(template: Template, [name, ...rest]: Address): boolean {
+    const child = this.childOf(template, name);
+    return child !== undefined && this.paramIn(child.kind, rest);
+  }
+  // the same for a setting
+  settingInside(template: Template, [name, ...rest]: Address): boolean {
+    const child = this.childOf(template, name);
+    return child !== undefined && this.settingIn(child.kind, rest);
+  }
 
   // the last name one of the kind's params or settings; the names before it children on the way down
   #reaches(kind: string, [name, ...rest]: Address, which: 'params' | 'settings'): boolean {
@@ -110,7 +137,7 @@ export class Catalog {
       return this.outsideOf(kind)?.[which].includes(name) ?? false;
     }
     const template = this.template(kind);
-    const child = template && this.childrenOf(template).find((each) => each.name === name);
+    const child = template && this.childOf(template, name);
     return child !== undefined && this.#reaches(child.kind, rest, which);
   }
   // a template's own setting's spec: the child's it stands for, under its name

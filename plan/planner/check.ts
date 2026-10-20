@@ -61,7 +61,7 @@ function wellFormedProblems(template: Template, catalog: Catalog): string[] {
       .filter(({ name }) => NUMBER_ALONE.test(name))
       .map(({ name }) => `${name}: a number alone, a name only a pool's copy has`),
     ...children.flatMap((child) => childProblems(child, template, catalog)),
-    ...wiresOf(template).flatMap((wire) => wireProblems(wire, template, catalog)),
+    ...catalog.wiresOf(template).flatMap((wire) => wireProblems(wire, template, catalog)),
     ...macroProblems(template, catalog),
     ...settingProblems(template, catalog),
     ...noteProblems(template, catalog),
@@ -107,10 +107,6 @@ function pathTo(held: string, kind: string, catalog: Catalog, seen: readonly str
   }
   return undefined;
 }
-// a template's wires, its pools' among them
-function wiresOf(template: Template): Wire[] {
-  return [...(template.wires ?? []), ...(template.pools ?? []).flatMap((pool) => pool.wires)];
-}
 // each end of a wire there
 function wireProblems({ from, to }: Wire, template: Template, catalog: Catalog): string[] {
   return [fromProblem(from, template, catalog), toProblem(to, template, catalog)].filter(
@@ -144,7 +140,7 @@ function toProblem(to: WireTo, template: Template, catalog: Catalog): string | u
 }
 // what a child shows from outside, by its name, the first of that name; none where there's no such child
 function outsideOfChild(name: string, template: Template, catalog: Catalog): ReturnType<Catalog['outsideOf']> {
-  const child = catalog.childrenOf(template).find((each) => each.name === name);
+  const child = catalog.childOf(template, name);
   return child && catalog.outsideOf(child.kind);
 }
 // each macro named; its targets params inside, a child's by its name, then within it; a target
@@ -158,14 +154,14 @@ function macroProblems(template: Template, catalog: Catalog): string[] {
       return [`macro ${macro.name}: no spec, and no target to take one from`];
     }
     return macro.maps
-      .filter((target) => !paramInside(target.to, template, catalog))
+      .filter((target) => !catalog.paramInside(template, target.to))
       .map((target) => `macro ${macro.name}: ${addressText(target.to)} is no param`);
   });
 }
 // each setting of its own standing for a child's setting
 function settingProblems(template: Template, catalog: Catalog): string[] {
   return (template.settings ?? [])
-    .filter(({ to }) => !settingInside(to, template, catalog))
+    .filter(({ to }) => !catalog.settingInside(template, to))
     .map(({ name, to }) => `setting ${name}: ${addressText(to)} is no setting`);
 }
 // Each macro onto a choice: its own choices the same, in the same order.
@@ -184,11 +180,11 @@ function choiceProblems(template: Template, catalog: Catalog): string[] {
 // Each sound wired into a macro: no map on its way holding it to a range.
 // A range holds a value; a sound through a macro goes to each target by its factor alone.
 function soundRangeProblems(template: Template, catalog: Catalog): string[] {
-  return wiresOf(template).flatMap(({ to }) => {
+  return catalog.wiresOf(template).flatMap(({ to }) => {
     if (!('node' in to) || !('param' in to)) {
       return [];
     }
-    const child = catalog.childrenOf(template).find((each) => each.name === to.node);
+    const child = catalog.childOf(template, to.node);
     return rangesOnTheWay(child?.kind, to.param, [to.node], catalog).map(
       (held) =>
         `a sound into ${to.node}/${to.param}: on its way, ${addressText(held)} held to a range, which holds a value, not a sound`,
@@ -208,17 +204,8 @@ function rangesOnTheWay(kind: string | undefined, name: string, at: Address, cat
       return [[...at, ...to]];
     }
     const path = to.slice(0, -1);
-    return rangesOnTheWay(kindAt(template, path, catalog), to.at(-1)!, [...at, ...path], catalog);
+    return rangesOnTheWay(catalog.kindAt(template, path), to.at(-1)!, [...at, ...path], catalog);
   });
-}
-// a node's kind by its path of children's names within a template; none where it isn't there
-function kindAt(template: Template, [name, ...rest]: Address, catalog: Catalog): string | undefined {
-  const child = catalog.childrenOf(template).find((each) => each.name === name);
-  if (!child || !rest.length) {
-    return child?.kind;
-  }
-  const inner = catalog.template(child.kind);
-  return inner && kindAt(inner, rest, catalog);
 }
 // two lists of choices the same, in the same order
 function sameChoices(one: readonly string[], other: readonly string[]): boolean {
@@ -234,14 +221,4 @@ function noteProblems(template: Template, catalog: Catalog): string[] {
         .map((address) => `pool ${child.name}: its note's ${source} into ${addressText(address)}, no param`),
     ),
   );
-}
-// whether an address within a template reaches a param of a child inside it
-function paramInside([name, ...rest]: readonly string[], template: Template, catalog: Catalog): boolean {
-  const child = catalog.childrenOf(template).find((each) => each.name === name);
-  return child !== undefined && catalog.paramIn(child.kind, rest);
-}
-// the same for a setting
-function settingInside([name, ...rest]: readonly string[], template: Template, catalog: Catalog): boolean {
-  const child = catalog.childrenOf(template).find((each) => each.name === name);
-  return child !== undefined && catalog.settingIn(child.kind, rest);
 }

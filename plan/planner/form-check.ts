@@ -14,15 +14,15 @@ import type { Template, TemplateChild } from './template.ts';
 // What's wrong with a template, held to its form; none where it fulfils it.
 export function formProblems(template: Template, form: Form, catalog: Catalog): string[] {
   const children = template.children ?? [];
-  const pooled = (template.pools ?? []).map((pool) => pool.child);
+  const everyChild = catalog.childrenOf(template); // a pool's child among them
   const roles = form.roles ?? [];
   const problems = [
     ...jackProblems(template, form),
-    ...(form.roles ? [...children, ...pooled].flatMap((child) => roleProblems(child, roles, catalog)) : []),
-    ...roles.flatMap((role) => countProblems(role, [...children, ...pooled])), // a pool one of its role
+    ...(form.roles ? everyChild.flatMap((child) => roleProblems(child, roles, catalog)) : []),
+    ...roles.flatMap((role) => countProblems(role, everyChild)), // a pool one of its role
     ...(form.ordered ? orderProblems(children, form) : []),
-    ...wireProblems(template, form),
-    ...(form.rules ?? []).flatMap((rule) => ruleProblems(rule, template)),
+    ...wireProblems(template, form, catalog),
+    ...(form.rules ?? []).flatMap((rule) => ruleProblems(rule, template, catalog)),
   ];
   return problems.map((problem) => `form ${form.name}: ${problem}`);
 }
@@ -82,22 +82,16 @@ function orderProblems(children: readonly TemplateChild[], form: Form): string[]
   return problems;
 }
 // each wire one the form allows, by the roles at its ends; any where the form lists none
-function wireProblems(template: Template, form: Form): string[] {
+function wireProblems(template: Template, form: Form, catalog: Catalog): string[] {
   const allowed = form.wires;
   if (!allowed) {
     return [];
   }
-  const roleOf = (name: string): string | undefined =>
-    [...(template.children ?? []), ...(template.pools ?? []).map((pool) => pool.child)].find(
-      (child) => child.name === name,
-    )?.role;
-  return wiresOf(template)
+  const roleOf = (name: string): string | undefined => catalog.childOf(template, name)?.role;
+  return catalog
+    .wiresOf(template)
     .filter(({ from, to }) => !allowed.some((wire) => fromFits(wire.from, from, roleOf) && toFits(wire.to, to, roleOf)))
     .map(({ from, to }) => `a wire from ${endName(from)} into ${endName(to)}: not allowed`);
-}
-// a template's wires, its pools' among them
-function wiresOf(template: Template): Wire[] {
-  return [...(template.wires ?? []), ...(template.pools ?? []).flatMap((pool) => pool.wires)];
 }
 // whether a wire's start fits a form's: the parent's own input, or a role's main output or a tap
 function fromFits(allowed: FormFrom, from: WireFrom, roleOf: (name: string) => string | undefined): boolean {
@@ -129,12 +123,11 @@ function endName(end: WireFrom | WireTo): string {
 }
 // a rule held: no loops through any child, but through the wires it names; every child's way out, by its main outputs, ending in the role, where there's one;
 // a pool's child among the children, its wires among the wires
-function ruleProblems(rule: FormRule, template: Template): string[] {
-  const children = [...(template.children ?? []), ...(template.pools ?? []).map((pool) => pool.child)];
-  const inside = { wires: wiresOf(template) };
+function ruleProblems(rule: FormRule, template: Template, catalog: Catalog): string[] {
+  const children = catalog.childrenOf(template);
+  const inside = { wires: catalog.wiresOf(template) };
   if (rule.rule === 'no loops') {
-    const roleOf = (name: string | undefined): string | undefined =>
-      children.find((child) => child.name === name)?.role;
+    const roleOf = (name: string | undefined): string | undefined => catalog.childOf(template, name)?.role;
     const loopsThrough = ({ from, to }: Wire): boolean =>
       rule.but !== undefined
       && roleOf(fromChild(from)) === rule.but.from
