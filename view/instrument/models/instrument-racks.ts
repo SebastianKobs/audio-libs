@@ -1,4 +1,4 @@
-// ---------- view/models/instrument-racks: the instruments as the device view shows them ----------
+// ---------- view/instrument/models/instrument-racks: the instruments as the device view shows them ----------
 // Each role's instrument a rack of its cards, a pad each, read through their readout (InstrumentsReadout).
 // The test note every instrument plays, set once for all:
 //   - its pitch and velocity, MIDI 1.0's at the edge, as its row sets them;
@@ -6,10 +6,10 @@
 //   - held for as long as its button is, from a little after now, pressed and let go as the
 //     app's messages.
 // Which of the note's own values a role's instrument reads, for its row to grey the others.
-import { OWN_NOTE_VALUES, type PresetMessage, type TestNoteMessage } from '../../plan/synth/index.ts';
-import type { InstrumentCard, InstrumentsReadout } from '../control-surface/index.ts';
-import type { PlanReadout } from '../device/readout/index.ts';
-import { ViewBuilder } from '../device/models/index.ts';
+import { OWN_NOTE_VALUES, type PresetMessage, type TestNoteMessage } from '../../../plan/synth/index.ts';
+import type { InstrumentCard, InstrumentsReadout } from '../readout/index.ts';
+import type { PlanReadout } from '../../device/readout/index.ts';
+import { ViewBuilder } from '../../device/models/index.ts';
 
 // what the racks send on the app's bus: a role's reset, its test note pressed and let go
 type RackMessage = PresetMessage | TestNoteMessage;

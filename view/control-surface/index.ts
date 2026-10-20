@@ -4,9 +4,7 @@
 //   - clips.ts: the clip slots, as a view's clip tracks read them, a clip player's and a
 //     control surface's (ClipsReadout);
 //   - arrangement.ts: what the arrangement reads, in its own words, the recording, the tracks,
-//     the playhead, what the desk declares, the clock; the session's tracks read the tracks too;
-//   - instruments.ts: the instruments as the device view reads them, the patch each role plays,
-//     a role's cards (InstrumentsReadout).
+//     the playhead, what the desk declares, the clock; the session's tracks read the tracks too.
 export type { ClipsReadout, ClipTrack } from './clips.ts';
 export type {
   ArrangementClock,
@@ -19,4 +17,3 @@ export type {
   TrackGroup,
   TracksReadout,
 } from './arrangement.ts';
-export type { InstrumentCard, InstrumentsReadout } from './instruments.ts';

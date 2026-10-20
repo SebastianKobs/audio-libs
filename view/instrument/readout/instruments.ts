@@ -1,7 +1,7 @@
-// ---------- view/control-surface/instruments: the instruments, as the device view reads them ----------
+// ---------- view/instrument/readout/instruments: the instruments, as the device view reads them ----------
 // Types only. The patch each role plays, and a role's instrument's cards, one for each patch it
 // plays, each a preset's readout and its edits sent as the app's messages.
-import type { Command, PlanReadout } from '../device/readout/index.ts';
+import type { Command, PlanReadout } from '../../device/readout/index.ts';
 
 // a card of an instrument: the patch it edits, by its name; a drum rack's pad's key; its plan's readout;
 // what's done on it sent as the app's message (send())

@@ -2,10 +2,6 @@
 // Handed a plan and its values through the plan's readout (libs/view/device/readout/), hands back
 // what a view shows and what it can do.
 // Its parts:
-//   - cards.ts: an instrument's patches as the device view edits them, a preset's readout each, the
-//     patch edited in the bank;
-//   - instrument-racks.ts: the instruments as the device view shows them, a rack of cards each,
-//     the test note every one plays, which of its own values each reads;
 //   - clip-tracks.ts: the clip tracks, each clip read from what holds it, a clip player or the
 //     control surface, its ▶, and its × asking first;
 //   - placed.ts: where a play goes, its group and its track, the session's and the arrangement's;
@@ -23,8 +19,6 @@ export { Session, type GroupShown, type TrackShown } from './session.ts';
 export { SessionTracks } from './session-tracks.ts';
 export { TransportLane } from './transport-lane.ts';
 export { Views, type ViewName } from './views.ts';
-export { InstrumentCards, type CardValues } from './cards.ts';
-export { InstrumentRacks, type InstrumentRack } from './instrument-racks.ts';
 export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';
 export { declaredBy } from './arrangement/declared.ts';
 export { laneLine, type Corner } from './arrangement/lane-shapes.ts';

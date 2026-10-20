@@ -1,4 +1,4 @@
-// The cards of an instrument (mockup/src/libs/view/models/cards.ts), as the device view edits them, on the tests' file of
+// The cards of an instrument (mockup/src/libs/view/instrument/models/cards.ts), as the device view edits them, on the tests' file of
 // instruments (libs/plan/synth/test/pluck.js):
 //   - a card for each patch an instrument plays: the patch alone, or a rack's pads, each its key;
 //   - its preset on its voice card, read through a preset's readout: each value its preset's, values from outside over its own
@@ -9,10 +9,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentCards } from '../index.ts';
-import { instrumentsOf, LiveBank } from '../../../plan/synth/index.ts';
-import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
-import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
-import { cardModels } from '../../device/models/test/card.js';
+import { instrumentsOf, LiveBank } from '../../../../plan/synth/index.ts';
+import { MODULE_TEMPLATES } from '../../../../plan/synth/content.ts';
+import { PLUCK_FILE } from '../../../../plan/synth/test/pluck.js';
+import { cardModels } from '../../../device/models/test/card.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 

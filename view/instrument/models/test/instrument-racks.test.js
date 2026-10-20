@@ -1,4 +1,4 @@
-// The instruments as the device view shows them (mockup/src/libs/view/models/instrument-racks.ts), in node, on instruments of
+// The instruments as the device view shows them (mockup/src/libs/view/instrument/models/instrument-racks.ts), in node, on instruments of
 // the tests' own, a pluck's cards:
 //   - a role's instrument a rack of its cards, a pad each, its status the patch it plays; none with no cards;
 //   - its reset: every card of its patches put back, as the app's messages;
@@ -9,8 +9,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentRacks } from '../index.ts';
-import { paramAt, settingAt } from '../../../plan/format/index.ts';
-import { CARD } from '../../device/models/test/card.js';
+import { paramAt, settingAt } from '../../../../plan/format/index.ts';
+import { CARD } from '../../../device/models/test/card.js';
 
 // the pluck, and one with a rise of its own, as the note's sources' macros
 const RISING = { ...CARD, node: { ...CARD.node, macros: [...CARD.node.macros, macro('rise')] } };
