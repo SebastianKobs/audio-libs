@@ -21,7 +21,7 @@ interface SessionClock {
 //   - Playing back, the clock's grid is held, so draw() runs a beat after the last drawing.
 //   - drawLive(): the level bars and the device view's knobs and views of their own, the
 //     limiter's history among them, on every frame.
-// On every beat, so a replay lights for a beat at most and never flickers.
+// On every beat, so a clip's play lights for a beat at most and never flickers.
 // The next beat's drawing shows what a skipped one missed.
 // Pressed: a beat's drawing waits while a pointer is pressed on the view. Redrawn under it,
 // the press and its release would land on two elements, and the browser fires no click.

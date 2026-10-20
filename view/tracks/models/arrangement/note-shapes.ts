@@ -43,9 +43,10 @@ export function noteShape(note: RecordedNote, now: number): NoteShape | null {
   const slide = bend ? { t: note.t, from: note.pitch + bend, to: note.pitch } : null;
   return { pieces, lines, slide, held };
 }
-// a note sent with its length kept whole past the holds it rang through, a stop's or the live garden's while the arrangement played back
-// (P3c1): its end where song time gets to its length from its start; a held one, its end where it was let go, and one held still as they
-// are
+// a note sent with its length kept whole past the holds it rang through,
+// a stop's, or live play's while the arrangement played back:
+// its end where song time gets to its length from its start; a held one,
+// its end where it was let go, and one held still as they are
 export function keptWhole<Note extends RecordedNote>(note: Note, song: TimeMap): Note {
   if (note.duration === undefined || note.held) {
     return note;

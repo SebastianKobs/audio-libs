@@ -15,7 +15,7 @@ import { KnobDrag, refreshKnobs } from './knob-view.ts';
 // A slot also marks its device. What opens with no devices shows an empty view.
 // Each control is bound to its model as it's drawn, by what draws it: a drag, a refresh and
 // a click find it by its element (Bound).
-// While it's open, the strip grows, floating over the garden, which keeps the whole window.
+// While it's open, the strip grows, floating over the page, which keeps the whole window.
 
 // The devices a kind of opening shows:
 //   - fill(): drawn into the row, each a composite, for what of it is opened;
