@@ -494,8 +494,10 @@ test("a control's place on its whole range, by its param's declared taper (U2c4c
   near(positionOf(DELAY_TIME.ms, -1), 0);
 });
 
-test("a lane's name, as the arrangement shows it, by its key: its slot and param, a send by its return's name, a strip's own by its param (U2c4b2)", () => {
+test("a lane's name, as the arrangement shows it, by its key: its slot and param, a send by its return's name, a strip's own by its param (U2c4b2); a param deeper in its slot by its own name (a patch's setting)", () => {
   const controllers = [
+    'osc 1/osc/wave',
+    'osc 1/osc/phase',
     'air/cutoff',
     'dull/cutoff',
     'delay/time',
@@ -508,7 +510,17 @@ test("a lane's name, as the arrangement shows it, by its key: its slot and param
   const rows = rowsOf([], tracks, new Set(['tap']), { lanes, opened: new Set(['tap 1']) });
   assert.deepEqual(
     rows.filter(({ track }) => track).map(({ name }) => name),
-    ['air cutoff', 'dull cutoff', 'delay time', 'utility level', 'limiter gain', 'far reverb', 'volume'],
+    [
+      'osc 1 wave',
+      'osc 1 phase',
+      'air cutoff',
+      'dull cutoff',
+      'delay time',
+      'utility level',
+      'limiter gain',
+      'far reverb',
+      'volume',
+    ],
   );
 });
 

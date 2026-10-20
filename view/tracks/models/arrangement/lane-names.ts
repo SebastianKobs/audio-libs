@@ -9,8 +9,10 @@ export function laneKeyOf(track: string, controller: string): string {
 }
 // A lane's name, by its controller: its slot and param, as Ableton names an automation
 // lane by its device and param; a send by its return's name; a strip's own by its param.
+// A param deeper in its slot by its own name: a patch's setting (osc 1/osc/wave) its osc 1's wave.
 export function laneName(controller: string): string {
-  const [first = '', param] = addressOf(controller); // under its strip: the strip's no part of its name
+  const [first = '', ...rest] = addressOf(controller); // under its strip: the strip's no part of its name
+  const param = rest.at(-1);
   if (param === undefined) {
     return first; // a strip's own
   }
