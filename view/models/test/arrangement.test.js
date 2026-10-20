@@ -9,7 +9,7 @@
 //     playhead placed and cued, scrolled back.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Arrangement, declaredBy, ViewBuilder } from '../index.ts';
+import { Arrangement, declaredBy, MixerViewBuilder } from '../index.ts';
 import { arrangedStrips, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
 import { TimeWindow } from '../arrangement/time-window.ts';
 import { keptWhole, noteShape, pitchRange } from '../arrangement/note-shapes.ts';
@@ -520,7 +520,7 @@ test("where a click in the ruler puts the playhead: on the nearest beat; at or p
 
 // the desk's view models on a plan's readout of the tests' own, every value at its plan's
 function viewsOf() {
-  return new ViewBuilder(
+  return new MixerViewBuilder(
     {
       plan: STUDIO,
       valueOf: () => undefined,

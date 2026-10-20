@@ -15,14 +15,17 @@ import {
   type Composite,
   type Wire,
 } from '../../plan/format/index.ts';
-import type { Model } from './model.ts';
 import type { Strip } from './strip.ts';
+import type { ViewBuilder } from './view-builder.ts';
 
 // a bus and the buses that go out into it
 export interface BusGroup {
   readonly bus: Strip;
   readonly members: readonly Strip[];
 }
+
+// what a mixer is read from: the view builder's plan and copies
+type MixerViews = Pick<ViewBuilder, 'plan' | 'copiesOf'>;
 
 // the desk form's roles a mixer sorts its strips by
 const BUS = 'bus';
@@ -34,12 +37,12 @@ export class Mixer {
   readonly buses: readonly BusGroup[];
   readonly returns: readonly Strip[];
   readonly master: Strip | undefined;
-  readonly #model: Model;
+  readonly #views: MixerViews;
   readonly #strip: (address: Address) => Strip | undefined;
 
   // strip: a channel as a strip, by its address, a pool's copy among them
-  constructor(model: Model, strip: (address: Address) => Strip | undefined) {
-    this.#model = model;
+  constructor(views: MixerViews, strip: (address: Address) => Strip | undefined) {
+    this.#views = views;
     this.#strip = strip;
     const own = this.#own();
     this.buses = groupsOf(own.filter(({ role }) => role === BUS));
@@ -75,12 +78,12 @@ export class Mixer {
 
   // the desk's own channels as strips, in the plan's order
   #own(): Strip[] {
-    const desk = this.#model.plan.node as Composite; // a desk is a composite
+    const desk = this.#views.plan.node as Composite; // a desk is a composite
     return desk.children.flatMap(({ name }) => this.#strip([name]) ?? []);
   }
   // the desk's wires as they are: its own, and each copy's added, by its pool's rule
   #wires(): readonly Wire[] {
-    return withCopies(this.#model.plan.node as Composite, this.#copies()).wires; // a desk is a composite
+    return withCopies(this.#views.plan.node as Composite, this.#copies()).wires; // a desk is a composite
   }
   // every strip on the desk now: its own, then each pool's copies added so far
   #all(): Strip[] {
@@ -88,8 +91,8 @@ export class Mixer {
   }
   // each pool's copies added so far, pool by pool
   #copies(): Address[] {
-    const desk = this.#model.plan.node as Composite; // a desk is a composite
-    return desk.pools.flatMap(({ child }) => this.#model.copiesOf([child.name]));
+    const desk = this.#views.plan.node as Composite; // a desk is a composite
+    return desk.pools.flatMap(({ child }) => this.#views.copiesOf([child.name]));
   }
 }
 

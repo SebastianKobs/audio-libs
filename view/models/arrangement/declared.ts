@@ -5,11 +5,11 @@
 //     its inserts' controls, its sends, its volume, pan, mute and solo.
 import type { DeclaredReadout } from '../../control-surface/index.ts';
 import type { Strip } from '../strip.ts';
-import type { ViewBuilder } from '../view-builder.ts';
+import type { MixerViewBuilder } from '../mixer-view-builder.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../plan/format/index.ts';
 
-export function declaredBy(views: ViewBuilder): DeclaredReadout {
+export function declaredBy(views: MixerViewBuilder): DeclaredReadout {
   return {
     specOf: (strip, controller) => views.control(controlAddress(strip, controller))?.spec,
     controllersOf: (strip) => controllersOf(views.strip(addressOf(strip))),

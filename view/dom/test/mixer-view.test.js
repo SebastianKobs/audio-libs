@@ -8,13 +8,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deskHtml, fedBy, trackHtml } from '../index.ts';
-import { ViewBuilder } from '../../models/index.ts';
+import { MixerViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
 
 // the small desk's view models, its values and roles by address, live unless said
 function viewsOn({ values = {}, roles = {}, copies = {} } = {}) {
-  return new ViewBuilder(
+  return new MixerViewBuilder(
     {
       plan: STUDIO,
       valueOf: (address) => values[addressText(address)],

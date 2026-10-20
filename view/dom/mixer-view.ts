@@ -28,7 +28,7 @@ import {
   type Strip,
   type Toggles,
   type TrackNow,
-  type ViewBuilder,
+  type MixerViewBuilder,
 } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import { html, makeElement, setHtml, type Html } from './elements.ts';
@@ -58,7 +58,7 @@ const FOLD_GROUP =
 export class MixerView {
   // its sections, in order: the tracks, the buses, the FX busses, the master
   readonly sections: readonly SectionView[];
-  readonly #models: ViewBuilder;
+  readonly #models: MixerViewBuilder;
   readonly #bound = new Bound<Control>(CONTROL_MARKS); // each knob drawn, its model
   readonly #look: MixerLook;
   readonly #changed: () => void;
@@ -80,7 +80,7 @@ export class MixerView {
     changed,
   }: {
     within: HTMLElement;
-    models: ViewBuilder;
+    models: MixerViewBuilder;
     look: MixerLook;
     folding: { readonly sections: Toggles; readonly groups: Toggles };
     changed: () => void;
@@ -211,7 +211,7 @@ export class MixerView {
 //   - the buses: a bus with the buses that go into it in a box, one alone as it is;
 //   - the FX busses, the desk's returns;
 //   - the master.
-export function deskHtml(models: ViewBuilder, levelOf: LevelOf): { buses: Html; returns: Html; master: Html } {
+export function deskHtml(models: MixerViewBuilder, levelOf: LevelOf): { buses: Html; returns: Html; master: Html } {
   const mixer = models.mixer();
   const drawn = (strip: Strip): Html => stripHtml(strip, lookOf(models, strip, strip.name, levelOf));
   return {
@@ -230,7 +230,7 @@ function busGroupHtml({ bus, members }: BusGroup, drawn: (strip: Strip) => Html)
 }
 // How a strip is shown: the name it's given, where it goes, its devices opened by its
 // address, its sends by their returns' short labels, its level bar's level.
-function lookOf(models: ViewBuilder, strip: Strip, name: string, levelOf: LevelOf): StripLook {
+function lookOf(models: MixerViewBuilder, strip: Strip, name: string, levelOf: LevelOf): StripLook {
   const key = addressText(strip.address);
   return {
     name,
@@ -242,7 +242,7 @@ function lookOf(models: ViewBuilder, strip: Strip, name: string, levelOf: LevelO
 }
 // A track's strip drawn: the name the view gives it, what plays on it now.
 // Empty while it plays nothing, its values a dash, but where it's set live.
-export function trackHtml(models: ViewBuilder, track: SessionTrack, levelOf: LevelOf): Html {
+export function trackHtml(models: MixerViewBuilder, track: SessionTrack, levelOf: LevelOf): Html {
   const strip = models.strip(track.address)!; // a track's channel, on the desk
   const empty = !track.playing && !strip.volume.live;
   return stripHtml(strip, { ...lookOf(models, strip, track.name, levelOf), now: cellHtml(track.now), empty });
@@ -253,11 +253,11 @@ function cellHtml({ text, lit, waiting }: TrackNow): Html {
 }
 // What the strips heard feed, they among it, for the lights: each through its way out, and
 // through a send while it's turned up. A name not on the desk kept, not followed.
-export function fedBy(models: ViewBuilder, heard: ReadonlySet<string>): Set<string> {
+export function fedBy(models: MixerViewBuilder, heard: ReadonlySet<string>): Set<string> {
   return models.mixer().reached(heard, (from, to) => sendUp(models, from, to));
 }
 // whether a strip's send to a return is turned up, as set live or by its track's notes
-function sendUp(models: ViewBuilder, from: string, to: string): boolean {
+function sendUp(models: MixerViewBuilder, from: string, to: string): boolean {
   const send = models.strip(addressOf(from))?.sends.find(({ name }) => name === to);
   return (send?.value ?? 0) > 0;
 }

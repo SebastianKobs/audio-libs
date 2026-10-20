@@ -4,7 +4,6 @@
 //   - a node: a device, its controls in the plan's order;
 //   - a composite's children: grouped by their roles, as a synth's panel groups its modules;
 //   - what a composite's own sources move: a matrix, as a synth's mod matrix;
-//   - a channel: a strip, by its form; a desk: a mixer, its strips by role.
 import {
   addressText,
   isComposite,
@@ -19,10 +18,8 @@ import {
 import { Choice } from './choice.ts';
 import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';
-import { Mixer } from './mixer.ts';
 import { Model } from './model.ts';
 import type { Command, PlanReadout } from '../control-surface/index.ts';
-import { Strip } from './strip.ts';
 
 // A row of a matrix: a source, by its address within the composite, what it moves, and how
 // much: a macro by its map, a modulator by its reach, a control of its own.
@@ -88,14 +85,6 @@ export class ViewBuilder {
       return { source: within(by), target: within(target), kind, ...(map && { map }), ...(amount && { amount }) };
     });
   }
-  // A channel as a strip, by its address, a pool's copy among them; none where nothing's there.
-  strip(address: Address): Strip | undefined {
-    const node = nodeAt(this.#model.plan, address);
-    if (!node) {
-      return undefined;
-    }
-    return new Strip(this.#model, this, address, node);
-  }
   // a node's level as the implementation hears it, at one of its points where it has several
   peakOf(address: Address, point?: string): number {
     return this.#model.peakOf(address, point);
@@ -104,9 +93,9 @@ export class ViewBuilder {
   readingOf(address: Address, reading: string): number {
     return this.#model.readingOf(address, reading);
   }
-  // the plan's desk as a mixer
-  mixer(): Mixer {
-    return new Mixer(this.#model, (address) => this.strip(address));
+  // a pool's copies added so far, by their addresses
+  copiesOf(pool: Address): readonly Address[] {
+    return this.#model.copiesOf(pool);
   }
 }
 

@@ -7,16 +7,16 @@
 //   - a reset for what's live on it;
 //   - a view of its own where its kind has one, the limiter's history (registered by its owner).
 import { addressOf, addressText } from '../../plan/format/index.ts';
-import { Knob, type Control, type Device, type ViewBuilder } from '../models/index.ts';
+import { Knob, type Control, type Device, type MixerViewBuilder } from '../models/index.ts';
 import type { CompositeView } from './composite-view.ts';
 import type { DeviceChain } from './device-panel-view.ts';
 
 // a strip's inserts, the master's too, each a device in the device view, in the order its
 // sound goes through them (fill())
 export class InsertDevices implements DeviceChain {
-  readonly #models: ViewBuilder;
+  readonly #models: MixerViewBuilder;
 
-  constructor({ models }: { models: ViewBuilder }) {
+  constructor({ models }: { models: MixerViewBuilder }) {
     this.#models = models;
   }
   // a strip's inserts drawn in a row, by its key, each a composite drawn flat, in the order its

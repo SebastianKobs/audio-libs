@@ -7,7 +7,7 @@
 //   - a solo click: that strip alone, or added with shift, each change a command on its strip.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ViewBuilder, shortName } from '../index.ts';
+import { MixerViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { STUDIO } from './desk.js';
 
@@ -25,7 +25,7 @@ function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
     slotOf: () => undefined,
   };
-  return { views: new ViewBuilder(planReadout, (command) => sent.push(command)), sent };
+  return { views: new MixerViewBuilder(planReadout, (command) => sent.push(command)), sent };
 }
 
 test("a channel as a strip, by its form: its name as shown, its label's, else its own; where it goes; its inserts as devices; its sends' knobs by return; its fader, pan, mute and solo", () => {

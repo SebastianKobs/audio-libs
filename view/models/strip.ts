@@ -14,15 +14,12 @@ import {
   type Node,
   type Plan,
 } from '../../plan/format/index.ts';
-import type { Control, Device } from './device.ts';
+import type { Device } from './device.ts';
 import type { Knob } from './knob.ts';
-import type { Model } from './model.ts';
+import type { ViewBuilder } from './view-builder.ts';
 
-// what a strip's parts are made by: the view builder's
-export interface Controls {
-  control(address: Address): Control | undefined;
-  device(address: Address): Device | undefined;
-}
+// what a strip is read from: the view builder's plan, controls, devices and levels
+type StripViews = Pick<ViewBuilder, 'plan' | 'control' | 'device' | 'peakOf'>;
 
 // the channel form's roles a strip finds its parts by
 const INSERT = 'insert';
@@ -42,20 +39,20 @@ export class Strip {
   readonly pan: Knob | undefined;
   readonly mute: Knob | undefined;
   readonly solo: Knob | undefined;
-  readonly #model: Model;
+  readonly #views: StripViews;
   readonly #cut: Knob | undefined;
 
-  constructor(model: Model, controls: Controls, address: Address, node: Node) {
-    this.#model = model;
+  constructor(views: StripViews, address: Address, node: Node) {
+    this.#views = views;
     this.address = address;
-    this.name = shownName(model.plan, address);
+    this.name = shownName(views.plan, address);
     this.role = node.role;
-    this.into = wayOutOf(model.plan, address);
-    this.out = this.into === undefined ? undefined : shownName(model.plan, [this.into]);
+    this.into = wayOutOf(views.plan, address);
+    this.out = this.into === undefined ? undefined : shownName(views.plan, [this.into]);
     const children = node.children ?? [];
     const under = (...names: string[]): Address => [...address, ...names];
-    const knob = (...names: string[]): Knob | undefined => controls.control(under(...names)) as Knob | undefined;
-    this.inserts = children.filter(({ role }) => role === INSERT).map(({ name }) => controls.device(under(name))!);
+    const knob = (...names: string[]): Knob | undefined => views.control(under(...names)) as Knob | undefined;
+    this.inserts = children.filter(({ role }) => role === INSERT).map(({ name }) => views.device(under(name))!);
     const sends = children.find(({ role }) => role === SENDS);
     this.sends = (sends?.macros ?? []).map(({ spec }) => knob(sends!.name, spec.name)!); // a sends' child's
     this.volume = knob('volume')!; // every channel has its volume
@@ -67,7 +64,7 @@ export class Strip {
   }
   // its level as the implementation hears it
   get level(): number {
-    return this.#model.peakOf(this.address);
+    return this.#views.peakOf(this.address);
   }
   // whether a mute or another's solo has it silent: its cut at 0
   get quiet(): boolean {

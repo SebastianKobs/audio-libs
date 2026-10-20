@@ -4,6 +4,7 @@
 // Its parts:
 //   - model.ts: the plan and its values by address, read through the plan's readout;
 //   - view-builder.ts: view models for whatever part of a plan is asked;
+//   - mixer-view-builder.ts: a desk's view models, its strips and its mixer;
 //   - knob.ts: a param with a range as a control, its text as shown;
 //   - choice.ts: a param or a setting with choices;
 //   - device.ts: a node as a device, its controls in order, what every control has;
@@ -52,6 +53,7 @@ export { InstrumentCards, type CardValues } from './cards.ts';
 export { InstrumentRacks, type InstrumentRack } from './instrument-racks.ts';
 export { Strip, shortName, shownName } from './strip.ts';
 export { ViewBuilder, type MatrixRow } from './view-builder.ts';
+export { MixerViewBuilder } from './mixer-view-builder.ts';
 export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';
 export { declaredBy } from './arrangement/declared.ts';
 export { laneLine, type Corner } from './arrangement/lane-shapes.ts';

@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deviceHtml, faderHtml, html, knobHtml, meterHtml, stillPanHtml, stripHtml } from '../index.ts';
-import { ViewBuilder } from '../../models/index.ts';
+import { MixerViewBuilder, ViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { positionOf } from '../../../params/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
@@ -17,7 +17,7 @@ const LOOK = { route: 'to master', sendLabel: (to) => `${to}!`, level: 0.5 };
 
 // the small desk's view models, its values and roles by address, live unless said; the slots' words by address
 function viewsOn({ values = {}, roles = {}, slots = {} } = {}) {
-  return new ViewBuilder(
+  return new MixerViewBuilder(
     {
       plan: STUDIO,
       valueOf: (address) => values[addressText(address)],
