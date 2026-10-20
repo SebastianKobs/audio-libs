@@ -1,4 +1,4 @@
-// Keys turned from where each starts (mockup/src/libs/view/models/toggles.ts): a section folded, a group unfolded, a track's lanes
+// Keys turned from where each starts (mockup/src/libs/view/mixer/models/toggles.ts): a section folded, a group unfolded, a track's lanes
 // opened; one turned alone, or every one handed in turned as the one clicked goes
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

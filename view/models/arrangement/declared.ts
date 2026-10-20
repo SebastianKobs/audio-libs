@@ -4,8 +4,7 @@
 //   - the strip's controllers in the order the sound goes through it, as its strip has them:
 //     its inserts' controls, its sends, its volume, pan, mute and solo.
 import type { DeclaredReadout } from '../../control-surface/index.ts';
-import type { Strip } from '../strip.ts';
-import type { MixerViewBuilder } from '../mixer-view-builder.ts';
+import type { MixerViewBuilder, Strip } from '../../mixer/models/index.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../plan/format/index.ts';
 

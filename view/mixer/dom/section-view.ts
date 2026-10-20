@@ -1,4 +1,4 @@
-// ---------- view/dom/section-view: a section of a view, its strips in a row ----------
+// ---------- view/mixer/dom/section-view: a section of a view, its strips in a row ----------
 // As a mixer's sections stand side by side: a label, then its strips in a row.
 // A section that folds: a click on its label folds it to its first strip, and back.
 //   - With shift: every section beside it that folds, as this one goes.
@@ -6,7 +6,7 @@
 //     reading the same one; drawn from it.
 //   - Folded, its light shows while a hidden strip sounds.
 import type { Toggles } from '../models/index.ts';
-import { makeElement } from '../html/index.ts';
+import { makeElement } from '../../html/index.ts';
 
 // what a click on a folding section's label does, as its hint says
 const FOLD =

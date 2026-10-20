@@ -1,15 +1,15 @@
-// ---------- view/dom/insert-devices: a strip's inserts, each a device as Ableton's are ----------
-// Drawn from the strip's model (libs/view/models/), each a composite drawn flat, as the device
+// ---------- view/mixer/dom/insert-devices: a strip's inserts, each a device as Ableton's are ----------
+// Drawn from the strip's model (libs/view/mixer/models/), each a composite drawn flat, as the device
 // view shows them, a chain of its own (DeviceChain, device-panel-view.ts), opened by a strip's address:
 //   - each insert whose slot its owner says something of: a Utility, a Filter, the limiter;
 //   - its status: its label and what it does there, and what sets it, where its notes do;
 //   - its knobs, each its hint, the template's, and how it's set;
 //   - a reset for what's live on it;
 //   - a view of its own where its kind has one, the limiter's history (registered by its owner).
-import { addressOf, addressText } from '../../plan/format/index.ts';
-import { Knob, type Control, type Device } from '../device/models/index.ts';
+import { addressOf, addressText } from '../../../plan/format/index.ts';
+import { Knob, type Control, type Device } from '../../device/models/index.ts';
 import type { MixerViewBuilder } from '../models/index.ts';
-import type { CompositeView, DeviceChain } from '../device/dom/index.ts';
+import type { CompositeView, DeviceChain } from '../../device/dom/index.ts';
 
 // a strip's inserts, the master's too, each a device in the device view, in the order its
 // sound goes through them (fill())

@@ -6,7 +6,7 @@ import type { DevicePanel } from '../device/models/index.ts';
 import type { Session, SessionTracks, Views } from '../models/index.ts';
 import type { ClipTracksView } from './clip-tracks-view.ts';
 import type { DevicePanelView } from '../device/dom/index.ts';
-import type { MixerView } from './mixer-view.ts';
+import type { MixerView } from '../mixer/dom/index.ts';
 
 // The clock as the drawing reads it: its time, its 16ths, a beat's length at the tempo now.
 interface SessionClock {

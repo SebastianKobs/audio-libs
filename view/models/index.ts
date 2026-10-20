@@ -2,10 +2,6 @@
 // Handed a plan and its values through the plan's readout (libs/view/device/readout/), hands back
 // what a view shows and what it can do.
 // Its parts:
-//   - mixer-view-builder.ts: a desk's view models, its strips and its mixer;
-//   - strip.ts: a channel as a strip, by its form, its name as shown;
-//   - mixer.ts: a desk as a mixer, its strips by role, a solo click;
-//   - mixer-groups.ts: the groups of tracks a mixer shows, a desk's channels as one;
 //   - cards.ts: an instrument's patches as the device view edits them, a preset's readout each, the
 //     patch edited in the bank;
 //   - instrument-racks.ts: the instruments as the device view shows them, a rack of cards each,
@@ -17,7 +13,6 @@
 //     what holds it, lit as it sounds, in its own words;
 //   - session-tracks.ts: the session's tracks as its mixer shows them, in the control
 //     surface's groups, and what sounded since the last look;
-//   - toggles.ts: keys turned from where each starts, a section folded, a group unfolded;
 //   - views.ts: the session view and the arrangement, which one is open;
 //   - transport-lane.ts: the transport as its lane shows it, whether it plays, bar and beat;
 //   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
@@ -26,15 +21,10 @@
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export { Session, type GroupShown, type TrackShown } from './session.ts';
 export { SessionTracks } from './session-tracks.ts';
-export { channelGroups, type MixerGroup, type MixerTrack, type TrackNow } from './mixer-groups.ts';
 export { TransportLane } from './transport-lane.ts';
-export { Toggles } from './toggles.ts';
 export { Views, type ViewName } from './views.ts';
-export { Mixer, type BusGroup } from './mixer.ts';
 export { InstrumentCards, type CardValues } from './cards.ts';
 export { InstrumentRacks, type InstrumentRack } from './instrument-racks.ts';
-export { Strip, shortName, shownName } from './strip.ts';
-export { MixerViewBuilder } from './mixer-view-builder.ts';
 export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';
 export { declaredBy } from './arrangement/declared.ts';
 export { laneLine, type Corner } from './arrangement/lane-shapes.ts';

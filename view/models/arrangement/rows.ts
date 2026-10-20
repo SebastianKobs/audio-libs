@@ -1,6 +1,6 @@
 // ---------- view/models/arrangement/rows: the arrangement's rows and their lanes ----------
 import type { RecordedLane, RecordedRegion, TracksReadout } from '../../control-surface/index.ts';
-import type { Mixer } from '../mixer.ts';
+import type { Mixer } from '../../mixer/models/index.ts';
 import { placedOn } from '../placed.ts';
 import { SEND } from '../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../plan/format/index.ts';

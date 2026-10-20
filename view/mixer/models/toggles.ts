@@ -1,8 +1,8 @@
-// ---------- view/models/toggles: keys turned from where each starts. Pure ----------
+// ---------- view/mixer/models/toggles: keys turned from where each starts. Pure ----------
 // What a view folds or opens, by key: a section folded, a group unfolded, a track's lanes opened.
 // Each key starts as its view starts it; turned, it's the other way.
 // One turned alone, or every one handed in, as the one clicked goes (shift-click).
-import { toggleIn } from '../../util/index.ts';
+import { toggleIn } from '../../../util/index.ts';
 
 export class Toggles {
   readonly #turned = new Set<string>();

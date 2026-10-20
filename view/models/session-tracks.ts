@@ -7,7 +7,7 @@
 //   3. what sounded since the last look, for the folded sections' lights: a replay group's
 //      clips, and each lit track's channel.
 import { addressOf } from '../../plan/format/index.ts';
-import type { MixerGroup, MixerTrack } from './mixer-groups.ts';
+import type { MixerGroup, MixerTrack } from '../mixer/models/index.ts';
 import type { TracksReadout } from '../control-surface/index.ts';
 import type { GroupShown, TrackShown } from './session.ts';
 

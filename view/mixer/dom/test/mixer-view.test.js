@@ -1,5 +1,5 @@
-// The mixer view's parts that need no page (mockup/src/libs/view/dom/mixer-view.ts), in node, on the models' small
-// desk (libs/view/models/test/desk.js):
+// The mixer view's parts that need no page (mockup/src/libs/view/mixer/dom/mixer-view.ts), in node, on the models' small
+// desk (libs/view/mixer/models/test/desk.js):
 //   - the desk's own channels drawn: its buses, a bus with those that go into it in a group's box; its returns;
 //     its master; each strip opening its devices by its address, its sends labelled by their returns' short labels;
 //   - a track's strip drawn: the name it's handed, what plays on it, empty while it plays nothing;
@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deskHtml, fedBy, trackHtml } from '../index.ts';
 import { MixerViewBuilder } from '../../models/index.ts';
-import { addressText } from '../../../plan/format/index.ts';
+import { addressText } from '../../../../plan/format/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
 
 // the small desk's view models, its values and roles by address, live unless said

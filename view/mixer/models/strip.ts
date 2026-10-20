@@ -1,4 +1,4 @@
-// ---------- view/models/strip: a channel as a strip, by its form ----------
+// ---------- view/mixer/models/strip: a channel as a strip, by its form ----------
 // As a mixer's strip: its inserts as devices, its sends' knobs, its fader, pan, mute and solo,
 // its level. Read by the channel form's roles: insert, mute (its cut), sends.
 // Its name as shown: its label, else its own; a pool's copy its pool's and its number.
@@ -13,8 +13,8 @@ import {
   type Composite,
   type Node,
   type Plan,
-} from '../../plan/format/index.ts';
-import type { Device, Knob, ViewBuilder } from '../device/models/index.ts';
+} from '../../../plan/format/index.ts';
+import type { Device, Knob, ViewBuilder } from '../../device/models/index.ts';
 
 // what a strip is read from: the view builder's plan, controls, devices and levels
 type StripViews = Pick<ViewBuilder, 'plan' | 'control' | 'device' | 'peakOf'>;

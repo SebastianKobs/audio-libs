@@ -1,4 +1,4 @@
-// The strips and the mixer (mockup/src/libs/view/models), in node, on a small desk (test/desk.js) and a plan's
+// The strips and the mixer (mockup/src/libs/view/mixer/models), in node, on a small desk (test/desk.js) and a plan's
 // in of the tests' own:
 //   - a channel as a strip, by its form: its shown name, where it goes, its inserts as devices, its sends'
 //     knobs, its fader, pan, mute and solo, its level; quiet where its cut is at 0; a pool's copy too;
@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { channelGroups, MixerViewBuilder, shortName } from '../index.ts';
-import { addressText } from '../../../plan/format/index.ts';
+import { addressText } from '../../../../plan/format/index.ts';
 import { STUDIO } from './desk.js';
 
 // The desk's view models on a plan's readout of the tests' own: values and peaks by address, the copies

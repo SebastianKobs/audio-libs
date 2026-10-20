@@ -1,4 +1,4 @@
-// ---------- view/dom/strip-view: a strip drawn ----------
+// ---------- view/mixer/dom/strip-view: a strip drawn ----------
 // As a mixer's strip, top to bottom:
 //   1. its name, a click opening its devices; where it goes; what plays on it now;
 //   2. its inserts, a slot each, as Pro Tools shows them: its device and what sets it;
@@ -7,11 +7,11 @@
 // Quiet, drawn so, where a mute or another's solo has it silent.
 // Empty, where its track plays nothing: its sends and its fader at the bottom, each value a
 // dash.
-import { addressText } from '../../plan/format/index.ts';
-import type { Device, Knob } from '../device/models/index.ts';
+import { addressText } from '../../../plan/format/index.ts';
+import type { Device, Knob } from '../../device/models/index.ts';
 import type { Strip } from '../models/index.ts';
-import { html, type Html } from '../html/index.ts';
-import { EMPTY, faderHtml, knobHtml, meterHtml, stillPanHtml } from '../device/dom/index.ts';
+import { html, type Html } from '../../html/index.ts';
+import { EMPTY, faderHtml, knobHtml, meterHtml, stillPanHtml } from '../../device/dom/index.ts';
 
 // How a view shows a strip beside the strip itself:
 //   - name: as the view names it; route: where it goes, as shown; now: what plays on it;

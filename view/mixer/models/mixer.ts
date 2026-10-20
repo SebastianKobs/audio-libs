@@ -1,4 +1,4 @@
-// ---------- view/models/mixer: a desk as a mixer ----------
+// ---------- view/mixer/models/mixer: a desk as a mixer ----------
 // Its strips in the plan's order, by their roles:
 //   - its buses, each with the buses that go out into it, as a group track holds its tracks;
 //   - its returns;
@@ -15,9 +15,9 @@ import {
   type Address,
   type Composite,
   type Wire,
-} from '../../plan/format/index.ts';
+} from '../../../plan/format/index.ts';
 import type { Strip } from './strip.ts';
-import type { ViewBuilder } from '../device/models/index.ts';
+import type { ViewBuilder } from '../../device/models/index.ts';
 
 // a bus and the buses that go out into it
 export interface BusGroup {

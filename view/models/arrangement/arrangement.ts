@@ -28,9 +28,8 @@ import {
   type Row,
   type SectionLabels,
 } from './rows.ts';
-import type { Mixer } from '../mixer.ts';
+import { Toggles, type Mixer } from '../../mixer/models/index.ts';
 import { TimeWindow } from './time-window.ts';
-import { Toggles } from '../toggles.ts';
 import type {
   ArrangementClock,
   DeclaredReadout,

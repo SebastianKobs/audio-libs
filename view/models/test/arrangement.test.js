@@ -9,7 +9,8 @@
 //     playhead placed and cued, scrolled back.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Arrangement, declaredBy, MixerViewBuilder } from '../index.ts';
+import { Arrangement, declaredBy } from '../index.ts';
+import { MixerViewBuilder } from '../../mixer/models/index.ts';
 import { arrangedStrips, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
 import { TimeWindow } from '../arrangement/time-window.ts';
 import { keptWhole, noteShape, pitchRange } from '../arrangement/note-shapes.ts';
@@ -18,7 +19,7 @@ import { playheadAt } from '../arrangement/playhead.ts';
 import { faderPosition, PAN, SEND_PARAM, STRIP_PARAMS, positionOf } from '../../../params/index.ts';
 import { BLOCKS, DELAY_TIME, LIMITER_SPECS } from '../../../plan/blocks/index.ts';
 import { near } from '../../../util/test/near.js';
-import { STUDIO } from './desk.js';
+import { STUDIO } from '../../mixer/models/test/desk.js';
 
 // the tracks, as a control surface names them: your kinds' pools first, then each kind's group,
 // the background's sounds sharing one

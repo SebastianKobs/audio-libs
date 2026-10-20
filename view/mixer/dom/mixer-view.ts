@@ -1,4 +1,4 @@
-// ---------- view/dom/mixer-view: a mixer drawn, its strips side by side ----------
+// ---------- view/mixer/dom/mixer-view: a mixer drawn, its strips side by side ----------
 // Its sections in one row, as the sound flows:
 //   1. the tracks, in the groups the view hands it, or the desk's own channels as one,
 //      each group in a box of its own;
@@ -17,9 +17,9 @@
 // Level bars: each falls as a peak meter's, drawn on every frame.
 // Lights: a folded section's, and a group's dot, while a hidden strip sounds; what the strips
 // heard feed counted too.
-import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
-import { Events } from '../../util/index.ts';
-import { Meters, type Control } from '../device/models/index.ts';
+import { addressOf, addressText, type Address } from '../../../plan/format/index.ts';
+import { Events } from '../../../util/index.ts';
+import { Meters, type Control } from '../../device/models/index.ts';
 import {
   channelGroups,
   shortName,
@@ -31,8 +31,8 @@ import {
   type TrackNow,
   type MixerViewBuilder,
 } from '../models/index.ts';
-import { Bound, CONTROL_MARKS, KnobDrag, meterPosition } from '../device/dom/index.ts';
-import { html, makeElement, setHtml, type Html } from '../html/index.ts';
+import { Bound, CONTROL_MARKS, KnobDrag, meterPosition } from '../../device/dom/index.ts';
+import { html, makeElement, setHtml, type Html } from '../../html/index.ts';
 import { SectionView } from './section-view.ts';
 import { stripHtml, type StripLook } from './strip-view.ts';
 

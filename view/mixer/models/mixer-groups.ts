@@ -1,8 +1,8 @@
-// ---------- view/models/mixer-groups: the groups of tracks a mixer shows ----------
+// ---------- view/mixer/models/mixer-groups: the groups of tracks a mixer shows ----------
 // What a mixer's tracks section draws, each group in a box of its own:
 //   - handed in by a view: the session's tracks in its groups (session-tracks.ts);
 //   - else, for a desk alone, its channels as one group (channelGroups()).
-import type { Address } from '../../plan/format/index.ts';
+import type { Address } from '../../../plan/format/index.ts';
 import type { Mixer } from './mixer.ts';
 
 // What a track plays now, as its cell shows it: the clip, a visitor's motif named after it, a

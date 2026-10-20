@@ -1,11 +1,11 @@
-// ---------- view/models/mixer-view-builder: a desk's view models, its strips and its mixer ----------
+// ---------- view/mixer/models/mixer-view-builder: a desk's view models, its strips and its mixer ----------
 // On a device's view models (view-builder.ts):
 //   - a channel as a strip, by its form, a pool's copy among them;
 //   - the desk as a mixer, its strips by role.
-import { nodeAt, type Address } from '../../plan/format/index.ts';
+import { nodeAt, type Address } from '../../../plan/format/index.ts';
 import { Mixer } from './mixer.ts';
 import { Strip } from './strip.ts';
-import { ViewBuilder } from '../device/models/index.ts';
+import { ViewBuilder } from '../../device/models/index.ts';
 
 // The view models of a desk's plan: a device builder's, and its strips and its mixer.
 export class MixerViewBuilder extends ViewBuilder {

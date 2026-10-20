@@ -3,9 +3,10 @@
 // A chip lights while its clip sounds; a played track's chips have ▶ and ×.
 // Its clicks are handed to its model (libs/view/models/clip-tracks.ts).
 import type { ClipTrack } from '../control-surface/index.ts';
-import type { ClipTracks, ShownClip, Toggles } from '../models/index.ts';
+import type { ClipTracks, ShownClip } from '../models/index.ts';
+import type { Toggles } from '../mixer/models/index.ts';
 import { makeElement } from '../html/index.ts';
-import { SectionView } from './section-view.ts';
+import { SectionView } from '../mixer/dom/index.ts';
 
 // A clip track as drawn, made once so it keeps its scroll: its count, its list, its chips.
 // A chip is kept with its clip; only its light and note count change.
