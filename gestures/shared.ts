@@ -24,7 +24,7 @@ import type { Box, FloorPoint } from '../spatial/index.ts';
 
 // what a pointer is doing: pressed, then dragging (looping once it winds) or holding; panning (the right button); one of a pair of
 // fingers; or done, the one left of a pair, until it's lifted
-export type PointerState = 'pressed' | 'dragging' | 'holding' | 'looping' | 'panning' | 'pair' | 'done';
+type PointerState = 'pressed' | 'dragging' | 'holding' | 'looping' | 'panning' | 'pair' | 'done';
 export type StrokeShape = 'straight' | 'curve' | 'zigzag';
 // an event, as every listener gets it: the pointer's id, its time, where it is on the screen and the floor, and its state
 export interface GestureEvent {
