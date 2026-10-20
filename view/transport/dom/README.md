@@ -1,6 +1,6 @@
 # libs/view/transport/dom
 
-The transport's lane drawn in the DOM, from its model (`libs/view/transport/models/`).
+The transport's lane drawn in the DOM, from its model (`libs/view/transport/models/`). It imports `libs/view/html/` and its model.
 
 | Part | Holds |
 |---|---|
