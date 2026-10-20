@@ -1,28 +1,29 @@
 // ---------- gestures/tracker: the gesture tracker: a pointer's events from press to release, its input in: down, move, up and cancel ----------
-// Each input takes a pointer on through its states (shared.ts): a second pointer goes to pair.ts, and a drag's every move to stroke.ts.
+// It only tells: everything else reacts to its events (events.ts).
+// Each pointer has a state:
+// - the left button, or any but the right: pressed, then dragging once it's moved past the drag threshold, or holding once it's stayed
+//   pressed for holdDelay. Either is for good, until it's let go. A drag that winds into a small loop is looping from then on
+// - the right button: panning
+// - two fingers (pair.ts): a second pointer down within "two-finger window" of the first makes the two a pair, which pans, as the design
+//   document has it: one finger is for stimming, two move the view. Whatever the first had started is taken back. Lift one, and the other
+//   does nothing until it's lifted, or a finger goes down again beside it, which pans on. A second pointer after the window, or a third,
+//   is ignored, so a stray finger or a palm never interrupts a stroke
+// Each input takes a pointer on through its states: a second pointer goes to pair.ts, and a drag's every move to stroke.ts.
 // A press becomes a hold, and a still drag rests, on the clock's tick
 import { Events, approach } from '../util/index.ts';
 import type { Clock } from '../clock/index.ts';
-import type {
-  EventType,
-  Extra,
-  GestureEvents,
-  HandedIn,
-  Pointer,
-  PointerInput,
-  StrokeShape,
-  TrackerSettings,
-  Tracking,
-} from './shared.ts';
+import type { EventType, Extra, GestureEvents, StrokeShape } from './events.ts';
+import type { HandedIn, Pointer, PointerInput, Tracking } from './pointers.ts';
+import type { TrackerSettings } from './settings.ts';
 import { emitPan, pairUp, unpair } from './pair.ts';
 import { readStroke, REST, stillSince } from './stroke.ts';
 
-// the gesture tracker (shared.ts says what it reads and tells): its input, each pointer's down, move, up and cancel, from the page; its
+// the gesture tracker: its input, each pointer's down, move, up and cancel, from the page; its
 // events, to on(type, listener); what's handed in (configure()); the pointers that are down and what's asked of them. Its tick listener,
 // a press's hold and a drag's rest, kept from its making until dispose()
 export class GestureTracker implements Tracking {
   readonly pointers = new Map<number, Pointer>(); // every pointer that's down, by id, and what it's doing. Written by the tracker's parts only
-  // what's handed in, its defaults until it is (shared.ts)
+  // what's handed in, its defaults until it is (pointers.ts)
   readonly handedIn: HandedIn = { height: 900, zoneAt: () => null };
   readonly settings: TrackerSettings;
   readonly #clock: Clock;

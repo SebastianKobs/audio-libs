@@ -109,7 +109,7 @@ test("events by name: each listener called in the order it came, with the event'
 
 test('a listener that stops listening as it is called: the others still hear that event; on and emit work handed on alone', () => {
   const events = new Events();
-  const { on, emit } = events; // as a module hands on its on() (gestures/shared.ts, session-view/clips.ts)
+  const { on, emit } = events; // as a module hands on its on() (gestures/tracker.ts, session-view/clips.ts)
   const heard = [];
   const stop = on('step', () => {
     heard.push('once');

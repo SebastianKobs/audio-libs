@@ -1,5 +1,5 @@
 // ---------- gestures/pair: two fingers, a pair that pans ----------
-import type { Pointer, PointerInput, Tracking } from './shared.ts';
+import type { Pointer, PointerInput, Tracking } from './pointers.ts';
 
 // a second pointer down: with the first, a pair that pans, if it came within "two-finger window" of it, or beside one left from a pan;
 // else, and a third, ignored. The pair's events go as the first (pan), from the point between the two, on the screen and on the floor

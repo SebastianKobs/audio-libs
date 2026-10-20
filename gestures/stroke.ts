@@ -9,9 +9,10 @@
 // - rest: still for 0.1 s. move: moving again after a rest, or the drag's first movement
 // Whether it loops is read from the same samples (loop.ts)
 import { wrapAngle } from '../util/index.ts';
-import { radians } from './shared.ts';
+import { radians } from './settings.ts';
 import type { FloorPoint } from '../spatial/index.ts';
-import type { Pointer, Stroke, StrokeShape, Tracking } from './shared.ts';
+import type { StrokeShape } from './events.ts';
+import type { Pointer, Stroke, Tracking } from './pointers.ts';
 import { noticeLoop } from './loop.ts';
 
 const SAMPLE_PX = 10;
