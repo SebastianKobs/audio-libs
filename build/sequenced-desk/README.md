@@ -1,6 +1,6 @@
 # build/sequenced-desk
 
-A mixing desk (`libs/build/desk/`) played from a sequencer, on the clock: its strips' controllers set on time, its tracks' channels, its own control surface. Its owner plans the desk (`libs/plan/desk/`), makes it once with its setup's rules and the clock, and hands it a function that builds the plan where it wants it. It knows no setup's names: a setup hands in its rules (`DeskSetup`, `libs/build/desk/`). As a console, it has its own parts, made with it: its strips' controls, its tracks' channels; its owner talks to the desk alone. It imports `libs/automation/`, `libs/build/desk/`, `libs/build/track-channels/`, `libs/clock/`, `libs/midi/`, `libs/params/`, `libs/plan/desk/`, `libs/plan/format/` and `libs/util/`.
+A mixing desk (`libs/build/desk/`) played from a sequencer, on the clock: its strips' controllers set on time, its tracks' channels, its own control surface. Its owner plans the desk (`libs/plan/desk/`), makes it once with its setup's rules and the clock, and hands it a function that builds the plan where it wants it. It knows no setup's names: a setup hands in its rules (`DeskSetup`, `libs/build/desk/`). As a console, it has its own parts, made with it: its strips' controls, its tracks' channels; its owner talks to the desk alone. It imports `libs/automation/`, `libs/build/desk/`, `libs/build/desk-channels/`, `libs/clock/`, `libs/midi/`, `libs/params/`, `libs/plan/desk/`, `libs/plan/format/` and `libs/util/`.
 
 ```ts
 import { SequencedDesk } from './index.ts';

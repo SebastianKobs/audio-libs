@@ -1,4 +1,4 @@
-// ---------- build/track-channels/track-channels: the tracks' channels on a mixing desk ----------
+// ---------- build/desk-channels/desk-channels: the tracks' channels on a mixing desk ----------
 // Each track's channel is its pool's copy on the desk, added the first time its track is
 // played on (the mixing desk's channelOf(), which applies the mix to it), the setup saying how it's set:
 //   - one its notes set: by them, at their times;
@@ -14,7 +14,7 @@ export interface ChannelInput<B extends DeskBuilt> {
 }
 
 // The tracks' channels, owned by the desk's owner, each by its track's key, the channel's address.
-export class TrackChannels<B extends DeskBuilt> {
+export class DeskChannels<B extends DeskBuilt> {
   readonly #desk: Pick<MixingDesk<B>, 'built' | 'channelOf' | 'set'>;
   readonly #clock: { now(): number };
   readonly #at: (t: number) => number;

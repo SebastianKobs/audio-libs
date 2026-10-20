@@ -2,7 +2,7 @@
 // A mixing desk (mixing-desk.ts) and its own parts, as a console has them, made with it:
 //   - its strips' controls, set on time (cued-controls.ts);
 //   - each track's channel, its instrument's way in, what its notes set on it
-//     (libs/build/track-channels/).
+//     (libs/build/desk-channels/).
 // Its owner hands in, once: its plan, its setup's rules, the clock and a time on it on what's
 // built's.
 import type { Clock } from '../../clock/index.ts';
@@ -10,7 +10,7 @@ import type { Controller } from '../../midi/index.ts';
 import type { Plan } from '../../plan/format/index.ts';
 import { MixingDesk, type DeskBuilt, type DeskSetup } from '../desk/index.ts';
 import { CuedControls } from './cued-controls.ts';
-import { TrackChannels, type ChannelInput } from '../track-channels/index.ts';
+import { DeskChannels, type ChannelInput } from '../desk-channels/index.ts';
 
 // What a desk is made with:
 //   - plan: the desk's plan; setup: its rules, which tracks are set live, what a
@@ -24,12 +24,12 @@ export interface DeskMaking {
 }
 
 export class SequencedDesk<B extends DeskBuilt> extends MixingDesk<B> {
-  readonly #channels: TrackChannels<B>;
+  readonly #channels: DeskChannels<B>;
   readonly #controls: CuedControls;
 
   constructor({ plan, setup, clock, at }: DeskMaking) {
     super({ plan });
-    this.#channels = new TrackChannels({ desk: this, clock, at, setup });
+    this.#channels = new DeskChannels({ desk: this, clock, at, setup });
     this.#controls = new CuedControls({ desk: this, channels: this.#channels, clock, at });
   }
   // a strip's controller set on time (cued-controls.ts)

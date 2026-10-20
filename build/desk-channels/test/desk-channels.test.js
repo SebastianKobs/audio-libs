@@ -1,11 +1,11 @@
-// The tracks' channels on a mixing desk (mockup/src/libs/build/track-channels/track-channels.ts), on the desk
+// The tracks' channels on a mixing desk (mockup/src/libs/build/desk-channels/desk-channels.ts), on the desk
 // library's stand-in for what's built (libs/build/desk/test/built.js) and its small studio:
 //   - a track's instrument's way into its channel, the channel added as its first note comes, once;
 //   - a change its notes set on its channel at its time, its channel added as it comes; one they don't set, or a
 //     live track's, not its own.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TrackChannels } from '../index.ts';
+import { DeskChannels } from '../index.ts';
 import { MixingDesk } from '../../desk/index.ts';
 import { clockAt, deskOn } from '../../desk/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
@@ -22,7 +22,7 @@ const change = (track, param, value, t) => ({ address: [...track.split('/'), ...
 function channelsOn() {
   const on = deskOn(MixingDesk, PLAN, { clock: clockAt(1) });
   on.build();
-  return { ...on, channels: new TrackChannels({ desk: on.desk, clock: on.clock, at: (t) => t + 10, setup }) };
+  return { ...on, channels: new DeskChannels({ desk: on.desk, clock: on.clock, at: (t) => t + 10, setup }) };
 }
 
 test("a track's instrument's way into its channel, the channel added as its first note comes, once; none for a track with no pool", () => {

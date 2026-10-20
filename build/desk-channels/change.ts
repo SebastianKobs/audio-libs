@@ -1,4 +1,4 @@
-// ---------- build/track-channels/change: a change to a param, and when it lands ----------
+// ---------- build/desk-channels/change: a change to a param, and when it lands ----------
 import type { TimedValue, When } from '../../automation/index.ts';
 import type { Address } from '../../util/index.ts';
 

@@ -9,7 +9,7 @@
 // On the desk, the strip's address in front (my tap/1/send/reverb).
 // Where each goes:
 //   1. one a track's notes set, where a note is heard from and what its phrase drew: its
-//      channel's (TrackChannels), at its time on the audio's clock;
+//      channel's (DeskChannels), at its time on the audio's clock;
 //   2. a strip's mute and solo: the desk's mute() and solo();
 //   3. any other: the desk's, which keeps it.
 // When, each held on the clock's cues:
@@ -25,7 +25,7 @@ import { controlAddress } from '../../plan/desk/index.ts';
 import { splitAtChild } from '../../plan/format/index.ts';
 import { addressText } from '../../util/index.ts';
 import type { DeskBuilt, MixingDesk } from '../desk/index.ts';
-import { whenOf, type Change } from '../track-channels/index.ts';
+import { whenOf, type Change } from '../desk-channels/index.ts';
 
 export class CuedControls {
   readonly #desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
