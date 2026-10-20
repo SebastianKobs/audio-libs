@@ -3,7 +3,7 @@ import { Choice, Knob, type Control, type DevicePanel } from '../models/index.ts
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import { CompositeView } from './composite-view.ts';
 import type { CustomView } from './custom-view.ts';
-import { makeElement } from './elements.ts';
+import { makeElement } from '../html/index.ts';
 import { KnobDrag, refreshKnobs } from './knob-view.ts';
 
 // The device view drawn from its model (DevicePanel, libs/view/models/device-panel.ts), as

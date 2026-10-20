@@ -16,7 +16,7 @@ import { positionOf } from '../../params/index.ts';
 import { addressText } from '../../plan/format/index.ts';
 import { clamp01 } from '../../util/index.ts';
 import { Knob, type Ring } from '../models/index.ts';
-import { html, type Html } from './elements.ts';
+import { html, type Html } from '../html/index.ts';
 
 // A knob as drawn now, by its address and the element it's drawn as, which says whose it is
 // where a view draws several plans' knobs.

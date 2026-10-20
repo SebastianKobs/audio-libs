@@ -1,4 +1,4 @@
-// ---------- view/dom/canvas: a canvas sized for the screen's pixels ----------
+// ---------- view/html/canvas: a canvas sized for the screen's pixels ----------
 
 // A canvas sized for the screen's pixels, and its context:
 //   - its size in CSS pixels, as wide as it's shown where it's given no width;

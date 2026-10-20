@@ -10,9 +10,8 @@
 import { gainOf } from '../../params/index.ts';
 import type { Address } from '../../plan/format/index.ts';
 import { Knob, LimiterHistory, type Device, type Peaks, type ViewBuilder } from '../models/index.ts';
-import { sizedCanvas } from './canvas.ts';
 import type { CustomView } from './custom-view.ts';
-import { html, type Html } from './elements.ts';
+import { html, sizedCanvas, type Html } from '../html/index.ts';
 import { meterPosition } from './meter-view.ts';
 
 // What it's drawn with, the view's: the colors of what comes out and of its ceiling; this

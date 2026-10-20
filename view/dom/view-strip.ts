@@ -1,7 +1,7 @@
 // ---------- view/dom/view-strip: the strip along the bottom, the session view and the arrangement ----------
 import type { Views } from '../models/index.ts';
 import type { ArrangementView } from './arrangement/arrangement-view.ts';
-import { makeElement } from './elements.ts';
+import { makeElement } from '../html/index.ts';
 
 // The session view and the arrangement drawn, as Ableton's two views, from which one is open
 // (Views, libs/view/models/views.ts):

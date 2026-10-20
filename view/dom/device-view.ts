@@ -11,7 +11,7 @@ import { timeParamsIn } from '../../params/index.ts';
 import { addressText } from '../../plan/format/index.ts';
 import { Choice, type Control, type Device, type Knob } from '../models/index.ts';
 import { choiceHtml, switchHtml } from './choice-view.ts';
-import { html, type Html } from './elements.ts';
+import { html, type Html } from '../html/index.ts';
 import { knobHtml } from './knob-view.ts';
 
 // How a view shows a device beside the device itself:

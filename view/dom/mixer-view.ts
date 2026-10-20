@@ -31,7 +31,7 @@ import {
   type MixerViewBuilder,
 } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
-import { html, makeElement, setHtml, type Html } from './elements.ts';
+import { html, makeElement, setHtml, type Html } from '../html/index.ts';
 import { KnobDrag } from './knob-view.ts';
 import { meterPosition } from './meter-view.ts';
 import { SectionView } from './section-view.ts';

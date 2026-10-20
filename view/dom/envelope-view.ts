@@ -7,7 +7,7 @@
 // As a device's view of its own (EnvelopeView), drawn before its knobs, redrawn as they're set.
 import { envelopeDrawing, type Device, type EnvelopeDrawing } from '../models/index.ts';
 import type { CustomView } from './custom-view.ts';
-import { html, setHtml, type Html } from './elements.ts';
+import { html, setHtml, type Html } from '../html/index.ts';
 
 const PER_SECOND = 60; // px across for a second
 const HEIGHT = 40; // px

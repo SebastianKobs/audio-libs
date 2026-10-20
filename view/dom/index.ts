@@ -1,7 +1,6 @@
 // ---------- libs/view/dom: the view models drawn in the DOM ----------
 // One implementation of the views, as Web Audio is of the sound.
 // Its parts:
-//   - elements.ts: an element made, and HTML made by html``, every value escaped;
 //   - bound.ts: drawn elements bound to their models as they're drawn, found by the element;
 //   - hint.ts: a control's hint, one wording for every view;
 //   - custom-view.ts: a view of its own, the contract every one meets;
@@ -33,11 +32,9 @@
 //     shown, a beat after the last while playing back, held under a pressed pointer;
 //   - view-strip.ts: the strip along the bottom, the session view and the arrangement, drawn
 //     from which one is open;
-//   - canvas.ts: a canvas sized for the screen's pixels;
 //   - arrangement/: the arrangement on the page, its names beside its time, drawn on canvases,
 //     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
 //     a drag and a wheel handed to its model.
-export { appendHtml, Html, html, makeElement, setHtml } from './elements.ts';
 export { Bound, CONTROL_MARKS } from './bound.ts';
 export { controlHint } from './hint.ts';
 export { choiceHtml, switchHtml } from './choice-view.ts';

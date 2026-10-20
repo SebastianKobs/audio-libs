@@ -4,7 +4,7 @@
 // Its clicks are handed to its model (libs/view/models/clip-tracks.ts).
 import type { ClipTrack } from '../control-surface/index.ts';
 import type { ClipTracks, ShownClip, Toggles } from '../models/index.ts';
-import { makeElement } from './elements.ts';
+import { makeElement } from '../html/index.ts';
 import { SectionView } from './section-view.ts';
 
 // A clip track as drawn, made once so it keeps its scroll: its count, its list, its chips.

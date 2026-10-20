@@ -5,7 +5,7 @@
 //   2. shown(): once in the page, handed the element its device's controls are drawn in; hands
 //      back what redraws it on every frame while it's shown, false once it's gone.
 import type { Device } from '../models/index.ts';
-import type { Html } from './elements.ts';
+import type { Html } from '../html/index.ts';
 
 export interface CustomView {
   html(device: Device): Html;

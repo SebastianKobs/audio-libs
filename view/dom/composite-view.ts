@@ -14,7 +14,7 @@ import { CustomViews, type Chosen, type Control, type Device, type ViewBuilder }
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import type { CustomView } from './custom-view.ts';
 import { deviceHtml } from './device-view.ts';
-import { appendHtml, html, type Html } from './elements.ts';
+import { appendHtml, html, type Html } from '../html/index.ts';
 import { groupHtml, type GroupLook } from './group-view.ts';
 import { controlHint } from './hint.ts';
 import { matrixHtml } from './matrix-view.ts';

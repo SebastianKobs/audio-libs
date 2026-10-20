@@ -5,7 +5,7 @@
 // Each marked with its address: a list by its choosing, a switch by its toggle.
 import { addressText } from '../../plan/format/index.ts';
 import type { Choice, Knob } from '../models/index.ts';
-import { html, type Html } from './elements.ts';
+import { html, type Html } from '../html/index.ts';
 
 // A choice drawn as a list of its options.
 export function choiceHtml(label: string, choice: Choice, title: string): Html {

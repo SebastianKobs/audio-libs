@@ -1,4 +1,4 @@
-// ---------- view/dom/elements: an element made, and HTML made by html``, every value escaped as it's made ----------
+// ---------- view/html/elements: an element made, and HTML made by html``, every value escaped as it's made ----------
 export function makeElement<Tag extends keyof HTMLElementTagNameMap>(
   tag: Tag,
   className?: string,

@@ -4,7 +4,7 @@
 //   - a modulator's its reach, a knob of its own, set here where it's live.
 import type { MacroTarget } from '../../plan/format/index.ts';
 import { Knob, type Control, type MatrixRow } from '../models/index.ts';
-import { html, type Html } from './elements.ts';
+import { html, type Html } from '../html/index.ts';
 import { knobHtml } from './knob-view.ts';
 
 // A matrix drawn: its heads, then a row each.

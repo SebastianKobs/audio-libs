@@ -9,7 +9,7 @@
 // dash.
 import { addressText } from '../../plan/format/index.ts';
 import type { Device, Knob, Strip } from '../models/index.ts';
-import { html, type Html } from './elements.ts';
+import { html, type Html } from '../html/index.ts';
 import { EMPTY, faderHtml, knobHtml, stillPanHtml } from './knob-view.ts';
 import { meterHtml } from './meter-view.ts';
 

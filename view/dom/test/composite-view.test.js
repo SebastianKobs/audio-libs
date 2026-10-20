@@ -6,7 +6,8 @@
 //   - the chosen pad and tabs read from their model, handed in; a box's reset.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CompositeView, controlHint, deviceHtml, groupHtml, html, matrixHtml } from '../index.ts';
+import { CompositeView, controlHint, deviceHtml, groupHtml, matrixHtml } from '../index.ts';
+import { html } from '../../html/index.ts';
 import { builderOn, CARD } from '../../models/test/card.js';
 import { Chosen } from '../../models/index.ts';
 

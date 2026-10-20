@@ -7,7 +7,8 @@
 //   - the matrix: a row a source and what it moves, how much: a macro's map as text, a modulator's reach a knob of its own.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { envelopeHtml, groupHtml, html, knobHtml, matrixHtml } from '../index.ts';
+import { envelopeHtml, groupHtml, knobHtml, matrixHtml } from '../index.ts';
+import { html } from '../../html/index.ts';
 import { builderOn, CARD } from '../../models/test/card.js';
 
 const LOOK = { hintOf: (control) => `about ${control.name}` };

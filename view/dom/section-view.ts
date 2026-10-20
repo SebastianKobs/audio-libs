@@ -6,7 +6,7 @@
 //     reading the same one; drawn from it.
 //   - Folded, its light shows while a hidden strip sounds.
 import type { Toggles } from '../models/index.ts';
-import { makeElement } from './elements.ts';
+import { makeElement } from '../html/index.ts';
 
 // what a click on a folding section's label does, as its hint says
 const FOLD =

@@ -1,6 +1,6 @@
 // ---------- view/dom/arrangement/time-drawing: the arrangement's time on its canvases: the bar ruler, the rows, the regions and the playhead ----------
 import type { Arrangement, PlacedLane, PlacedRegion, Row } from '../../models/index.ts';
-import { sizedCanvas } from '../canvas.ts';
+import { sizedCanvas } from '../../html/index.ts';
 import { drawNotes, type DrawnNote } from './note-drawing.ts';
 import { drawLane, type DrawnLane } from './lane-drawing.ts';
 import { xOf } from './pixels.ts';

@@ -10,7 +10,7 @@
 import type { InstrumentRacks } from '../models/index.ts';
 import type { CompositeLook, CompositeView } from './composite-view.ts';
 import type { DeviceChain } from './device-panel-view.ts';
-import { html } from './elements.ts';
+import { html } from '../html/index.ts';
 
 // How an instrument is shown, in its owner's words:
 //   - own: its voice card's own group's title;

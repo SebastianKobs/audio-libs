@@ -7,7 +7,8 @@
 //   - every value escaped as it's made.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deviceHtml, faderHtml, html, knobHtml, meterHtml, stillPanHtml, stripHtml } from '../index.ts';
+import { deviceHtml, faderHtml, knobHtml, meterHtml, stillPanHtml, stripHtml } from '../index.ts';
+import { html } from '../../html/index.ts';
 import { MixerViewBuilder, ViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../plan/format/index.ts';
 import { positionOf } from '../../../params/index.ts';

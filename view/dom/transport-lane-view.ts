@@ -5,7 +5,7 @@
 // Its hints the owner's, in its own words.
 // Drawn on every frame, as a key may play and stop it too.
 import type { TransportLane } from '../models/index.ts';
-import { makeElement } from './elements.ts';
+import { makeElement } from '../html/index.ts';
 
 // What ▶ and ■ send.
 type TransportMessage = { type: 'play' } | { type: 'stop' };

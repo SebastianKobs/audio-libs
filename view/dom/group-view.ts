@@ -6,7 +6,7 @@
 // Each tab marked with its child's name, which a click chooses it by.
 import type { Control, Device } from '../models/index.ts';
 import { controlsHtml } from './device-view.ts';
-import { html, type Html } from './elements.ts';
+import { html, type Html } from '../html/index.ts';
 
 // A group: its title, its children as devices, the one chosen by its name.
 export interface Group {

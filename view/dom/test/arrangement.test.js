@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { STEP_PX, placeAt, xOf } from '../arrangement/pixels.ts';
-import { sizedCanvas } from '../canvas.ts';
+import { sizedCanvas } from '../../html/index.ts';
 
 test("a place's x in view, 8 px a 16th from the place at its left edge", () => {
   assert.equal(STEP_PX, 8);
