@@ -6,7 +6,7 @@
 // once it's settled. What's in effect at a time, and what starts in a range. The sequencer's recorder keeps what's heard on it, its
 // regions and lanes its own views of it (libs/midi-sequencer/recorder.ts)
 import { HISTORY, type Seconds } from '../clock/index.ts';
-import { entryOf, firstAfter, lastAtOrBefore } from '../util/index.ts';
+import { entryOf, lastAtOrBefore, placeInOrder } from '../util/index.ts';
 
 // an event on the timeline: when, and how long, none while it's open or while it holds until the next of its key
 export interface TimedEvent {
@@ -55,9 +55,10 @@ export class Timeline<Event extends TimedEvent, Held extends TimedEvent = Event>
   }
   // an event that holds until the next of its key, among its key's in time order, after those at its time
   hold(key: string, event: Held): void {
-    placed(
+    placeInOrder(
       entryOf(this.#held, key, () => []),
       event,
+      timeOf,
     );
   }
   // the timeline as of a time: what ended before its window let go, and an event that holds what's held already thinned once settled
@@ -112,10 +113,6 @@ export class Timeline<Event extends TimedEvent, Held extends TimedEvent = Event>
 // an event's time, what the timeline keeps its events in order by
 export function timeOf(event: TimedEvent): Seconds {
   return event.t;
-}
-// an event into others in time order, after those at or before its time, as Web Audio places an event among those at its time
-export function placed<Event extends TimedEvent>(events: Event[], event: Event): void {
-  events.splice(firstAfter(events, event.t, timeOf), 0, event);
 }
 // events that change nothing left out, once settled: each holding what the one before it held, by the caller's equality; the first
 // against where it starts from, if it's given

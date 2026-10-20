@@ -12,11 +12,11 @@
 // timeline since L1c2 (libs/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import type { Seconds } from '../clock/index.ts';
-import { endOf, LATEST, Timeline, placed, thinned, type TimedEvent } from '../timeline/index.ts';
+import { endOf, LATEST, Timeline, thinned, type TimedEvent } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { NoteOff, PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
 import type { Play, PlayedNote } from './stream.ts';
-import { entryOf } from '../util/index.ts';
+import { entryOf, placeInOrder } from '../util/index.ts';
 import { timedValue } from '../automation/index.ts';
 
 // what a track's lane is known by: the track's kind and number, as its regions have them, and the controller it's of; the track's
@@ -132,7 +132,7 @@ export class Recorder {
         continue;
       }
       const lanes = (note.lanes ??= {});
-      placed((lanes[controller] ??= []), timedValue(value, t, glide));
+      placeInOrder((lanes[controller] ??= []), timedValue(value, t, glide), (point) => point.t);
     }
   }
   // a track's controllers, as they come, each into its lane, a point holding until the next of its lane (G3b)

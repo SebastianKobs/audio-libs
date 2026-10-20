@@ -18,6 +18,7 @@ import {
   LiveCopies,
   modulo,
   pickFrom,
+  placeInOrder,
   sameData,
   seeded,
   SETTLED,
@@ -342,6 +343,33 @@ test('things due at a time: kept in their time order, after those at the same ti
     ['third', 'fourth'],
     'the rest kept',
   );
+});
+
+test('an item put in time order among others, after those at its time; things due before a time, not at it, taken in their order', () => {
+  const items = [
+    { t: 1, name: 'a' },
+    { t: 2, name: 'c' },
+  ];
+  placeInOrder(items, { t: 1, name: 'b' }, (item) => item.t);
+  placeInOrder(items, { t: 0, name: 'first' }, (item) => item.t);
+  assert.deepEqual(
+    items.map((item) => item.name),
+    ['first', 'a', 'b', 'c'],
+  );
+  const due = new DueQueue((item) => item.t);
+  for (const item of items) {
+    due.add(item);
+  }
+  assert.deepEqual(
+    due.takeBefore(1).map((item) => item.name),
+    ['first'],
+    'not at its time',
+  );
+  assert.deepEqual(
+    due.takeBefore(3).map((item) => item.name),
+    ['a', 'b', 'c'],
+  );
+  assert.deepEqual(due.items, []);
 });
 
 test("a number near another: within a float's rounding, or as asked", () => {
