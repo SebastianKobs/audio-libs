@@ -20,7 +20,7 @@ const plan = new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], presets).plan(
 
 | | |
 |---|---|
-| `CHANNEL_FORM`, `DESK_FORM`, `DESK_FORMS`, `DeskRole` | what every channel and every desk is, as forms: a channel's roles in order, the wires between them; a desk's channels by role, at least one channel, a pool of them one, exactly one master, a way out into a bus or the master, a send into a return, no loops, every way out ending in the master (`channel-form.ts`, `desk-form.ts`) |
+| `DESK_FORMS`, `DeskRole` | what every channel and every desk is, as forms: a channel's roles in order, the wires between them; a desk's channels by role, at least one channel, a pool of them one, exactly one master, a way out into a bus or the master, a send into a return, no loops, every way out ending in the master (`channel-form.ts`, `desk-form.ts`) |
 | `deskTemplates(desk, channels)`, `Desk`, `DeskChannel`, `DeskPool` | a desk written short made into templates: the desk's, of the desk's form, its own inputs into its channels and buses, and each channel's and its sends', a pool's among them; refused where it's written wrong, every failure said: a channel not handed in, or built in a loop; a way out into no bus; a tap for a return it has no send to (`desk.ts`) |
 | `Channel`, `ChannelParts`, `Insert`, `Tap`, `SEND` | a channel written short, apart or on a desk; made into a template of the channel's form, its stages and sends filled in and wired (`channel.ts`); the sends' child's name, a send's address on a channel under it (`send/reverb`) |
 | `controlAddress(strip, controller)` | a controller on a strip as its param's address on the desk: the strip's address in front, a pool's copy's its pool's name and number (`my tap/3/send/reverb`) (`channel.ts`, SHAPE1b1) |

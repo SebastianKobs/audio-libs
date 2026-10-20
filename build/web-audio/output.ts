@@ -16,11 +16,11 @@ export class Output {
   readonly node: GainNode; // where what's built goes in
   readonly #context: BaseAudioContext;
 
-  constructor(context: BaseAudioContext, into: AudioNode = context.destination) {
+  constructor(context: BaseAudioContext) {
     this.#context = context;
     this.node = context.createGain();
     this.node.gain.value = 0;
-    this.node.connect(into);
+    this.node.connect(context.destination);
     const awake = context.createConstantSource();
     awake.offset.value = 0;
     awake.connect(this.node);

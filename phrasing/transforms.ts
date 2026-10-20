@@ -23,10 +23,10 @@ export interface PhraseNote {
 }
 
 // the start moved to the next place of a cycle, in ticks: the answer in the bar after a call, such as a bass's motif every two bars
-export function answer(start: number, grid: Grid, { every = 2 * barTicks(), at = barTicks() } = {}): number {
+export function answer(start: number, grid: Grid): number {
   const si = Math.round(grid.stepAt(start));
-  const everySteps = every / STEP;
-  const atStep = at / STEP;
+  const everySteps = (2 * barTicks()) / STEP; // a two-bar cycle
+  const atStep = barTicks() / STEP; // the answer in its second bar
   return grid.timeAt(si + modulo(atStep - si, everySteps));
 }
 export function layBack(notes: PhraseNote[], by: number): void {

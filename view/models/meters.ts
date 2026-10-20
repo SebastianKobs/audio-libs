@@ -5,10 +5,12 @@
 // The sound system measures its peaks without them (the builder's meter, libs/build/web-audio/).
 import { gainOf, SILENCE } from '../../params/index.ts';
 
+const FALL_RATE = 20 / 1.5; // dB a second, a DIN peak meter's: 20 dB in 1.5 s
+
 // A meter's fall, as a DIN peak meter's: up at once to the peak, back down 20 dB in 1.5 s.
 // Levels as gains, 1 full scale; dt in s.
-export function meterFall(shown: number, peak: number, dt: number, fall = 20 / 1.5): number {
-  const fallen = shown * gainOf(-fall * dt);
+export function meterFall(shown: number, peak: number, dt: number): number {
+  const fallen = shown * gainOf(-FALL_RATE * dt);
   return Math.max(peak, fallen < SILENCE ? 0 : fallen);
 }
 

@@ -15,7 +15,7 @@ A phrase played as a player would, on the sequencer's patterns: a rhythm's speed
 
 | | |
 |---|---|
-| `answer(start, grid, { every, at })` | the start moved to the next answer in a cycle: the bar after a call, every two bars by default |
+| `answer(start, grid)` | the start moved to the next answer in a two-bar cycle: the bar after a call |
 | `layBack(notes, by)`, `holdLast(notes, dur)`, `halfTime(notes, ring)` | later by so many ticks; the last note held; twice as slow, ringing longer |
 | `breath(notes, rand)` | a note left out of the middle, or two of six or more, half the time |
 | `rephrase(notes, set, rand, { dur })` | the last phrase in another rhythm from a set, not the one it came from |

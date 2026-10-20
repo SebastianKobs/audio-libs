@@ -65,9 +65,8 @@ export class Recorder {
   readonly #lanes = new Map<string, Lane>(); // each track's, by its kind, number and controller, in the order they began
   #leftOut: (play: Play) => boolean = () => false; // what its owner says to leave out
 
-  constructor({ keep }: { keep?: Seconds } = {}) {
+  constructor() {
     this.#timeline = new Timeline<RecordedNote, LanePoint>({
-      keep,
       same: (before, after) => samePoint(before, after),
       onLetGo: (gone) => this.#forget(gone),
     });
