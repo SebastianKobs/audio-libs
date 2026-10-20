@@ -1,12 +1,11 @@
-// ---------- build/web-audio/engine-building: building in the engine's context ----------
+// ---------- build/web-audio-engine/engine-building: building in the engine's context ----------
 // What an instrument is made with at its first note, once the audio runs:
 //   - the Web Audio builder in the engine's audio context, into where it's told;
 //   - the time now the context's, a clock's time put on it;
 //   - the noise's buffers made with the first builder, shared by every one in that context;
 //   - its own draws, where it's kept apart from the others.
 import type { EngineOnceStarted } from './power.ts';
-import { Buffers } from './buffers.ts';
-import { WebAudioBuilder } from './builder.ts';
+import { Buffers, WebAudioBuilder } from '../web-audio/index.ts';
 
 // a builder in a context, into where it's told; the time now, a clock's time on it
 export interface BuildingIn {

@@ -1,4 +1,4 @@
-// ---------- build/web-audio/power: the audio's power, started, paused and resumed ----------
+// ---------- build/web-audio-engine/power: the audio's power, started, paused and resumed ----------
 // Start: on the first touch, as browsers ask.
 //   1. The engine made in the browser's audio, handed in: iOS's audio session set first, the
 //      audio context on the clock's time.
@@ -14,10 +14,8 @@
 import type { Clock } from '../../clock/index.ts';
 import type { Plan } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
-import type { WebAudioBuilt } from './built.ts';
-import { WebAudioBuilder } from './builder.ts';
+import { Output, WebAudioBuilder, type WebAudioBuilt } from '../web-audio/index.ts';
 import { ClockedContext, type ClockedContextOptions } from './context.ts';
-import { Output } from './output.ts';
 
 // The browser's audio, as the page hands it in: its AudioContext class, and iOS's audio
 // session where there is one.

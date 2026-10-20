@@ -1,4 +1,4 @@
-// The audio's power (mockup/src/libs/build/web-audio/power.ts), on the stand-in for Web Audio: the audio started, paused and
+// The audio's power (mockup/src/libs/build/web-audio-engine/power.ts), on the stand-in for Web Audio: the audio started, paused and
 // resumed, as a transport and a first touch ask.
 // Start: the engine made once, what's built built in it into the output after it, the clock on the audio's time, then
 // told; once started, back on; not while paused.
@@ -8,8 +8,9 @@
 // Woken: back on after the browser stopped the sound, the audio never started by it.
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { AudioPower, FADE_IN, FADE_OUT } from '../index.ts';
-import { into, StandInContext } from './audio-stand-in.js';
+import { AudioPower } from '../index.ts';
+import { FADE_IN, FADE_OUT } from '../../web-audio/index.ts';
+import { into, StandInContext } from '../../web-audio/test/audio-stand-in.js';
 
 // The power on the stand-in's audio, the browser's as it's handed in; the contexts made, what's built, the clock's audio and
 // what's told kept. session: iOS's audio session, where the browser has one.

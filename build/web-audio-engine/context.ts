@@ -1,4 +1,4 @@
-// ---------- build/web-audio/context: the audio context a plan is built in, on a clock ----------
+// ---------- build/web-audio-engine/context: the audio context a plan is built in, on a clock ----------
 // Made at a low latency, as an instrument played live wants it.
 // A clock's time put on the context's time, never into its past: a sound due now starts with
 // the next chunk the audio renders.

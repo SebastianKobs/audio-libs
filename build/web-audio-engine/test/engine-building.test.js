@@ -1,13 +1,14 @@
-// Building in the engine's context (mockup/src/libs/build/web-audio/engine-building.ts), on the stand-in for Web Audio, as
+// Building in the engine's context (mockup/src/libs/build/web-audio-engine/engine-building.ts), on the stand-in for Web Audio, as
 // an instrument is made at its first note:
 //   - the Web Audio builder in the engine's context once the audio runs, into where it's told, the time now the
 //     context's, a clock's time on it;
 //   - the noise's buffers made once, shared by every builder in that context; one in a context of its own its own.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ClockedContext, EngineBuilding, buildingIn, Buffers, WebAudioBuilder } from '../index.ts';
-import { StandInContext } from './audio-stand-in.js';
-import { oneBlockPlan } from './blocks.js';
+import { ClockedContext, EngineBuilding, buildingIn } from '../index.ts';
+import { Buffers, WebAudioBuilder } from '../../web-audio/index.ts';
+import { StandInContext } from '../../web-audio/test/audio-stand-in.js';
+import { oneBlockPlan } from '../../web-audio/test/blocks.js';
 
 // an engine on a stand-in context at 4 s, a clock's time 1 s behind it; none until the audio starts
 function buildingOn() {
