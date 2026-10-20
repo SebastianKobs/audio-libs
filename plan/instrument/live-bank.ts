@@ -1,4 +1,4 @@
-// ---------- plan/synth/live-bank: a bank's patches as they play, edited as asked ----------
+// ---------- plan/instrument/live-bank: a bank's patches as they play, edited as asked ----------
 // As a synth's edit buffer holds its programs as you tweak them: each patch a live copy of its
 // start (LiveCopies), edited or reset as messages on a bus ask (PresetMessage),
 // each change told to whoever plays it.

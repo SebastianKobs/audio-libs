@@ -8,7 +8,7 @@
 // Pressed and let go as messages on a bus too,
 // a key's note held until its key's is let go.
 import { NoteRotation, type Message, type Receiver } from '../../midi/index.ts';
-import type { TestNote, TestNoteMessage } from '../../plan/synth/index.ts';
+import type { TestNote, TestNoteMessage } from '../../plan/instrument/index.ts';
 import { entryOf } from '../../util/index.ts';
 
 // a test note as it sounds: let go as its button is

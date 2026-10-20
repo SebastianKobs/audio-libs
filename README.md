@@ -9,7 +9,7 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 - **MIDI:** `midi` (MIDI 2.0's channel voice messages as values), `midi-sequencer` (the input, the stream, the recorder, the recording played back), `clip-player` (a session view's clips, launched into the input).
 - **Music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would).
 - **Places and input:** `spatial` (places perceived from where you are, a world that wraps round), `spatial-audio` (hearing by distance, as values), `gestures` (pointer input in, gestures out).
-- **`plan/`, a sound as data, no audio:** `format` (what a plan is), `blocks` (the building blocks every builder makes), `planner` (templates made into plans), `effects`, `desk`, `synth` (forms and templates of each, the templates their content).
+- **`plan/`, a sound as data, no audio:** `format` (what a plan is), `blocks` (the building blocks every builder makes), `planner` (templates made into plans), `effects`, `desk`, `instrument` (forms and templates of each, the templates their content).
 - **`build/`, a plan built:** `contract` (what every builder is and hands back), `web-audio` (the builder for Web Audio, the only code that makes Web Audio nodes), `web-audio-engine` (the audio's power, its context on the clock, building in the engine's context), `instrument` (MIDI's notes played into an instrument), `desk` (a desk built, set by address and mixed), `desk-channels` (a desk's channel for each track), `sequenced-desk` (a desk played from a sequencer), `instrument-channels` (a track's sounding end).
 - **`view/`, by what's shown, each in layers** (`readout`, what a view reads; `models`, no DOM; `dom`, drawn), on `html` (HTML made safely): `device` (a plan's devices, knobs, choices, a composite), `mixer` (a desk as a mixer), `instrument` (an instrument's patches and racks), `transport` (play, stop, where the music is), `tracks` (the session view, the clips, the arrangement).
 
@@ -24,7 +24,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | 2 | `clock`, `plan/format`, `spatial-audio` |
 | 3 | `build/contract`, `gestures`, `midi`, `plan/blocks`, `sequencer`, `timeline`, `view/device/readout`, `view/tracks/readout`, `view/transport/models` |
 | 4 | `build/web-audio`, `midi-sequencer`, `plan/planner`, `view/device/models`, `view/instrument/readout`, `view/transport/dom` |
-| 5 | `build/web-audio-engine`, `clip-player`, `phrasing`, `plan/effects`, `plan/synth`, `view/device/dom`, `view/mixer/models` |
+| 5 | `build/web-audio-engine`, `clip-player`, `phrasing`, `plan/effects`, `plan/instrument`, `view/device/dom`, `view/mixer/models` |
 | 6 | `build/instrument`, `plan/desk`, `view/instrument/models`, `view/mixer/dom` |
 | 7 | `build/desk`, `view/instrument/dom`, `view/tracks/models` |
 | 8 | `build/desk-channels`, `view/mixer/readout`, `view/tracks/dom` |
@@ -37,7 +37,7 @@ A sound is data until it's built, and built only by a builder:
 
 1. **What a sound is** (`plan/format`, `plan/blocks`): a plan, a node, a block or a composite of others, its wires, params, macros and pools. Timeless: what to build, its values as it starts.
 2. **Planned** (`plan/planner`): templates, written short or in YAML, made into a plan, checked against their forms; a block alone by its kind.
-3. **What's planned** (`plan/effects`, `plan/desk`, `plan/synth`): the effects, a desk and its channels, a synth's voice cards and instruments, as forms and templates; a preset is values on one, by address.
+3. **What's planned** (`plan/effects`, `plan/desk`, `plan/instrument`): the effects, a desk and its channels, a synth's voice cards and instruments, as forms and templates; a preset is values on one, by address.
 4. **Built** (`build/contract`, `build/web-audio`): a builder handed a plan hands back what's built (`Built`), set and automated by address, built again, taken apart.
 5. **Powered** (`build/web-audio-engine`): the audio context started on a first touch, what's built built into an output that fades in, the clock on the audio's time.
 6. **Played by notes** (`build/instrument`): MIDI's notes played into an instrument on what's built, a voice a pool's copy, a sound module a part for each track.
@@ -158,14 +158,14 @@ export function mixSmallDesk(context) {
 
 ### 5. An instrument planned, built and played by notes
 
-An instrument planned from a file of instruments on the synth's modules (`plan/synth`, its `content.ts`), built (`build/web-audio`), and played by MIDI's notes (`build/instrument`, `midi`).
+An instrument planned from a file of instruments on the synth's modules (`plan/instrument`, its `content.ts`), built (`build/web-audio`), and played by MIDI's notes (`build/instrument`, `midi`).
 
 ```js
 // Scenario 5: an instrument as a library's user writes it: a file of instruments
 // on the synth's modules, a patch planned, built for Web Audio into a context handed
 // in, played by a note; no view, desk or sequencer.
-import { instrumentsOf } from '../../src/libs/plan/synth/index.ts';
-import { MODULE_TEMPLATES } from '../../src/libs/plan/synth/content.ts';
+import { instrumentsOf } from '../../src/libs/plan/instrument/index.ts';
+import { MODULE_TEMPLATES } from '../../src/libs/plan/instrument/content.ts';
 import { WebAudioBuilder } from '../../src/libs/build/web-audio/index.ts';
 import { Instrument } from '../../src/libs/build/instrument/index.ts';
 import { noteMessages } from '../../src/libs/midi/index.ts';

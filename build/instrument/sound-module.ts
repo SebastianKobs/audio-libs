@@ -6,7 +6,7 @@
 //     rack; a part made after an edit made as edited.
 //   - A new tempo told every part, one unchanged passed over.
 import type { Preset } from '../../plan/planner/index.ts';
-import type { Instruments } from '../../plan/synth/index.ts';
+import type { Instruments } from '../../plan/instrument/index.ts';
 import type { LiveCopies } from '../../util/index.ts';
 import { Instrument, type InstrumentMaking } from './instrument.ts';
 

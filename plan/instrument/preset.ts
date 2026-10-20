@@ -1,4 +1,4 @@
-// ---------- plan/synth/preset: a preset changed, and edited as a message asks ----------
+// ---------- plan/instrument/preset: a preset changed, and edited as a message asks ----------
 // A patch is a preset on an architecture: its values and settings by address (the planner's
 // Preset). Changed on a playing instrument:
 //   - each value that differs set by its address, glided there;

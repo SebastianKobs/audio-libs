@@ -1,6 +1,6 @@
-# plan/synth
+# plan/instrument
 
-The synth's templates and forms: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons, a module named as it is on a synth's panel and never as a block is; the note's sources the voice card's macros. Handed to the planner (`libs/plan/planner/`) with its forms; a patch is a preset on an architecture. It imports `libs/util/`, `libs/params/`, `libs/plan/format/` and `libs/plan/planner/`.
+An instrument's templates and forms, its modules a synth's: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons, a module named as it is on a synth's panel and never as a block is; the note's sources the voice card's macros. Handed to the planner (`libs/plan/planner/`) with its forms; a patch is a preset on an architecture. It imports `libs/util/`, `libs/params/`, `libs/plan/format/` and `libs/plan/planner/`.
 
 ```ts
 import { SYNTH_FORMS } from './index.ts';

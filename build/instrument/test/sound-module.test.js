@@ -1,5 +1,5 @@
 // A multitimbral sound module (mockup/src/libs/build/instrument/sound-module.ts), on a stand-in for what's built, its bank
-// the tests' file of instruments (libs/plan/synth/test/pluck.js):
+// the tests' file of instruments (libs/plan/instrument/test/pluck.js):
 //   - a part for each track, an instrument playing a patch from its bank by name, built where it's told;
 //   - a patch edited in the bank: every part that plays it edited, its own or a pad's of its rack; one made after an
 //     edit made as edited;
@@ -9,10 +9,10 @@ import assert from 'node:assert/strict';
 import { SoundModule } from '../index.ts';
 import { BuiltStandIn } from './built.js';
 import { noteMessages } from '../../../midi/index.ts';
-import { instrumentsOf } from '../../../plan/synth/index.ts';
-import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
+import { instrumentsOf } from '../../../plan/instrument/index.ts';
+import { MODULE_TEMPLATES } from '../../../plan/instrument/content.ts';
 import { LiveCopies } from '../../../util/index.ts';
-import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
+import { PLUCK_FILE } from '../../../plan/instrument/test/pluck.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 

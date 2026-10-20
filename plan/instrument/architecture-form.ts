@@ -1,4 +1,4 @@
-// ---------- plan/synth/architecture-form: what a voice card is, and its modules ----------
+// ---------- plan/instrument/architecture-form: what a voice card is, and its modules ----------
 // A voice card's form, an architecture:
 //   1. its sources, oscillators and noises, each into a stage or straight out;
 //   2. its stages, in the order the sound goes through them, each into the next or out;

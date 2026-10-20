@@ -1,4 +1,4 @@
-// ---------- plan/synth/patch-plans: a patch planned from a file of instruments ----------
+// ---------- plan/instrument/patch-plans: a patch planned from a file of instruments ----------
 // By the patch's name:
 //   - its chains: the patch alone, or its rack's pads, each its key;
 //   - its instrument: a pool of voices of its voice card, or a drum rack, a pool for each pad.

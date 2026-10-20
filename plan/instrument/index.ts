@@ -1,4 +1,4 @@
-// ---------- libs/plan/synth: the synth's templates and forms ----------
+// ---------- libs/plan/instrument: the synth's templates and forms ----------
 // A voice card, an architecture: its modules, a YAML template each, wired by its form; the note's
 // sources its macros, set as each note starts.
 // Its parts:

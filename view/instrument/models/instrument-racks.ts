@@ -6,7 +6,7 @@
 //   - held for as long as its button is, from a little after now, pressed and let go as the
 //     app's messages.
 // Which of the note's own values a role's instrument reads, for its row to grey the others.
-import { OWN_NOTE_VALUES, type PresetMessage, type TestNoteMessage } from '../../../plan/synth/index.ts';
+import { OWN_NOTE_VALUES, type PresetMessage, type TestNoteMessage } from '../../../plan/instrument/index.ts';
 import type { InstrumentCard, InstrumentsReadout } from '../readout/index.ts';
 import type { PlanReadout } from '../../device/readout/index.ts';
 import { ViewBuilder } from '../../device/models/index.ts';

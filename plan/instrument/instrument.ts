@@ -1,4 +1,4 @@
-// ---------- plan/synth/instrument: an instrument, a pool of voices ----------
+// ---------- plan/instrument/instrument: an instrument, a pool of voices ----------
 // Only ever planned: what's built makes, releases and lets go of its voices as notes come.
 // An instrument of one patch: a pool of voices, each a copy of its voice card, the patch's
 // preset on its architecture.

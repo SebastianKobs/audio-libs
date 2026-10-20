@@ -1,4 +1,4 @@
-// The tests' voice card, as an architecture writes it (mockup/src/libs/plan/synth/test/): an oscillator through a VCA
+// The tests' voice card, as an architecture writes it (mockup/src/libs/plan/instrument/test/): an oscillator through a VCA
 // its envelope moves, out; the note's frequency, gate and velocity its macros.
 export const PLUCK = {
   kind: 'Pluck',

@@ -1,5 +1,5 @@
 // An instrument playing one patch (mockup/src/libs/build/instrument/instrument.ts), on a stand-in for what's built, its patch
-// from the tests' file of instruments (libs/plan/synth/test/pluck.js):
+// from the tests' file of instruments (libs/plan/instrument/test/pluck.js):
 //   - built from its patch's instrument, by the builder handed in, into where it's told;
 //   - its notes played by its voices, each message moved onto what's built's time;
 //   - its voice cards' own values from outside, set on each voice as it's added;
@@ -10,10 +10,10 @@ import assert from 'node:assert/strict';
 import { Instrument } from '../index.ts';
 import { BuiltStandIn } from './built.js';
 import { noteMessages } from '../../../midi/index.ts';
-import { instrumentsOf, patchPlan } from '../../../plan/synth/index.ts';
-import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
+import { instrumentsOf, patchPlan } from '../../../plan/instrument/index.ts';
+import { MODULE_TEMPLATES } from '../../../plan/instrument/content.ts';
 import { settingAt } from '../../../plan/format/index.ts';
-import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
+import { PLUCK_FILE } from '../../../plan/instrument/test/pluck.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 

@@ -1,4 +1,4 @@
-// ---------- plan/synth/note: a note's sources into a voice, as a voice card's CV ----------
+// ---------- plan/instrument/note: a note's sources into a voice, as a voice card's CV ----------
 // As a MIDI-to-CV module hands a voice card its note:
 //   - its frequency, its pitch in Hz; its gate, open while the note is held; its velocity;
 //   - its volume, MIDI 2.0's per-note #7, at the voice card's output: a held note hushed;

@@ -16,7 +16,7 @@ import { retimed, type Message, type Receiver } from '../../midi/index.ts';
 import { type Composite, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
 import { addressOf, addressText } from '../../util/index.ts';
 import type { Preset } from '../../plan/planner/index.ts';
-import { cardPlanner, chainsOf, changesFrom, patchPlan, type Instruments } from '../../plan/synth/index.ts';
+import { cardPlanner, chainsOf, changesFrom, patchPlan, type Instruments } from '../../plan/instrument/index.ts';
 import { Voices } from './voices.ts';
 
 // What it's made with:

@@ -1,4 +1,4 @@
-// The synth's library (mockup/src/libs/plan/synth), in node: what a voice card is made of.
+// The synth's library (mockup/src/libs/plan/instrument), in node: what a voice card is made of.
 //   - the note's sources, a voice card's CV: each on a control, by MIDI's names where it has them; the note's settings;
 //   - the modules, a YAML template each, of its form: sources, modulators, stages, the output;
 //   - each module's params, its macros, onto its blocks: a tune in semitones onto a detune in cents; each its hint;

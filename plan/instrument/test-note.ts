@@ -1,4 +1,4 @@
-// ---------- plan/synth/test-note: a test note, as a device view sets it, and its message on a bus ----------
+// ---------- plan/instrument/test-note: a test note, as a device view sets it, and its message on a bus ----------
 // Played on an instrument of its own for each key (libs/build/instrument/'s TestNotes).
 
 // A test note as a device view sets it: its pitch, velocity, 0 to 1, and time; its own values

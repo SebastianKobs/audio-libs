@@ -12,7 +12,7 @@
 //     changing the bank's preset as it hears it.
 import { paramAt, type Plan, type ValuesByAddress } from '../../../plan/format/index.ts';
 import type { Preset } from '../../../plan/planner/index.ts';
-import { cardPlanner, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../../plan/synth/index.ts';
+import { cardPlanner, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../../plan/instrument/index.ts';
 import { entryOf, type LiveCopies, addressOf, addressText, type Address } from '../../../util/index.ts';
 import { PresetReadout, type Command, type PlanReadout, type Role } from '../../device/readout/index.ts';
 import type { InstrumentCard } from '../readout/index.ts';

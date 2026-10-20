@@ -1,4 +1,4 @@
-// A file of instruments read (mockup/src/libs/plan/synth/instruments-file.ts), in node, on a small file of the tests' own, its
+// A file of instruments read (mockup/src/libs/plan/instrument/instruments-file.ts), in node, on a small file of the tests' own, its
 // instrument the tests' voice card (pluck.js):
 //   - each instrument a template of a voice card's form, its name its kind, one mono output, planned as the planner takes it;
 //   - each patch a preset, by a name of its own, the instrument it plays its kind; each rack its pads;

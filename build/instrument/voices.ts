@@ -28,7 +28,7 @@ import {
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
 import { addressOf, type Address } from '../../util/index.ts';
-import { NOTE_SETTINGS } from '../../plan/synth/index.ts';
+import { NOTE_SETTINGS } from '../../plan/instrument/index.ts';
 import type { Built } from '../contract/index.ts';
 import { Silence } from './silence.ts';
 
