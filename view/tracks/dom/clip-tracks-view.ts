@@ -16,6 +16,12 @@ interface DrawnTrack {
   chips: Map<unknown, HTMLDivElement>;
 }
 
+// The hints on a clip's ▶ and ×, as the owner words them.
+export interface ClipHints {
+  readonly launch: string;
+  readonly drop: string;
+}
+
 // The clip tracks drawn (see the top of this file).
 // Clicks anywhere in what it's made in, its own:
 //   - a clip's ▶ and ×, handed to its model, the × asking first;
@@ -25,12 +31,14 @@ export class ClipTracksView {
   readonly section: SectionView;
   readonly #clips: ClipTracks;
   readonly #open: (title: string, what: string) => void;
+  readonly #hints: ClipHints;
   readonly #tracks = new Map<string, DrawnTrack>(); // by its clip track's key
   readonly #slots = new WeakMap<Element, unknown>(); // a chip's clip
   #beat = 0; // the clock's beat the view was last drawn on
   #askingShown: unknown = null; // the clip whose × shows it asks
 
   // within: what its section is made at the end of, its clicks listened to;
+  // hints: what a clip's ▶ and × do, in its owner's words;
   // opens(): what a clip track's name opens, if anything;
   // open(): what it opens opened, by its title;
   // folding: which sections are folded, its own and those beside it;
@@ -38,6 +46,7 @@ export class ClipTracksView {
   constructor({
     within,
     clips,
+    hints,
     opens,
     open,
     folding,
@@ -45,12 +54,14 @@ export class ClipTracksView {
   }: {
     within: HTMLElement;
     clips: ClipTracks;
+    hints: ClipHints;
     opens: (track: ClipTrack) => string | null;
     open: (title: string, what: string) => void;
     folding: Toggles;
     folded: () => void;
   }) {
     this.#clips = clips;
+    this.#hints = hints;
     this.#open = open;
     this.section = new SectionView(within, 'clip', { folding, folded });
     within.addEventListener('click', (event) => this.#clicked(event));
@@ -117,9 +128,9 @@ export class ClipTracksView {
       const go = makeElement('b', 'launch', '▶');
       const drop = makeElement('b', 'drop', '×');
       go.dataset.launch = '';
-      go.title = 'Play this clip in full, on the next beat';
+      go.title = this.#hints.launch;
       drop.dataset.delete = '';
-      drop.title = 'Delete this plant: click again to confirm';
+      drop.title = this.#hints.drop;
       chip.prepend(go, ' ');
       chip.append(' ', drop);
     }

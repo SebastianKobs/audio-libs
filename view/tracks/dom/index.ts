@@ -10,7 +10,7 @@
 //   - arrangement/: the arrangement on the page, its names beside its time, drawn on canvases,
 //     its ruler, rows, regions and their notes, lanes, the present and the playhead; a click,
 //     a drag and a wheel handed to its model.
-export { ClipTracksView } from './clip-tracks-view.ts';
+export { ClipTracksView, type ClipHints } from './clip-tracks-view.ts';
 export {
   ArrangementView,
   type ArrangementColors,
