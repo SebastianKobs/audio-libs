@@ -77,11 +77,10 @@ export class Planner {
       throw new Error(['templates not well-formed:', ...problems].join('\n'));
     }
   }
-  // a plan for a template, its top node named as asked
-  // a plan for a template, its top node named as asked; what it's asked for at an address it hasn't refused
+  // a plan for a block or a template, its top node named as asked; what it's asked for at an address it hasn't refused
   plan(kind: string, { name = kind, values = {}, settings = {}, beat }: Asked = {}): Plan {
-    if (!this.#catalog.template(kind)) {
-      throw new Error(`no template ${kind}`);
+    if (!this.#catalog.template(kind) && !this.#catalog.block(kind)) {
+      throw new Error(`no block or template ${kind}`);
     }
     const missing = [
       ...Object.keys(values)

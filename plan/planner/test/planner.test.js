@@ -163,7 +163,22 @@ test('a value a block needs and has no default for refused, naming it; a templat
     ]).plan('Loud').node.children[0].params[0].value,
     6,
   );
-  assert.throws(() => planner.plan('Choir'), /no template Choir/);
+  assert.throws(() => planner.plan('Choir'), /no block or template Choir/);
+});
+
+test('a block planned alone, by its kind: as it is as a child of its own, its jacks mono where it fixes none; asked what it has not, refused', () => {
+  const alone = new Planner([]).plan('oscillator', { values: { frequency: 220 } });
+  const solo = new Planner([
+    {
+      kind: 'Solo',
+      outputs: [{ name: 'out', channels: 1 }],
+      children: [{ name: 'oscillator', kind: 'oscillator', values: { frequency: 220 } }],
+      wires: [{ from: { node: 'oscillator', output: 'out' }, to: { output: 'out' } }],
+    },
+  ]).plan('Solo');
+  assert.deepEqual(alone.node, solo.node.children[0]);
+  assert.deepEqual(new Planner([]).plan('gain').node.inputs, [{ name: 'in', channels: 1 }]);
+  assert.throws(() => new Planner([]).plan('oscillator', { values: { pitch: 1 } }), /no param pitch/);
 });
 
 test('every template checked well-formed as it is handed in, every failure said at once: its template, its child, its rule', () => {
