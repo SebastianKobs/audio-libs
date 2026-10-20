@@ -55,7 +55,7 @@ Each is a scenario the tests run (`mockup/test/scenarios/`, checked by `mockup/t
 Planning alone: `plan/planner`, no YAML, no builder.
 
 ```js
-// Scenario 1 (LIBS8): a voice planned in code, as a library's user writes it: an oscillator and an envelope,
+// Scenario 1: a voice planned in code, as a library's user writes it: an oscillator and an envelope,
 // each a block, wired into a gain, the envelope moving it; the planner alone, no template read from YAML.
 import { Planner } from '../../src/libs/plan/planner/index.ts';
 
@@ -86,7 +86,7 @@ export function planVoice() {
 The plan of scenario 1 handed to the Web Audio builder: `build/web-audio`, no clock, no engine.
 
 ```js
-// Scenario 2 (LIBS10): the voice planned in code (plan-in-code.js) built for Web Audio, as a library's user
+// Scenario 2: the voice planned in code (plan-in-code.js) built for Web Audio, as a library's user
 // writes it: into an audio context handed in, run with no view, no clock and no engine of the app's.
 import { planVoice } from './plan-in-code.js';
 import { WebAudioBuilder } from '../../src/libs/build/web-audio/index.ts';
@@ -105,7 +105,7 @@ export function buildVoice(context) {
 A plan's device shown, its knobs moving its params: the plan of scenario 1 read through `view/device`'s readout, shaped by its models, drawn by its dom.
 
 ```js
-// Scenario 3 (LIBS13a): a plan's device drawn, as a library's user writes it: the voice planned in code
+// Scenario 3: a plan's device drawn, as a library's user writes it: the voice planned in code
 // (plan-in-code.js), read through a preset's readout, its envelope a device, drawn as HTML.
 import { planVoice } from './plan-in-code.js';
 import { PresetReadout } from '../../src/libs/view/device/readout/index.ts';
@@ -128,7 +128,7 @@ export function drawEnvelope() {
 A desk planned from one written short (`plan/desk`, `plan/planner`), built for Web Audio (`build/web-audio`) and mixed by address (`build/desk`), with no clock, MIDI or sequencer.
 
 ```js
-// Scenario 4 (LIBS11): a desk alone, as a library's user writes it: planned from a desk written short, built for
+// Scenario 4: a desk alone, as a library's user writes it: planned from a desk written short, built for
 // Web Audio into a context handed in, a value set by its address, a strip muted; no clock, no sequencer.
 import { DESK_FORMS, deskTemplates } from '../../src/libs/plan/desk/index.ts';
 import { Planner } from '../../src/libs/plan/planner/index.ts';
