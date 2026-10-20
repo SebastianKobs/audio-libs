@@ -25,7 +25,7 @@ export function lastAtOrBefore<Item>(
 }
 // a value at a time between timed points, a line between each two, held before the first and after the last;
 // walked from the first, so their times needn't rise strictly; a step in time counted at least 1 ms
-export function valueAt<Point>(
+export function valueBetween<Point>(
   points: readonly Point[],
   time: number,
   timeOf: (point: Point) => number,

@@ -19,7 +19,7 @@ export {
   smoothstep,
   wrapToTile,
 } from './maths.ts';
-export { firstAfter, lastAtOrBefore, valueAt } from './search.ts';
+export { firstAfter, lastAtOrBefore, valueBetween } from './search.ts';
 export { DueQueue, placeInOrder } from './due.ts';
 export { Events } from './events.ts';
 export { Bus } from './bus.ts';

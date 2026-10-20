@@ -28,7 +28,7 @@ import {
   toggleIn,
   under,
   updateInPlace,
-  valueAt,
+  valueBetween,
 } from '../index.ts';
 import { isNear, near } from './near.js';
 
@@ -220,7 +220,7 @@ test('a value at a time between timed points: a line between each two, held befo
   const timeOf = (point) => point.t;
   const valueOf = (point) => point.v;
   assert.deepEqual(
-    [1, 2, -1, 5].map((time) => valueAt(points, time, timeOf, valueOf)),
+    [1, 2, -1, 5].map((time) => valueBetween(points, time, timeOf, valueOf)),
     [2, 4, 0, 4],
   );
 });
