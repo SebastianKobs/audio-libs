@@ -1,4 +1,4 @@
-// The mixer view's parts that need no page (mockup/src/libs/view/mixer/dom/mixer-view.ts), in node, on the models' small
+// The mixer view's parts that need no page (mockup/src/libs/view/mixer/dom/mixer-html.ts), in node, on the models' small
 // desk (libs/view/mixer/models/test/desk.js):
 //   - the desk's own channels drawn: its buses, a bus with those that go into it in a group's box; its returns;
 //     its master; each strip opening its devices by its address, its sends labelled by their returns' short labels;
