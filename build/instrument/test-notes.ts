@@ -1,4 +1,4 @@
-// ---------- build/voices/test-notes: a device view's test note ----------
+// ---------- build/instrument/test-notes: a device view's test note ----------
 // An instrument of its own for each key, made at its first test note, played straight into it:
 //   - not a track's: a sequencer hands out its own note numbers, which the test note's would
 //     meet;

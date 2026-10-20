@@ -1,4 +1,4 @@
-// A multitimbral sound module (mockup/src/libs/build/voices/sound-module.ts), on a stand-in for what's built, its bank
+// A multitimbral sound module (mockup/src/libs/build/instrument/sound-module.ts), on a stand-in for what's built, its bank
 // the tests' file of instruments (libs/plan/synth/test/pluck.js):
 //   - a part for each track, an instrument playing a patch from its bank by name, built where it's told;
 //   - a patch edited in the bank: every part that plays it edited, its own or a pad's of its rack; one made after an

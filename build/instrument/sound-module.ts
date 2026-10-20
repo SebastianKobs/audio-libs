@@ -1,4 +1,4 @@
-// ---------- build/voices/sound-module: a multitimbral sound module ----------
+// ---------- build/instrument/sound-module: a multitimbral sound module ----------
 // As a rack synth with its parts: a part for each track, each an instrument playing a patch
 // from the module's bank by name, as a program change picks one.
 //   - A part made where it's told, by the builder handed in (instrument.ts).

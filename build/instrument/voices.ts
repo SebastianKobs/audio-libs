@@ -1,4 +1,4 @@
-// ---------- build/voices/voices: MIDI's notes played into an instrument ----------
+// ---------- build/instrument/voices: MIDI's notes played into an instrument ----------
 // What MIDI's notes are played into (a Receiver): an instrument's voices juggled on what's built.
 //   1. A note on: a copy of its pool's voice card added at its time, a drum rack's pad's by its key;
 //      its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is

@@ -1,4 +1,4 @@
-// An instrument playing one patch (mockup/src/libs/build/voices/instrument.ts), on a stand-in for what's built, its patch
+// An instrument playing one patch (mockup/src/libs/build/instrument/instrument.ts), on a stand-in for what's built, its patch
 // from the tests' file of instruments (libs/plan/synth/test/pluck.js):
 //   - built from its patch's instrument, by the builder handed in, into where it's told;
 //   - its notes played by its voices, each message moved onto what's built's time;

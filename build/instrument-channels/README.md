@@ -1,6 +1,6 @@
 # build/instrument-channels
 
-A track's sounding end: between the sound module (`libs/build/voices/`) and the desk (`libs/build/desk/`), so neither knows the other. A track's notes go into its instrument, made at its first note and plugged into the track's channel on the desk; its controllers go onto its strip. It's a sequencer's track by its shape (`libs/midi-sequencer/`'s `Track`, a `Receiver` with a role), so a router can hand it messages as the sequencer does. It imports `libs/build/desk/`, `libs/build/sequenced-desk/`, `libs/midi/` and `libs/util/`.
+A track's sounding end: between the sound module (`libs/build/instrument/`) and the desk (`libs/build/desk/`), so neither knows the other. A track's notes go into its instrument, made at its first note and plugged into the track's channel on the desk; its controllers go onto its strip. It's a sequencer's track by its shape (`libs/midi-sequencer/`'s `Track`, a `Receiver` with a role), so a router can hand it messages as the sequencer does. It imports `libs/build/desk/`, `libs/build/sequenced-desk/`, `libs/midi/` and `libs/util/`.
 
 ```ts
 import { InstrumentChannelFactory } from './index.ts';

@@ -1,4 +1,4 @@
-// ---------- build/voices/instrument: one instrument playing one patch ----------
+// ---------- build/instrument/instrument: one instrument playing one patch ----------
 // As a track and the test note play it:
 //   - its plan its patch's, from a file of instruments by name: an instrument of one voice
 //     card, or a drum rack, a pad for each key; built by the builder handed in, into where it's

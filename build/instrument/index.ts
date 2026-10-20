@@ -1,4 +1,4 @@
-// ---------- build/voices: MIDI's notes played into an instrument, on what's built ----------
+// ---------- build/instrument: MIDI's notes played into an instrument, on what's built ----------
 // Its parts:
 //   - voices.ts: the voices, a Receiver, each note a copy of its pool's voice card, let go once
 //     it has rung out;

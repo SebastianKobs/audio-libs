@@ -1,4 +1,4 @@
-# build/voices
+# build/instrument
 
 MIDI's notes played into an instrument: its voices juggled on what's built. Handed the instrument's plan, what's built of it (the contract's `Built`, `libs/build/contract/`) and the time now, it's what the notes are played into, a `Receiver` (`libs/midi/`). It makes no sound: what's built makes the sound, the plan says what each note sets. On it, an instrument, one patch from a file of instruments planned by name and built by the builder handed in, its edits glided or built again (`Instrument`); and a multitimbral sound module, a part for each track, each playing a patch from its bank, an edit reaching every part that plays it (`SoundModule`). It reads the plan's format, the synth's note (`libs/plan/synth/`'s `NOTE_SETTINGS`, the sources' names its pools' note keys), a note's frequency (`libs/music-theory/`) and the floor of silence (`libs/params/`).
 

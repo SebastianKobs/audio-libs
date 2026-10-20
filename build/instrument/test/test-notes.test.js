@@ -1,4 +1,4 @@
-// The test notes (mockup/src/libs/build/voices/test-notes.ts), a device view's, played straight into an instrument of
+// The test notes (mockup/src/libs/build/instrument/test-notes.ts), a device view's, played straight into an instrument of
 // their own for each key, made at its first test note, never through a sequencer, so never recorded:
 //   - each note a fresh index, phrased as its owner says, held at most 30 s;
 //   - let go as its button is: its note off at that time;

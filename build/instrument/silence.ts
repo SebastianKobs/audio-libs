@@ -1,4 +1,4 @@
-// ---------- build/voices/silence: when a voice has rung out ----------
+// ---------- build/instrument/silence: when a voice has rung out ----------
 // Worked out from its voice card's plan, as a synth stops a note's sources:
 //   1. A gain resting at nothing, opened only by envelopes, closes once they have all faded.
 //   2. A block is silent from where a gain it is closes, or as late as the latest of where its
