@@ -5,7 +5,7 @@
 //   - a patch edited in the bank: every part that plays it edited, its own or a pad's of its rack; one made after an
 //     edit made as edited;
 //   - a new tempo told every part, one unchanged passed over;
-//   - a param's spec in a patch, from its voice card planned by its preset's kind.
+//   - a param's or a setting's spec in a patch, from its voice card planned by its preset's kind.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SoundModule } from '../index.ts';
@@ -75,9 +75,14 @@ test('a part made after an edit made as edited; a new tempo told every part, one
   assert.deepEqual(built.tempi, [0.4, 0.5]);
 });
 
-test("a param's spec in a patch, from its voice card; none for a patch or a param it hasn't", () => {
+test("a control in a patch, a param or a setting, from its voice card; none for a patch or an address it hasn't", () => {
   const { module } = moduleOn();
-  assert.equal(module.specOf('bright', ['osc 1', 'tune']).name, 'tune');
-  assert.equal(module.specOf('bright', ['osc 1', 'nothing']), undefined);
-  assert.equal(module.specOf('nobody', ['osc 1', 'tune']), undefined);
+  const param = module.controlOf('bright', ['osc 1', 'tune']);
+  assert.equal(param.of, 'values');
+  assert.equal(param.spec.name, 'tune');
+  const setting = module.controlOf('bright', ['osc 1', 'osc', 'wave']);
+  assert.equal(setting.of, 'settings');
+  assert.deepEqual(setting.spec.choices, ['sine', 'triangle', 'square', 'sawtooth']);
+  assert.equal(module.controlOf('bright', ['osc 1', 'nothing']), undefined);
+  assert.equal(module.controlOf('nobody', ['osc 1', 'tune']), undefined);
 });

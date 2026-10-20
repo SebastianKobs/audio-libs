@@ -6,9 +6,9 @@
 //   - A patch edited in the bank: every part that plays it edited, its own or a pad's of its
 //     rack; a part made after an edit made as edited.
 //   - A new tempo told every part, one unchanged passed over.
-//   - A param's spec in a patch, from its voice card planned by its preset's kind.
+//   - A param's or a setting's spec in a patch, from its voice card planned by its preset's kind.
 import type { Preset } from '../../plan/planner/index.ts';
-import { paramAt, type Plan } from '../../plan/format/index.ts';
+import { paramAt, settingAt, type Plan } from '../../plan/format/index.ts';
 import type { ParamSpec } from '../../params/index.ts';
 import { cardPlanner, type Instruments } from '../../plan/instrument/index.ts';
 import { entryOf, type Address, type LiveCopies } from '../../util/index.ts';
@@ -16,6 +16,12 @@ import { Instrument, type InstrumentMaking } from './instrument.ts';
 
 // where a part is made, and how: all an instrument's making but its file and its patch
 export type PartMaking<Into> = Omit<InstrumentMaking<Into>, 'instruments' | 'patch'>;
+
+// a patch's control: a value or a setting, and its spec
+export interface PatchControl {
+  readonly of: 'values' | 'settings';
+  readonly spec: ParamSpec;
+}
 
 export class SoundModule<Into> {
   readonly #instruments: Instruments;
@@ -40,15 +46,20 @@ export class SoundModule<Into> {
   sounding(patch: string): number {
     return this.#parts.get(patch)?.sounding ?? 0;
   }
-  // a param's spec in a patch: its voice card's, planned by its preset's kind; none for a
-  // patch the bank hasn't or an address its card hasn't
-  specOf(patch: string, address: Address): ParamSpec | undefined {
+  // a control in a patch, a param's or else a setting's, with its spec: its voice card's,
+  // planned by its preset's kind; none for a patch the bank hasn't or an address its card hasn't
+  controlOf(patch: string, address: Address): PatchControl | undefined {
     const preset = this.#bank.current(patch);
     if (!preset) {
       return undefined;
     }
     const card = entryOf(this.#cards, preset.kind, () => cardPlanner(this.#instruments).plan(preset.kind));
-    return paramAt(card, address)?.spec;
+    const param = paramAt(card, address);
+    if (param) {
+      return { of: 'values', spec: param.spec };
+    }
+    const setting = settingAt(card, address);
+    return setting && { of: 'settings', spec: setting.spec };
   }
   // a part made as its patch is edited now: the edits replayed onto it
   #make(patch: string, making: PartMaking<Into>): Instrument<Into> {

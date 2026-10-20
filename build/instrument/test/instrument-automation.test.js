@@ -14,9 +14,16 @@ function automationOn() {
     clock.time = now;
     ticks.forEach((listener) => listener(now));
   };
-  const specOf = (patch, address) =>
-    address.join('/') === 'lfo/note' ? { name: 'note', choices: ['1/4', '1/8'] } : undefined;
-  return { automation: new InstrumentAutomation({ bank, clock, specOf }), edits, tick };
+  const controlOf = (patch, address) => {
+    if (address.join('/') === 'lfo/note') {
+      return { of: 'values', spec: { name: 'note', choices: ['1/4', '1/8'] } };
+    }
+    if (address.join('/') === 'filter/type') {
+      return { of: 'settings', spec: { name: 'type', choices: ['lowpass', 'highpass'] } };
+    }
+    return undefined;
+  };
+  return { automation: new InstrumentAutomation({ bank, clock, controlOf }), edits, tick };
 }
 const controller = (name, value, t, glide) => ({
   type: 'controller',
@@ -47,5 +54,15 @@ test("a param with choices set as its choice, the controller's value its index",
   tick(2);
   assert.deepEqual(edits, [
     { type: 'preset edited', patch: 'reed', of: 'values', address: ['lfo', 'note'], value: '1/8' },
+  ]);
+});
+
+test("a setting's controller set as the setting edited, its choice by its index, at its time", () => {
+  const { automation, edits, tick } = automationOn();
+  automation.control('reed', controller('filter/type', 1, 2));
+  assert.deepEqual(edits, [], 'held until its time');
+  tick(2);
+  assert.deepEqual(edits, [
+    { type: 'preset edited', patch: 'reed', of: 'settings', address: ['filter', 'type'], value: 'highpass' },
   ]);
 });
