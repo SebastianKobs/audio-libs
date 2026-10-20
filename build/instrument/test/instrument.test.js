@@ -19,7 +19,7 @@ import { PLUCK_FILE } from '../../../plan/instrument/test/pluck.js';
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 
 // an instrument of a patch on the stand-in, its builder recording what it's handed
-function instrumentOf(patch, { at = (t) => t, cardValues } = {}) {
+function instrumentOf(patch, { at = (t) => t, now = () => 0, cardValues } = {}) {
   const built = new BuiltStandIn();
   const handed = [];
   const builder = {
@@ -28,7 +28,7 @@ function instrumentOf(patch, { at = (t) => t, cardValues } = {}) {
       return built;
     },
   };
-  const making = { instruments: INSTRUMENTS, patch, builder, into: 'its way in', now: () => 0, at };
+  const making = { instruments: INSTRUMENTS, patch, builder, into: 'its way in', now, at };
   const instrument = new Instrument({ ...making, ...(cardValues && { cardValues }) });
   return { built, handed, instrument };
 }
@@ -52,7 +52,7 @@ test("its notes played by its voices, each message moved onto what's built's tim
 });
 
 test('an input of its own: its notes retimed, each voice into its destination; the voices sounding counted', () => {
-  const { built, instrument } = instrumentOf('bright', { at: (t) => t + 100 });
+  const { built, instrument } = instrumentOf('bright', { at: (t) => t + 100, now: () => 105 });
   const first = instrument.input(() => 'first way');
   const second = instrument.input(() => 'second way');
   first.receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));

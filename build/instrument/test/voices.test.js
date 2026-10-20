@@ -8,7 +8,8 @@
 //     by envelopes, has closed; one nothing closes as its note's last release fades; at once where its note is detached;
 //   - its sources stopped by then, told as its gate closes, where it's known;
 //   - a change of structure while notes sound: built again, each note's gate told again at its own time;
-//   - its voice card's own values, a knob's or an edit's: set on each voice as it's added; an edit on every voice sounding.
+//   - its voice card's own values, a knob's or an edit's: set on each voice as it's added; an edit on every voice sounding;
+//   - the voices sounding: those playing now, from their start until they are silent.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Voices } from '../index.ts';
@@ -288,24 +289,42 @@ test("two inputs' notes of one index kept apart, each voice added into what its 
   assert.deepEqual(built.added.at(-1), ['voice/3', 7], "its own input's: into none");
 });
 
+test('the voices sounding: those playing now, each from its start until it is silent; one rung out no longer counted, though not let go until the messages after', () => {
+  const { built, clock, voices } = voicesOn();
+  played(voices, { pitch: 69, velocity: 1, t: 5, duration: 1 }, 1);
+  played(voices, { pitch: 64, velocity: 1, t: 8 }, 2);
+  clock.now = 4;
+  assert.equal(voices.sounding, 0, 'neither started');
+  clock.now = 5;
+  assert.equal(voices.sounding, 1);
+  built.fadedAt.set('voice/1/envelope', 6.3);
+  clock.now = 6.4;
+  assert.equal(voices.sounding, 0, 'rung out');
+  assert.deepEqual(built.letGone, [], 'not let go yet');
+  clock.now = 8;
+  assert.equal(voices.sounding, 1);
+});
+
 test('a note past its polyphony takes over the oldest voice: its gate closed first, else the oldest held; faded by its note volume, stopped, let go once silent; the voices sounding counted', () => {
   const plan = synthWith({ note: { volume: [['vca', 'gain']] } });
   const held = voicesOn(plan, undefined, () => 2);
   played(held.voices, { pitch: 69, velocity: 1, t: 5 }, 1);
   played(held.voices, { pitch: 64, velocity: 1, t: 5 }, 2);
+  held.clock.now = 5;
   assert.equal(held.voices.sounding, 2);
   played(held.voices, { pitch: 60, velocity: 1, t: 7 }, 3);
   const faded = (built) => built.told.filter(([address, value]) => address.endsWith('vca/gain') && value === 0);
   assert.deepEqual(faded(held.built), [['voice/1/vca/gain', 0, { at: 7, glide: 0.05 }]], 'a tie: the first added');
   assert.deepEqual(held.built.stoppedBy, [['voice/1', 7.25]]);
   assert.deepEqual(held.built.added.at(-1), ['voice/3', 7]);
-  assert.equal(held.voices.sounding, 2, 'the one taken over not counted');
   held.clock.now = 7.2;
   held.voices.receive([]);
   assert.deepEqual(held.built.letGone, [], 'still fading');
+  assert.equal(held.voices.sounding, 3, 'the one taken over counted while it fades');
   held.clock.now = 7.3;
   held.voices.receive([]);
   assert.deepEqual(held.built.letGone, ['voice/1']);
+  assert.equal(held.voices.sounding, 2);
   played(held.voices, { pitch: 62, velocity: 1, t: 8 }, 4);
   assert.deepEqual(held.built.stoppedBy.at(-1), ['voice/2', 8.25], 'then the oldest held');
 

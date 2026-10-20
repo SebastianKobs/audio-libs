@@ -41,8 +41,8 @@ test("a part for each patch, made the first time it's asked for, then kept: aske
   assert.equal(part.patch, 'bright');
   assert.equal(module.part('bright', makingOnce), part);
   assert.equal(makings, 1, 'its making asked for once');
-  part.receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));
-  assert.deepEqual(built.added, [['voice/1', 5]]);
+  part.receive(noteMessages({ pitch: 69, velocity: 1, t: 0 }, 1)); // at the time now: playing
+  assert.deepEqual(built.added, [['voice/1', 0]]);
   assert.equal(module.sounding('bright'), 1);
   assert.equal(module.sounding('kit'), 0, 'a patch with no part made');
 });

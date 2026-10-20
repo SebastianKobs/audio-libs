@@ -121,9 +121,10 @@ export class Voices implements Receiver {
       this.#owned(voice, values, { glide: SMOOTHING });
     }
   }
-  // the voices sounding now, not taken over
+  // the voices playing now: each from its start until it's silent, rung out or taken over
   get sounding(): number {
-    return [...this.#sounding].filter((voice) => voice.stolen === undefined).length;
+    const now = this.#now();
+    return [...this.#sounding].filter((voice) => voice.start <= now && this.#silentFrom(voice) > now).length;
   }
 
   // the messages handed an input, at once: any voice rung out let go first; then each note on a voice,
@@ -187,11 +188,16 @@ export class Voices implements Receiver {
     this.#sounding.add(voice);
     input.byIndex.set(voice.index, voice);
   }
-  // voices taken over until one fewer than its polyphony sounds
+  // voices taken over until one fewer than its polyphony holds a place
   #makeRoom(t: number): void {
-    while (this.sounding >= this.#polyphony() && this.sounding > 0) {
+    while (this.#placesTaken() >= this.#polyphony() && this.#placesTaken() > 0) {
       this.#takeOver(t);
     }
+  }
+  // the voices holding a place in its polyphony: every voice added, those yet to start among them,
+  // but one taken over
+  #placesTaken(): number {
+    return [...this.#sounding].filter((voice) => voice.stolen === undefined).length;
   }
   // the voice whose gate closed first, else the one started first, a tie going to the one added first:
   // faded out by its note volume, stopped once it's faded
