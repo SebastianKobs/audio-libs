@@ -10,6 +10,7 @@ import {
   clamp,
   DueQueue,
   entryOf,
+  isUnder,
   Events,
   firstAfter,
   Draws,
@@ -419,4 +420,12 @@ test("an address as text, its names joined by slashes, and back; a parent's name
   assert.deepEqual(under('desk', ['channel 3', 'utility', 'level']), ['desk', 'channel 3', 'utility', 'level']);
   assert.throws(() => addressText(['send/reverb', 'level']), /send\/reverb/);
   assert.throws(() => under('a/b', ['level']), /a\/b/);
+});
+
+test('an address under another, as text: a name further down, not the other itself; every one under the top, the empty text', () => {
+  assert.equal(isUnder('desk/tap/level', 'desk/tap'), true);
+  assert.equal(isUnder('desk/tap', 'desk/tap'), false);
+  assert.equal(isUnder('desk/tapping', 'desk/tap'), false);
+  assert.equal(isUnder('desk', ''), true);
+  assert.equal(isUnder('', ''), false);
 });

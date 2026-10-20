@@ -23,6 +23,7 @@ import {
 } from '../format/index.ts';
 import type { Block } from '../blocks/index.ts';
 import { choiceAt, freeAt, timeParamsIn, type ParamSpec, type RangedSpec } from '../../params/index.ts';
+import { isUnder } from '../../util/index.ts';
 import { monoOrStereo, type LooseJack } from './mono-stereo.ts';
 import { problemsInAll } from './check.ts';
 import { extendedAll } from './extend.ts';
@@ -247,11 +248,10 @@ function named(
 }
 // the values under a child's name, by their addresses within it
 function under(values: ValuesByAddress, name: string): ValuesByAddress {
-  const prefix = `${name}/`;
   return Object.fromEntries(
     Object.entries(values)
-      .filter(([address]) => address.startsWith(prefix))
-      .map(([address, value]) => [address.slice(prefix.length), value]),
+      .filter(([address]) => isUnder(address, name))
+      .map(([address, value]) => [address.slice(name.length + 1), value]),
   );
 }
 // A synced time's free value, where none is given and it's planned at a beat: where its note is

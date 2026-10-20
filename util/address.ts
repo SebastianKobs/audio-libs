@@ -1,4 +1,4 @@
-// ---------- util/address: a path of names, and as text ----------
+// ---------- util/address: a path of names, as text, and one under another ----------
 // Where something is, by its names on the way down: desk/channel 3/utility/level.
 // Written with slashes; a name holds none.
 
@@ -22,6 +22,14 @@ export function addressOf(text: string): Address {
 export function under(name: string, address: Address): Address {
   refuseSlash(name);
   return [name, ...address];
+}
+// Whether an address, as text, is under another: a name further down, not the other itself.
+// Every address but the top's is under the top's, the empty text.
+export function isUnder(text: string, parent: string): boolean {
+  if (parent === '') {
+    return text !== '';
+  }
+  return text.startsWith(`${parent}${SLASH}`);
 }
 // a name with a slash refused: its address would read as two names
 function refuseSlash(name: string): void {

@@ -27,4 +27,4 @@ export { chainFrom, entryOf, frozen, sameData, toggleIn, updateInPlace } from '.
 export { fromData, type Shape } from './from-data.ts';
 export { Draws, keptDraws, pickFrom, pickWeighted, seeded } from './random.ts';
 export { LiveCopies } from './live-copies.ts';
-export { addressOf, addressText, under, type Address } from './address.ts';
+export { addressOf, addressText, isUnder, under, type Address } from './address.ts';

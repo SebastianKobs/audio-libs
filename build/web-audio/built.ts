@@ -20,7 +20,7 @@
 // Times are the context's.
 import { eventOf, timedAt, type Automation, type When } from '../../automation/index.ts';
 import { choiceIndex } from '../../params/index.ts';
-import { entryOf } from '../../util/index.ts';
+import { entryOf, isUnder } from '../../util/index.ts';
 import {
   addressOf,
   addressText,
@@ -219,7 +219,7 @@ export class WebAudioBuilt implements Built {
   // made them.
   nodesUnder(address: Address): AudioNode[] {
     const text = addressText(address);
-    const under = [...this.#now.parts.made].filter(([at]) => !text || at === text || at.startsWith(`${text}/`));
+    const under = [...this.#now.parts.made].filter(([at]) => at === text || isUnder(at, text));
     return [...new Set(under.flatMap(([, nodes]) => nodes))];
   }
   // a copy's sources stopped by a time, as it's gone silent then: none later than its own stop
@@ -239,10 +239,10 @@ export class WebAudioBuilt implements Built {
     this.#now.parts.giveBack(added.parts);
     added.holder.children.delete(added.name);
     this.#now.copies.delete(text);
-    for (const told of [...this.#told.keys()].filter((key) => key.startsWith(`${text}/`))) {
+    for (const told of [...this.#told.keys()].filter((key) => isUnder(key, text))) {
       this.#told.delete(told);
     }
-    for (const metered of [...this.#meters.keys()].filter((key) => key === text || key.startsWith(`${text}/`))) {
+    for (const metered of [...this.#meters.keys()].filter((key) => key === text || isUnder(key, text))) {
       this.#meters.delete(metered); // on what's gone
     }
     for (const fed of this.#fed.filter(({ address }) => addressText(address) === text)) {
