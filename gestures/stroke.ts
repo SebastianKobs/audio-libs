@@ -5,7 +5,7 @@
 //   bendAngle of gentler turning, counted whichever way it turns, so a wave counts too. A corner starts that count again
 // - shape { shape, prev }: what the last shapeSpan of the path is: zigzag if a corner is in it, curve if it turns curveAngle or more,
 //   straight otherwise. Once a curve, it stays one down to 60% of that, so a wave doesn't flicker between the two
-// - pitch { deg, prev }: the finger crossed into another scale step, the pitch where it is
+// - zone { zone, prev }: the finger crossed into another zone, the one it's in now
 // - rest: still for 0.1 s. move: moving again after a rest, or the drag's first movement
 // Whether it loops is read from the same samples (loop.ts)
 import { wrapAngle } from '../util/index.ts';
@@ -38,7 +38,7 @@ export function readStroke(tracking: Tracking, pointer: Pointer): void {
     stroke = startStroke(tracking, pointer);
   }
   if (pointer.g) {
-    followPitch(tracking, pointer, stroke, pointer.g);
+    followZone(tracking, pointer, stroke, pointer.g);
   }
   sampleAlong(tracking, pointer, stroke);
 }
@@ -53,7 +53,7 @@ function startStroke(tracking: Tracking, pointer: Pointer): Stroke {
     lastCorner: -Infinity,
     bending: 0,
     shape: 'straight',
-    degree: null,
+    zone: null,
     lastMoved: t,
     lastX: x,
     lastY: y,
@@ -86,14 +86,14 @@ function noticeMoving(tracking: Tracking, pointer: Pointer, stroke: Stroke): voi
   stroke.lastY = y;
   stroke.rested = false;
 }
-// the pitch where the finger is, said as it crosses into another scale step
-function followPitch(tracking: Tracking, pointer: Pointer, stroke: Stroke, floorPoint: FloorPoint): void {
+// the zone where the finger is, said as it crosses into another
+function followZone(tracking: Tracking, pointer: Pointer, stroke: Stroke, floorPoint: FloorPoint): void {
   coverFloor(stroke, floorPoint);
-  const degree = tracking.handedIn.pitchAt(floorPoint);
-  if (stroke.degree !== null && degree !== stroke.degree) {
-    tracking.emit('pitch', pointer, { deg: degree, prev: stroke.degree });
+  const zone = tracking.handedIn.zoneAt(floorPoint);
+  if (stroke.zone !== null && zone !== stroke.zone) {
+    tracking.emit('zone', pointer, { zone, prev: stroke.zone });
   }
-  stroke.degree = degree;
+  stroke.zone = zone;
 }
 // a sample every 10 px along the way, even when the pointer jumps
 function sampleAlong(tracking: Tracking, pointer: Pointer, stroke: Stroke): void {
