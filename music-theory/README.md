@@ -15,7 +15,7 @@ mtof(69);                           // 440
 | `mtof(note)` | a note's frequency, equal temperament on A 440 (`pitch.ts`) |
 | `chordNote(note, key)`, `ChordNote` | a chord's note in a key: `{ semi }`, semitones from the root, or else `{ degree }`, a degree of its scale (`pitch.ts`) |
 | `Key` | a key: its `root`, a MIDI note, and its `scale` (`scales.ts`) |
-| `SCALES` | scales as their steps: major and minor pentatonic, Lydian, and a harmonic pentatonic, partials 8, 9, 10, 12 and 14 in pure intervals, after Stockhausen's "Stimmung" (`scales.ts`) |
+| `SCALES` | the standard scales as their steps: the seven modes (`major` the Ionian, `minor` the Aeolian), the harmonic and melodic minor, both pentatonics, the blues, the whole tone and the chromatic (`scales.ts`) |
 | `degreeNote(degree, key)` | a degree's note: degree 0 is the root an octave down, one scale's length on the root itself, a negative degree on down (`scales.ts`) |
 | `PlayStyle<Rhythm>` | a play style: its contours, each a line's steps of the scale, and its rhythms, of the type its owner gives (`style.ts`) |
 | `new PlayingStyle({ contours, rhythms })` | the style as it plays: the lists it's made with to begin with; `current()` copies of its lists, `set(lists)` a list at a time, each frozen as it's set, so it plays as it was handed in, `reset()` the lists it began with; the garden's `Bank` until SHAPE1e (`style.ts`) |
