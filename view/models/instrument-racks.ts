@@ -9,8 +9,9 @@
 import { OWN_NOTE_VALUES, type PresetMessage } from '../../plan/synth/index.ts';
 import type { TestNoteMessage } from '../../build/voices/index.ts';
 import type { Clock } from '../../clock/index.ts';
-import type { InstrumentCard, InstrumentsReadout, PlanReadout } from '../control-surface/index.ts';
-import { ViewBuilder } from './view-builder.ts';
+import type { InstrumentCard, InstrumentsReadout } from '../control-surface/index.ts';
+import type { PlanReadout } from '../device/readout/index.ts';
+import { ViewBuilder } from '../device/models/index.ts';
 
 // what the racks send on the app's bus: a role's reset, its test note pressed and let go
 type RackMessage = PresetMessage | TestNoteMessage;

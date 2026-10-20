@@ -16,7 +16,7 @@ import {
   type Wire,
 } from '../../plan/format/index.ts';
 import type { Strip } from './strip.ts';
-import type { ViewBuilder } from './view-builder.ts';
+import type { ViewBuilder } from '../device/models/index.ts';
 
 // a bus and the buses that go out into it
 export interface BusGroup {

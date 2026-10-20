@@ -8,8 +8,7 @@
 // The test note's row is its owner's (head()): drawn in the device view's head, told which
 // instruments are shown each time one is (shown()), to grey the values none of them reads.
 import type { InstrumentRacks } from '../models/index.ts';
-import type { CompositeLook, CompositeView } from './composite-view.ts';
-import type { DeviceChain } from './device-panel-view.ts';
+import type { CompositeLook, CompositeView, DeviceChain } from '../device/dom/index.ts';
 import { html } from '../html/index.ts';
 
 // How an instrument is shown, in its owner's words:

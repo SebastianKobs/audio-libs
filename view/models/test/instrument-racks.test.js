@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentRacks } from '../index.ts';
 import { paramAt, settingAt } from '../../../plan/format/index.ts';
-import { CARD } from './card.js';
+import { CARD } from '../../device/models/test/card.js';
 
 // the pluck, and one with a rise of its own, as the note's sources' macros
 const RISING = { ...CARD, node: { ...CARD.node, macros: [...CARD.node.macros, macro('rise')] } };

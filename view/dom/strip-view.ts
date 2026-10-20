@@ -8,10 +8,10 @@
 // Empty, where its track plays nothing: its sends and its fader at the bottom, each value a
 // dash.
 import { addressText } from '../../plan/format/index.ts';
-import type { Device, Knob, Strip } from '../models/index.ts';
+import type { Device, Knob } from '../device/models/index.ts';
+import type { Strip } from '../models/index.ts';
 import { html, type Html } from '../html/index.ts';
-import { EMPTY, faderHtml, knobHtml, stillPanHtml } from './knob-view.ts';
-import { meterHtml } from './meter-view.ts';
+import { EMPTY, faderHtml, knobHtml, meterHtml, stillPanHtml } from '../device/dom/index.ts';
 
 // How a view shows a strip beside the strip itself:
 //   - name: as the view names it; route: where it goes, as shown; now: what plays on it;

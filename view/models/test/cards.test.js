@@ -12,7 +12,7 @@ import { InstrumentCards } from '../index.ts';
 import { instrumentsOf, LiveBank } from '../../../plan/synth/index.ts';
 import { MODULE_TEMPLATES } from '../../../plan/synth/content.ts';
 import { PLUCK_FILE } from '../../../plan/synth/test/pluck.js';
-import { cardModels } from './card.js';
+import { cardModels } from '../../device/models/test/card.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
 

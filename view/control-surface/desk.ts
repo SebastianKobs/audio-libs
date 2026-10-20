@@ -13,7 +13,7 @@
 import { addressText, nodeAt, splitAtChild, type Address, type Node } from '../../plan/format/index.ts';
 import { SEND } from '../../plan/desk/index.ts';
 import type { DeskBuilt, DeskMessage, DeskSetup, MixingDesk } from '../../build/desk/index.ts';
-import type { Command, PlanReadout, Role, Slot } from './plan.ts';
+import type { Command, PlanReadout, Role, Slot } from '../device/readout/index.ts';
 
 // What the desk's readout asks of what's built beyond the desk's: its meters, a level and a reading,
 // by address.

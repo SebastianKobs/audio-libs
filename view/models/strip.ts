@@ -14,9 +14,7 @@ import {
   type Node,
   type Plan,
 } from '../../plan/format/index.ts';
-import type { Device } from './device.ts';
-import type { Knob } from './knob.ts';
-import type { ViewBuilder } from './view-builder.ts';
+import type { Device, Knob, ViewBuilder } from '../device/models/index.ts';
 
 // what a strip is read from: the view builder's plan, controls, devices and levels
 type StripViews = Pick<ViewBuilder, 'plan' | 'control' | 'device' | 'peakOf'>;

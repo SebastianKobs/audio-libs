@@ -18,11 +18,10 @@
 // heard feed counted too.
 import { addressOf, addressText, type Address } from '../../plan/format/index.ts';
 import { Events } from '../../util/index.ts';
+import { Meters, type Control } from '../device/models/index.ts';
 import {
-  Meters,
   shortName,
   type BusGroup,
-  type Control,
   type SessionGroup,
   type SessionTrack,
   type Strip,
@@ -30,10 +29,8 @@ import {
   type TrackNow,
   type MixerViewBuilder,
 } from '../models/index.ts';
-import { Bound, CONTROL_MARKS } from './bound.ts';
+import { Bound, CONTROL_MARKS, KnobDrag, meterPosition } from '../device/dom/index.ts';
 import { html, makeElement, setHtml, type Html } from '../html/index.ts';
-import { KnobDrag } from './knob-view.ts';
-import { meterPosition } from './meter-view.ts';
 import { SectionView } from './section-view.ts';
 import { stripHtml, type StripLook } from './strip-view.ts';
 

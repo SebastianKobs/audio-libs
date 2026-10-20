@@ -1,6 +1,6 @@
 // ---------- view/models/cards: an instrument's patches as the device view edits them ----------
 // A card for each patch an instrument plays, its own, or a drum rack's pads, each by its key:
-// its preset on its voice card, read through a preset's readout (libs/view/control-surface/preset.ts). The patch is
+// its preset on its voice card, read through a preset's readout (libs/view/device/readout/preset.ts). The patch is
 // edited in the bank, not an instrument playing it: an edit reaches every instrument that plays
 // it, and those still to come.
 //   - its voice card planned at its preset as the bank has it now, values from outside over its
@@ -21,13 +21,8 @@ import {
 import type { Preset } from '../../plan/planner/index.ts';
 import { cardPlanner, NOTE_SOURCES, type Instruments, type PresetMessage } from '../../plan/synth/index.ts';
 import { entryOf, type LiveCopies } from '../../util/index.ts';
-import {
-  PresetReadout,
-  type Command,
-  type InstrumentCard,
-  type PlanReadout,
-  type Role,
-} from '../control-surface/index.ts';
+import { PresetReadout, type Command, type PlanReadout, type Role } from '../device/readout/index.ts';
+import type { InstrumentCard } from '../control-surface/index.ts';
 
 // Values from outside over a voice card's own, by their addresses in it, and what sets them,
 // as a card's hints say it (the tweak panel).

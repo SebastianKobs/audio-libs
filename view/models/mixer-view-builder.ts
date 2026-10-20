@@ -5,7 +5,7 @@
 import { nodeAt, type Address } from '../../plan/format/index.ts';
 import { Mixer } from './mixer.ts';
 import { Strip } from './strip.ts';
-import { ViewBuilder } from './view-builder.ts';
+import { ViewBuilder } from '../device/models/index.ts';
 
 // The view models of a desk's plan: a device builder's, and its strips and its mixer.
 export class MixerViewBuilder extends ViewBuilder {
