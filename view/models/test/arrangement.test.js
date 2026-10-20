@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Arrangement, declaredBy, ViewBuilder } from '../index.ts';
-import { arrangedStrips, laneName, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
+import { arrangedStrips, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
 import { TimeWindow } from '../arrangement/time-window.ts';
 import { keptWhole, noteShape, pitchRange } from '../arrangement/note-shapes.ts';
 import { laneLine } from '../arrangement/lane-shapes.ts';
@@ -493,10 +493,19 @@ test("a control's place on its whole range, by its param's declared taper (U2c4c
 });
 
 test("a lane's name, as the arrangement shows it, by its key: its slot and param, a send by its return's name, a strip's own by its param (U2c4b2)", () => {
+  const controllers = [
+    'air/cutoff',
+    'dull/cutoff',
+    'delay/time',
+    'utility/level',
+    'limiter/gain',
+    'send/far reverb',
+    'volume',
+  ];
+  const lanes = controllers.map((controller) => lane('tap', 1, controller));
+  const rows = rowsOf([], tracks, new Set(['tap']), { lanes, opened: new Set(['tap 1']) });
   assert.deepEqual(
-    ['air/cutoff', 'dull/cutoff', 'delay/time', 'utility/level', 'limiter/gain', 'send/far reverb', 'volume'].map(
-      laneName,
-    ),
+    rows.filter(({ track }) => track).map(({ name }) => name),
     ['air cutoff', 'dull cutoff', 'delay time', 'utility level', 'limiter gain', 'far reverb', 'volume'],
   );
 });

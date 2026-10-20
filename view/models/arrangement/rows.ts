@@ -212,7 +212,7 @@ function withLanes(track: Row, controllers: readonly string[] | undefined, open:
 }
 // A lane's name, by its controller: its slot and param, as Ableton names an automation
 // lane by its device and param; a send by its return's name; a strip's own by its param.
-export function laneName(controller: string): string {
+function laneName(controller: string): string {
   const [first = '', param] = addressOf(controller); // under its strip: the strip's no part of its name
   if (param === undefined) {
     return first; // a strip's own
