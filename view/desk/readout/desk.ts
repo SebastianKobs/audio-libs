@@ -12,8 +12,8 @@
 // it (the desk's surface).
 import { nodeAt, splitAtChild, type Node } from '../../../plan/format/index.ts';
 import { addressText, type Address } from '../../../util/index.ts';
-import { SEND } from '../../../plan/desk/index.ts';
-import type { DeskBuilt, DeskMessage, DeskSetup, MixingDesk } from '../../../build/desk/mixing/index.ts';
+import { SEND, type DeskMessage } from '../../../plan/desk/index.ts';
+import type { DeskBuilt, DeskSetup, MixingDesk } from '../../../build/desk/mixing/index.ts';
 import type { Command, PlanReadout, Role, Slot } from '../../device/readout/index.ts';
 
 // What the desk's readout asks of what's built beyond the desk's: its meters, a level and a reading,

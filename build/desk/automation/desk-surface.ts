@@ -15,9 +15,10 @@ import { SMOOTHING } from '../../../automation/index.ts';
 import type { Clock } from '../../../clock/index.ts';
 import type { Controller } from '../../../midi/index.ts';
 import { choiceIndex } from '../../../params/index.ts';
+import type { DeskMessage } from '../../../plan/desk/index.ts';
 import { splitAtChild } from '../../../plan/format/index.ts';
 import { addressText, Events, type Address } from '../../../util/index.ts';
-import type { DeskBuilt, DeskMessage, MixingDesk } from '../mixing/index.ts';
+import type { DeskBuilt, MixingDesk } from '../mixing/index.ts';
 import type { DeskAutomation } from './desk-automation.ts';
 
 // what the surface asks of the desk: a param's spec, its settings changed; of the automation: what glides
