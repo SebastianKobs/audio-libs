@@ -131,16 +131,17 @@ class StandInNode {
     return target;
   } // output: a splitter's side
   disconnect(target) {
-    // from one target: that edge goes, as Web Audio's does
+    // from one target: that edge goes, as Web Audio's does; one not connected to it refused, as Web Audio throws
     this.ctx.rec.disconnects.push(this);
     if (!target) {
       return;
     }
     const edges = this.ctx.rec.edges;
     const k = edges.findIndex((e) => e.from === this && e.to === target);
-    if (k >= 0) {
-      edges.splice(k, 1);
+    if (k < 0) {
+      throw new Error(`InvalidAccessError: a ${this.kind} not connected to the target it's disconnected from`);
     }
+    edges.splice(k, 1);
   }
   start(...args) {
     this.starts.push(args);

@@ -96,6 +96,37 @@ test('what makes sound of its own built again: the old faded out, the new faded 
   assert.ok(!context.rec.disconnects.includes(fadeIn), 'the new kept');
 });
 
+test('built again twice: the second fades out what the first faded in through the fade it came in by, the generation and its copies alike', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let now = 4;
+  const context = new StandInContext(() => now);
+  const what = new WebAudioBuilder({ context, beat: () => 0.5, random: () => 0.5 }).build(TONE, {
+    into: context.destination,
+  });
+  what.rebuild(TONE);
+  const [, fadeIn] = into(context, context.destination);
+  now = 5;
+  what.rebuild(TONE);
+  assert.deepEqual(
+    fadeIn.gain.events,
+    [
+      ['set', 0, 4],
+      ['linear', 1, 4 + CROSSFADE],
+      ['set', 1, 5],
+      ['linear', 0, 5 + CROSSFADE],
+    ],
+    'faded out by the fade it came in by',
+  );
+  const copied = built(SYNTH);
+  const destination = copied.context.createGain();
+  copied.what.add(['voice', '1'], 3.5, destination);
+  copied.what.rebuild(SYNTH);
+  const [, copyIn] = into(copied.context, destination);
+  copied.what.rebuild(SYNTH);
+  assert.deepEqual(copyIn.gain.events.at(-1), ['linear', 0, 4 + CROSSFADE], "a copy's too");
+  assert.equal(into(copied.context, destination).length, 3, 'each generation by its own fade');
+});
+
 test('what was told kept as it was built again: the values set, a macro by its own address, the copies added', () => {
   const effect = built(UTILITY);
   effect.what.set(['level'], 0.3);

@@ -13,13 +13,17 @@ export function fadedThrough(
   outputs: readonly AudioNode[],
   { into, levels: [from, to], fade, now }: { into: AudioNode; levels: [number, number]; fade: GainNode; now: number },
 ): void {
-  fade.gain.setValueAtTime(from, now);
-  fade.gain.linearRampToValueAtTime(to, now + CROSSFADE);
+  fadedBy(fade, [from, to], now);
   fade.connect(into);
   for (const output of outputs) {
     output.disconnect(into);
     output.connect(fade);
   }
+}
+// a fade from one level to another over the crossfade, from now
+export function fadedBy(fade: GainNode, [from, to]: [number, number], now: number): void {
+  fade.gain.setValueAtTime(from, now);
+  fade.gain.linearRampToValueAtTime(to, now + CROSSFADE);
 }
 // a sound no longer led into where it went: a node's input or a param, as Web Audio unwires each
 export function disconnectFrom(source: AudioNode, destination: Destination): void {
