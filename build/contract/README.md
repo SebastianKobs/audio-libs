@@ -11,7 +11,7 @@ built.automate(['voice', '3', 'filter', 'frequency'], automation);    // a lane'
 built.preset({ 'filter/frequency': 900 }, { 'filter/slope': '12' }); // its values together; a setting changed, a rebuild
 built.tempo(60 / 96);                                     // each synced time following a new beat
 const voice = ['synth', 'voice', '3'];                     // a pool's copy, by the pool's name and its number
-built.add(voice, at);                                     // built from the pool's child, wired by its rule, its sources started at its time
+built.add(voice, at, into);                               // built from the pool's child, wired by its rule, its sources started at its time, its outputs into `into` where one is given
 built.stopBy(voice, silent);                              // its sources stopped by when it's silent, as its owner works it out
 built.letGo(voice);                                       // once it has rung out, as its owner says
 built.rebuild(plan);                                      // a setting or its structure changed: built again, the old ringing out
@@ -22,6 +22,6 @@ built.dispose();
 | | |
 |---|---|
 | `Builder<Into>` | handed a plan and where its sound goes, a builder's own (Web Audio's a node), it builds it and hands back what's built (`builder.ts`) |
-| `Built` | what's built: a param set by its address, now, at a time or gliding there (`When`, `libs/automation/`), a choice as its param's choices have it; automated, its events' times from a time; a preset's values set together, a setting it changes a rebuild; a new tempo, each synced time following it; a pool's copy added and let go by its own address, the pool's name and its number, an instrument's voice and a desk's channel alike, its sources started at a time, now unless given, stopped by a time as it's gone silent, none later than its own stop; built again from a plan, a setting or its structure changed, the old ringing out; when what a block makes has faded for good, an envelope's, so a voice's owner knows when it has rung out (`faded()`); the placeholders it put in, by address, a block's sound passed straight through, a source silent; disposed (`built.ts`) |
+| `Built` | what's built: a param set by its address, now, at a time or gliding there (`When`, `libs/automation/`), a choice as its param's choices have it; automated, its events' times from a time; a preset's values set together, a setting it changes a rebuild; a new tempo, each synced time following it; a pool's copy added and let go by its own address, the pool's name and its number, an instrument's voice and a desk's channel alike, its sources started at a time, now unless given, its outputs into a destination of its own where one is given, in place of its composite's, stopped by a time as it's gone silent, none later than its own stop; built again from a plan, a setting or its structure changed, the old ringing out; when what a block makes has faded for good, an envelope's, so a voice's owner knows when it has rung out (`faded()`); the placeholders it put in, by address, a block's sound passed straight through, a source silent; disposed (`built.ts`) |
 
 Types only: what meets them is tested where it's built (`libs/build/web-audio/`).

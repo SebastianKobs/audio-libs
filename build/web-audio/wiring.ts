@@ -71,7 +71,7 @@ export function compositeJacks(
 }
 // One wire made inside a composite, by names: from a child's output or its own input, into a child's
 // input or param or its own output. Where its own jack has no node, what it leads to is collected.
-export function wireInside(
+function wireInside(
   node: Node,
   { from, to }: Wire,
   {
@@ -93,6 +93,27 @@ export function wireInside(
     return;
   }
   (collected!.outputs[(to as { output: string }).output] ??= []).push(...sources); // none of a child's: its own output
+}
+// A copy's pool wires made inside its composite. Given a destination of its own, the wires to the
+// composite's own output aren't made: the copy's outputs they leave from go into it, and are returned.
+export function wireCopy(
+  node: Node,
+  wires: readonly Wire[],
+  { children, own }: { children: ReadonlyMap<string, Jacks>; own: OwnJacks },
+  into?: AudioNode,
+): AudioNode[] {
+  const leaving: AudioNode[] = [];
+  for (const wire of wires) {
+    if (!into || !('output' in wire.to)) {
+      wireInside(node, wire, { children, own });
+      continue;
+    }
+    if ('node' in wire.from) {
+      leaving.push(...(children.get(wire.from.node)!.outputs[wire.from.output] ?? [])); // a well-formed plan's child
+    }
+  }
+  leaving.forEach((output) => connectInto(output, into!));
+  return leaving;
 }
 // a sound into a node's input or into a param, as Web Audio wires each
 export function connectInto(source: AudioNode, destination: Destination): void {

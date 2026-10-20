@@ -76,6 +76,17 @@ test("a voice added from an instrument's pool: built from its voice card, into t
   assert.equal(made('constant').length, 2, 'each its envelope, built');
 });
 
+test("a copy added with a destination of its own: its output into it, not into the composite's", () => {
+  const { context, what, made } = built(SYNTH);
+  const [out] = into(context, context.destination);
+  const destination = context.createGain();
+  what.add(['voice', '1'], undefined, destination);
+  what.add(['voice', '2']);
+  const [vca, vcaOfSecond] = made('gain').filter((node) => node !== out && node !== destination);
+  assert.deepEqual(outOf(context, vca), [destination], 'its output into its destination alone');
+  assert.deepEqual(outOf(context, vcaOfSecond), [out], 'a copy with none: into its composite, as before');
+});
+
 test("a voice's placeholders by its own address, gone as it's let go", () => {
   const { what } = built(withTheremin(SYNTH));
   what.add(['voice', '1']);

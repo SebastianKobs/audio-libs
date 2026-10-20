@@ -4,7 +4,8 @@
 //     its targets; a choice by its index, as its block's param holds it; a placeholder's left alone;
 //   - a preset's values set together; a new tempo told what follows it;
 //   - a pool's copy added by its own address, its pool's name and its number (my tap/3), wired by
-//     its rule, its sources started at its time, now unless given; let go;
+//     its rule, its sources started at its time, now unless given, its outputs into a destination
+//     of its own where it's given one; let go;
 //   - built again: the new beside the old, its inputs moved over, the values told and the copies
 //     added kept, the old ringing out, faded where it makes sound of its own (rebuild.ts); a preset
 //     that changes a setting built again with it;
@@ -41,7 +42,7 @@ import { BuiltLookup } from './lookup.ts';
 import { BuiltParts, type PoolHolder } from './parts.ts';
 import { BuiltReadings } from './readings.ts';
 import { CROSSFADE, disconnectFrom, fadedThrough, RING_OUT } from './rebuild.ts';
-import { connectInto, wireInside, type Jacks } from './wiring.ts';
+import { connectInto, wireCopy, type Jacks } from './wiring.ts';
 
 // a copy as added: its parts, the composite it's in, its name there as its wires name it, its address, to add it again
 interface Copy {
@@ -50,6 +51,8 @@ interface Copy {
   readonly name: string;
   readonly address: Address;
   readonly at: number | undefined; // when it was added for, none now
+  readonly into: AudioNode | undefined; // where its outputs go, in place of its composite's own output
+  readonly outputs: readonly AudioNode[]; // its outputs that lead into it, none without
 }
 // what's built of one plan: its plan, its parts, its jacks at the top, its copies by their addresses as text
 interface Generation {
@@ -138,8 +141,8 @@ export class WebAudioBuilt implements Built {
   }
   // A pool's copy added by its own address, its pool's name and its number from 1 (my tap/3):
   // built from the pool's child, wired by its rule, set by its address; its sources started at a
-  // time, now unless given.
-  add(copy: Address, at?: number): void {
+  // time, now unless given. Given a destination, its outputs go into it, not into the composite's.
+  add(copy: Address, at?: number, into?: AudioNode): void {
     const pool = copy.slice(0, -1); // its pool's address: the pool's parent's, and its name
     const number = copy.at(-1) ?? '';
     const holder = this.#now.parts.poolHolders.get(addressText(pool.slice(0, -1)));
@@ -157,11 +160,9 @@ export class WebAudioBuilt implements Built {
     }
     const parts = new BuiltParts();
     holder.children.set(name, this.#building.copied(node, copy, parts));
-    for (const wire of wires) {
-      wireInside(holder.node, wire, { children: holder.children, own: holder.own });
-    }
+    const outputs = wireCopy(holder.node, wires, holder, into);
     this.#now.parts.takeIn(parts);
-    this.#now.copies.set(addressText(copy), { parts, holder, name, address: copy, at });
+    this.#now.copies.set(addressText(copy), { parts, holder, name, address: copy, at, into, outputs });
     parts.startSources(at);
   }
   // A sound fed into a node's input by its address, its main one unless named:
@@ -240,8 +241,12 @@ export class WebAudioBuilt implements Built {
       this.#faded(this.#now, [0, 1]);
       stoppedBy(old, this.#context().currentTime + CROSSFADE);
     }
-    for (const { address, at } of old.copies.values()) {
-      this.add(address, at);
+    for (const copy of old.copies.values()) {
+      this.add(copy.address, copy.at, copy.into);
+      if (copy.into && copy.parts.sources.length > 0) {
+        this.#fadedCopy(copy, [1, 0]);
+        this.#fadedCopy(this.#added(copy.address), [0, 1]);
+      }
     }
     this.#feeding.feedAgain();
     for (const [text, value] of this.#told) {
@@ -269,9 +274,17 @@ export class WebAudioBuilt implements Built {
   }
   // a generation's main output faded from one level to another, through a fade it keeps
   #faded({ top, parts }: Generation, levels: [number, number]): void {
+    this.#fadedThrough(top.outputs.out ?? [], parts, this.#building.into, levels);
+  }
+  // a copy's outputs into its destination faded from one level to another, through a fade it keeps
+  #fadedCopy({ outputs, parts, into }: Copy, levels: [number, number]): void {
+    this.#fadedThrough(outputs, parts, into!, levels); // a copy with a destination
+  }
+  // outputs faded from one level to another on their way into a destination, the fade kept with the parts
+  #fadedThrough(outputs: readonly AudioNode[], parts: BuiltParts, into: AudioNode, levels: [number, number]): void {
     const context = this.#context();
     const fade = parts.keep(context.createGain());
-    fadedThrough(top.outputs.out ?? [], { into: this.#building.into, levels, fade, now: context.currentTime });
+    fadedThrough(outputs, { into, levels, fade, now: context.currentTime });
   }
   #context(): BaseAudioContext {
     return this.#building.context;

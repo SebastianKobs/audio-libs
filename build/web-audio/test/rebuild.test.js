@@ -121,6 +121,39 @@ test('a copy added at its time, built again: added again at that time, its sourc
   assert.deepEqual([again.starts, againNow.starts], [[[3.5]], [[]]], 'at its time; one added now, now');
 });
 
+test('a copy with a destination of its own, built again: added again into it, the old faded out and the new in there', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { context, what, made } = built(SYNTH);
+  const destination = context.createGain();
+  what.add(['voice', '1'], 3.5, destination);
+  const [oldVca] = outOf(context, made('oscillator')[0]);
+  what.rebuild(SYNTH);
+  const [fadeOut, fadeIn] = into(context, destination);
+  assert.deepEqual(
+    fadeOut.gain.events,
+    [
+      ['set', 1, 4],
+      ['linear', 0, 4 + CROSSFADE],
+    ],
+    'the old faded out where it sounds',
+  );
+  assert.deepEqual(
+    fadeIn.gain.events,
+    [
+      ['set', 0, 4],
+      ['linear', 1, 4 + CROSSFADE],
+    ],
+    'the new faded in',
+  );
+  assert.deepEqual(outOf(context, oldVca), [fadeOut], 'the old copy into its fade');
+  const [newVca] = outOf(context, made('oscillator')[1]);
+  assert.deepEqual(outOf(context, newVca), [fadeIn], 'the new copy into its fade');
+  assert.deepEqual(made('oscillator')[1].starts, [[3.5]], 'added again at its time');
+  t.mock.timers.tick(RING_OUT);
+  assert.ok(context.rec.disconnects.includes(fadeOut), 'the old fade let go with it');
+  assert.ok(!context.rec.disconnects.includes(fadeIn), 'the new kept');
+});
+
 test('a preset that changes a setting: built again with it, its values set on the new; one that keeps it, passed over', () => {
   const { what, made } = built(UTILITY);
   what.preset({ 'pan/pan': 0.5 }, { 'pan/law': 'pan pot' });
