@@ -1,11 +1,12 @@
-// ---------- view/models/transport-lane: the transport as its lane shows it. Pure ----------
+// ---------- view/transport/models/transport-lane: the transport as its lane shows it. Pure ----------
 // Whether the music plays, and where it is, bar and beat, as a DAW's transport bar shows it.
 // Read live, through what's handed in:
 //   - the transport, in the lane's own words (Playing);
 //   - the clock: its time now, its grid's place for a time, its meter;
 //   - the playhead's place, where it's set back, the arrangement's.
-// What ▶ and ■ do isn't the model's: its drawer sends them (libs/view/dom/transport-lane-view.ts).
-import { barTicks, beatTicks, STEP, type Meter } from '../../clock/index.ts';
+// What ▶ and ■ do isn't the model's: its drawer sends them
+//   (libs/view/transport/dom/transport-lane-view.ts).
+import { barTicks, beatTicks, STEP, type Meter } from '../../../clock/index.ts';
 
 // The transport as the lane reads it: whether the music plays.
 interface Playing {

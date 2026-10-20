@@ -1,11 +1,12 @@
-// ---------- view/dom/transport-lane-view: the transport's lane drawn ----------
-// ▶ and ■, and where the music is, bar and beat, its model's (TransportLane, libs/view/models/).
+// ---------- view/transport/dom/transport-lane-view: the transport's lane drawn ----------
+// ▶ and ■, and where the music is, bar and beat, its model's (TransportLane).
+// Model: libs/view/transport/models/transport-lane.ts.
 // Put at the top of the element it's handed, as a DAW's transport bar.
 // What ▶ and ■ do is the owner's: sent as messages, play and stop.
 // Its hints the owner's, in its own words.
 // Drawn on every frame, as a key may play and stop it too.
 import type { TransportLane } from '../models/index.ts';
-import { makeElement } from '../html/index.ts';
+import { makeElement } from '../../html/index.ts';
 
 // What ▶ and ■ send.
 type TransportMessage = { type: 'play' } | { type: 'stop' };

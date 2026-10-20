@@ -10,14 +10,12 @@
 //   - session-tracks.ts: the session's tracks as its mixer shows them, in the control
 //     surface's groups, and what sounded since the last look;
 //   - views.ts: the session view and the arrangement, which one is open;
-//   - transport-lane.ts: the transport as its lane shows it, whether it plays, bar and beat;
 //   - arrangement/: what was heard laid out in time, its rows, regions and lanes, the time in
 //     view and the playhead, in 16ths; what it reads in its own words (libs/view/control-surface/); a region's notes'
 //     and a lane's shapes, as they're drawn; what the desk declares, read from its view models.
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export { Session, type GroupShown, type TrackShown } from './session.ts';
 export { SessionTracks } from './session-tracks.ts';
-export { TransportLane } from './transport-lane.ts';
 export { Views, type ViewName } from './views.ts';
 export { Arrangement, type PlacedLane, type PlacedRegion } from './arrangement/arrangement.ts';
 export { declaredBy } from './arrangement/declared.ts';

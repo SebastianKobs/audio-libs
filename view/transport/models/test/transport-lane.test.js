@@ -1,4 +1,5 @@
-// The transport's lane as a model (mockup/src/libs/view/models/transport-lane.ts): whether the music plays, and where it is,
+// The transport's lane as a model (libs/view/transport/models/transport-lane.ts):
+// whether the music plays, and where it is,
 // bar and beat, counted from bar 1 as the arrangement's ruler numbers them; the playhead's place while it's set back
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

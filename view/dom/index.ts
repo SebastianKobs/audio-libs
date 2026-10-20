@@ -3,7 +3,6 @@
 // Its parts:
 //   - clip-tracks-view.ts: the clip tracks drawn, a column each, a chip a clip, lit while it
 //     sounds, its ▶ and its × handed to its model;
-//   - transport-lane-view.ts: the transport's lane drawn, ▶ and ■ sent, bar and beat;
 //   - session-drawing.ts: when the session view is drawn: on a beat, from a beat back as it's
 //     shown, a beat after the last while playing back, held under a pressed pointer;
 //   - view-strip.ts: the strip along the bottom, the session view and the arrangement, drawn
@@ -17,6 +16,5 @@ export {
   type ArrangementColors,
   type Drawn as ArrangementDrawn,
 } from './arrangement/arrangement-view.ts';
-export { TransportLaneView, type TransportHints } from './transport-lane-view.ts';
 export { SessionDrawing } from './session-drawing.ts';
 export { ViewStrip } from './view-strip.ts';
