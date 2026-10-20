@@ -1,14 +1,18 @@
-// ---------- libs/midi/messages: what a control surface plays, MIDI 2.0's channel voice messages as values (the sequencer's until V1) ----------
-// MIDI 2.0's model and names, not its packets (M2-104-UM): the app's values, a velocity 0 to 1, a pitch a MIDI note number, each at a
-// clock time. A note's index is its note number as its source hands it out (rotation.ts), so two notes of one pitch keep apart. Each
-// kind comes with the step that first sends it (G0, mockup/architecture/done.md): note on and note off with your taps (G0a), per-note
-// controllers and per-note management with how a note is heard (G0b), controllers with a replay track's (G0d). A controller's change,
-// a per-note one's too, carries how it moves there, as an automation point's curve: jumping at its time, or gliding from it by a time
-// constant (glide), so what's recorded plays back as it was heard
+// ---------- libs/midi/messages: what a control surface plays, MIDI 2.0's channel voice messages as values ----------
+// MIDI 2.0's model and names, not its packets (M2-104-UM):
+//   - values in plain units: a velocity 0 to 1, a pitch a MIDI note number,
+//     each at a clock time;
+//   - a note's index its note number as its source hands it out (rotation.ts),
+//     so two notes of one pitch keep apart;
+//   - its kinds: note on and note off; per-note controllers and per-note
+//     management, how a note is heard; a track's controllers.
+// A controller's change, a per-note one's too, carries how it moves there,
+// as an automation point's curve: jumping at its time, or gliding from it by
+// a time constant (glide), so what's recorded plays back as it was heard
 import type { Seconds } from '../clock/index.ts';
 import type { TimedValue } from '../automation/index.ts';
 
-// a note that starts: its index, pitch and velocity; which part of its clip's element sounds it (a bulb, a leaf, a crystal)
+// a note that starts: its index, pitch and velocity; which part of its clip's owner sounds it, by its number
 export interface NoteOn {
   type: 'note on';
   index: number;
@@ -23,12 +27,17 @@ export interface NoteOff {
   index: number;
   t: Seconds;
 }
-// a note's per-note controllers, each in its own units, not MIDI's numbers. MIDI 2.0's registered ones (M2-104-UM, Appendix A, Table 11):
-// those a note is heard by, #7 Volume a gain, #10 Pan from -1 to 1, #74 Brightness a lowpass's cutoff in Hz, #91 Effects 1 Depth its
-// reverb send's gain; how it's played, #77 Vibrato Depth in cents, #76 Vibrato Rate in Hz, #2 Breath from 0 to 1, #75 Decay Time in
-// seconds (LAY14a3); #3 Pitch 7.25, a MIDI note number, which the spec gives a sender that controls a note's pitch all its life, its
-// glides too (4.2.14). And assignable ones, by name, a note's own values: its rise, in seconds, how long a drone swells (G0c); its
-// bend, in semitones, where it slides in from (G0d2)
+// A note's per-note controllers, each in its own units, not MIDI's numbers.
+// MIDI 2.0's registered ones (M2-104-UM, Appendix A, Table 11):
+//   - those a note is heard by: #7 Volume a gain, #10 Pan from -1 to 1,
+//     #74 Brightness a lowpass's cutoff in Hz, #91 Effects 1 Depth its reverb
+//     send's gain;
+//   - how it's played: #77 Vibrato Depth in cents, #76 Vibrato Rate in Hz,
+//     #2 Breath from 0 to 1, #75 Decay Time in seconds;
+//   - #3 Pitch 7.25, a MIDI note number, which the spec gives a sender that
+//     controls a note's pitch all its life, its glides too (4.2.14).
+// Assignable ones, by name, a note's own values: its rise, in seconds, how
+// long a held note swells; its bend, in semitones, where it slides in from.
 export type PerNoteControllerName =
   | 'volume'
   | 'pan'

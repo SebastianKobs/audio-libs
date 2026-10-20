@@ -1,6 +1,6 @@
 // ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes, for an arrangement to show (G1b) ----------
-// As Ableton records the session into its arrangement (mockup/architecture/views.md): every play the stream carries, the garden's, yours
-// and the background's, into the region it's of (play.region, G1a), told apart by its element and its number, a region's number its
+// As Ableton records the session into its arrangement (mockup/architecture/views.md): every play the stream carries, live or not,
+// into the region it's of (play.region, G1a), told apart by its element and its number, a region's number its
 // source's; a play with none, a region of its own; a launched clip's plays left out (E2), as nothing a user launches is recorded. A region
 // runs from its first note to the end of its last; a held note open until its note off comes, a play of its own by the note's index, its
 // glides added to it (G2a); one still held as its element's next region begins, a held part's as its key changes, ends there and starts
@@ -17,8 +17,9 @@ import { entryOf } from '../util/index.ts';
 import { changedOn, thinNote, valuesAt, type RecordedNote } from './note-lanes.ts';
 import { TrackLanes, type Lane } from './track-lanes.ts';
 
-// a region as recorded: the element it's of and its clip, its kind and role, whether you played it, its replay track and until when it
-// holds it, as its first play had them; its notes, and from when to when, an open one's end never
+// A region as recorded, as its first play had them: the element it's of and
+// its clip, its kind and role, whether it was played live, its track and until
+// when it holds it; its notes, and from when to when, an open one's end never.
 export interface Region {
   owner: unknown;
   clip: unknown;
@@ -93,8 +94,10 @@ export class Recorder {
       thinNote(note, now - LATEST); // a note's change that changes nothing, thinned once nothing comes that late
     }
   }
-  // a held note's end, as it comes, on its element's note of that index still held (G2a); one let go before it sounded, its note off for
-  // a time before its note on's, as a trace winding into a tower ends a phrase's note still to come, no length, never less
+  // A held note's end, as it comes, on its element's note of that index still held.
+  // One let go before it sounded, its note off for a time before its note on's
+  // (a gesture ending a phrase's note still to come), no length,
+  // never less.
   #told(owner: unknown, ends: readonly NoteOff[]): void {
     for (const end of ends) {
       const note = this.#noteOf(owner, end.index, { held: true });

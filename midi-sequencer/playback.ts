@@ -1,6 +1,6 @@
 // ---------- midi-sequencer/playback: the recording played back from a time, its regions' notes as heard, its lanes with them (P3a, P4b) ----------
-// As Ableton plays its arrangement (mockup/architecture/done.md, P3, P4): each region's notes sent into the input as they come due, offset
-// from the recording's time to now, to the track it was recorded on, by name, with its clip, as you played it or not, marked played back
+// As Ableton plays its arrangement: each region's notes sent into the input as they come due, offset
+// from the recording's time to now, to the track it was recorded on, by name, with its clip, live or not, marked played back
 // and left out of the recording, its sender its own, so its notes don't meet another sender's on a track. A note's start, its glides, its
 // changes and its end each sent once it comes due, not all at once, so a stop can still let go what sounds; played to the end, what sounds
 // there rings out as it was recorded. And each lane's points, a controller on the lane's track, picked up where it starts at its value
@@ -33,9 +33,9 @@ interface PutBack<Track extends string> extends PlayedLane<Track> {
   value: number;
 }
 
-const SENDER = 'playback'; // its sender at the input, kept apart from the live garden's
+const SENDER = 'playback'; // its sender at the input, kept apart from live play's
 
-// the recording played back from a time (play()), what's due sent each tick (due()); stopped or jumping (stop()), left for the live garden
+// the recording played back from a time (play()), what's due sent each tick (due()); stopped or jumping (stop()), left for live play
 // (leave()) or played to the end (finish()); where it plays (position()), when it plays to the end (endsAt()), and whether it has (ended())
 export class RecordingPlayer<Track extends string> {
   readonly #input: Pick<Input<Track>, 'send'>;
@@ -100,7 +100,7 @@ export class RecordingPlayer<Track extends string> {
   stop(t: Seconds): void {
     this.#player.stop(t);
   }
-  // left for the live garden at a clock time, before the end: the strips back as they were when it started, but one moved by hand; what
+  // left for live play at a clock time, before the end: the strips back as they were when it started, but one moved by hand; what
   // sounds let go then
   leave(t: Seconds): void {
     this.#putLanesBack(t);
