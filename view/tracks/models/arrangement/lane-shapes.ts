@@ -3,8 +3,6 @@
 import { automationOf, Levels, type TimedValue } from '../../../../automation/index.ts';
 import { firstAfter, SETTLED } from '../../../../util/index.ts';
 
-// a lane's point, as recorded: a value at a time, jumping there, or gliding there by a time constant (glide)
-type LanePoint = TimedValue;
 // a corner of a lane's line: a value at a time
 export interface Corner {
   t: number;
@@ -23,7 +21,7 @@ interface Span {
 //   - points at one time: passed through in turn, as a DAW shows its breakpoints;
 //   - held at the last value to the end; nothing before the first point.
 // Drawn from the last points before the view.
-export function laneLine(points: readonly LanePoint[], span: Span): Corner[] {
+export function laneLine(points: readonly TimedValue[], span: Span): Corner[] {
   if (!points.length || points[0]!.t > span.to) {
     return [];
   }
@@ -37,7 +35,7 @@ export function laneLine(points: readonly LanePoint[], span: Span): Corner[] {
   return corners;
 }
 // the first point drawn: the first of those at the time of the last by the view's start
-function firstDrawn(points: readonly LanePoint[], from: number): number {
+function firstDrawn(points: readonly TimedValue[], from: number): number {
   let index = Math.max(0, firstAfter(points, from, (point) => point.t) - 1);
   while (index > 0 && points[index - 1]!.t === points[index]!.t) {
     index--;
@@ -45,7 +43,7 @@ function firstDrawn(points: readonly LanePoint[], from: number): number {
   return index;
 }
 // where the line comes in at the first point drawn: the level before it; nothing before, its own value
-function comingIn(points: readonly LanePoint[], first: number, levels: Levels): Corner {
+function comingIn(points: readonly TimedValue[], first: number, levels: Levels): Corner {
   const { t, value } = points[first]!;
   if (first === 0) {
     return { t, value };
@@ -57,7 +55,7 @@ function comingIn(points: readonly LanePoint[], first: number, levels: Levels): 
 //   - a glide: its curve sampled until it has settled, then held;
 //   - at the next point's time: passed through, nothing held.
 // It ends coming up to the next point, that point's jump not yet made.
-function piece({ t, value, glide }: LanePoint, levels: Levels, { to, step }: Span, corners: Corner[]): void {
+function piece({ t, value, glide }: TimedValue, levels: Levels, { to, step }: Span, corners: Corner[]): void {
   if (!glide) {
     put(corners, { t, value });
   }
