@@ -1,5 +1,5 @@
 // ---------- build/instrument/test-notes: a device view's test note ----------
-// An instrument of its own for each key, made at its first test note, played straight into it:
+// An input of its own on its role's instrument for each key, made at its first test note, played straight into it:
 //   - not a track's: a sequencer hands out its own note numbers, which the test note's would
 //     meet;
 //   - not through a sequencer, so it isn't recorded.

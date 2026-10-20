@@ -1,6 +1,7 @@
 // A multitimbral sound module (mockup/src/libs/build/instrument/sound-module.ts), on a stand-in for what's built, its bank
 // the tests' file of instruments (libs/plan/instrument/test/pluck.js):
-//   - a part for each track, an instrument playing a patch from its bank by name, built where it's told;
+//   - a part for each patch, an instrument playing a patch from its bank by name, built where it's told
+//     the first time it's asked for, then kept, its voices sounding counted;
 //   - a patch edited in the bank: every part that plays it edited, its own or a pad's of its rack; one made after an
 //     edit made as edited;
 //   - a new tempo told every part, one unchanged passed over.
@@ -27,20 +28,30 @@ function making() {
 }
 const tuned = (tune) => ({ ...INSTRUMENTS.patches.bright, values: { 'osc 1/tune': tune } });
 
-test('a part for each track: an instrument playing a patch from its bank by name', () => {
+test("a part for each patch, made the first time it's asked for, then kept: asked again, the same", () => {
   const { module } = moduleOn();
   const { built, where } = making();
-  const part = module.part('bright', where);
+  let makings = 0;
+  const makingOnce = () => {
+    makings += 1;
+    return where;
+  };
+  assert.equal(module.sounding('bright'), 0, 'none made yet');
+  const part = module.part('bright', makingOnce);
   assert.equal(part.patch, 'bright');
+  assert.equal(module.part('bright', makingOnce), part);
+  assert.equal(makings, 1, 'its making asked for once');
   part.receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));
   assert.deepEqual(built.added, [['voice/1', 5]]);
+  assert.equal(module.sounding('bright'), 1);
+  assert.equal(module.sounding('kit'), 0, 'a patch with no part made');
 });
 
 test('a patch edited in the bank: every part that plays it edited, its own or a pad of its rack; not one that plays another', () => {
   const { bank, module } = moduleOn();
   const parts = ['bright', 'kit', 'rtlprnf'].map((patch) => {
     const { built, where } = making();
-    const part = module.part(patch, where);
+    const part = module.part(patch, () => where);
     part.receive(noteMessages({ pitch: 38, velocity: 1, t: 5 }, 1));
     return built;
   });
@@ -55,7 +66,7 @@ test('a part made after an edit made as edited; a new tempo told every part, one
   const { bank, module } = moduleOn();
   bank.set('bright', tuned(7));
   const { built, where } = making();
-  module.part('bright', where).receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));
+  module.part('bright', () => where).receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));
   assert.ok(built.told.some(([address, value]) => address === 'voice/1/osc 1/tune' && value === 7));
   module.tempo(0.4);
   module.tempo(0.4);

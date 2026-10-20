@@ -1,13 +1,14 @@
 // ---------- build/instrument/sound-module: a multitimbral sound module ----------
-// As a rack synth with its parts: a part for each track, each an instrument playing a patch
+// As a rack synth with its parts: a part for each patch, each an instrument playing a patch
 // from the module's bank by name, as a program change picks one.
-//   - A part made where it's told, by the builder handed in (instrument.ts).
+//   - A part made where it's told, by the builder handed in (instrument.ts), the first time it's
+//     asked for, then kept: every track playing the patch plays into it.
 //   - A patch edited in the bank: every part that plays it edited, its own or a pad's of its
 //     rack; a part made after an edit made as edited.
 //   - A new tempo told every part, one unchanged passed over.
 import type { Preset } from '../../plan/planner/index.ts';
 import type { Instruments } from '../../plan/instrument/index.ts';
-import type { LiveCopies } from '../../util/index.ts';
+import { entryOf, type LiveCopies } from '../../util/index.ts';
 import { Instrument, type InstrumentMaking } from './instrument.ts';
 
 // where a part is made, and how: all an instrument's making but its file and its patch
@@ -16,7 +17,7 @@ export type PartMaking<Into> = Omit<InstrumentMaking<Into>, 'instruments' | 'pat
 export class SoundModule<Into> {
   readonly #instruments: Instruments;
   readonly #bank: LiveCopies<Preset>;
-  readonly #parts: Instrument<Into>[] = [];
+  readonly #parts = new Map<string, Instrument<Into>>(); // by patch, made once
   readonly #edited = new Set<string>(); // the patches edited, by name
   #beat: number | undefined; // the beat last told, none at first
 
@@ -27,13 +28,20 @@ export class SoundModule<Into> {
     this.#bank = bank;
     bank.onSet((name, preset) => this.#edit(name, preset));
   }
-  // a part playing a patch, by its name, made where it's told, as its patch is edited now
-  part(patch: string, making: PartMaking<Into>): Instrument<Into> {
+  // the part playing a patch, by its name: made where making() says, the first time it's asked for
+  part(patch: string, making: () => PartMaking<Into>): Instrument<Into> {
+    return entryOf(this.#parts, patch, () => this.#make(patch, making()));
+  }
+  // the voices a patch's part sounds now, 0 for one not made yet
+  sounding(patch: string): number {
+    return this.#parts.get(patch)?.sounding ?? 0;
+  }
+  // a part made as its patch is edited now: the edits replayed onto it
+  #make(patch: string, making: PartMaking<Into>): Instrument<Into> {
     const instrument = new Instrument({ ...making, instruments: this.#instruments, patch });
     for (const name of [...this.#edited].filter((edited) => instrument.plays(edited))) {
       instrument.edited(name, this.#bank.of(name)!); // edited: the bank has it
     }
-    this.#parts.push(instrument);
     return instrument;
   }
   // a new beat's length, told every part; one unchanged passed over
@@ -42,7 +50,7 @@ export class SoundModule<Into> {
       return;
     }
     this.#beat = beat;
-    for (const part of this.#parts) {
+    for (const part of this.#parts.values()) {
       part.tempo(beat);
     }
   }
@@ -50,7 +58,7 @@ export class SoundModule<Into> {
   // a patch edited in the bank: every part that plays it edited
   #edit(name: string, preset: Preset): void {
     this.#edited.add(name);
-    for (const part of this.#parts.filter((each) => each.plays(name))) {
+    for (const part of [...this.#parts.values()].filter((each) => each.plays(name))) {
       part.edited(name, preset);
     }
   }

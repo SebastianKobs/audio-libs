@@ -5,10 +5,10 @@
 //   - silence.ts: when a voice has rung out, worked out from its voice card;
 //   - instrument.ts: one instrument playing one patch from a file of instruments, its voices,
 //     built by the builder handed in, its edits glided or built again;
-//   - sound-module.ts: a multitimbral sound module, a part for each track, each playing a
+//   - sound-module.ts: a multitimbral sound module, a part for each patch, each playing a
 //     patch from its bank, an edit reaching every part that plays it;
-//   - test-notes.ts: a device view's test note, an instrument of its own for each key, pressed
-//     and let go as messages on a bus too.
+//   - test-notes.ts: a device view's test note, an input of its own on its role's instrument
+//     for each key, pressed and let go as messages on a bus too.
 export { Voices } from './voices.ts';
 export { Instrument, type InstrumentMaking } from './instrument.ts';
 export { SoundModule, type PartMaking } from './sound-module.ts';
