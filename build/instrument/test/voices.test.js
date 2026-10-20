@@ -44,10 +44,10 @@ function rackOf(keys) {
 // a note setting of a voice card, as a macro with no targets
 const setting = (name, value) => ({ spec: { name, unit: 's', range: [0, 10, 0.001] }, value, maps: [] });
 // voices played into the stand-in, the time now as the test sets it
-function voicesOn(plan = SYNTH, own) {
+function voicesOn(plan = SYNTH, own, polyphony) {
   const built = new BuiltStandIn();
   const clock = { now: 0 };
-  const voices = new Voices(built, plan, () => clock.now, own);
+  const voices = new Voices(built, plan, () => clock.now, own, polyphony);
   return { built, clock, voices };
 }
 const played = (voices, note, index = 1) => voices.receive(noteMessages(note, index));
@@ -269,4 +269,51 @@ test("a drum rack's own values, by their pads' addresses: each pad's on its own 
       ['pad 38/1/vca/gain', 0.75, { glide: 0.05 }],
     ],
   );
+});
+
+test("two inputs' notes of one index kept apart, each voice added into what its input gives", () => {
+  const { built, voices } = voicesOn();
+  const first = voices.input(() => 'first');
+  const second = voices.input(() => 'second');
+  first.receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 0));
+  second.receive(noteMessages({ pitch: 64, velocity: 1, t: 5 }, 0));
+  first.receive([{ type: 'note off', index: 0, t: 6 }]);
+  assert.deepEqual(built.added, [
+    ['voice/1', 5, 'first'],
+    ['voice/2', 5, 'second'],
+  ]);
+  const gates = built.told.filter(([address, value]) => address.endsWith('gate') && value === 0);
+  assert.deepEqual(gates, [['voice/1/envelope/gate', 0, { at: 6 }]], "the first's closed, the second's not");
+  played(voices, { pitch: 60, velocity: 1, t: 7 }, 0);
+  assert.deepEqual(built.added.at(-1), ['voice/3', 7], "its own input's: into none");
+});
+
+test('a note past its polyphony takes over the oldest voice: its gate closed first, else the oldest held; faded by its note volume, stopped, let go once silent; the voices sounding counted', () => {
+  const plan = synthWith({ note: { volume: [['vca', 'gain']] } });
+  const held = voicesOn(plan, undefined, () => 2);
+  played(held.voices, { pitch: 69, velocity: 1, t: 5 }, 1);
+  played(held.voices, { pitch: 64, velocity: 1, t: 5 }, 2);
+  assert.equal(held.voices.sounding, 2);
+  played(held.voices, { pitch: 60, velocity: 1, t: 7 }, 3);
+  const faded = (built) => built.told.filter(([address, value]) => address.endsWith('vca/gain') && value === 0);
+  assert.deepEqual(faded(held.built), [['voice/1/vca/gain', 0, { at: 7, glide: 0.05 }]], 'a tie: the first added');
+  assert.deepEqual(held.built.stoppedBy, [['voice/1', 7.25]]);
+  assert.deepEqual(held.built.added.at(-1), ['voice/3', 7]);
+  assert.equal(held.voices.sounding, 2, 'the one taken over not counted');
+  held.clock.now = 7.2;
+  held.voices.receive([]);
+  assert.deepEqual(held.built.letGone, [], 'still fading');
+  held.clock.now = 7.3;
+  held.voices.receive([]);
+  assert.deepEqual(held.built.letGone, ['voice/1']);
+  played(held.voices, { pitch: 62, velocity: 1, t: 8 }, 4);
+  assert.deepEqual(held.built.stoppedBy.at(-1), ['voice/2', 8.25], 'then the oldest held');
+
+  const released = voicesOn(plan, undefined, () => 2);
+  played(released.voices, { pitch: 69, velocity: 1, t: 5 }, 1);
+  played(released.voices, { pitch: 64, velocity: 1, t: 6 }, 2);
+  released.voices.receive([{ type: 'note off', index: 2, t: 6.5 }]);
+  played(released.voices, { pitch: 60, velocity: 1, t: 7 }, 3);
+  assert.deepEqual(released.built.stoppedBy.at(-1), ['voice/2', 7.25], 'its gate closed first, though a younger voice');
+  assert.deepEqual(faded(released.built), [['voice/2/vca/gain', 0, { at: 7, glide: 0.05 }]]);
 });
