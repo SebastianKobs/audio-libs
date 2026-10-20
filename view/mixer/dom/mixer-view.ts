@@ -186,11 +186,11 @@ export class MixerView {
     const kept = new Map(
       [...row.querySelectorAll<HTMLElement>('.group')].map((group) => [group.dataset.group!, group]), // each has its key
     );
-    groups.forEach(({ key, name, mine, tracks }, index) => {
+    groups.forEach(({ key, name, live, tracks }, index) => {
       const group = kept.get(key) ?? newGroup(key, name);
       kept.delete(key);
       const box = boxOf(group);
-      box.classList.toggle('you', mine);
+      box.classList.toggle('live', live);
       setShown(box, this.#look.tracksShown());
       setHtml(box, html`${tracks.map((track) => trackHtml(this.#models, track, levelOf))}`);
       const there = row.children[index] ?? null;
@@ -225,7 +225,7 @@ function busGroupHtml({ bus, members }: BusGroup, drawn: (strip: Strip) => Html)
   if (!members.length) {
     return html`${strips}`;
   }
-  return html`<div class="kind you">${strips}</div>`;
+  return html`<div class="kind bus-group">${strips}</div>`;
 }
 // How a strip is shown: the name it's given, where it goes, its devices opened by its
 // address, its sends by their returns' short labels, its level bar's level.
@@ -246,7 +246,7 @@ export function trackHtml(models: MixerViewBuilder, track: MixerTrack, levelOf: 
   const empty = !track.playing && !strip.volume.live;
   return stripHtml(strip, { ...lookOf(models, strip, track.name, levelOf), now: cellHtml(track.now), empty });
 }
-// what a track plays now, its cell: lit while it sounds, dimmed while its replay waits
+// what a track plays now, its cell: lit while it sounds, dimmed while its play waits
 function cellHtml({ text, lit, waiting }: TrackNow): Html {
   return html`<div class="cell${lit ? ' lit' : ''}${waiting ? ' waiting' : ''}">${text}</div>`;
 }

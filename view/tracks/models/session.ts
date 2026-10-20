@@ -1,12 +1,12 @@
 // ---------- view/tracks/models/session: what the session view shows of what's played. Pure ----------
 // Plays are kept per group of tracks, with what plays on each track:
-//   - a replay, on its replay track;
-//   - a note of your playing, on a track of its kind's pool.
+//   - a clip's play, on its group's track;
+//   - a note played live, on a track of its kind's pool.
 // A group has as many tracks as its plays ever used.
 // Loops: a loop holds its track while it plays (`until` never); each loop note is a play.
 // Held notes: a note with no length sounds until its note off, matched by its index.
-// groupOf(kind, live): the group a kind's replays go on, so visitors and residents can share one;
-// played live, the pool your playing of a kind goes on, none for a kind with none.
+// groupOf(kind, live): the group a kind's clips play on, so two kinds can share one;
+// played live, the pool a kind is played live on, none for a kind with none.
 // Times are the caller's.
 // The plays are read in the session's own words (HeardPlay): the MIDI sequencer's stream fits
 // them by their shape.
@@ -15,8 +15,8 @@ import type { TracksReadout } from '../readout/index.ts';
 import { placedOn } from './placed.ts';
 
 // A play as the session hears it:
-//   - owner: what plays it, a plant; clip: the clip it names, a visitor's motif;
-//   - kind: whose kind it is; live: your playing as you play it; track: its group's track;
+//   - owner: what plays it; clip: the clip it names, where it names one;
+//   - kind: whose kind it is; live: whether it's played live; track: its group's track;
 //   - notes: each its start, its length where it has one, its index; ends: held notes' note offs;
 //   - until: when it lets go of its track; playback: played back from the recording.
 interface HeardPlay {
@@ -92,23 +92,23 @@ export class Session {
     if (!placed) {
       return;
     }
-    const { group, track, yours } = placed;
+    const { group, track, live } = placed;
     letGo(group, play, play.ends ?? []);
     if (!play.notes.length) {
       return; // only note offs for held notes, handled by letGo() above
     }
     group.count = Math.max(group.count, track + 1);
-    group.plays.push(keptOf(play, track, yours));
+    group.plays.push(keptOf(play, track, live));
   }
   // Where a play goes, on the track it was played on.
-  // Your playing goes on its kind's pool, where it has one; a replay on its group.
+  // Played live, it goes on its kind's pool, where it has one; a clip's play on its group.
   // A play on no track goes nowhere.
-  #placed(play: HeardPlay): { group: Group; track: number; yours: boolean } | null {
+  #placed(play: HeardPlay): { group: Group; track: number; live: boolean } | null {
     const placed = placedOn(this.#tracks, play);
     if (!placed) {
       return null;
     }
-    return { group: this.#groupNamed(placed.group), track: placed.track, yours: play.live === true };
+    return { group: this.#groupNamed(placed.group), track: placed.track, live: play.live === true };
   }
   // A group by its name, made the first time a play goes on it.
   #groupNamed(name: string): Group {
@@ -116,11 +116,11 @@ export class Session {
   }
   // A look at `now`, covering the time since the last look (`since`).
   // Per track: what holds it, whether it sounded since,
-  // or else the replay waiting for its first note.
+  // or else the play waiting for its first note.
   // Per group: the clips that sounded since, which light.
-  // A replay shorter than the time between two looks still lights once.
-  // A play's clip: the one it names (a visitor's motif), else its owner (a plant's record).
-  // Let go: replays done before the last look, and a loop's older notes but its latest.
+  // A play shorter than the time between two looks still lights once.
+  // A play's clip: the one it names, else its owner.
+  // Let go: plays done before the last look, and a loop's older notes but its latest.
   at(now: number, since: number): Record<string, GroupShown> {
     const shown: Record<string, GroupShown> = {};
     for (const [name, group] of this.#groups) {
@@ -173,7 +173,7 @@ function look(group: Group, now: number, since: number): GroupShown {
       lit.add(play.clip);
     }
   }
-  // An empty track shows the replay placed on it next, waiting for its first note,
+  // An empty track shows the play placed on it next, waiting for its first note,
   // as a launched clip waits in Ableton.
   for (const play of next.sort((earlier, later) => earlier.from - later.from)) {
     const track = trackOf(tracks, play.track);
@@ -195,9 +195,9 @@ function trackOf(tracks: TrackShown[], index: number): TrackShown {
 // to: the last note's end; open (Infinity) while a note waits for its note off.
 // until: the play's own end, its tail included, where it gives one.
 // freedByNotes: the track is let go as the notes end when the tail isn't known here:
-//   - your playing;
-//   - a play with no end of its own, such as a replay played back from the recording.
-function keptOf(play: HeardPlay, track: number, yours: boolean): Kept {
+//   - a play played live;
+//   - a play with no end of its own, such as one played back from the recording.
+function keptOf(play: HeardPlay, track: number, live: boolean): Kept {
   const from = Math.min(...play.notes.map((note) => note.t));
   const held = new Set(play.notes.filter((note) => note.duration === undefined).map((note) => note.index ?? -1));
   const lengths = play.notes.filter((note) => note.duration !== undefined).map((note) => note.t + note.duration!);
@@ -210,7 +210,7 @@ function keptOf(play: HeardPlay, track: number, yours: boolean): Kept {
     from,
     to,
     until: play.until ?? to, // held on its track until then
-    freedByNotes: yours || play.until === undefined,
+    freedByNotes: live || play.until === undefined,
     playback: play.playback ?? false,
     held,
     ended,
@@ -218,7 +218,7 @@ function keptOf(play: HeardPlay, track: number, yours: boolean): Kept {
 }
 // Held notes let go as their note offs come.
 // A play ends once none of its notes is held; its track goes with it if freedByNotes.
-// Only the same sender's note off counts: a playback and the live garden number their
+// Only the same sender's note off counts: a playback and live play number their
 // notes apart, each from 0, so an index alone could match the wrong note.
 function letGo(
   group: Group,

@@ -1,11 +1,11 @@
 // ---------- view/tracks/models/session-tracks: the session's tracks as its mixer shows them. Pure ----------
 // From a look at the session (session.ts), in the control surface's groups (Tracks):
-//   1. the tracks with notes, in the groups' order, yours marked; a group shows once its first
-//      play adds a track;
+//   1. the tracks with notes, in the groups' order, those played live marked; a group shows
+//      once its first play adds a track;
 //   2. each track named from its group's name and numbered from 1, at its channel's address on
 //      the desk, with what it plays now;
-//   3. what sounded since the last look, for the folded sections' lights: a replay group's
-//      clips, and each lit track's channel.
+//   3. what sounded since the last look, for the folded sections' lights: the clips of a group
+//      not played live, and each lit track's channel.
 import { addressOf } from '../../../util/index.ts';
 import type { MixerGroup, MixerTrack } from '../../mixer/models/index.ts';
 import type { TracksReadout } from '../readout/index.ts';
@@ -26,21 +26,22 @@ export class SessionTracks {
   groups(seen: Readonly<Record<string, GroupShown>>): MixerGroup[] {
     return this.#tracks.groups
       .filter(({ group }) => seen[group]?.tracks.length)
-      .map(({ group, name, kind, mine }) => ({
+      .map(({ group, name, kind, live }) => ({
         key: group,
         name,
-        mine,
+        live,
         // seen[group] is there: filtered above
         tracks: seen[group]!.tracks.map((shown, index) => this.#track(group, kind, name, shown, index)),
       }));
   }
-  // What sounded since the last look: a replay group's clips, by its key ('clips flower'),
-  // and each lit track's channel, by its address as text. What those feed is the mixer's.
+  // What sounded since the last look: the clips of a group not played live, by its key
+  // ('clips <group>'), and each lit track's channel, by its address as text.
+  // What those feed is the mixer's.
   sounded(seen: Readonly<Record<string, GroupShown>>): Set<string> {
     const heard = new Set<string>();
-    for (const { group, mine } of this.#tracks.groups) {
+    for (const { group, live } of this.#tracks.groups) {
       const shown = seen[group];
-      if (!mine && shown?.lit.size) {
+      if (!live && shown?.lit.size) {
         heard.add(`clips ${group}`);
       }
       (shown?.tracks ?? []).forEach(({ lit }, index) => {
@@ -67,7 +68,7 @@ export class SessionTracks {
       playing: Boolean(playing),
     };
   }
-  // what a track plays, as its cell says it: its clip, a visitor's motif after it; a dash with none
+  // what a track plays, as its cell says it: its clip, a name its play gives after it; a dash with none
   #text(playing: unknown, kind: string, clip: unknown): string {
     if (!playing) {
       return '—';

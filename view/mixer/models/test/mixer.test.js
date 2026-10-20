@@ -113,7 +113,7 @@ test("a desk's channels, as a desk alone shows them: its own of the channel role
     {
       key: 'channels',
       name: 'replay',
-      mine: false,
+      live: false,
       tracks: [
         { address: ['my tap', '1'], name: 'my tap 1', now: nothing, playing: true },
         { address: ['my tap', '2'], name: 'my tap 2', now: nothing, playing: true },

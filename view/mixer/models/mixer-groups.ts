@@ -5,8 +5,8 @@
 import type { Address } from '../../../util/index.ts';
 import type { Mixer } from './mixer.ts';
 
-// What a track plays now, as its cell shows it: the clip, a visitor's motif named after it, a
-// dash with none; lit while it sounds; waiting while a replay waits for its first note.
+// What a track plays now, as its cell shows it: the clip, a name its play gives after it, a
+// dash with none; lit while it sounds; waiting while a play waits for its first note.
 export interface TrackNow {
   readonly text: string;
   readonly lit: boolean;
@@ -20,11 +20,11 @@ export interface MixerTrack {
   readonly now: TrackNow;
   readonly playing: boolean;
 }
-// a group of tracks: its key, its header's name, whether it's yours, its tracks
+// a group of tracks: its key, its header's name, whether it's played live, its tracks
 export interface MixerGroup {
   readonly key: string;
   readonly name: string;
-  readonly mine: boolean;
+  readonly live: boolean;
   readonly tracks: readonly MixerTrack[];
 }
 
@@ -45,5 +45,5 @@ export function channelGroups(mixer: Pick<Mixer, 'channels'>, name: string): Mix
     now: NOTHING,
     playing: true,
   }));
-  return [{ key: 'channels', name, mine: false, tracks }];
+  return [{ key: 'channels', name, live: false, tracks }];
 }

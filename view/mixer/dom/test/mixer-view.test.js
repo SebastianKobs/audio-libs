@@ -34,7 +34,7 @@ test("the desk's own channels drawn: its buses, a bus with those that go into it
   const { buses, returns, master } = deskHtml(viewsOn(), NO_LEVEL);
   assert.match(
     buses.text,
-    /^<div class="kind you"><div class="track"[^>]*><div class="name" data-open="you" data-title="my playing">my playing<\/div>/,
+    /^<div class="kind bus-group"><div class="track"[^>]*><div class="name" data-open="you" data-title="my playing">my playing<\/div>/,
   );
   assert.match(buses.text, /data-open="tap" data-title="my tap">my tap<\/div><div class="route">to my playing<\/div>/);
   assert.match(

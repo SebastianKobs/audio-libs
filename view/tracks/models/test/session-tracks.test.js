@@ -1,5 +1,5 @@
 // What the session view's mixer shows of a look at the session (mockup/src/libs/view/tracks/models/session-tracks.ts): the tracks
-// with notes in their groups, in the order the control surface gives them, yours marked; each track's name, its address on
+// with notes in their groups, in the order the control surface gives them, those played live marked; each track's name, its address on
 // the desk and what it plays now; what sounded since the last look, for the folded sections' lights.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,9 +8,9 @@ import { SessionTracks } from '../index.ts';
 // the tracks as a control surface names them: your taps' pool, then the flowers' replays, then the vines'
 const TRACKS = {
   groups: [
-    { group: 'my tap', name: 'my tap', kind: 'tap', mine: true },
-    { group: 'flower', name: 'flowers', kind: 'flower', mine: false },
-    { group: 'vine', name: 'vines', kind: 'vine', mine: false },
+    { group: 'my tap', name: 'my tap', kind: 'tap', live: true },
+    { group: 'flower', name: 'flowers', kind: 'flower', live: false },
+    { group: 'vine', name: 'vines', kind: 'vine', live: false },
   ],
   clipName: (clip, kind) => `${kind} ${clip.n}`,
 };
@@ -33,9 +33,9 @@ const SEEN = {
   vine: { tracks: [], lit: new Set() },
 };
 
-test("the tracks with notes in their groups, in the control surface's order, yours marked; a group with none not shown", () => {
+test("the tracks with notes in their groups, in the control surface's order, those played live marked; a group with none not shown", () => {
   assert.deepEqual(
-    tracks.groups(SEEN).map(({ key, name, mine, tracks: shown }) => [key, name, mine, shown.length]),
+    tracks.groups(SEEN).map(({ key, name, live, tracks: shown }) => [key, name, live, shown.length]),
     [
       ['my tap', 'my tap', true, 2],
       ['flower', 'flowers', false, 1],
