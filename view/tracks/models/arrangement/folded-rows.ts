@@ -2,7 +2,7 @@
 // Folding: each group folded to its first track until it's unfolded.
 // Lanes: a track's lanes under it once they're opened.
 // With shift, every group or every track, as the one clicked goes. The rows are rowsOf()'s.
-import { Toggles } from '../../../mixer/models/index.ts';
+import { Toggles } from '../../../desk/models/index.ts';
 import { rowsOf, type ArrangedStrip, type Row } from './rows.ts';
 import type { RecordedLane, RecordedRegion, TracksReadout } from '../../readout/index.ts';
 

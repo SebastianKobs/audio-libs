@@ -1,12 +1,12 @@
 // ---------- libs/view/tracks/dom/session-drawing: when the session view is drawn ----------
-// What it draws is its drawers': the clip tracks', the mixer's, the device view's.
+// What it draws is its drawers': the clip tracks', the desk's, the device view's.
 // What it shows of the session is its models': what the stream played (Session), the groups of
 // tracks and what sounded (SessionTracks).
 import type { DevicePanel } from '../../device/models/index.ts';
 import type { Session, SessionTracks, Views } from '../models/index.ts';
 import type { ClipTracksView } from './clip-tracks-view.ts';
 import type { DevicePanelView } from '../../device/dom/index.ts';
-import type { MixerView } from '../../mixer/dom/index.ts';
+import type { DeskView } from '../../desk/dom/index.ts';
 
 // The clock as the drawing reads it: its time, its 16ths, a beat's length at the tempo
 //   now, and its 16ths.
@@ -35,7 +35,7 @@ export class SessionDrawing {
   readonly #clipTracks: Pick<ClipTracksView, 'setBeat' | 'draw'> & {
     section: Pick<ClipTracksView['section'], 'light'>;
   };
-  readonly #mixer: Pick<MixerView, 'draw' | 'drawLevels' | 'light'>;
+  readonly #deskView: Pick<DeskView, 'draw' | 'drawLevels' | 'light'>;
   readonly #devicePanelView: Pick<DevicePanelView, 'refresh'>;
   #lastLook = -Infinity;
   #pressed = false; // a pointer pressed on the view
@@ -48,7 +48,7 @@ export class SessionDrawing {
     session,
     tracks,
     clipTracks,
-    mixer,
+    deskView,
     devicePanel,
     devicePanelView,
     flow,
@@ -59,9 +59,9 @@ export class SessionDrawing {
     views: Pick<Views, 'shown' | 'onShow'>; // which view is open
     transport: { readonly playingBack: boolean };
     session: Pick<Session, 'at'>; // what the stream played
-    tracks: Pick<SessionTracks, 'groups' | 'sounded'>; // in their groups, as the mixer shows them
+    tracks: Pick<SessionTracks, 'groups' | 'sounded'>; // in their groups, as the desk shows them
     clipTracks: Pick<ClipTracksView, 'setBeat' | 'draw'> & { section: Pick<ClipTracksView['section'], 'light'> };
-    mixer: Pick<MixerView, 'draw' | 'drawLevels' | 'light'>;
+    deskView: Pick<DeskView, 'draw' | 'drawLevels' | 'light'>;
     devicePanel: Pick<DevicePanel<unknown>, 'close'>; // closed as both views hide
     devicePanelView: Pick<DevicePanelView, 'refresh'>;
     flow: EventTarget; // the session view's sections, a press on it held
@@ -74,7 +74,7 @@ export class SessionDrawing {
     this.#session = session;
     this.#tracks = tracks;
     this.#clipTracks = clipTracks;
-    this.#mixer = mixer;
+    this.#deskView = deskView;
     this.#devicePanelView = devicePanelView;
     flow.addEventListener('pointerdown', () => {
       this.#pressed = true;
@@ -120,7 +120,7 @@ export class SessionDrawing {
     }
     this.#drawPlayingBack();
     this.#devicePanelView.refresh(); // its knobs as they play, its views of their own
-    this.#mixer.drawLevels(this.#frameStep());
+    this.#deskView.drawLevels(this.#frameStep());
   }
   // Playing back, the live grid is held and hands out no 16ths, so no beat draws the view.
   // Drawn instead a beat after the last drawing, at the tempo now.
@@ -139,9 +139,9 @@ export class SessionDrawing {
     const seen = this.#session.at(t, since);
     this.#lastLook = t;
     this.#clipTracks.draw((track) => seen[track]?.lit ?? new Set());
-    this.#mixer.draw(this.#tracks.groups(seen));
+    this.#deskView.draw(this.#tracks.groups(seen));
     const heard = this.#tracks.sounded(seen);
     this.#clipTracks.section.light(heard);
-    this.#mixer.light(heard);
+    this.#deskView.light(heard);
   }
 }

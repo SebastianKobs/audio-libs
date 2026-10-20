@@ -4,11 +4,11 @@
 //   - the strip's controllers in the order the sound goes through it, as its strip has them:
 //     its inserts' controls, its sends, its volume, pan, mute and solo.
 import type { DeclaredReadout } from '../../readout/index.ts';
-import type { MixerViewBuilder, Strip } from '../../../mixer/models/index.ts';
+import type { DeskViewBuilder, Strip } from '../../../desk/models/index.ts';
 import { controlAddress } from '../../../../plan/desk/index.ts';
 import { addressOf, addressText } from '../../../../util/index.ts';
 
-export function declaredBy(views: MixerViewBuilder): DeclaredReadout {
+export function declaredBy(views: DeskViewBuilder): DeclaredReadout {
   return {
     specOf: (strip, controller) => views.control(controlAddress(strip, controller))?.spec,
     controllersOf: (strip) => controllersOf(views.strip(addressOf(strip))),

@@ -1,6 +1,6 @@
 # libs/view/tracks/dom
 
-The session view's, the clips' and the arrangement's: the view models (`libs/view/tracks/models/`) drawn in the DOM, the mixer's drawing (`libs/view/mixer/dom/`) and the device view's (`libs/view/device/dom/`): one implementation of the views, as Web Audio is of the sound. The session view's strips are drawn on it too. It imports `libs/params/`, `libs/view/device/dom/`, `libs/view/device/models/`, `libs/view/html/`, `libs/view/mixer/dom/`, `libs/view/mixer/models/`, `libs/view/tracks/models/` and `libs/view/tracks/readout/`.
+The session view's, the clips' and the arrangement's: the view models (`libs/view/tracks/models/`) drawn in the DOM, the desk's drawing (`libs/view/desk/dom/`) and the device view's (`libs/view/device/dom/`): one implementation of the views, as Web Audio is of the sound. The session view's strips are drawn on it too. It imports `libs/params/`, `libs/view/device/dom/`, `libs/view/device/models/`, `libs/view/html/`, `libs/view/desk/dom/`, `libs/view/desk/models/`, `libs/view/tracks/models/` and `libs/view/tracks/readout/`.
 
 | Part | Holds |
 |---|---|

@@ -1,4 +1,4 @@
-// The desk as the view models read it (mockup/src/libs/view/mixer/readout/desk.ts), its readout as it plays, on the
+// The desk as the view models read it (mockup/src/libs/view/desk/readout/desk.ts), its readout as it plays, on the
 // desk library's desk and its stand-in for what's built (libs/build/desk/test/built.js), the desk library's small studio:
 //   - its plan; a value as it plays, its start; a strip's mute and solo the live mix's;
 //   - how a param is set, worked out: a strip's own live, by its notes where they set it; an insert's own params and

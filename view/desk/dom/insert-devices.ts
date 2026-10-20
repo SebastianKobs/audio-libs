@@ -1,5 +1,5 @@
-// ---------- view/mixer/dom/insert-devices: a strip's inserts, each a device as Ableton's are ----------
-// Drawn from the strip's model (libs/view/mixer/models/), each a composite drawn flat, as the device
+// ---------- view/desk/dom/insert-devices: a strip's inserts, each a device as Ableton's are ----------
+// Drawn from the strip's model (libs/view/desk/models/), each a composite drawn flat, as the device
 // view shows them, a chain of its own (DeviceChain, device-panel-view.ts), opened by a strip's address:
 //   - each insert whose slot its owner says something of: a Utility, a Filter, the limiter;
 //   - its status: its label and what it does there, and what sets it, where its notes do;
@@ -8,15 +8,15 @@
 //   - a view of its own where its kind has one, the limiter's history (registered by its owner).
 import { addressOf, addressText } from '../../../util/index.ts';
 import { Knob, type Control, type Device } from '../../device/models/index.ts';
-import type { MixerViewBuilder } from '../models/index.ts';
+import type { DeskViewBuilder } from '../models/index.ts';
 import type { CompositeView, DeviceChain } from '../../device/dom/index.ts';
 
 // a strip's inserts, the master's too, each a device in the device view, in the order its
 // sound goes through them (fill())
 export class InsertDevices implements DeviceChain {
-  readonly #models: MixerViewBuilder;
+  readonly #models: DeskViewBuilder;
 
-  constructor({ models }: { models: MixerViewBuilder }) {
+  constructor({ models }: { models: DeskViewBuilder }) {
     this.#models = models;
   }
   // a strip's inserts drawn in a row, by its key, each a composite drawn flat, in the order its

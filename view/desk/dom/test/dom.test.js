@@ -1,4 +1,4 @@
-// The view models drawn (mockup/src/libs/view/mixer/dom), as HTML, in node, on the models' small desk (libs/view/mixer/models/test/desk.js):
+// The view models drawn (mockup/src/libs/view/desk/dom), as HTML, in node, on the models' small desk (libs/view/desk/models/test/desk.js):
 //   - a knob: its label, its bar by its taper, a gain's unity marked, a pan's from its middle, its text; a live one
 //     marked with its address; a pan that does nothing;
 //   - a fader, its unity marked; a level bar, red at full scale;
@@ -11,7 +11,7 @@ import { stripHtml } from '../index.ts';
 import { deviceHtml, faderHtml, knobHtml, meterHtml, stillPanHtml } from '../../../device/dom/index.ts';
 import { html } from '../../../html/index.ts';
 import { ViewBuilder } from '../../../device/models/index.ts';
-import { MixerViewBuilder } from '../../models/index.ts';
+import { DeskViewBuilder } from '../../models/index.ts';
 import { addressText } from '../../../../util/index.ts';
 import { positionOf } from '../../../../params/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
@@ -20,7 +20,7 @@ const LOOK = { route: 'to master', sendLabel: (to) => `${to}!`, level: 0.5 };
 
 // the small desk's view models, its values and roles by address, live unless said; the slots' words by address
 function viewsOn({ values = {}, roles = {}, slots = {} } = {}) {
-  return new MixerViewBuilder(
+  return new DeskViewBuilder(
     {
       plan: STUDIO,
       valueOf: (address) => values[addressText(address)],

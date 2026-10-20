@@ -1,15 +1,15 @@
-// ---------- view/mixer/models/mixer-view-builder: a desk's view models, its strips and its mixer ----------
+// ---------- view/desk/models/desk-view-builder: a desk's view models, its strips and its desk ----------
 // On a device's view models (view-builder.ts):
 //   - a channel as a strip, by its form, a pool's copy among them;
-//   - the desk as a mixer, its strips by role.
+//   - the desk read as its strips, by role.
 import { nodeAt } from '../../../plan/format/index.ts';
 import type { Address } from '../../../util/index.ts';
-import { Mixer } from './mixer.ts';
+import { DeskModel } from './desk-model.ts';
 import { Strip } from './strip.ts';
 import { ViewBuilder } from '../../device/models/index.ts';
 
-// The view models of a desk's plan: a device builder's, and its strips and its mixer.
-export class MixerViewBuilder extends ViewBuilder {
+// The view models of a desk's plan: a device builder's, and its strips and its desk.
+export class DeskViewBuilder extends ViewBuilder {
   // A channel as a strip, by its address, a pool's copy among them; none where nothing's there.
   strip(address: Address): Strip | undefined {
     const node = nodeAt(this.plan, address);
@@ -18,8 +18,8 @@ export class MixerViewBuilder extends ViewBuilder {
     }
     return new Strip(this, address, node);
   }
-  // the plan's desk as a mixer
-  mixer(): Mixer {
-    return new Mixer(this, (address) => this.strip(address));
+  // the plan's desk, its strips by role
+  desk(): DeskModel {
+    return new DeskModel(this, (address) => this.strip(address));
   }
 }

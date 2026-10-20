@@ -18,7 +18,7 @@ import { FoldedRows } from './folded-rows.ts';
 import { placedLane, placedRegions, type PlacedLane, type PlacedRegion } from './regions.ts';
 import { arrangedStrips, type ArrangedStrip, type Row, type SectionLabels } from './rows.ts';
 import { TimeInView } from './time-in-view.ts';
-import type { Mixer } from '../../../mixer/models/index.ts';
+import type { DeskModel } from '../../../desk/models/index.ts';
 import type {
   ArrangementClock,
   DeclaredReadout,
@@ -41,14 +41,14 @@ export class Arrangement {
   #shown = false;
 
   // declared: each lane's param's declaration and each strip's controllers in order
-  // mixer, sections: the desk's strips with no notes of their own, rows in the sections' groups
+  // desk, sections: the desk's strips with no notes of their own, rows in the sections' groups
   // cue: the playhead set back to a time, or on the present, as the transport is asked it
   constructor({
     recording,
     transport,
     declared,
     tracks,
-    mixer,
+    desk,
     sections,
     clock,
     cue,
@@ -57,7 +57,7 @@ export class Arrangement {
     transport: PlayheadReadout;
     declared: DeclaredReadout;
     tracks: TracksReadout;
-    mixer: Pick<Mixer, 'buses' | 'returns' | 'master'>;
+    desk: Pick<DeskModel, 'buses' | 'returns' | 'master'>;
     sections: SectionLabels;
     clock: ArrangementClock;
     cue: (t: Seconds | null) => void;
@@ -65,7 +65,7 @@ export class Arrangement {
     this.#recording = recording;
     this.#declared = declared;
     this.#tracks = tracks;
-    this.#strips = arrangedStrips(mixer, sections);
+    this.#strips = arrangedStrips(desk, sections);
     this.#clock = clock;
     this.map = new GridMap({ clock });
     this.#folded = new FoldedRows({

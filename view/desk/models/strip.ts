@@ -1,5 +1,5 @@
-// ---------- view/mixer/models/strip: a channel as a strip, by its form ----------
-// As a mixer's strip: its inserts as devices, its sends' knobs, its fader, pan, mute and solo,
+// ---------- view/desk/models/strip: a channel as a strip, by its form ----------
+// As a desk's strip: its inserts as devices, its sends' knobs, its fader, pan, mute and solo,
 // its level. Read by the channel form's roles: insert, mute (its cut), sends.
 // Its name as shown: its label, else its own; a pool's copy its pool's and its number.
 // Where it goes: the channel its way out goes into, by that one's name as shown.

@@ -1,6 +1,6 @@
-# libs/view/mixer/readout
+# libs/view/desk/readout
 
-A desk as the mixer reads it, on the mixing desk (`libs/build/desk/`). It imports `libs/build/desk/`, `libs/plan/desk/`, `libs/plan/format/`, `libs/util/` and the device readout (`libs/view/device/readout/`).
+A desk as its view reads it, on the mixing desk (`libs/build/desk/`). It imports `libs/build/desk/`, `libs/plan/desk/`, `libs/plan/format/`, `libs/util/` and the device readout (`libs/view/device/readout/`).
 
 | | |
 |---|---|

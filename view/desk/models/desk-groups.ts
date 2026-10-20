@@ -1,9 +1,9 @@
-// ---------- view/mixer/models/mixer-groups: the groups of tracks a mixer shows ----------
-// What a mixer's tracks section draws, each group in a box of its own:
+// ---------- view/desk/models/desk-groups: the groups of tracks a desk shows ----------
+// What a desk's tracks section draws, each group in a box of its own:
 //   - handed in by a view: the session's tracks in its groups (session-tracks.ts);
 //   - else, for a desk alone, its channels as one group (channelGroups()).
 import type { Address } from '../../../util/index.ts';
-import type { Mixer } from './mixer.ts';
+import type { DeskModel } from './desk-model.ts';
 
 // What a track plays now, as its cell shows it: the clip, a name its play gives after it, a
 // dash with none; lit while it sounds; waiting while a play waits for its first note.
@@ -12,30 +12,30 @@ export interface TrackNow {
   readonly lit: boolean;
   readonly waiting: boolean;
 }
-// A track a mixer shows: its channel's address on the desk, its name, what it plays now, and
+// A track a desk shows: its channel's address on the desk, its name, what it plays now, and
 // whether anything holds it.
-export interface MixerTrack {
+export interface DeskTrack {
   readonly address: Address;
   readonly name: string;
   readonly now: TrackNow;
   readonly playing: boolean;
 }
 // a group of tracks: its key, its header's name, whether it's played live, its tracks
-export interface MixerGroup {
+export interface DeskGroup {
   readonly key: string;
   readonly name: string;
   readonly live: boolean;
-  readonly tracks: readonly MixerTrack[];
+  readonly tracks: readonly DeskTrack[];
 }
 
 // what a desk's channel shows in its cell: nothing played on it
 const NOTHING: TrackNow = { text: '—', lit: false, waiting: false };
 
-// A desk's channels as one group, for a mixer drawn with no session:
+// A desk's channels as one group, for a desk drawn with no session:
 // its own channels, then each pool's copies added so far.
 // Each by its address and its name as shown, holding; none with none.
-export function channelGroups(mixer: Pick<Mixer, 'channels'>, name: string): MixerGroup[] {
-  const channels = mixer.channels();
+export function channelGroups(desk: Pick<DeskModel, 'channels'>, name: string): DeskGroup[] {
+  const channels = desk.channels();
   if (!channels.length) {
     return [];
   }

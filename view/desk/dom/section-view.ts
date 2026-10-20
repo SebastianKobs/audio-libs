@@ -1,5 +1,5 @@
-// ---------- view/mixer/dom/section-view: a section of a view, its strips in a row ----------
-// As a mixer's sections stand side by side: a label, then its strips in a row.
+// ---------- view/desk/dom/section-view: a section of a view, its strips in a row ----------
+// As a desk's sections stand side by side: a label, then its strips in a row.
 // A section that folds: a click on its label folds it to its first strip, and back.
 //   - With shift: every section beside it that folds, as this one goes.
 //   - Which are folded is a model's (Toggles), by each section's label, every section beside it

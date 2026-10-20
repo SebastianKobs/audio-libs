@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Arrangement, declaredBy } from '../index.ts';
-import { MixerViewBuilder } from '../../../mixer/models/index.ts';
+import { DeskViewBuilder } from '../../../desk/models/index.ts';
 import { arrangedStrips, laneRowOf, rowKeyOf, rowsOf } from '../arrangement/rows.ts';
 import { TimeWindow } from '../arrangement/time-window.ts';
 import { keptWhole, noteShape, pitchRange } from '../arrangement/note-shapes.ts';
@@ -19,7 +19,7 @@ import { playheadAt } from '../arrangement/playhead.ts';
 import { faderPosition, PAN, SEND_PARAM, STRIP_PARAMS, positionOf } from '../../../../params/index.ts';
 import { BLOCKS, DELAY_TIME, LIMITER_SPECS } from '../../../../plan/blocks/index.ts';
 import { near } from '../../../../util/test/near.js';
-import { STUDIO } from '../../../mixer/models/test/desk.js';
+import { STUDIO } from '../../../desk/models/test/desk.js';
 
 // the tracks, as a control surface names them: your kinds' pools first, then each kind's group,
 // the background's sounds sharing one
@@ -96,12 +96,12 @@ const strips = [
   { group: 'fx', strip: 'reverb', name: 'reverb' },
   { group: 'master', strip: 'master', name: 'master' },
 ];
-// the mixer's sections as a view labels them
+// the desk's sections as a view labels them
 const SECTIONS = { buses: 'bus', returns: 'fx', master: 'master' };
 
-// the mixer they're from: each bus and those that go into it, the returns, the master
+// the desk they're from: each bus and those that go into it, the returns, the master
 const strip = (name, shown) => ({ address: [name], name: shown });
-const MIXER = {
+const DESK = {
   buses: [
     { bus: strip('you', 'my playing'), members: [strip('trace', 'my trace')] },
     { bus: strip('ambient', 'background'), members: [] },
@@ -110,9 +110,9 @@ const MIXER = {
   master: strip('master', 'master'),
 };
 
-test("the desk's strips with no notes of their own, from the mixer: each bus and those that go into it after it, the returns, the master; each by its address and its name as shown", () => {
-  assert.deepEqual(arrangedStrips(MIXER, SECTIONS), strips);
-  assert.deepEqual(arrangedStrips({ ...MIXER, master: undefined }, SECTIONS).at(-1), strips.at(-2), 'no master: none');
+test("the desk's strips with no notes of their own, from the desk: each bus and those that go into it after it, the returns, the master; each by its address and its name as shown", () => {
+  assert.deepEqual(arrangedStrips(DESK, SECTIONS), strips);
+  assert.deepEqual(arrangedStrips({ ...DESK, master: undefined }, SECTIONS).at(-1), strips.at(-2), 'no master: none');
 });
 
 const lane = (kind, track, controller) => ({ kind, track, controller, points: [{ t: 1, value: 0.5 }] });
@@ -521,7 +521,7 @@ test("where a click in the ruler puts the playhead: on the nearest beat; at or p
 
 // the desk's view models on a plan's readout of the tests' own, every value at its plan's
 function viewsOf() {
-  return new MixerViewBuilder(
+  return new DeskViewBuilder(
     {
       plan: STUDIO,
       valueOf: () => undefined,
@@ -600,7 +600,7 @@ function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack 
     transport,
     declared,
     tracks,
-    mixer: MIXER,
+    desk: DESK,
     sections: SECTIONS,
     clock,
     cue,

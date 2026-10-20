@@ -1,4 +1,4 @@
-// ---------- view/tracks/models/session-tracks: the session's tracks as its mixer shows them. Pure ----------
+// ---------- view/tracks/models/session-tracks: the session's tracks as its desk shows them. Pure ----------
 // From a look at the session (session.ts), in the control surface's groups (Tracks):
 //   1. the tracks with notes, in the groups' order, those played live marked; a group shows
 //      once its first play adds a track;
@@ -7,7 +7,7 @@
 //   3. what sounded since the last look, for the folded sections' lights: the clips of a group
 //      not played live, and each lit track's channel.
 import { addressOf } from '../../../util/index.ts';
-import type { MixerGroup, MixerTrack } from '../../mixer/models/index.ts';
+import type { DeskGroup, DeskTrack } from '../../desk/models/index.ts';
 import type { TracksReadout } from '../readout/index.ts';
 import type { GroupShown, TrackShown } from './session.ts';
 
@@ -23,7 +23,7 @@ export class SessionTracks {
     this.#trackAt = trackAt;
   }
   // the tracks with notes, in their groups, in the control surface's order
-  groups(seen: Readonly<Record<string, GroupShown>>): MixerGroup[] {
+  groups(seen: Readonly<Record<string, GroupShown>>): DeskGroup[] {
     return this.#tracks.groups
       .filter(({ group }) => seen[group]?.tracks.length)
       .map(({ group, name, kind, live }) => ({
@@ -36,7 +36,7 @@ export class SessionTracks {
   }
   // What sounded since the last look: the clips of a group not played live, by its key
   // ('clips <group>'), and each lit track's channel, by its address as text.
-  // What those feed is the mixer's.
+  // What those feed is the desk's.
   sounded(seen: Readonly<Record<string, GroupShown>>): Set<string> {
     const heard = new Set<string>();
     for (const { group, live } of this.#tracks.groups) {
@@ -55,7 +55,7 @@ export class SessionTracks {
 
   // A track of a group: named from the group's name, numbered from 1.
   // kind: whose clips it plays, as the control surface names them.
-  #track(group: string, kind: string, name: string, shown: TrackShown, index: number): MixerTrack {
+  #track(group: string, kind: string, name: string, shown: TrackShown, index: number): DeskTrack {
     const playing = shown.owner ?? shown.waiting;
     return {
       address: addressOf(this.#trackAt({ kind: group, track: index })),

@@ -1,5 +1,5 @@
 // A small desk written out as a plan, as the desk's planner would hand it out: the strips' and the
-// mixer's tests' data.
+// desk view's tests' data.
 //   reverb: a return, shown as rev in little room, its Utility at 0.6, a Utility a level and a
 //     pan, its pan's law a setting.
 //   you: a bus, shown as my playing, a send to the reverb; tap: a bus into it, shown as my tap.

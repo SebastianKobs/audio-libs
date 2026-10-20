@@ -1,4 +1,4 @@
-// ---------- view/mixer/dom/mixer-view: a mixer drawn, its strips side by side ----------
+// ---------- view/desk/dom/desk-view: a desk drawn, its strips side by side ----------
 // Its sections in one row, as the sound flows:
 //   1. the tracks, in the groups the view hands it, or the desk's own channels as one,
 //      each group in a box of its own;
@@ -15,19 +15,19 @@
 // After each, the view is told to draw it again (changed()).
 // Level bars: each falls as a peak meter's, drawn on every frame.
 // Lights: a folded section's, and a group's dot, while a hidden strip sounds; what the strips
-// heard feed counted too (fedBy(), mixer-html.ts).
+// heard feed counted too (fedBy(), desk-html.ts).
 import { Events, addressOf, type Address } from '../../../util/index.ts';
 import { Meters, type Control } from '../../device/models/index.ts';
-import { channelGroups, type MixerGroup, type Toggles, type MixerViewBuilder } from '../models/index.ts';
+import { channelGroups, type DeskGroup, type Toggles, type DeskViewBuilder } from '../models/index.ts';
 import { Bound, CONTROL_MARKS, KnobDrag, meterPosition } from '../../device/dom/index.ts';
 import { html, makeElement, setHtml } from '../../html/index.ts';
 import { SectionView } from './section-view.ts';
-import { deskHtml, fedBy, trackHtml, type LevelOf } from './mixer-html.ts';
+import { deskHtml, fedBy, trackHtml, type LevelOf } from './desk-html.ts';
 
-// How a view shows its mixer:
+// How a view shows its desk:
 //   - labels: each section's label;
 //   - tracksShown(): how many tracks a group's box shows before it scrolls; 0 shows all.
-export interface MixerLook {
+export interface DeskLook {
   readonly labels: Readonly<Record<'tracks' | 'buses' | 'returns' | 'master', string>>;
   readonly tracksShown: () => number;
 }
@@ -39,13 +39,13 @@ type Opened = [address: Address, title: string, slot: number];
 const FOLD_GROUP =
   'Click to fold this group to its first track, or unfold it; shift-click: all groups, as this one goes. Its dot shows while tracks are folded away or out of sight, lit while one of them sounds.';
 
-// A mixer drawn in its sections, made at the end of what it's in.
-export class MixerView {
+// A desk drawn in its sections, made at the end of what it's in.
+export class DeskView {
   // its sections, in order: the tracks, the buses, the FX busses, the master
   readonly sections: readonly SectionView[];
-  readonly #models: MixerViewBuilder;
+  readonly #models: DeskViewBuilder;
   readonly #bound = new Bound<Control>(CONTROL_MARKS); // each knob drawn, its model
-  readonly #look: MixerLook;
+  readonly #look: DeskLook;
   readonly #changed: () => void;
   readonly #events = new Events<{ open: Opened }>();
   readonly #levels = new Meters(); // each level bar's, falling
@@ -65,8 +65,8 @@ export class MixerView {
     changed,
   }: {
     within: HTMLElement;
-    models: MixerViewBuilder;
-    look: MixerLook;
+    models: DeskViewBuilder;
+    look: DeskLook;
     folding: { readonly sections: Toggles; readonly groups: Toggles };
     changed: () => void;
   }) {
@@ -89,9 +89,9 @@ export class MixerView {
   readonly onOpen = (listener: (...opened: Opened) => void): (() => void) => this.#events.on('open', listener);
   // Drawn: the groups of tracks handed in, else the desk's own channels as one;
   // then the desk's own buses, returns and master.
-  draw(groups?: readonly MixerGroup[]): void {
+  draw(groups?: readonly DeskGroup[]): void {
     const levelOf: LevelOf = (key) => this.#levels.of(key);
-    this.#placeGroups(groups ?? channelGroups(this.#models.mixer(), this.#look.labels.tracks), levelOf);
+    this.#placeGroups(groups ?? channelGroups(this.#models.desk(), this.#look.labels.tracks), levelOf);
     const { buses, returns, master } = deskHtml(this.#models, levelOf);
     setHtml(this.#buses.row, buses);
     setHtml(this.#returns.row, returns);
@@ -160,7 +160,7 @@ export class MixerView {
       this.#models.strip(addressOf(mute))?.mute?.toggle();
       return;
     }
-    this.#models.mixer().soloClick(addressOf(solo!), adding); // not a mute, so a solo
+    this.#models.desk().soloClick(addressOf(solo!), adding); // not a mute, so a solo
   }
   // Each group in its box, the boxes kept across drawings, so a box stays where it was
   // scrolled to, and its scrollbar doesn't flicker on every drawing:
@@ -168,7 +168,7 @@ export class MixerView {
   //   2. A new group gets a box of its own, in its place among the others.
   //   3. A group no longer handed in is taken out.
   // Box: as wide as the tracks the look shows, scrolling sideways on its own.
-  #placeGroups(groups: readonly MixerGroup[], levelOf: LevelOf): void {
+  #placeGroups(groups: readonly DeskGroup[], levelOf: LevelOf): void {
     const row = this.#tracks.row;
     const kept = new Map(
       [...row.querySelectorAll<HTMLElement>('.group')].map((group) => [group.dataset.group!, group]), // each has its key

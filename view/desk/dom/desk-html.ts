@@ -1,4 +1,4 @@
-// ---------- view/mixer/dom/mixer-html: a mixer's strips as HTML, and what they light ----------
+// ---------- view/desk/dom/desk-html: a desk's strips as HTML, and what they light ----------
 // The desk's own channels, a section each (deskHtml()); a track's strip (trackHtml()).
 // A send's knob is labelled by its return's short label.
 // Lights: what the strips heard feed, through ways out and sends turned up (fedBy()).
@@ -6,10 +6,10 @@ import { addressOf, addressText } from '../../../util/index.ts';
 import {
   shortName,
   type BusGroup,
-  type MixerTrack,
+  type DeskTrack,
   type Strip,
   type TrackNow,
-  type MixerViewBuilder,
+  type DeskViewBuilder,
 } from '../models/index.ts';
 import { html, type Html } from '../../html/index.ts';
 import { stripHtml, type StripLook } from './strip-view.ts';
@@ -21,13 +21,13 @@ export type LevelOf = (key: string) => number;
 //   - the buses: a bus with the buses that go into it in a box, one alone as it is;
 //   - the FX busses, the desk's returns;
 //   - the master.
-export function deskHtml(models: MixerViewBuilder, levelOf: LevelOf): { buses: Html; returns: Html; master: Html } {
-  const mixer = models.mixer();
+export function deskHtml(models: DeskViewBuilder, levelOf: LevelOf): { buses: Html; returns: Html; master: Html } {
+  const desk = models.desk();
   const drawn = (strip: Strip): Html => stripHtml(strip, lookOf(models, strip, strip.name, levelOf));
   return {
-    buses: html`${mixer.buses.map((group) => busGroupHtml(group, drawn))}`,
-    returns: html`${mixer.returns.map(drawn)}`,
-    master: mixer.master ? drawn(mixer.master) : html``,
+    buses: html`${desk.buses.map((group) => busGroupHtml(group, drawn))}`,
+    returns: html`${desk.returns.map(drawn)}`,
+    master: desk.master ? drawn(desk.master) : html``,
   };
 }
 // a bus with the buses that go into it, in a box; one alone as it is
@@ -40,7 +40,7 @@ function busGroupHtml({ bus, members }: BusGroup, drawn: (strip: Strip) => Html)
 }
 // How a strip is shown: the name it's given, where it goes, its devices opened by its
 // address, its sends by their returns' short labels, its level bar's level.
-function lookOf(models: MixerViewBuilder, strip: Strip, name: string, levelOf: LevelOf): StripLook {
+function lookOf(models: DeskViewBuilder, strip: Strip, name: string, levelOf: LevelOf): StripLook {
   const key = addressText(strip.address);
   return {
     name,
@@ -52,7 +52,7 @@ function lookOf(models: MixerViewBuilder, strip: Strip, name: string, levelOf: L
 }
 // A track's strip drawn: the name the view gives it, what plays on it now.
 // Empty while it plays nothing, its values a dash, but where it's set live.
-export function trackHtml(models: MixerViewBuilder, track: MixerTrack, levelOf: LevelOf): Html {
+export function trackHtml(models: DeskViewBuilder, track: DeskTrack, levelOf: LevelOf): Html {
   const strip = models.strip(track.address)!; // a track's channel, on the desk
   const empty = !track.playing && !strip.volume.live;
   return stripHtml(strip, { ...lookOf(models, strip, track.name, levelOf), now: cellHtml(track.now), empty });
@@ -63,11 +63,11 @@ function cellHtml({ text, lit, waiting }: TrackNow): Html {
 }
 // What the strips heard feed, they among it, for the lights: each through its way out, and
 // through a send while it's turned up. A name not on the desk kept, not followed.
-export function fedBy(models: MixerViewBuilder, heard: ReadonlySet<string>): Set<string> {
-  return models.mixer().reached(heard, (from, to) => sendUp(models, from, to));
+export function fedBy(models: DeskViewBuilder, heard: ReadonlySet<string>): Set<string> {
+  return models.desk().reached(heard, (from, to) => sendUp(models, from, to));
 }
 // whether a strip's send to a return is turned up, as set live or by its track's notes
-function sendUp(models: MixerViewBuilder, from: string, to: string): boolean {
+function sendUp(models: DeskViewBuilder, from: string, to: string): boolean {
   const send = models.strip(addressOf(from))?.sends.find(({ name }) => name === to);
   return (send?.value ?? 0) > 0;
 }

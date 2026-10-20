@@ -1,5 +1,5 @@
-// ---------- view/mixer/dom/strip-view: a strip drawn ----------
-// As a mixer's strip, top to bottom:
+// ---------- view/desk/dom/strip-view: a strip drawn ----------
+// As a desk's strip, top to bottom:
 //   1. its name, a click opening its devices; where it goes; what plays on it now;
 //   2. its inserts, a slot each, as Pro Tools shows them: its device and what sets it;
 //   3. its sends' knobs, its pan, its fader with its level bar and its value, its mute and

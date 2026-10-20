@@ -1,4 +1,4 @@
-// ---------- view/mixer/models/mixer: a desk as a mixer ----------
+// ---------- view/desk/models/desk-model: a desk read as its strips ----------
 // Its strips in the plan's order, by their roles:
 //   - its buses, each with the buses that go out into it, as a group track holds its tracks;
 //   - its returns;
@@ -18,25 +18,25 @@ export interface BusGroup {
   readonly members: readonly Strip[];
 }
 
-// what a mixer is read from: the view builder's plan and copies
-type MixerViews = Pick<ViewBuilder, 'plan' | 'copiesOf'>;
+// what a desk is read from: the view builder's plan and copies
+type DeskViews = Pick<ViewBuilder, 'plan' | 'copiesOf'>;
 
-// the desk form's roles a mixer sorts its strips by
+// the desk form's roles a desk sorts its strips by
 const BUS = 'bus';
 const RETURN = 'return';
 const MASTER = 'master';
 const CHANNEL = 'channel';
 
-// A desk as a mixer: its strips by role, in the plan's order.
-export class Mixer {
+// A desk read as its strips, by role, in the plan's order.
+export class DeskModel {
   readonly buses: readonly BusGroup[];
   readonly returns: readonly Strip[];
   readonly master: Strip | undefined;
-  readonly #views: MixerViews;
+  readonly #views: DeskViews;
   readonly #strip: (address: Address) => Strip | undefined;
 
   // strip: a channel as a strip, by its address, a pool's copy among them
-  constructor(views: MixerViews, strip: (address: Address) => Strip | undefined) {
+  constructor(views: DeskViews, strip: (address: Address) => Strip | undefined) {
     this.#views = views;
     this.#strip = strip;
     const own = this.#own();

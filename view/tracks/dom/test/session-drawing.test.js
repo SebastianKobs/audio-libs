@@ -52,7 +52,7 @@ function drawing({ playingBack = false, stepsPerBeat = 4 } = {}) {
       draw: () => {},
       section: { light: (heard) => asked.lit.push([...heard]) },
     },
-    mixer: { draw: () => {}, drawLevels: (dt) => asked.levels.push(dt), light: () => {} },
+    deskView: { draw: () => {}, drawLevels: (dt) => asked.levels.push(dt), light: () => {} },
     devicePanel: { close: () => asked.closed++ },
     devicePanelView: { refresh: () => asked.refreshed++ },
     flow,

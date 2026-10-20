@@ -1,6 +1,6 @@
 // ---------- view/tracks/models/arrangement/rows: the arrangement's rows and their lanes ----------
 import type { RecordedLane, RecordedRegion, TracksReadout } from '../../readout/index.ts';
-import type { Mixer } from '../../../mixer/models/index.ts';
+import type { DeskModel } from '../../../desk/models/index.ts';
 import { placedOn } from '../placed.ts';
 import { entryOf, addressText } from '../../../../util/index.ts';
 import { laneKeyOf, laneName, stripOf } from './lane-names.ts';
@@ -26,7 +26,7 @@ export interface ArrangedStrip {
   strip: string;
   name: string;
 }
-// The mixer's sections the arrangement shows, by the labels the session view gives them.
+// The desk's sections the arrangement shows, by the labels the session view gives them.
 export type SectionLabels = Readonly<Record<'buses' | 'returns' | 'master', string>>;
 // What shows beside the regions: the desk's strips that have no notes,
 // the recorded lanes, and the tracks whose lanes are open.
@@ -130,14 +130,14 @@ function stripGroups(strips: readonly ArrangedStrip[]): Group[] {
 //   2. the returns;
 //   3. the master.
 export function arrangedStrips(
-  mixer: Pick<Mixer, 'buses' | 'returns' | 'master'>,
+  desk: Pick<DeskModel, 'buses' | 'returns' | 'master'>,
   sections: SectionLabels,
 ): ArrangedStrip[] {
-  const buses = mixer.buses.flatMap(({ bus, members }) => [bus, ...members]);
-  const master = mixer.master ? [mixer.master] : [];
+  const buses = desk.buses.flatMap(({ bus, members }) => [bus, ...members]);
+  const master = desk.master ? [desk.master] : [];
   return [
     ...buses.map((strip) => arranged(sections.buses, strip)),
-    ...mixer.returns.map((strip) => arranged(sections.returns, strip)),
+    ...desk.returns.map((strip) => arranged(sections.returns, strip)),
     ...master.map((strip) => arranged(sections.master, strip)),
   ];
 }

@@ -1,4 +1,4 @@
-// What the session view's mixer shows of a look at the session (mockup/src/libs/view/tracks/models/session-tracks.ts): the tracks
+// What the session view's desk shows of a look at the session (mockup/src/libs/view/tracks/models/session-tracks.ts): the tracks
 // with notes in their groups, in the order the control surface gives them, those played live marked; each track's name, its address on
 // the desk and what it plays now; what sounded since the last look, for the folded sections' lights.
 import { test } from 'node:test';

@@ -1,13 +1,13 @@
-// The strips and the mixer (mockup/src/libs/view/mixer/models), in node, on a small desk (test/desk.js) and a plan's
+// The strips and the desk model (mockup/src/libs/view/desk/models), in node, on a small desk (test/desk.js) and a plan's
 // in of the tests' own:
 //   - a channel as a strip, by its form: its shown name, where it goes, its inserts as devices, its sends'
 //     knobs, its fader, pan, mute and solo, its level; quiet where its cut is at 0; a pool's copy too;
-//   - a desk as a mixer: its buses, each with the buses that go into it, its returns, its master, in the
+//   - a desk read as its strips: its buses, each with the buses that go into it, its returns, its master, in the
 //     plan's order;
 //   - a solo click: that strip alone, or added with shift, each change a command on its strip.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { channelGroups, MixerViewBuilder, shortName } from '../index.ts';
+import { channelGroups, DeskViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../../util/index.ts';
 import { STUDIO } from './desk.js';
 
@@ -25,7 +25,7 @@ function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
     copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
     slotOf: () => undefined,
   };
-  return { views: new MixerViewBuilder(planReadout, (command) => sent.push(command)), sent };
+  return { views: new DeskViewBuilder(planReadout, (command) => sent.push(command)), sent };
 }
 
 test("a channel as a strip, by its form: its name as shown, its label's, else its own; where it goes; its inserts as devices; its sends' knobs by return; its fader, pan, mute and solo", () => {
@@ -86,8 +86,8 @@ test("a strip's level, its peak as the planReadout hears it; quiet where its cut
   );
 });
 
-test("a desk as a mixer, in the plan's order: its buses, each with the buses that go into it; its returns; its master", () => {
-  const mixer = mixerOn().views.mixer();
+test("a desk read as its strips, in the plan's order: its buses, each with the buses that go into it; its returns; its master", () => {
+  const mixer = mixerOn().views.desk();
   assert.deepEqual(
     mixer.buses.map(({ bus, members }) => [bus.name, members.map(({ name }) => name)]),
     [
@@ -102,8 +102,8 @@ test("a desk as a mixer, in the plan's order: its buses, each with the buses tha
   assert.equal(mixer.master.name, 'master');
 });
 
-test("a desk's channels, as a desk alone shows them: its own of the channel role, then each pool's copies added so far; one group of tracks for a mixer drawn with no session, none with none", () => {
-  const mixer = mixerOn({ copies: { 'my tap': [1, 2] } }).views.mixer();
+test("a desk's channels, as a desk alone shows them: its own of the channel role, then each pool's copies added so far; one group of tracks for a desk drawn with no session, none with none", () => {
+  const mixer = mixerOn({ copies: { 'my tap': [1, 2] } }).views.desk();
   assert.deepEqual(
     mixer.channels().map(({ name }) => name),
     ['my tap 1', 'my tap 2'],
@@ -120,13 +120,13 @@ test("a desk's channels, as a desk alone shows them: its own of the channel role
       ],
     },
   ]);
-  assert.deepEqual(channelGroups(mixerOn().views.mixer(), 'replay'), []);
+  assert.deepEqual(channelGroups(mixerOn().views.desk(), 'replay'), []);
 });
 
 test("a solo click: that strip alone, the others let go first; again, none; with shift, added or let go; a pool's copy among them; each change a command on its strip's solo", () => {
   const clicked = (values, address, add) => {
     const { views, sent } = mixerOn({ values, copies: { 'my tap': [1] } });
-    views.mixer().soloClick(address, add);
+    views.desk().soloClick(address, add);
     return sent.map(({ address: at, value }) => `${addressText(at)} ${value}`);
   };
   assert.deepEqual(clicked({ 'you/solo': 1, 'my tap/1/solo': 1 }, ['tap']), [
@@ -141,7 +141,7 @@ test("a solo click: that strip alone, the others let go first; again, none; with
 });
 
 test("what strips feed, for a view's lights: each through its way out, and the sends said to be up, a pool's copies added among them; a name not on the desk kept, not followed (Z3, LAY12f)", () => {
-  const mixer = mixerOn({ copies: { 'my tap': [1] } }).views.mixer();
+  const mixer = mixerOn({ copies: { 'my tap': [1] } }).views.desk();
   const sorted = (names) => [...names].sort();
   assert.deepEqual(
     sorted(mixer.reached(['tap'], () => false)),

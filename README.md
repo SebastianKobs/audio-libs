@@ -11,7 +11,7 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 - **Places and input:** `spatial` (places perceived from where you are, a world that wraps round), `spatial-audio` (hearing by distance, as values), `gestures` (pointer input in, gestures out).
 - **`plan/`, a sound as data, no audio:** `format` (what a plan is), `blocks` (the building blocks every builder makes), `planner` (templates made into plans), `effects`, `desk`, `instrument` (forms and templates of each, the templates their content).
 - **`build/`, a plan built:** `contract` (what every builder is and hands back), `web-audio` (the builder for Web Audio, the only code that makes Web Audio nodes), `web-audio-engine` (the audio's power, its context on the clock, building in the engine's context), `instrument` (MIDI's notes played into an instrument), `desk` (a desk built, set by address and mixed), `desk-channels` (a desk's channel for each track), `sequenced-desk` (a desk played from a sequencer), `instrument-channels` (a track's sounding end).
-- **`view/`, by what's shown, each in layers** (`readout`, what a view reads; `models`, no DOM; `dom`, drawn), on `html` (HTML made safely): `device` (a plan's devices, knobs, choices, a composite), `mixer` (a desk as a mixer), `instrument` (an instrument's patches and racks), `transport` (play, stop, where the music is), `tracks` (the session view, the clips, the arrangement).
+- **`view/`, by what's shown, each in layers** (`readout`, what a view reads; `models`, no DOM; `dom`, drawn), on `html` (HTML made safely): `device` (a plan's devices, knobs, choices, a composite), `desk` (a desk as its strips, by role), `instrument` (an instrument's patches and racks), `transport` (play, stop, where the music is), `tracks` (the session view, the clips, the arrangement).
 
 ## By layer
 
@@ -24,10 +24,10 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | 2 | `clock`, `plan/format`, `spatial-audio` |
 | 3 | `build/contract`, `gestures`, `midi`, `plan/blocks`, `sequencer`, `timeline`, `view/device/readout`, `view/tracks/readout`, `view/transport/models` |
 | 4 | `build/web-audio`, `midi-sequencer`, `plan/planner`, `view/device/models`, `view/instrument/readout`, `view/transport/dom` |
-| 5 | `build/web-audio-engine`, `clip-player`, `phrasing`, `plan/effects`, `plan/instrument`, `view/device/dom`, `view/mixer/models` |
-| 6 | `build/instrument`, `plan/desk`, `view/instrument/models`, `view/mixer/dom` |
+| 5 | `build/web-audio-engine`, `clip-player`, `phrasing`, `plan/effects`, `plan/instrument`, `view/desk/models`, `view/device/dom` |
+| 6 | `build/instrument`, `plan/desk`, `view/desk/dom`, `view/instrument/models` |
 | 7 | `build/desk`, `view/instrument/dom`, `view/tracks/models` |
-| 8 | `build/desk-channels`, `view/mixer/readout`, `view/tracks/dom` |
+| 8 | `build/desk-channels`, `view/desk/readout`, `view/tracks/dom` |
 | 9 | `build/sequenced-desk` |
 | 10 | `build/instrument-channels` |
 
