@@ -42,7 +42,7 @@ export class ArrangementView {
   #shown = false;
   #dragFrom: number | null = null; // a drag's last x
 
-  // colors: the theme's, read as it draws
+  // colors: its owner's, read as it draws
   constructor({ arrangement, colors }: { arrangement: Arrangement; colors: () => ArrangementColors }) {
     this.#arrangement = arrangement;
     this.#drawing = new TimeDrawing({ ruler: this.#ruler, rows: this.#canvas, colors });

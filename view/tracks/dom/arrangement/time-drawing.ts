@@ -26,12 +26,12 @@ export interface Look {
   map: Arrangement['map'];
   now: number;
 }
-// The colors it draws with, handed in, as the theme has them:
+// The colors it draws with, handed in, by its owner:
 //   - strip: its ground; line: a bar's line, a row's;
-//   - clip: a region played back; you: a region played live;
+//   - clip: a region played back; live: a region played live;
 //   - text, soft: a label, a bar's number and the notes;
 //   - accent: the present, the playhead and a lane's line.
-export type ArrangementColors = Record<'strip' | 'line' | 'clip' | 'you' | 'text' | 'soft' | 'accent', string>;
+export type ArrangementColors = Record<'strip' | 'line' | 'clip' | 'live' | 'text' | 'soft' | 'accent', string>;
 type Colors = ArrangementColors;
 
 const HEADER_HEIGHT = 16; // px: a group's header row, as the names' (index.html)
@@ -39,7 +39,7 @@ const ROW_HEIGHT = 34; // px: a track's, as the names': its label above its note
 const LANE_HEIGHT = 24; // px: a lane's, as the names' (G5a, Default)
 const LABEL_HEIGHT = 12; // px: a region's label, its notes below it
 const RULER_HEIGHT = 18; // px
-const GONE_ALPHA = 0.35; // a region whose clip is gone from the garden, greyed
+const GONE_ALPHA = 0.35; // a region whose clip is gone, greyed
 const LANE_ALPHA = 0.12; // a lane's ground, under its track's (G5a)
 const LANE_PAD = 4; // px: a lane's line kept off its row's edges (G5b)
 const MARKER = 4; // px: half the playhead's triangle in the ruler (P2)
@@ -58,7 +58,7 @@ export class TimeDrawing {
   #present = 0; // its x
   #playhead: number | null = null; // its x, where it's set back (P2)
 
-  // colors: the theme's, read as it draws
+  // colors: its owner's, read as it draws
   constructor({ ruler, rows, colors }: { ruler: HTMLCanvasElement; rows: HTMLCanvasElement; colors: () => Colors }) {
     this.#ruler = ruler;
     this.#rows = rows;
@@ -137,7 +137,7 @@ export class TimeDrawing {
     }
     rows.save();
     rows.globalAlpha = placed.gone ? GONE_ALPHA : 1;
-    rows.fillStyle = placed.live ? colors.you : colors.clip;
+    rows.fillStyle = placed.live ? colors.live : colors.clip;
     rows.fillRect(x, top + 2, width, ROW_HEIGHT - 4);
     rows.beginPath();
     rows.rect(x, top, width, ROW_HEIGHT);
