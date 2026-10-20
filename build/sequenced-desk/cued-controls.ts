@@ -18,33 +18,13 @@
 //   - a switch, a choice and a param its spec says never glides (a delay line's time): until
 //     its time.
 // Each checked as it comes: an address the desk hasn't refused, naming it.
-import type { TimedValue, When } from '../../automation/index.ts';
 import { Cues, LOOKAHEAD, type Clock } from '../../clock/index.ts';
 import type { Controller } from '../../midi/index.ts';
 import { isSwitch, type ParamSpec } from '../../params/index.ts';
 import { controlAddress } from '../../plan/desk/index.ts';
-import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
+import { addressText, splitAtChild } from '../../plan/format/index.ts';
 import type { DeskBuilt, MixingDesk } from '../desk/index.ts';
-
-// a change to a param by its address: its value, when it lands, its glide's time constant if any
-export interface Change extends TimedValue {
-  readonly address: Address;
-}
-// the clock a change's time is on, and the audio's clock a time on it is played on
-interface Clocks {
-  now: number;
-  at: (t: number) => number;
-}
-
-// When a change lands on the audio's clock: at its time if it's to come, else now;
-// gliding there by its time constant where it says.
-export function whenOf({ t, glide }: Pick<Change, 't' | 'glide'>, { now, at }: Clocks): When {
-  const atTime = t > now ? { at: at(t) } : {};
-  if (glide === undefined) {
-    return atTime;
-  }
-  return { ...atTime, glide };
-}
+import { whenOf, type Change } from '../track-channels/index.ts';
 
 export class CuedControls {
   readonly #desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
