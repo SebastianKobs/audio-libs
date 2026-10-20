@@ -158,12 +158,14 @@ export function mixSmallDesk(context) {
 
 ### 5. An instrument planned, built and played by notes
 
-An instrument planned from a file of instruments on the synth's modules (`plan/instrument`, its `content.ts`), built (`build/web-audio`), and played by MIDI's notes (`build/instrument`, `midi`).
+An instrument planned from a file of instruments on the synth's modules (`plan/instrument`, its `content.ts`), built (`build/web-audio`), and played by MIDI's notes (`build/instrument`, `midi`); two sources on it, one heard from its own place.
 
 ```js
 // Scenario 5: an instrument as a library's user writes it: a file of instruments
 // on the synth's modules, a patch planned, built for Web Audio into a context handed
 // in, played by a note; no view, desk or sequencer.
+// Two sources on one instrument, as a game plays it with no sequencer: a creature heard from
+// its own place, an input of its own into a panner; the ambience summed, the instrument's own input.
 import { instrumentsOf } from '../../src/libs/plan/instrument/index.ts';
 import { MODULE_TEMPLATES } from '../../src/libs/plan/instrument/content.ts';
 import { WebAudioBuilder } from '../../src/libs/build/web-audio/index.ts';
@@ -201,13 +203,18 @@ const FILE = {
   patches: { bright: { instrument: 'Pluck', values: { 'osc/tune': 12 } } },
 };
 
-// the patch's instrument built into the context's destination, an A played on it
-export function playNote(context) {
+// the patch's instrument built into the context's destination; a creature's A through a panner
+// of its own, and a C on the instrument's own input, both played
+export function playTwoSources(context) {
   const instruments = instrumentsOf(FILE, 'scenario 5', MODULE_TEMPLATES);
   const builder = new WebAudioBuilder({ context, beat: () => 0.5 });
   const making = { instruments, patch: 'bright', builder, into: context.destination, at: (t) => t };
   const instrument = new Instrument({ ...making, now: () => context.currentTime });
-  instrument.receive(noteMessages({ pitch: 69, velocity: 1, t: 0.1 }, 1));
-  return instrument;
+  const creaturePan = context.createStereoPanner();
+  creaturePan.connect(context.destination);
+  const creature = instrument.input(() => creaturePan);
+  creature.receive(noteMessages({ pitch: 69, velocity: 1, t: 0.1 }, 1));
+  instrument.receive(noteMessages({ pitch: 64, velocity: 1, t: 0.1 }, 1));
+  return { instrument, creaturePan };
 }
 ```

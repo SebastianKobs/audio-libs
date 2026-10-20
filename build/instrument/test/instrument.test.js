@@ -2,6 +2,7 @@
 // from the tests' file of instruments (libs/plan/instrument/test/pluck.js):
 //   - built from its patch's instrument, by the builder handed in, into where it's told;
 //   - its notes played by its voices, each message moved onto what's built's time;
+//   - an input of its own, its notes kept apart, each voice into the destination it's given;
 //   - its voice cards' own values from outside, set on each voice as it's added;
 //   - a patch it plays edited: a value glided on every voice sounding; a setting, built again;
 //   - whether it plays a patch, its own or a pad's of its rack; a new tempo told what's built.
@@ -48,6 +49,19 @@ test("its notes played by its voices, each message moved onto what's built's tim
   const { built, instrument } = instrumentOf('bright', { at: (t) => t + 100 });
   played(instrument, 5);
   assert.deepEqual(built.added, [['voice/1', 105]]);
+});
+
+test('an input of its own: its notes retimed, each voice into its destination; the voices sounding counted', () => {
+  const { built, instrument } = instrumentOf('bright', { at: (t) => t + 100 });
+  const first = instrument.input(() => 'first way');
+  const second = instrument.input(() => 'second way');
+  first.receive(noteMessages({ pitch: 69, velocity: 1, t: 5 }, 1));
+  second.receive(noteMessages({ pitch: 64, velocity: 1, t: 5 }, 1));
+  assert.deepEqual(built.added, [
+    ['voice/1', 105, 'first way'],
+    ['voice/2', 105, 'second way'],
+  ]);
+  assert.equal(instrument.sounding, 2);
 });
 
 test("its voice cards' own values from outside, set on each voice as it's added", () => {

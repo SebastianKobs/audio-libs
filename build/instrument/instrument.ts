@@ -4,6 +4,8 @@
 //     card, or a drum rack, a pad for each key; built by the builder handed in, into where it's
 //     told, its notes played by its voices;
 //   - messages in on the clock's time, each moved onto what's built's;
+//   - Its inputs: one for each source, each voice into its own destination (`input()`); `receive()`
+//     into its own output;
 //   - its voice cards' own values, read as each voice is added: its patch's edits, then the
 //     values from outside over them (a panel's knobs), set on each voice card it has;
 //   - a new tempo told what's built: its synced LFOs follow.
@@ -23,7 +25,8 @@ import { Voices } from './voices.ts';
 //   - instruments: the file its patch is in, as it began; patch: the patch's name;
 //   - builder: what builds it, into: where its sound goes;
 //   - now: what's built's time now; at: a clock time on what's built's;
-//   - cardValues: its voice cards' own values from outside, by their addresses in a voice card.
+//   - cardValues: its voice cards' own values from outside, by their addresses in a voice card;
+//   - polyphony: the voices it sounds at once, 16 where none is given.
 export interface InstrumentMaking<Into> {
   readonly instruments: Instruments;
   readonly patch: string;
@@ -32,6 +35,7 @@ export interface InstrumentMaking<Into> {
   readonly now: () => number;
   readonly at: (t: number) => number;
   readonly cardValues?: () => Readonly<Record<string, number>>;
+  readonly polyphony?: () => number;
 }
 
 export class Instrument<Into> implements Receiver {
@@ -44,17 +48,37 @@ export class Instrument<Into> implements Receiver {
   #plan: Plan;
   #edits: ValuesByAddress = {}; // each value an edit changed since it was planned, by its address
 
-  constructor({ instruments, patch, builder, into, now, at, cardValues = () => ({}) }: InstrumentMaking<Into>) {
+  constructor({
+    instruments,
+    patch,
+    builder,
+    into,
+    now,
+    at,
+    cardValues = () => ({}),
+    polyphony,
+  }: InstrumentMaking<Into>) {
     this.patch = patch;
     this.#at = at;
     this.#cardValues = cardValues;
     this.#instruments = instruments;
     this.#plan = patchPlan(patch, instruments);
     this.#built = builder.build(this.#plan, { into });
-    this.#voices = new Voices(this.#built, this.#plan, now, () => this.#own());
+    this.#voices = new Voices(this.#built, this.#plan, now, () => this.#own(), polyphony);
   }
+  // messages played straight into its own output
   receive(messages: readonly Message[]): void {
     this.#voices.receive(retimed(messages, this.#at));
+  }
+  // an input of its own, for a track or a test note: its notes kept apart from every other input's,
+  // each voice added into what into() gives as it's added
+  input(into: () => Into): Receiver {
+    const voices = this.#voices.input(into);
+    return { receive: (messages) => voices.receive(retimed(messages, this.#at)) };
+  }
+  // the voices it sounds now
+  get sounding(): number {
+    return this.#voices.sounding;
   }
   // a new beat's length: its synced rates following it
   tempo(beat: number): void {
