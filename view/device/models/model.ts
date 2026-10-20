@@ -9,15 +9,8 @@
 //   - what a node does in its slot and what sets it there, the tool's words.
 // What's done sent as a command, through the send handed in: the app's message for the plan.
 // And what moves each param, worked out from the plan alone (PlanMoves).
-import {
-  paramAt,
-  PlanMoves,
-  settingAt,
-  type Address,
-  type Move,
-  type Param,
-  type Plan,
-} from '../../../plan/format/index.ts';
+import { paramAt, PlanMoves, settingAt, type Move, type Param, type Plan } from '../../../plan/format/index.ts';
+import type { Address } from '../../../util/index.ts';
 import type { Command, PlanReadout, Role, Slot } from '../readout/index.ts';
 
 // a param or a setting found by its address, and which of the two

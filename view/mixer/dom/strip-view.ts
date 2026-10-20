@@ -7,7 +7,7 @@
 // Quiet, drawn so, where a mute or another's solo has it silent.
 // Empty, where its track plays nothing: its sends and its fader at the bottom, each value a
 // dash.
-import { addressText } from '../../../plan/format/index.ts';
+import { addressText } from '../../../util/index.ts';
 import type { Device, Knob } from '../../device/models/index.ts';
 import type { Strip } from '../models/index.ts';
 import { html, type Html } from '../../html/index.ts';

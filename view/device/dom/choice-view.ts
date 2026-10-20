@@ -3,7 +3,7 @@
 // desk set it, its list closed.
 // A switch: on or off, a click toggling a live one.
 // Each marked with its address: a list by its choosing, a switch by its toggle.
-import { addressText } from '../../../plan/format/index.ts';
+import { addressText } from '../../../util/index.ts';
 import type { Choice, Knob } from '../models/index.ts';
 import { html, type Html } from '../../html/index.ts';
 

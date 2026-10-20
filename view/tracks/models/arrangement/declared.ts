@@ -6,7 +6,7 @@
 import type { DeclaredReadout } from '../../readout/index.ts';
 import type { MixerViewBuilder, Strip } from '../../../mixer/models/index.ts';
 import { controlAddress } from '../../../../plan/desk/index.ts';
-import { addressOf, addressText } from '../../../../plan/format/index.ts';
+import { addressOf, addressText } from '../../../../util/index.ts';
 
 export function declaredBy(views: MixerViewBuilder): DeclaredReadout {
   return {

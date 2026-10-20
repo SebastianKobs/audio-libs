@@ -12,7 +12,7 @@ import { deviceHtml, faderHtml, knobHtml, meterHtml, stillPanHtml } from '../../
 import { html } from '../../../html/index.ts';
 import { ViewBuilder } from '../../../device/models/index.ts';
 import { MixerViewBuilder } from '../../models/index.ts';
-import { addressText } from '../../../../plan/format/index.ts';
+import { addressText } from '../../../../util/index.ts';
 import { positionOf } from '../../../../params/index.ts';
 import { STUDIO } from '../../models/test/desk.js';
 

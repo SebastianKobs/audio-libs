@@ -9,11 +9,11 @@ import {
   poolNamed,
   splitAtChild,
   wayOut,
-  type Address,
   type Composite,
   type Node,
   type Plan,
 } from '../../../plan/format/index.ts';
+import type { Address } from '../../../util/index.ts';
 import type { Device, Knob, ViewBuilder } from '../../device/models/index.ts';
 
 // what a strip is read from: the view builder's plan, controls, devices and levels

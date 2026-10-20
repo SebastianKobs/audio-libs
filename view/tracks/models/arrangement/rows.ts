@@ -3,8 +3,7 @@ import type { RecordedLane, RecordedRegion, TracksReadout } from '../../readout/
 import type { Mixer } from '../../../mixer/models/index.ts';
 import { placedOn } from '../placed.ts';
 import { SEND } from '../../../../plan/desk/index.ts';
-import { addressOf, addressText } from '../../../../plan/format/index.ts';
-import { entryOf } from '../../../../util/index.ts';
+import { entryOf, addressOf, addressText } from '../../../../util/index.ts';
 
 // One row of the arrangement.
 // Header: the group's name; it folds the group. `open` is set when tracks can fold.

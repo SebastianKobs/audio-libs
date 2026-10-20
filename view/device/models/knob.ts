@@ -8,8 +8,8 @@
 //   - a pan by its side: C in the middle, L or R and how far, 0 to 50;
 //   - any other to its step, its unit beside it.
 import { dBOf, gainOf, isSwitch, positionOf, valueAt, type ParamSpec } from '../../../params/index.ts';
-import { addressText, mapOnto, type Move } from '../../../plan/format/index.ts';
-import { clamp } from '../../../util/index.ts';
+import { mapOnto, type Move } from '../../../plan/format/index.ts';
+import { clamp, addressText } from '../../../util/index.ts';
 import { Control } from './device.ts';
 
 // a range a move takes a knob through, by where it lies on its control, by what moves it

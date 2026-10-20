@@ -8,7 +8,7 @@
 // Its levels and its reduction read from the limiter block inside the device, by its address;
 // its history's columns a model's (LimiterHistory, libs/view/device/models/meters.ts).
 import { gainOf } from '../../../params/index.ts';
-import type { Address } from '../../../plan/format/index.ts';
+import type { Address } from '../../../util/index.ts';
 import { Knob, LimiterHistory, type Device, type Peaks, type ViewBuilder } from '../models/index.ts';
 import type { CustomView } from './custom-view.ts';
 import { html, sizedCanvas, type Html } from '../../html/index.ts';

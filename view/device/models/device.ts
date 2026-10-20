@@ -3,7 +3,8 @@
 // What every control on it has: its address, a param's or a setting's, its declared spec,
 // its words, and how it's set.
 import type { ParamSpec } from '../../../params/index.ts';
-import type { Address, Move } from '../../../plan/format/index.ts';
+import type { Move } from '../../../plan/format/index.ts';
+import type { Address } from '../../../util/index.ts';
 import type { Found, Model } from './model.ts';
 import type { Role, Slot } from '../readout/index.ts';
 

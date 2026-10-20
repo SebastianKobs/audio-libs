@@ -3,7 +3,7 @@
 // A drag, a refresh and a click then find the model by the element alone, with no routing.
 // An element is marked with its model's address (data-knob, data-set, …); its drawer's models
 // say what's there.
-import { addressOf, type Address } from '../../../plan/format/index.ts';
+import { addressOf, type Address } from '../../../util/index.ts';
 
 // the marks a control is drawn with: a knob, a live one's drag, a switch, a list of choices
 export const CONTROL_MARKS: readonly string[] = Object.freeze(['knob', 'set', 'toggle', 'choose']);

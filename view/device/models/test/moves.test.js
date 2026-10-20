@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ViewBuilder } from '../index.ts';
 import { PresetReadout } from '../../readout/index.ts';
-import { addressText } from '../../../../plan/format/index.ts';
+import { addressText } from '../../../../util/index.ts';
 import { positionOf } from '../../../../params/index.ts';
 import { near } from '../../../../util/test/near.js';
 import { builderOn, CARD } from './card.js';

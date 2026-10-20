@@ -7,15 +7,8 @@
 // added or let go. A pool's copies among them, as they're added.
 // What strips feed, for a view's lights: each through its way out, the sends said to be up.
 // Its channels, as a desk alone shows them.
-import {
-  addressOf,
-  addressText,
-  reached,
-  withCopies,
-  type Address,
-  type Composite,
-  type Wire,
-} from '../../../plan/format/index.ts';
+import { reached, withCopies, type Composite, type Wire } from '../../../plan/format/index.ts';
+import { addressOf, addressText, type Address } from '../../../util/index.ts';
 import type { Strip } from './strip.ts';
 import type { ViewBuilder } from '../../device/models/index.ts';
 

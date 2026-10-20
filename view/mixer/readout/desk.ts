@@ -10,7 +10,8 @@
 //   - a pool's copies added so far.
 // What's done sent as the desk's message (deskEdited()), its owner playing it in as it hears
 // it (the desk's surface).
-import { addressText, nodeAt, splitAtChild, type Address, type Node } from '../../../plan/format/index.ts';
+import { nodeAt, splitAtChild, type Node } from '../../../plan/format/index.ts';
+import { addressText, type Address } from '../../../util/index.ts';
 import { SEND } from '../../../plan/desk/index.ts';
 import type { DeskBuilt, DeskMessage, DeskSetup, MixingDesk } from '../../../build/desk/index.ts';
 import type { Command, PlanReadout, Role, Slot } from '../../device/readout/index.ts';

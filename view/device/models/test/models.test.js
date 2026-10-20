@@ -8,7 +8,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CustomViews, ViewBuilder } from '../index.ts';
-import { addressText, paramAt, settingAt } from '../../../../plan/format/index.ts';
+import { paramAt, settingAt } from '../../../../plan/format/index.ts';
+import { addressText } from '../../../../util/index.ts';
 import { UTILITY } from '../../../../plan/format/test/plans.ts';
 import { positionOf } from '../../../../params/index.ts';
 import { near } from '../../../../util/test/near.js';

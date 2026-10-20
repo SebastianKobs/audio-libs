@@ -6,7 +6,7 @@
 //   - its knobs, each its hint, the template's, and how it's set;
 //   - a reset for what's live on it;
 //   - a view of its own where its kind has one, the limiter's history (registered by its owner).
-import { addressOf, addressText } from '../../../plan/format/index.ts';
+import { addressOf, addressText } from '../../../util/index.ts';
 import { Knob, type Control, type Device } from '../../device/models/index.ts';
 import type { MixerViewBuilder } from '../models/index.ts';
 import type { CompositeView, DeviceChain } from '../../device/dom/index.ts';

@@ -2,7 +2,8 @@
 // On a device's view models (view-builder.ts):
 //   - a channel as a strip, by its form, a pool's copy among them;
 //   - the desk as a mixer, its strips by role.
-import { nodeAt, type Address } from '../../../plan/format/index.ts';
+import { nodeAt } from '../../../plan/format/index.ts';
+import type { Address } from '../../../util/index.ts';
 import { Mixer } from './mixer.ts';
 import { Strip } from './strip.ts';
 import { ViewBuilder } from '../../device/models/index.ts';

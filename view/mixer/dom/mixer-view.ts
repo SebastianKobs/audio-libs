@@ -17,8 +17,7 @@
 // Level bars: each falls as a peak meter's, drawn on every frame.
 // Lights: a folded section's, and a group's dot, while a hidden strip sounds; what the strips
 // heard feed counted too.
-import { addressOf, addressText, type Address } from '../../../plan/format/index.ts';
-import { Events } from '../../../util/index.ts';
+import { Events, addressOf, addressText, type Address } from '../../../util/index.ts';
 import { Meters, type Control } from '../../device/models/index.ts';
 import {
   channelGroups,

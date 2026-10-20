@@ -4,17 +4,8 @@
 //   - a node: a device, its controls in the plan's order;
 //   - a composite's children: grouped by their roles, as a synth's panel groups its modules;
 //   - what a composite's own sources move: a matrix, as a synth's mod matrix;
-import {
-  addressText,
-  isComposite,
-  nodeAt,
-  under,
-  type Address,
-  type MacroTarget,
-  type Move,
-  type Node,
-  type Plan,
-} from '../../../plan/format/index.ts';
+import { isComposite, nodeAt, type MacroTarget, type Move, type Node, type Plan } from '../../../plan/format/index.ts';
+import { addressText, under, type Address } from '../../../util/index.ts';
 import { Choice } from './choice.ts';
 import type { Control, Device } from './device.ts';
 import { Knob } from './knob.ts';

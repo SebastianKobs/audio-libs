@@ -9,13 +9,13 @@
 //   - macro.ts: a composite's own param mapped onto its children's, its value onto theirs;
 //   - pool.ts: children that come and go, a copy, its name and its wiring, a composite with
 //     copies added, a voice's note, an address split at the copy or the child it's in;
-//   - address.ts: where a param or a setting is, by names from the top, and as text;
+//   - address.ts: values by their addresses, a preset's, a template's child's;
 //   - param-at.ts: a node, a param or a setting found by its address; settings changed by it,
 //     a new plan;
 //   - moves.ts: what moves each param, a macro's maps and a child wired into it, as a mod matrix;
 //   - routing.ts: what feeds what over one composite's wires, the loop check, a node's way out;
 //   - version.ts: a stored plan's version.
-export { addressOf, addressText, under, type Address, type ValuesByAddress } from './address.ts';
+export type { ValuesByAddress } from './address.ts';
 export type { Channels, Input, Output } from './input-output.ts';
 export { macroValues, mapOnto, type Macro, type MacroTarget } from './macro.ts';
 export { PlanMoves, type Move } from './moves.ts';

@@ -3,7 +3,7 @@
 //   1. its own words, its template's or its module's;
 //   2. how it's set: live, by its macro, by its notes as recorded, fixed, or by its source;
 //   3. what moves it as the note plays, its modulators.
-import { addressText } from '../../../plan/format/index.ts';
+import { addressText } from '../../../util/index.ts';
 import type { Control } from '../models/index.ts';
 
 // A control's hint, its parts in order (see the top of this file).

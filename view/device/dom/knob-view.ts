@@ -13,8 +13,7 @@
 //     elsewhere leaves it; one it can't read kept in the field, marked;
 //   - a double-click sets it back to its start.
 import { positionOf } from '../../../params/index.ts';
-import { addressText } from '../../../plan/format/index.ts';
-import { clamp01 } from '../../../util/index.ts';
+import { clamp01, addressText } from '../../../util/index.ts';
 import { Knob, type Ring } from '../models/index.ts';
 import { html, type Html } from '../../html/index.ts';
 

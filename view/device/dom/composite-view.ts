@@ -9,7 +9,7 @@
 // registered once (register()), redrawn on every frame while it's shown (redraw()).
 // The chosen pad of each rack and tab of each group its model's, handed in (Chosen); each
 // reset drawn, by its key, its own, as the elements it binds are.
-import { addressOf, addressText, type Address } from '../../../plan/format/index.ts';
+import { addressOf, addressText, type Address } from '../../../util/index.ts';
 import { CustomViews, type Chosen, type Control, type Device, type ViewBuilder } from '../models/index.ts';
 import { Bound, CONTROL_MARKS } from './bound.ts';
 import type { CustomView } from './custom-view.ts';

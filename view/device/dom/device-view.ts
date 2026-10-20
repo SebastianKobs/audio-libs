@@ -8,7 +8,7 @@
 // A setting shown only where it's live: one fixed as built isn't the device's to change.
 // A time with a sync switch shows its note while synced, its free time while not.
 import { timeParamsIn } from '../../../params/index.ts';
-import { addressText } from '../../../plan/format/index.ts';
+import { addressText } from '../../../util/index.ts';
 import { Choice, type Control, type Device, type Knob } from '../models/index.ts';
 import { choiceHtml, switchHtml } from './choice-view.ts';
 import { html, type Html } from '../../html/index.ts';

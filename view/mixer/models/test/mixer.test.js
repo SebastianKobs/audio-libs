@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { channelGroups, MixerViewBuilder, shortName } from '../index.ts';
-import { addressText } from '../../../../plan/format/index.ts';
+import { addressText } from '../../../../util/index.ts';
 import { STUDIO } from './desk.js';
 
 // The desk's view models on a plan's readout of the tests' own: values and peaks by address, the copies
