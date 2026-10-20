@@ -6,7 +6,8 @@
 // Its parts:
 //   - channel-form.ts, desk-form.ts: what every channel and every desk is, as forms;
 //   - channel.ts: a channel written short, read from data, made into templates of its form, alone or on a desk;
-//   - desk.ts: a desk written short, its channels and pools, read from data, made into templates;
+//   - desk.ts: a desk written short, its channels and pools, read from data;
+//   - desk-templates.ts: a desk written short, made into templates;
 //   - mute-solo.ts: which channels a mute or a solo silences, over a plan's wires;
 // A channel's own params, as a strip's, are libs/params/'s (STRIP_PARAMS, SEND_PARAM).
 import { CHANNEL_FORM } from './channel-form.ts';
@@ -29,7 +30,8 @@ export {
   type Tap,
 } from './channel.ts';
 export { CHANNEL_FORM } from './channel-form.ts';
-export { deskOf, deskTemplates, type Desk, type DeskChannel, type DeskPool } from './desk.ts';
+export { deskOf, type Desk, type DeskChannel, type DeskPool } from './desk.ts';
+export { deskTemplates } from './desk-templates.ts';
 export { MUTE_GLIDE, silenced, type Muting } from './mute-solo.ts';
 
 // the desk's forms, to hand the planner beside the effect's
