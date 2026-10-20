@@ -5,7 +5,8 @@ import { SEND_PARAM, type ParamSpec } from '../../../../params/index.ts';
 import type { Seconds, TimeMap } from '../../../../clock/index.ts';
 import type { TimedValue } from '../../../../automation/index.ts';
 import { keptWhole } from './note-shapes.ts';
-import { laneKeyOf, laneRowOf, rowKeyOf, stripOf, type ArrangedStrip } from './rows.ts';
+import { laneRowOf, rowKeyOf, type ArrangedStrip } from './rows.ts';
+import { laneKeyOf, stripOf } from './lane-names.ts';
 import type {
   DeclaredReadout,
   RecordedLane,

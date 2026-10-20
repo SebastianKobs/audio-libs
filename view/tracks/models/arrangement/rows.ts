@@ -2,8 +2,8 @@
 import type { RecordedLane, RecordedRegion, TracksReadout } from '../../readout/index.ts';
 import type { Mixer } from '../../../mixer/models/index.ts';
 import { placedOn } from '../placed.ts';
-import { SEND } from '../../../../plan/desk/index.ts';
-import { entryOf, addressOf, addressText } from '../../../../util/index.ts';
+import { entryOf, addressText } from '../../../../util/index.ts';
+import { laneKeyOf, laneName, stripOf } from './lane-names.ts';
 
 // One row of the arrangement.
 // Header: the group's name; it folds the group. `open` is set when tracks can fold.
@@ -178,10 +178,6 @@ function controllersByRow(
     [...byRow].map(([row, { strip, controllers }]) => [row, inSignalOrder(controllers, controllersOf(strip))]),
   );
 }
-// The strip a lane is on: the one its play was sent to; a strip's own lane, its kind.
-export function stripOf(lane: RecordedLane): string {
-  return lane.trackName ?? lane.kind;
-}
 // Controllers sorted by where each comes through a strip; one it doesn't list after.
 function inSignalOrder(controllers: readonly string[], order: readonly string[]): string[] {
   const place = (controller: string): number => {
@@ -189,10 +185,6 @@ function inSignalOrder(controllers: readonly string[], order: readonly string[])
     return index === -1 ? Infinity : index;
   };
   return controllers.toSorted((first, second) => place(first) - place(second));
-}
-// A lane row's key: the track's key and the controller.
-export function laneKeyOf(track: string, controller: string): string {
-  return `${track}: ${controller}`;
 }
 // A track row, marked when it has lanes. When open, its lanes follow it, one row each,
 // named by its controller (laneName()).
@@ -208,16 +200,4 @@ function withLanes(track: Row, controllers: readonly string[] | undefined, open:
     track: track.key,
   }));
   return [{ ...track, open }, ...(open ? lanes : [])];
-}
-// A lane's name, by its controller: its slot and param, as Ableton names an automation
-// lane by its device and param; a send by its return's name; a strip's own by its param.
-function laneName(controller: string): string {
-  const [first = '', param] = addressOf(controller); // under its strip: the strip's no part of its name
-  if (param === undefined) {
-    return first; // a strip's own
-  }
-  if (first === SEND) {
-    return param;
-  }
-  return `${first} ${param}`;
 }
