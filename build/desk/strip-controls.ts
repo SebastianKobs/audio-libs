@@ -9,7 +9,7 @@
 // Where each goes:
 //   1. one a track's notes set, where a note is heard from and what its phrase drew: its
 //      channel's (TrackChannels), at its time on the audio's clock;
-//   2. a strip's mute and solo: the live mix's (mix.ts);
+//   2. a strip's mute and solo: the desk's mute() and solo();
 //   3. any other: the desk's, which keeps it.
 // When, each held on the clock's cues:
 //   - one that glides: until its lead ahead of its time, as the 16ths are, then set at its
@@ -23,8 +23,8 @@ import type { Controller } from '../../midi/index.ts';
 import { isSwitch, type ParamSpec } from '../../params/index.ts';
 import { controlAddress } from '../../plan/desk/index.ts';
 import { addressText, splitAtChild, type Address } from '../../plan/format/index.ts';
-import type { DeskBuilt, DeskState } from './desk-state.ts';
-import type { Mix } from './mix.ts';
+import type { DeskBuilt } from './desk-state.ts';
+import type { MixingDesk } from './mixing-desk.ts';
 
 // a change to a param by its address: its value, when it lands, its glide's time constant if any
 export interface Change extends TimedValue {
@@ -47,8 +47,7 @@ export function whenOf({ t, glide }: Pick<Change, 't' | 'glide'>, { now, at }: C
 }
 
 export class StripControls {
-  readonly #desk: Pick<DeskState<DeskBuilt>, 'plan' | 'specOf' | 'set'>;
-  readonly #mix: Mix;
+  readonly #desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
   readonly #channels: { control(strip: string, change: Change): boolean };
   readonly #clock: Pick<Clock, 'now' | 'onTick'>;
   readonly #at: (t: number) => number;
@@ -63,19 +62,16 @@ export class StripControls {
   // clock: its time now and its ticks; at(): a time on it on the audio's clock
   constructor({
     desk,
-    mix,
     channels,
     clock,
     at,
   }: {
-    desk: Pick<DeskState<DeskBuilt>, 'plan' | 'specOf' | 'set'>;
-    mix: Mix;
+    desk: Pick<MixingDesk<DeskBuilt>, 'plan' | 'specOf' | 'set' | 'mute' | 'solo'>;
     channels: { control(strip: string, change: Change): boolean };
     clock: Pick<Clock, 'now' | 'onTick'>;
     at: (t: number) => number;
   }) {
     this.#desk = desk;
-    this.#mix = mix;
     this.#channels = channels;
     this.#clock = clock;
     this.#at = at;
@@ -138,10 +134,10 @@ export class StripControls {
   }
   #switched(strip: string, param: 'mute' | 'solo', on: boolean): void {
     if (param === 'mute') {
-      this.#mix.setMute(strip, on);
+      this.#desk.mute(strip, on);
       return;
     }
-    this.#mix.setSolo(strip, on);
+    this.#desk.solo(strip, on);
   }
 }
 // whether a change is set at its time, not glided there: a switch, a choice, or a param its

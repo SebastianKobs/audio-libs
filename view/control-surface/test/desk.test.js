@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deskEdited, deskReadout } from '../index.ts';
-import { Desk } from '../../../build/desk/index.ts';
+import { MixingDesk } from '../../../build/desk/index.ts';
 import { deskOn } from '../../../build/desk/test/built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
 
@@ -24,11 +24,10 @@ const SETUP = {
 };
 
 function planReadoutOn() {
-  const on = deskOn(Desk, PLAN, { setup: SETUP });
+  const on = deskOn(MixingDesk, PLAN, { setup: SETUP });
   const planReadout = deskReadout({ desk: on.desk, setup: SETUP });
   return { ...on, planReadout };
 }
-const switched = (name) => ({ type: 'controller', controller: name, value: 1, t: 0 });
 
 test("the desk's plan; a value as it plays, its start; a strip's mute and solo the live mix's", () => {
   const { desk, planReadout } = planReadoutOn();
@@ -36,7 +35,7 @@ test("the desk's plan; a value as it plays, its start; a strip's mute and solo t
   desk.set(['tap', 'volume'], 0.5);
   assert.equal(planReadout.valueOf(['tap', 'volume']), 0.5);
   assert.equal(planReadout.startOf(['tap', 'utility', 'level']), 0.7);
-  desk.control('tap', switched('mute'));
+  desk.mute('tap', true);
   assert.deepEqual(
     [planReadout.valueOf(['tap', 'mute']), planReadout.valueOf(['tap', 'solo']), planReadout.valueOf(['you', 'mute'])],
     [1, 0, 0],
@@ -79,14 +78,14 @@ test("a level and a reading once the desk is built, its channel there, a copy's 
   built.levels.set('my tap/3/', 0.2);
   assert.deepEqual([planReadout.peakOf(['tap']), planReadout.readingOf(['master', 'limiter'], 'reduction')], [0.4, 3]);
   assert.equal(planReadout.peakOf(['my tap', '3']), 0, 'a copy not added');
-  desk.inputOf('my tap/3');
+  desk.channelOf('my tap/3');
   assert.equal(planReadout.peakOf(['my tap', '3']), 0.2);
 });
 
 test("a pool's copies added", () => {
   const { desk, build, planReadout } = planReadoutOn();
   build();
-  desk.inputOf('my tap/3');
+  desk.channelOf('my tap/3');
   assert.deepEqual(planReadout.copiesOf(['my tap']), [['my tap', '3']]);
 });
 

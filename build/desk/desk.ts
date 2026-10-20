@@ -1,18 +1,15 @@
 // ---------- build/desk/desk: a desk built and played, as its owner holds it ----------
-// Its state as it plays (desk-state.ts), and its own parts, as a console has them, made with
-// it, each working on its state:
+// A mixing desk (mixing-desk.ts) and its own parts, as a console has them, made with it:
 //   - its strips' controls, set on time (strip-controls.ts);
 //   - each track's channel, its instrument's way in, what its notes set on it
-//     (track-channels.ts);
-//   - the live mix's mute and solo (mix.ts), applied as it's built and as each track's channel
-//     is added; set by a strip's mute and solo controllers.
+//     (track-channels.ts).
 // Its owner hands in, once: its plan, its setup's rules, the clock and a time on it on what's
 // built's.
 import type { Clock } from '../../clock/index.ts';
 import type { Controller } from '../../midi/index.ts';
 import type { Plan } from '../../plan/format/index.ts';
-import { DeskState, type DeskBuilt } from './desk-state.ts';
-import { Mix } from './mix.ts';
+import type { DeskBuilt } from './desk-state.ts';
+import { MixingDesk } from './mixing-desk.ts';
 import type { DeskSetup } from './setup.ts';
 import { StripControls } from './strip-controls.ts';
 import { TrackChannels, type ChannelInput } from './track-channels.ts';
@@ -28,24 +25,14 @@ export interface DeskMaking {
   readonly at: (t: number) => number;
 }
 
-export class Desk<B extends DeskBuilt> extends DeskState<B> {
-  readonly #mix: Mix;
+export class Desk<B extends DeskBuilt> extends MixingDesk<B> {
   readonly #channels: TrackChannels<B>;
   readonly #controls: StripControls;
 
   constructor({ plan, setup, clock, at }: DeskMaking) {
     super({ plan });
-    this.#mix = new Mix({ desk: this });
-    // a track's channel muted as it's added, where it or what takes it along is
-    const made = (): void => this.#mix.apply();
-    this.#channels = new TrackChannels({ desk: this, clock, at, made, setup });
-    this.#controls = new StripControls({ desk: this, mix: this.#mix, channels: this.#channels, clock, at });
-  }
-  // built as its state is, the mute and solo set before applied
-  override build(make: (plan: Plan) => B): B {
-    const built = super.build(make);
-    this.#mix.apply();
-    return built;
+    this.#channels = new TrackChannels({ desk: this, clock, at, setup });
+    this.#controls = new StripControls({ desk: this, channels: this.#channels, clock, at });
   }
   // a strip's controller set on time (strip-controls.ts)
   control(strip: string, controller: Controller): void {
@@ -63,9 +50,5 @@ export class Desk<B extends DeskBuilt> extends DeskState<B> {
   // with no pool
   inputOf(track: string): ChannelInput<B> | null {
     return this.#channels.inputOf(track);
-  }
-  // the strips muted and soloed now, copies
-  mixState(): { muted: Set<string>; soloed: Set<string> } {
-    return this.#mix.state();
   }
 }

@@ -12,7 +12,7 @@
 // it (the desk's surface).
 import { addressText, nodeAt, splitAtChild, type Address, type Node } from '../../plan/format/index.ts';
 import { SEND } from '../../plan/desk/index.ts';
-import type { Desk, DeskBuilt, DeskMessage, DeskSetup } from '../../build/desk/index.ts';
+import type { DeskBuilt, DeskMessage, DeskSetup, MixingDesk } from '../../build/desk/index.ts';
 import type { Command, PlanReadout, Role, Slot } from './plan.ts';
 
 // What the desk's readout asks of what's built beyond the desk's: its meters, a level and a reading,
@@ -22,7 +22,7 @@ interface Metered {
   reading(address: Address, name: string): number;
 }
 // a desk whose built has meters, as its readout reads it
-type MeteredDesk = Desk<DeskBuilt & Metered>;
+type MeteredDesk = MixingDesk<DeskBuilt & Metered>;
 
 const LIVE: Role = { by: 'live' };
 const AUTOMATED: Role = { by: 'automated', recorded: true }; // a desk's automation, in its lanes

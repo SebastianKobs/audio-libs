@@ -7,7 +7,7 @@
 //   - settings changed as a preset; a new beat, one unchanged passed over; whether a strip is one of its own channels.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Desk } from '../index.ts';
+import { MixingDesk } from '../index.ts';
 import { deskOn } from './built.js';
 import { planned } from '../../../plan/desk/test/desks.js';
 import { settingAt } from '../../../plan/format/index.ts';
@@ -16,7 +16,7 @@ const PLAN = planned();
 const ROOM = 'reverb/reverb/length';
 
 test('built from its plan by the function handed in, the settings changed before in it; a way into each of its own inputs, by name; the values set before told it', () => {
-  const { desk, built, handed, build } = deskOn(Desk, PLAN);
+  const { desk, built, handed, build } = deskOn(MixingDesk, PLAN);
   desk.settings({ [ROOM]: 2 });
   desk.set(['tap', 'volume'], 0.5);
   assert.equal(desk.built, null);
@@ -28,7 +28,7 @@ test('built from its plan by the function handed in, the settings changed before
 });
 
 test("a track's channel, its pool's copy, added the first time it's asked for once built, what was set on it before told; none for a track with no pool", () => {
-  const { desk, built, build } = deskOn(Desk, PLAN);
+  const { desk, built, build } = deskOn(MixingDesk, PLAN);
   desk.set(['my tap', '3', 'volume'], 0.4);
   assert.deepEqual(desk.channelOf('my tap/3'), ['my tap', '3'], 'before it is built: its address alone');
   assert.equal(desk.added('my tap/3'), false);
@@ -48,7 +48,7 @@ test("a track's channel, its pool's copy, added the first time it's asked for on
 });
 
 test('a value set: kept, told what plays it; a choice by its index kept as its choice; read back as set, or as the plan starts it', () => {
-  const { desk, built, build } = deskOn(Desk, PLAN);
+  const { desk, built, build } = deskOn(MixingDesk, PLAN);
   build();
   desk.set(['tap', 'volume'], 0.3, { glide: 0.05 });
   assert.deepEqual(built.told.at(-1), ['tap/volume', 0.3, { glide: 0.05 }]);
@@ -64,7 +64,7 @@ test('a value set: kept, told what plays it; a choice by its index kept as its c
 });
 
 test("settings changed: kept, what's built built again with them; a new beat told, one unchanged passed over; whether a strip is one of its own channels", () => {
-  const { desk, built, build } = deskOn(Desk, PLAN);
+  const { desk, built, build } = deskOn(MixingDesk, PLAN);
   build();
   desk.settings({ [ROOM]: 1.5 });
   assert.deepEqual(built.presets, [[{}, { [ROOM]: 1.5 }]]);
