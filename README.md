@@ -4,7 +4,7 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 
 ## By role
 
-Five groups, each a folder, read bottom up: base, sequencing, music, spatial, modular-audio. A group reads only those before it, but for one edge: `sequencing/clip-player` reads `music/music-theory`, until MUSIC3. Each group's `README.md` says what it holds and what it reads.
+Five groups, each a folder, read bottom up: base, sequencing, music, spatial, modular-audio. A group reads only those before it. Each group's `README.md` says what it holds and what it reads.
 
 - **[`base/`](base/README.md), at the bottom,** words and helpers every library shares: `util` (maths, searches, events, a bus, seeded draws, addresses, data read for its shape), `automation` (what a param is told as it plays), `params` (a param as a plugin declares it), `html` (HTML made safely).
 - **[`sequencing/`](sequencing/README.md), time, events and MIDI:** `clock` (music time, the beat grid, ticks), `timeline` (what happened, laid out in time, played back), `sequencer` (patterns of events on the grid, clips on tracks, pools of tracks); `midi` (MIDI 2.0's channel voice messages as values), `midi-sequencer` (the input, the stream, the recorder, the recording played back), `clip-player` (a session view's clips, launched into the input); `view/transport` (play, stop, where the music is).

@@ -10,4 +10,4 @@ Music's time, its events and MIDI, and the transport's view. Part of [the librar
 - [`clip-player/`](clip-player/README.md): a session view's clips, launched into the input.
 - [`view/transport/`](view/transport/models/README.md): play, stop, where the music is, as `models/` and `dom/`.
 
-Reads: `base/` (`util`, `params`, `automation`, `html`); `clip-player/` also `music/music-theory/`. `clock/` is the time every other library here stands on, `midi/` the messages they carry.
+Reads: `base/` (`util`, `params`, `automation`, `html`). `clock/` is the time every other library here stands on, `midi/` the messages they carry.

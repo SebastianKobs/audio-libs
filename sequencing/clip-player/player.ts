@@ -7,7 +7,7 @@
 // Launched from a 16th to come (launch quantization), it waits for that 16th, what its track
 // plays playing on till then.
 // Its notes:
-//   - pitches, or steps of the scale, pitched in the key as the clip is launched;
+//   - pitches, transposed as the clip is launched;
 //   - each with its part, its own per-note values and a held note's glides, as MIDI 2.0 has them;
 //   - sent into the input as they come due, so they reach their instrument and the stream as
 //     a played note does;
@@ -18,19 +18,21 @@ import type { Seconds, Ticks } from '../clock/index.ts';
 import { ClipLauncher, type ClipGrid, type Pattern, type Span } from '../sequencer/index.ts';
 import type { SentTo, Input, PatternNote } from '../midi-sequencer/index.ts';
 import { NoteRotation, noteMessages, type PerNoteValues } from '../midi/index.ts';
-import { degreeNote, type Key } from '../../music/music-theory/index.ts';
 
 // A clip's note, as a pattern's, and what it plays with:
+//   - pitch: its note number; a clip holds pitches, a step of a scale is the Scale device's;
 //   - part: which part of its element sounds it, as the way back lights it;
 //   - values: its per-note controllers as it starts;
 //   - glides: a held note's, each [ticks after its start, the pitch it glides to].
 export interface ClipNote extends PatternNote {
+  step?: undefined;
+  pitch: number;
   part?: number | undefined;
   values?: PerNoteValues | undefined;
   glides?: readonly (readonly [after: Ticks, pitch: number])[] | undefined;
 }
 // A clip: where its notes go, its pattern, and how it plays.
-// transpose: semitones, once its notes are pitched.
+// transpose: semitones, added to each note's pitch as it's launched.
 // straight: under the grid's swing, or on it.
 // velocity: read as each note comes due, as a velocity device sets it; full if it has none,
 // none leaving the note out.
@@ -46,11 +48,6 @@ export type Clip<Track extends string> = {
 } & (
   { once?: false | undefined; lend?: undefined } | { once: true; lend?(to: SentTo<Track>, span: Span): SentTo<Track> }
 );
-// A launch waiting for its 16th, pitched in the key it was asked in.
-interface QueuedLaunch {
-  from: number;
-  key: Key;
-}
 // A clip as it plays: its slot, and where its notes go, once a lent track is known.
 interface Playing<Track extends string, Slot> {
   clip: Clip<Track>;
@@ -68,21 +65,18 @@ interface Playing<Track extends string, Slot> {
 export class ClipPlayer<Track extends string, Slot = unknown> {
   readonly #input: Input<Track>;
   readonly #grid: ClipGrid;
-  readonly #key: () => Key;
   readonly #rotation = new NoteRotation();
   readonly #launcher: ClipLauncher<Track | Slot, ClipNote>;
   readonly #slots = new Map<Slot, Clip<Track>>(); // in the order put
   readonly #playing = new Map<Track | Slot, Playing<Track, Slot>>(); // by its track, or its slot where lent
   readonly #sounding = new Map<Slot, Seconds>(); // a clip played once: when its last note ends, from its start
-  readonly #queued = new Map<Slot, QueuedLaunch>(); // in the order asked
+  readonly #queued = new Map<Slot, number>(); // the 16th it waits for, in the order asked
   #now: Seconds = -Infinity; // the last 16th's time
   #stepped = -Infinity; // the last 16th's number
 
-  // key: the key a clip's steps are pitched in, read as it's launched
-  constructor({ input, grid, key }: { input: Input<Track>; grid: ClipGrid; key: () => Key }) {
+  constructor({ input, grid }: { input: Input<Track>; grid: ClipGrid }) {
     this.#input = input;
     this.#grid = grid;
-    this.#key = key;
     this.#launcher = new ClipLauncher<Track | Slot, ClipNote>({
       grid,
       play: (track, note, at) => this.#send(track, note, at),
@@ -114,12 +108,11 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
     return this.#slots.get(slot);
   }
   // A slot's clip launched on its track, in place of what the track played.
-  // Pitched in the key now; its notes carrying a fresh region, one while it loops.
+  // Its notes carrying a fresh region, one while it loops.
   // An empty slot launches nothing.
   // from: a 16th not stepped yet:
   //   - the clip waits for it, launched as that 16th comes, before it plays;
-  //   - what its track plays plays on till then;
-  //   - pitched in the key as it's asked, not as that 16th comes.
+  //   - what its track plays plays on till then.
   launch(slot: Slot, from?: number): void {
     const clip = this.#slots.get(slot);
     if (!clip) {
@@ -127,10 +120,10 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
     }
     this.#unqueue(trackOf(slot, clip));
     if (from !== undefined && from > this.#stepped) {
-      this.#queued.set(slot, { from, key: this.#key() });
+      this.#queued.set(slot, from);
       return;
     }
-    this.#launchNow(slot, clip, this.#key());
+    this.#launchNow(slot, clip);
   }
   stop(track: Track): void {
     this.#unqueue(track);
@@ -160,12 +153,12 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
     this.#launcher.step(i, t);
   }
   #launchQueued(i: number): void {
-    for (const [slot, { from, key }] of this.#queued) {
+    for (const [slot, from] of this.#queued) {
       if (from > i) {
         continue;
       }
       this.#queued.delete(slot);
-      this.#launchNow(slot, this.#slots.get(slot)!, key); // remove() lets a queued one go
+      this.#launchNow(slot, this.#slots.get(slot)!); // remove() lets a queued one go
     }
   }
   // a queued launch on a track let go
@@ -176,9 +169,9 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
       }
     }
   }
-  #launchNow(slot: Slot, clip: Clip<Track>, key: Key): void {
+  #launchNow(slot: Slot, clip: Clip<Track>): void {
     const track = trackOf(slot, clip);
-    const pattern = pitched(clip.pattern, key, clip.transpose ?? 0);
+    const pattern = transposed(clip.pattern, clip.transpose ?? 0);
     const region = this.#launcher.launch({ track, pattern, straight: clip.straight, once: clip.once });
     const playing: Playing<Track, Slot> = { clip, slot };
     if (!clip.lend) {
@@ -209,7 +202,7 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
     const grid = this.#grid;
     const duration = grid.secondsOf(note.duration!); // its length on the straight grid
     const glides = note.glides?.map(([after, pitch]) => [at + grid.secondsOf(after), pitch] as const);
-    const sent = { pitch: note.pitch!, velocity, t: at, duration, part: note.part, controllers: note.values, glides }; // pitched as launched
+    const sent = { pitch: note.pitch, velocity, t: at, duration, part: note.part, controllers: note.values, glides };
     this.#input.send(playing.to!, noteMessages(sent, index)); // a lent track's lent as it started
   }
 }
@@ -222,19 +215,12 @@ function trackOf<Track extends string, Slot>(slot: Slot, clip: Clip<Track>): Tra
 function inRegion<Track extends string>(to: SentTo<Track>, region: number): SentTo<Track> {
   return { ...to, play: { ...to.play, region } };
 }
-// a pattern's notes as pitches in a key, transposed; a held note's glides transposed with it
-function pitched(pattern: Pattern<ClipNote>, key: Key, transpose: number): Pattern<ClipNote> {
+// a pattern's notes transposed by semitones; a held note's glides transposed with it
+function transposed(pattern: Pattern<ClipNote>, transpose: number): Pattern<ClipNote> {
   const events = pattern.events.map((note) => ({
     ...note,
-    pitch: pitchOf(note, key) + transpose,
+    pitch: note.pitch + transpose,
     ...(note.glides ? { glides: note.glides.map(([after, pitch]) => [after, pitch + transpose] as const) } : {}),
   }));
   return { ...pattern, events };
-}
-// a note's pitch: its step of the scale in the key, where it has one; else its own
-function pitchOf(note: ClipNote, key: Key): number {
-  if (note.step !== undefined) {
-    return degreeNote(note.step, key);
-  }
-  return note.pitch!; // a clip's note has a step or a pitch
 }
