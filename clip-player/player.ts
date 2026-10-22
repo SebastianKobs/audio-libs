@@ -4,6 +4,8 @@
 //   - looping on the grid;
 //   - or once, from the next beat, its first note to its last, on its track or on one its
 //     owner lends it for that long, as it starts.
+// Launched from a 16th to come (launch quantization), it waits for that 16th, what its track
+// plays playing on till then.
 // Its notes:
 //   - pitches, or steps of the scale, pitched in the key as the clip is launched;
 //   - each with its part, its own per-note values and a held note's glides, as MIDI 2.0 has them;
@@ -44,6 +46,11 @@ export type Clip<Track extends string> = {
 } & (
   { once?: false | undefined; lend?: undefined } | { once: true; lend?(to: SentTo<Track>, span: Span): SentTo<Track> }
 );
+// A launch waiting for its 16th, pitched in the key it was asked in.
+interface QueuedLaunch {
+  from: number;
+  key: Key;
+}
 // A clip as it plays: its slot, and where its notes go, once a lent track is known.
 interface Playing<Track extends string, Slot> {
   clip: Clip<Track>;
@@ -56,6 +63,7 @@ interface Playing<Track extends string, Slot> {
 // were launched.
 // Each launch is a region of its own, its notes carrying its number.
 // Slot: what its owner knows a slot by.
+// A launch queued for a 16th: one a slot, a later one on its track in its place.
 // A lent clip plays one a slot: launched again, it starts again on a track lent again.
 export class ClipPlayer<Track extends string, Slot = unknown> {
   readonly #input: Input<Track>;
@@ -66,7 +74,9 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   readonly #slots = new Map<Slot, Clip<Track>>(); // in the order put
   readonly #playing = new Map<Track | Slot, Playing<Track, Slot>>(); // by its track, or its slot where lent
   readonly #sounding = new Map<Slot, Seconds>(); // a clip played once: when its last note ends, from its start
+  readonly #queued = new Map<Slot, QueuedLaunch>(); // in the order asked
   #now: Seconds = -Infinity; // the last 16th's time
+  #stepped = -Infinity; // the last 16th's number
 
   // key: the key a clip's steps are pitched in, read as it's launched
   constructor({ input, grid, key }: { input: Input<Track>; grid: ClipGrid; key: () => Key }) {
@@ -87,6 +97,7 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   // a slot emptied: its clip gone, stopped where it plays
   remove(slot: Slot): void {
     this.#slots.delete(slot);
+    this.#queued.delete(slot);
     this.#sounding.delete(slot);
     for (const [track, playing] of this.#playing) {
       if (playing.slot === slot) {
@@ -105,21 +116,24 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   // A slot's clip launched on its track, in place of what the track played.
   // Pitched in the key now; its notes carrying a fresh region, one while it loops.
   // An empty slot launches nothing.
-  launch(slot: Slot): void {
+  // from: a 16th not stepped yet:
+  //   - the clip waits for it, launched as that 16th comes, before it plays;
+  //   - what its track plays plays on till then;
+  //   - pitched in the key as it's asked, not as that 16th comes.
+  launch(slot: Slot, from?: number): void {
     const clip = this.#slots.get(slot);
     if (!clip) {
       return;
     }
-    const track = clip.lend ? slot : clip.to.track;
-    const pattern = pitched(clip.pattern, this.#key(), clip.transpose ?? 0);
-    const region = this.#launcher.launch({ track, pattern, straight: clip.straight, once: clip.once });
-    const playing: Playing<Track, Slot> = { clip, slot };
-    if (!clip.lend) {
-      playing.to = inRegion(clip.to, region);
+    this.#unqueue(trackOf(slot, clip));
+    if (from !== undefined && from > this.#stepped) {
+      this.#queued.set(slot, { from, key: this.#key() });
+      return;
     }
-    this.#playing.set(track, playing);
+    this.#launchNow(slot, clip, this.#key());
   }
   stop(track: Track): void {
+    this.#unqueue(track);
     const playing = this.#playing.get(track);
     if (playing) {
       this.#sounding.delete(playing.slot);
@@ -131,15 +145,46 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   //   - one played once: from its start until its last note ends, or as long as its track
   //     is lent, its ring-out among it;
   //   - a looping one: from its launch until it's stopped.
+  // A clip queued for a 16th to come doesn't play yet.
   playing(slot: Slot): boolean {
     if ((this.#sounding.get(slot) ?? -Infinity) > this.#now) {
       return true;
     }
     return [...this.#playing.values()].some((playing) => playing.slot === slot && !playing.clip.once);
   }
+  // Each queued launch whose 16th has come is launched first, then the 16th's notes sent.
   step(i: number, t: Seconds): void {
     this.#now = t;
+    this.#stepped = i;
+    this.#launchQueued(i);
     this.#launcher.step(i, t);
+  }
+  #launchQueued(i: number): void {
+    for (const [slot, { from, key }] of this.#queued) {
+      if (from > i) {
+        continue;
+      }
+      this.#queued.delete(slot);
+      this.#launchNow(slot, this.#slots.get(slot)!, key); // remove() lets a queued one go
+    }
+  }
+  // a queued launch on a track let go
+  #unqueue(track: Track | Slot): void {
+    for (const slot of this.#queued.keys()) {
+      if (trackOf(slot, this.#slots.get(slot)!) === track) {
+        this.#queued.delete(slot);
+      }
+    }
+  }
+  #launchNow(slot: Slot, clip: Clip<Track>, key: Key): void {
+    const track = trackOf(slot, clip);
+    const pattern = pitched(clip.pattern, key, clip.transpose ?? 0);
+    const region = this.#launcher.launch({ track, pattern, straight: clip.straight, once: clip.once });
+    const playing: Playing<Track, Slot> = { clip, slot };
+    if (!clip.lend) {
+      playing.to = inRegion(clip.to, region);
+    }
+    this.#playing.set(track, playing);
   }
   // A clip played once as it starts:
   //   - a lent one on the track its owner lends it for its span, its notes carrying its region;
@@ -169,6 +214,10 @@ export class ClipPlayer<Track extends string, Slot = unknown> {
   }
 }
 
+// where a slot's clip plays: its own slot where lent, else its track
+function trackOf<Track extends string, Slot>(slot: Slot, clip: Clip<Track>): Track | Slot {
+  return clip.lend ? slot : clip.to.track;
+}
 // an address, its notes carrying a launch's region
 function inRegion<Track extends string>(to: SentTo<Track>, region: number): SentTo<Track> {
   return { ...to, play: { ...to.play, region } };

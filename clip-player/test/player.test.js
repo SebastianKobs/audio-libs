@@ -287,3 +287,71 @@ test('a clip played once on a lent track plays for as long as the track is lent,
   clips.step(4, 4 * SIXTEENTH);
   assert.equal(clips.playing(flower), false, 'its track let go');
 });
+
+test('a clip launched from a 16th to come: what its track plays plays on till then, the new clip from that 16th, pitched in the key it was asked in', () => {
+  const into = input();
+  let key = KEY;
+  const clips = new ClipPlayer({ input: into, grid, key: () => key });
+  launch(clips, { to: to('bass'), pattern }, 'old');
+  const stepped = { bars: 1, loop: true, events: [{ start: 0, duration: STEP, step: 0 }] };
+  clips.put('new', { to: to('bass'), pattern: stepped });
+  clips.step(0, 0);
+  clips.launch('new', 16);
+  key = { root: 62, scale: [0, 2, 4, 7, 9] }; // changed after the launch was asked
+  clips.step(1, SIXTEENTH + SWING);
+  assert.equal(clips.playing('new'), false, 'queued, not playing');
+  assert.equal(clips.playing('old'), true, 'what the track played plays on');
+  clips.step(16, 16 * SIXTEENTH);
+  assert.deepEqual(
+    into.sent.map(({ messages }) => [messages[0].pitch, messages[0].t]),
+    [
+      [40, 0],
+      [38, SIXTEENTH + SWING],
+      [48, 16 * SIXTEENTH], // the root an octave below, as the theory puts it; 50 in the later key
+    ],
+    'the old clip till the 16th, then the new, in the key it was asked in, the old one silent on it',
+  );
+  assert.equal(clips.playing('new'), true, 'launched');
+  assert.equal(clips.playing('old'), false, 'taken its place');
+});
+
+test('a queued launch replaced by a later one on its track, let go by a stop, none from an emptied slot', () => {
+  const into = input();
+  const clips = new ClipPlayer({ input: into, grid, key: () => KEY });
+  const one = (pitch) => ({
+    to: to('bass'),
+    pattern: {
+      bars: 1,
+      loop: true,
+      events: [
+        { start: 0, duration: STEP, pitch },
+        { start: STEP, duration: STEP, pitch },
+      ],
+    },
+  });
+  clips.put('a', one(50));
+  clips.put('b', one(52));
+  clips.put('c', one(54));
+  clips.step(0, 0);
+  clips.launch('a', 16);
+  clips.launch('b', 16);
+  clips.step(1, SIXTEENTH + SWING);
+  assert.equal(into.sent.length, 0, 'nothing till the 16th asked');
+  clips.step(16, 16 * SIXTEENTH);
+  assert.deepEqual(
+    into.sent.map(({ messages }) => messages[0].pitch),
+    [52],
+    'the later launch in place of the queued one',
+  );
+  clips.launch('a', 32);
+  clips.stop('bass');
+  clips.step(32, 32 * SIXTEENTH);
+  clips.step(33, 33 * SIXTEENTH + SWING);
+  assert.equal(into.sent.length, 1, 'a stop let the queued launch go');
+  clips.launch('c', 48);
+  clips.remove('c');
+  clips.step(48, 48 * SIXTEENTH);
+  clips.step(49, 49 * SIXTEENTH + SWING);
+  assert.equal(into.sent.length, 1, 'an emptied slot launched nothing');
+  assert.equal(clips.playing('c'), false);
+});
