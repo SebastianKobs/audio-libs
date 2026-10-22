@@ -6,4 +6,4 @@ What the music knows, apart from its time and its sound. Part of [the libraries]
 - [`phrasing/`](phrasing/README.md): a phrase played as a player would.
 - [`scale-device/`](scale-device/README.md): the Scale device, a MIDI insert mapping each note into the key chosen.
 
-Reads: `base/util/`; `phrasing/` also `sequencing/` (`clock`, `sequencer`, `midi-sequencer`); `scale-device/` also `sequencing/midi` and `base/params`.
+Reads: `base/util/`; `phrasing/` also `sequencing/` (`clock`, `sequencer`, `midi-sequencer`); `scale-device/` also `midi/protocol` and `base/params`.

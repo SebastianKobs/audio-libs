@@ -23,8 +23,8 @@ A library's layer is one more than the highest of those it uses; it can be taken
 |---|---|
 | 0 | `base/html`, `base/util` |
 | 1 | `base/automation`, `base/params`, `music/music-theory`, `spatial/places` |
-| 2 | `modular-audio/plan/format`, `sequencing/clock`, `sequencing/midi`, `spatial/hearing` |
-| 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `music/scale-device`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
+| 2 | `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
+| 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
 | 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
 | 5 | `modular-audio/build/web-audio-engine`, `modular-audio/plan/effects`, `modular-audio/plan/instrument`, `modular-audio/view/desk/models`, `modular-audio/view/device/dom`, `music/phrasing`, `sequencing/clip-player` |
 | 6 | `modular-audio/build/instrument`, `modular-audio/plan/desk`, `modular-audio/view/desk/dom`, `modular-audio/view/instrument/models` |
@@ -170,7 +170,7 @@ import { instrumentsOf } from './modular-audio/plan/instrument/index.ts';
 import { MODULE_TEMPLATES } from './modular-audio/plan/instrument/content.ts';
 import { WebAudioBuilder } from './modular-audio/build/web-audio/index.ts';
 import { Instrument } from './modular-audio/build/instrument/index.ts';
-import { noteMessages } from './sequencing/midi/index.ts';
+import { noteMessages } from './midi/protocol/index.ts';
 
 // a file of instruments: a pluck, an oscillator through a VCA, and a patch on it
 const FILE = {

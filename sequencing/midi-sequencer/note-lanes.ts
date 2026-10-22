@@ -1,7 +1,7 @@
 // ---------- midi-sequencer/note-lanes: a note as recorded, its changes after it its own lanes ----------
 // A note's changes after it, on the note, its own lanes, as a DAW keeps poly aftertouch
 // with its note (G3b).
-import type { PerNoteController, PerNoteControllerName, PerNoteValues } from '../midi/index.ts';
+import type { PerNoteController, PerNoteControllerName, PerNoteValues } from '../../midi/protocol/index.ts';
 import { placeInOrder, type Seconds } from '../../base/util/index.ts';
 import { timedValue } from '../../base/automation/index.ts';
 import { thinned } from '../timeline/index.ts';

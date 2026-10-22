@@ -1,7 +1,7 @@
-// ---------- libs/music/scale-device/steps: how far a pitch moves from one key into another, by its step ----------
+// ---------- libs/midi-devices/scale/steps: how far a pitch moves from one key into another, by its step ----------
 // A pitch is matched to a step within a tolerance: a key an octave down may differ in its last bit, and
 // Stimmung's steps aren't whole semitones (music-theory's degreeNote).
-import { degreeNote, type Key } from '../music-theory/index.ts';
+import { degreeNote, type Key } from '../../music/music-theory/index.ts';
 
 // a semitone's error still on a step: a float's last bits, not a fraction of a step
 const TOLERANCE = 0.000001;

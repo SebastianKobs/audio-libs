@@ -1,11 +1,11 @@
-// ---------- libs/music/scale-device/scale-device: a MIDI insert mapping each note from the key it arrives in into the key chosen ----------
+// ---------- libs/midi-devices/scale/scale-device: a MIDI insert mapping each note from the key it arrives in into the key chosen ----------
 // On a track, around its part's input, so everything on the track passes it, as a delay sits on its audio's way.
 // Its key a choice among the keys handed in, by name; a key controller carries the choice's index (base/params).
 // Each note's shift is kept by its index, as the instrument keeps its voices: from its note on, until its detach.
 import type { ParamSpec } from '../../base/params/index.ts';
 import { choiceAt } from '../../base/params/index.ts';
-import type { Message, NoteOn, PerNoteController, Receiver } from '../../sequencing/midi/index.ts';
-import type { Key } from '../music-theory/index.ts';
+import type { Message, NoteOn, PerNoteController, Receiver } from '../../midi/protocol/index.ts';
+import type { Key } from '../../music/music-theory/index.ts';
 import { shiftInto } from './steps.ts';
 
 // what the device is handed: its keys by name, the one it starts in, the key its notes arrive in, what it plays into

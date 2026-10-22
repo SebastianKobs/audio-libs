@@ -1,6 +1,6 @@
 # scale-device
 
-The Scale device: a MIDI insert, as a delay is an insert on audio. It sits on a track's way in, and maps each note from the key its notes arrive in into the key chosen, a step of one key into the same step of another. It imports the MIDI protocol (`sequencing/midi/`), the key and its scales (`music/music-theory/`) and a param's spec (`base/params/`); its tests the shared `near()` (`base/util/`).
+The Scale device: a MIDI insert, as a delay is an insert on audio. It sits on a track's way in, and maps each note from the key its notes arrive in into the key chosen, a step of one key into the same step of another. It imports the MIDI protocol (`midi/protocol/`), the key and its scales (`music/music-theory/`) and a param's spec (`base/params/`); its tests the shared `near()` (`base/util/`).
 
 | | |
 |---|---|

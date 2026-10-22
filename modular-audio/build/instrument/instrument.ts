@@ -14,7 +14,7 @@
 //      set on each voice from then;
 //   2. else built again from it and crossfaded, its notes sounding on.
 import type { Builder, Built } from '../contract/index.ts';
-import { retimed, type Message, type Receiver } from '../../../sequencing/midi/index.ts';
+import { retimed, type Message, type Receiver } from '../../../midi/protocol/index.ts';
 import { type Composite, type Plan, type ValuesByAddress } from '../../plan/format/index.ts';
 import { addressOf, addressText } from '../../../base/util/index.ts';
 import type { Preset } from '../../plan/planner/index.ts';

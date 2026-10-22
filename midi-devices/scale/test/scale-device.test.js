@@ -1,9 +1,9 @@
-// The Scale device's unit tests (mockup/src/libs/music/scale-device/): a MIDI insert mapping each note from the key it arrives in into the
+// The Scale device's unit tests (mockup/src/libs/midi-devices/scale/): a MIDI insert mapping each note from the key it arrives in into the
 // key chosen, its glides with it, every other message passed on unchanged
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ScaleDevice } from '../index.ts';
-import { SCALES, degreeNote } from '../../music-theory/index.ts';
+import { SCALES, degreeNote } from '../../../music/music-theory/index.ts';
 import { choiceIndex } from '../../../base/params/index.ts';
 import { near } from '../../../base/util/test/near.js';
 

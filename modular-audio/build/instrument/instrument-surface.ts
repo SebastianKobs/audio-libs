@@ -16,7 +16,7 @@
 //   - a reset: the bank's edit at once, not recorded.
 import { SMOOTHING } from '../../../base/automation/index.ts';
 import type { Clock } from '../../../sequencing/clock/index.ts';
-import type { Controller } from '../../../sequencing/midi/index.ts';
+import type { Controller } from '../../../midi/protocol/index.ts';
 import { atItsTime, choiceIndex } from '../../../base/params/index.ts';
 import type { LiveBank, PresetMessage } from '../../plan/instrument/index.ts';
 import { addressText, Events, type Address } from '../../../base/util/index.ts';

@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Instrument } from '../index.ts';
 import { BuiltStandIn } from './built.js';
-import { noteMessages } from '../../../../sequencing/midi/index.ts';
+import { noteMessages } from '../../../../midi/protocol/index.ts';
 import { instrumentsOf, patchPlan } from '../../../plan/instrument/index.ts';
 import { MODULE_TEMPLATES } from '../../../plan/instrument/content.ts';
 import { settingAt } from '../../../plan/format/index.ts';

@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/midi/messages: what a control surface plays, MIDI 2.0's channel voice messages as values ----------
+// ---------- libs/midi/protocol/messages: what a control surface plays, MIDI 2.0's channel voice messages as values ----------
 // MIDI 2.0's model and names, not its packets (M2-104-UM):
 //   - values in plain units: a velocity 0 to 1, a pitch a MIDI note number,
 //     each at a clock time;

@@ -1,4 +1,4 @@
-// The MIDI protocol's unit tests (mockup/src/libs/sequencing/midi/, its test/ folder; G0a, mockup/architecture/done.md; the sequencer's until V1): a
+// The MIDI protocol's unit tests (mockup/src/libs/midi/protocol/, its test/ folder; G0a, mockup/architecture/done.md; the sequencer's until V1): a
 // control surface's messages, MIDI 2.0's channel voice messages as values, and the notes among them; a note's index, handed out by note
 // rotation. The sequencer's input, which passes them on, is tested in libs/sequencing/midi-sequencer/test/input.test.js
 import { test } from 'node:test';

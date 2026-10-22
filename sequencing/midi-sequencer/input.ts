@@ -12,7 +12,7 @@ import {
   type PerNoteController,
   type Receiver,
   type SentNote,
-} from '../midi/index.ts';
+} from '../../midi/protocol/index.ts';
 import type { Play, PlayedNote, PlayListener } from './stream.ts';
 import { entryOf, Events, type Seconds } from '../../base/util/index.ts';
 import { Monitoring } from './monitoring.ts';
@@ -33,7 +33,7 @@ export interface SentTo<Name extends string> {
   play?: Partial<Play> | undefined;
   source?: string | undefined;
 }
-// a track, as the sequencer plays it: the messages handed it, at once (Receiver, libs/sequencing/midi/), its notes to its instrument, its controllers
+// a track, as the sequencer plays it: the messages handed it, at once (Receiver, libs/midi/protocol/), its notes to its instrument, its controllers
 // to its strip, its user's; and its role, the stream's label for what it plays (the track's instrument until V4)
 export interface Track extends Receiver {
   readonly role: string;

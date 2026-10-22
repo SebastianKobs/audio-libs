@@ -7,7 +7,7 @@
 //   - set at the tick that finds its time come, a tick late at most, as a switch on the desk is;
 //   - one already due is set at once.
 import { Cues, type Clock } from '../../../sequencing/clock/index.ts';
-import type { Controller } from '../../../sequencing/midi/index.ts';
+import type { Controller } from '../../../midi/protocol/index.ts';
 import { choiceAt } from '../../../base/params/index.ts';
 import type { LiveBank } from '../../plan/instrument/index.ts';
 import { addressOf, type Address } from '../../../base/util/index.ts';

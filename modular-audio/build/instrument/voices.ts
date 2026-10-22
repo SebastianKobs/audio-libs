@@ -26,7 +26,7 @@ import {
   type PerNoteController,
   type Receiver,
   type SentNote,
-} from '../../../sequencing/midi/index.ts';
+} from '../../../midi/protocol/index.ts';
 import { mtof } from '../../../music/music-theory/index.ts';
 import {
   isComposite,

@@ -7,7 +7,7 @@
 // its longest; let go as its button is.
 // Pressed and let go as messages on a bus too,
 // a key's note held until its key's is let go.
-import { NoteRotation, type Message, type Receiver } from '../../../sequencing/midi/index.ts';
+import { NoteRotation, type Message, type Receiver } from '../../../midi/protocol/index.ts';
 import type { TestNote, TestNoteMessage } from '../../plan/instrument/index.ts';
 import { entryOf } from '../../../base/util/index.ts';
 

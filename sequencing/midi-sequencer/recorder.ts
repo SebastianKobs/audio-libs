@@ -10,7 +10,7 @@
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import { endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
 import { samePoint, type LanePoint } from './lanes.ts';
-import type { NoteOff, PerNoteController } from '../midi/index.ts';
+import type { NoteOff, PerNoteController } from '../../midi/protocol/index.ts';
 import type { Play, PlayedNote } from './stream.ts';
 import { entryOf, type Seconds } from '../../base/util/index.ts';
 import { changedOn, thinNote, valuesAt, type RecordedNote } from './note-lanes.ts';

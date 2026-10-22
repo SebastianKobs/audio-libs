@@ -15,7 +15,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Voices } from '../index.ts';
 import { BuiltStandIn } from './built.js';
-import { noteMessages } from '../../../../sequencing/midi/index.ts';
+import { noteMessages } from '../../../../midi/protocol/index.ts';
 import { mtof } from '../../../../music/music-theory/index.ts';
 import { SYNTH } from '../../../plan/format/test/plans.ts';
 

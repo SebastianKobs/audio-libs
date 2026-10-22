@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/midi/rotation: a source's notes, each a fresh index, as MIDI 2.0's note rotation hands them out (the sequencer's until V1) ----------
+// ---------- libs/midi/protocol/rotation: a source's notes, each a fresh index, as MIDI 2.0's note rotation hands them out (the sequencer's until V1) ----------
 // M2-104-UM, 4.2.14: a note's number is an index, not its pitch, never reused while its note is on, so two notes of one pitch sound at
 // once, each with its own per-note controllers. Handed out in turn round the 128 note numbers, so one just let go comes back last, its
 // release long rung out

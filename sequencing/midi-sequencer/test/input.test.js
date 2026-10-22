@@ -1,6 +1,6 @@
 // The sequencer's input's unit tests (mockup/src/libs/sequencing/midi-sequencer/input.ts; G0a, mockup/architecture/done.md): the input, which passes a
 // track's messages on to its instrument at once and puts the play they make into the stream; the messages themselves and a note's index,
-// handed out by note rotation, libs/sequencing/midi/'s since V1 (libs/sequencing/midi/test/midi.test.js). What the garden plays through it is held to the
+// handed out by note rotation, libs/midi/protocol/'s since V1 (libs/midi/protocol/test/midi.test.js). What the garden plays through it is held to the
 // recordings (replays.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -18,7 +18,7 @@ import type { Ticks } from '../clock/index.ts';
 import type { Seconds } from '../../base/util/index.ts';
 import { ClipLauncher, type ClipGrid, type Pattern, type Span } from '../sequencer/index.ts';
 import type { SentTo, Input, PatternNote } from '../midi-sequencer/index.ts';
-import { NoteRotation, noteMessages, type PerNoteValues } from '../midi/index.ts';
+import { NoteRotation, noteMessages, type PerNoteValues } from '../../midi/protocol/index.ts';
 
 // A clip's note, as a pattern's, and what it plays with:
 //   - pitch: its note number; a clip holds pitches, a step of a scale is the Scale device's;

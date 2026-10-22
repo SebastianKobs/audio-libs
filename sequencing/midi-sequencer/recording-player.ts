@@ -15,7 +15,7 @@ import type { Seconds } from '../../base/util/index.ts';
 import { Player, type PlayedFrom } from '../timeline/index.ts';
 import type { SentTo, Input } from './input.ts';
 import { lastValueAt, laneValueAt, type LanePoint } from './lanes.ts';
-import { NoteRotation, noteMessages, type Message, type PerNoteControllerName } from '../midi/index.ts';
+import { NoteRotation, noteMessages, type Message, type PerNoteControllerName } from '../../midi/protocol/index.ts';
 import type { Region } from './recorder.ts';
 import type { Lane } from './track-lanes.ts';
 import { valuesAt, type RecordedNote } from './note-lanes.ts';

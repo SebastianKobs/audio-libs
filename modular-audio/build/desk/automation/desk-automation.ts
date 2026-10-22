@@ -22,7 +22,7 @@
 //     its time.
 // Each checked as it comes: an address the desk hasn't refused, naming it.
 import { Cues, LOOKAHEAD, type Clock } from '../../../../sequencing/clock/index.ts';
-import type { Controller } from '../../../../sequencing/midi/index.ts';
+import type { Controller } from '../../../../midi/protocol/index.ts';
 import { atItsTime } from '../../../../base/params/index.ts';
 import { controlAddress } from '../../../plan/desk/index.ts';
 import { splitAtChild } from '../../../plan/format/index.ts';

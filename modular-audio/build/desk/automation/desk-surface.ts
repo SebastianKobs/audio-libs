@@ -13,7 +13,7 @@
 //   - a setting: the desk built again with it, not recorded, as a rebuild isn't automation.
 import { SMOOTHING } from '../../../../base/automation/index.ts';
 import type { Clock } from '../../../../sequencing/clock/index.ts';
-import type { Controller } from '../../../../sequencing/midi/index.ts';
+import type { Controller } from '../../../../midi/protocol/index.ts';
 import { choiceIndex } from '../../../../base/params/index.ts';
 import type { DeskMessage } from '../../../plan/desk/index.ts';
 import { splitAtChild } from '../../../plan/format/index.ts';
