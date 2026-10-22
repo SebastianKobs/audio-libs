@@ -1,0 +1,238 @@
+// ---------- view/desk/dom/desk-view: a desk drawn, its strips side by side ----------
+// Its sections in one row, as the sound flows:
+//   1. the tracks, in the groups the view hands it, or the desk's own channels as one,
+//      each group in a box of its own;
+//   2. the buses, the desk's, a bus with the buses that go into it in a box;
+//   3. the FX busses, the desk's returns;
+//   4. the master.
+// Its clicks, its own:
+//   - a strip's name or slot: told to whoever listens, by the strip's address (onOpen());
+//   - M mutes, S solos it alone, with shift adds it or lets it go;
+//   - a group's header folds it to its first track, with shift every group, which are
+//     unfolded a model's (Toggles), drawn from it;
+//   - a knob dragged, set back by a double-click (KnobDrag), each bound to its model as it's
+//     drawn (Bound).
+// After each, the view is told to draw it again (changed()).
+// Level bars: each falls as a peak meter's, drawn on every frame.
+// Lights: a folded section's, and a group's dot, while a hidden strip sounds; what the strips
+// heard feed counted too (fedBy(), desk-html.ts).
+import { Events, addressOf, type Address } from '../../../../base/util/index.ts';
+import { Meters, type Control } from '../../device/models/index.ts';
+import { channelGroups, type DeskGroup, type Toggles, type DeskViewBuilder } from '../models/index.ts';
+import { Bound, CONTROL_MARKS, KnobDrag, meterPosition } from '../../device/dom/index.ts';
+import { html, makeElement, setHtml } from '../../../../base/html/index.ts';
+import { SectionView } from './section-view.ts';
+import { deskHtml, fedBy, trackHtml, type LevelOf } from './desk-html.ts';
+
+// How a view shows its desk:
+//   - labels: each section's label;
+//   - tracksShown(): how many tracks a group's box shows before it scrolls; 0 shows all.
+export interface DeskLook {
+  readonly labels: Readonly<Record<'tracks' | 'buses' | 'returns' | 'master', string>>;
+  readonly tracksShown: () => number;
+}
+// What a click on a strip's name or slot opens: the strip, by its address; the name it's shown
+// by; the slot marked, -1 for its name.
+type Opened = [address: Address, title: string, slot: number];
+
+// what a click on a group's header does, and what its dot says
+const FOLD_GROUP =
+  'Click to fold this group to its first track, or unfold it; shift-click: all groups, as this one goes. Its dot shows while tracks are folded away or out of sight, lit while one of them sounds.';
+
+// A desk drawn in its sections, made at the end of what it's in.
+export class DeskView {
+  // its sections, in order: the tracks, the buses, the FX busses, the master
+  readonly sections: readonly SectionView[];
+  readonly #models: DeskViewBuilder;
+  readonly #bound = new Bound<Control>(CONTROL_MARKS); // each knob drawn, its model
+  readonly #look: DeskLook;
+  readonly #changed: () => void;
+  readonly #events = new Events<{ open: Opened }>();
+  readonly #levels = new Meters(); // each level bar's, falling
+  readonly #tracks: SectionView;
+  readonly #buses: SectionView;
+  readonly #returns: SectionView;
+  readonly #master: SectionView;
+  readonly #unfolded: Toggles; // the groups unfolded, each folded to its first track until it is
+
+  // folding: which sections are folded, these and those beside them, and which groups unfolded;
+  // changed(): told after a click or a drag changed what it draws
+  constructor({
+    within,
+    models,
+    look,
+    folding,
+    changed,
+  }: {
+    within: HTMLElement;
+    models: DeskViewBuilder;
+    look: DeskLook;
+    folding: { readonly sections: Toggles; readonly groups: Toggles };
+    changed: () => void;
+  }) {
+    this.#models = models;
+    this.#look = look;
+    this.#unfolded = folding.groups;
+    this.#changed = changed;
+    const folds = { folding: folding.sections, folded: changed };
+    this.#tracks = new SectionView(within, look.labels.tracks, folds);
+    this.#buses = new SectionView(within, look.labels.buses, folds);
+    this.#returns = new SectionView(within, look.labels.returns, folds);
+    this.#master = new SectionView(within, look.labels.master);
+    this.sections = [this.#tracks, this.#buses, this.#returns, this.#master];
+    for (const section of this.sections) {
+      section.row.addEventListener('click', (event) => this.#clicked(event));
+    }
+    new KnobDrag({ within, knobOf: (element) => this.#bound.at(element), moved: changed });
+  }
+  // what a click on a strip's name or slot opens, to whoever listens
+  readonly onOpen = (listener: (...opened: Opened) => void): (() => void) => this.#events.on('open', listener);
+  // Drawn: the groups of tracks handed in, else the desk's own channels as one;
+  // then the desk's own buses, returns and master.
+  draw(groups?: readonly DeskGroup[]): void {
+    const levelOf: LevelOf = (key) => this.#levels.of(key);
+    this.#placeGroups(groups ?? channelGroups(this.#models.desk(), this.#look.labels.tracks), levelOf);
+    const { buses, returns, master } = deskHtml(this.#models, levelOf);
+    setHtml(this.#buses.row, buses);
+    setHtml(this.#returns.row, returns);
+    setHtml(this.#master.row, master);
+    for (const section of this.sections) {
+      this.#bound.bind(section.row, (address) => this.#models.control(address));
+    }
+  }
+  // The level bars, each falling from its last as a peak meter's, dt s on: on every frame.
+  // A track not on the desk yet reads silence, as all do before the audio starts.
+  drawLevels(dt: number): void {
+    for (const section of this.sections) {
+      for (const meter of section.row.querySelectorAll<HTMLElement>('[data-meter]')) {
+        const key = meter.dataset.meter!; // selected by it
+        const level = this.#levels.fall(key, this.#models.peakOf(addressOf(key)), dt);
+        meter.style.setProperty('--m', String(meterPosition(level)));
+        meter.classList.toggle('over', level >= 1);
+      }
+    }
+  }
+  // Its sections' lights, by what the strips heard feed.
+  light(heard: ReadonlySet<string>): void {
+    const fed = fedBy(this.#models, heard);
+    for (const section of this.sections) {
+      section.light(fed);
+    }
+  }
+  // A click on a strip's name or slot, its mute or solo, or a group's header.
+  #clicked(event: MouseEvent): void {
+    const target = event.target as Element;
+    const opener = target.closest<HTMLElement>('[data-open]');
+    if (opener) {
+      const { open = '', title = '', mark = '-1' } = opener.dataset;
+      this.#events.emit('open', addressOf(open), title, Number(mark));
+      return;
+    }
+    const header = target.closest<HTMLElement>('[data-subfold]');
+    const button = target.closest<HTMLElement>('[data-mute], [data-solo]');
+    if (header) {
+      this.#foldGroup(header.parentElement as HTMLElement, event.shiftKey); // its group
+    } else if (button) {
+      this.#muteOrSolo(button, event.shiftKey);
+    } else {
+      return;
+    }
+    this.#changed();
+  }
+  // A group folded to its first track, or unfolded; with shift every group, as this one goes.
+  // Each group then drawn as its folding says.
+  #foldGroup(group: HTMLElement, all: boolean): void {
+    const groups = [...this.#tracks.row.querySelectorAll<HTMLElement>('.group')];
+    const every = groups.map((each) => each.dataset.group!); // each has its key
+    this.#unfolded.turn(group.dataset.group!, all ? every : [group.dataset.group!]);
+    for (const each of groups) {
+      this.#drawFolded(each);
+    }
+  }
+  // a group folded to its first track until it's unfolded
+  #drawFolded(group: HTMLElement): void {
+    group.classList.toggle('folded', !this.#unfolded.has(group.dataset.group!)); // each has its key
+  }
+  // M mutes or unmutes. S solos the strip alone; with shift, adds it or lets it go.
+  #muteOrSolo(button: HTMLElement, adding: boolean): void {
+    const { mute, solo } = button.dataset;
+    if (mute !== undefined) {
+      this.#models.strip(addressOf(mute))?.mute?.toggle();
+      return;
+    }
+    this.#models.desk().soloClick(addressOf(solo!), adding); // not a mute, so a solo
+  }
+  // Each group in its box, the boxes kept across drawings, so a box stays where it was
+  // scrolled to, and its scrollbar doesn't flicker on every drawing:
+  //   1. A group seen before keeps its box; only its tracks are drawn again.
+  //   2. A new group gets a box of its own, in its place among the others.
+  //   3. A group no longer handed in is taken out.
+  // Box: as wide as the tracks the look shows, scrolling sideways on its own.
+  #placeGroups(groups: readonly DeskGroup[], levelOf: LevelOf): void {
+    const row = this.#tracks.row;
+    const kept = new Map(
+      [...row.querySelectorAll<HTMLElement>('.group')].map((group) => [group.dataset.group!, group]), // each has its key
+    );
+    groups.forEach(({ key, name, live, tracks }, index) => {
+      const group = kept.get(key) ?? newGroup(key, name);
+      kept.delete(key);
+      const box = boxOf(group);
+      box.classList.toggle('live', live);
+      setShown(box, this.#look.tracksShown());
+      setHtml(box, html`${tracks.map((track) => trackHtml(this.#models, track, levelOf))}`);
+      const there = row.children[index] ?? null;
+      if (there !== group) {
+        row.insertBefore(group, there);
+      }
+      this.#drawFolded(group);
+      lightGroup(group);
+    });
+    for (const gone of kept.values()) {
+      gone.remove();
+    }
+  }
+}
+
+// A group, new: its header, the group's name with a dot as a section's, and its box.
+// Folded as its folding says (#drawFolded()); a click on its header folds and unfolds it.
+// Scrolled, its dot shows at once whether tracks are out of sight.
+function newGroup(key: string, name: string): HTMLElement {
+  const group = makeElement('div', 'group');
+  group.dataset.group = key;
+  const head = makeElement('div', 'subhead', `${name} →`); // an arrow, as a section's label
+  Object.assign(head.dataset, { subfold: '', title: FOLD_GROUP });
+  head.append(makeElement('i', 'dot'));
+  const box = makeElement('div', 'kind');
+  group.append(head, box);
+  box.addEventListener('scroll', () => lightGroup(group), { passive: true });
+  return group;
+}
+// A group's box: the scrolling element that holds its tracks.
+function boxOf(group: HTMLElement): HTMLElement {
+  return group.querySelector<HTMLElement>('.kind')!; // every group has its box
+}
+// The box's width in tracks, as the look says. At 0, no width: every track shows.
+function setShown(box: HTMLElement, shown: number): void {
+  if (shown <= 0) {
+    box.style.removeProperty('--shown');
+    return;
+  }
+  box.style.setProperty('--shown', String(shown));
+}
+// A group's dot, as a section's:
+//   hidden: tracks are folded away or lie out of sight in the box, so the dot shows;
+//   lit: one of them sounds.
+// A track partly in sight counts as in sight. A folded-away track takes no room.
+function lightGroup(group: HTMLElement): void {
+  const box = boxOf(group).getBoundingClientRect();
+  const hidden = [...group.querySelectorAll<HTMLElement>('.track')].filter((track) => {
+    const at = track.getBoundingClientRect();
+    return at.width === 0 || at.right <= box.left || at.left >= box.right;
+  });
+  const dot = group.querySelector('.subhead .dot')!; // every group's header has its dot
+  dot.classList.toggle('hidden', hidden.length > 0);
+  dot.classList.toggle(
+    'lit',
+    hidden.some((track) => track.querySelector('.cell.lit') !== null),
+  );
+}

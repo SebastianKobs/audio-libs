@@ -1,0 +1,34 @@
+# plan/effects
+
+The effects as templates: Utility, Filter, Limiter, Delay, Tape delay and Reverb, each a YAML file, its comments the reasons. The Tape delay is built on the Delay (`extends: Delay`), only its wobble written. Handed to the planner (`libs/modular-audio/plan/planner/`) with their form; an owner's or a desk's presets are values and settings on them, by address. It imports `libs/base/util/` and `libs/modular-audio/plan/planner/`.
+
+Its face, `index.ts`, is the form alone; the six templates are its content, `content.ts`, imported apart, so a desk's forms load no YAML.
+
+```ts
+import { EFFECT_FORM } from './index.ts';
+import { EFFECT_TEMPLATES } from './content.ts';
+import { Planner } from '../planner/index.ts';
+const planner = new Planner(EFFECT_TEMPLATES, [EFFECT_FORM]);
+planner.plan('Delay', { name: 'delay', values: { note: '1/4', feedback: 0.6, tone: 1600 } });
+planner.plan('Utility', { name: 'utility', settings: { 'pan/law': 'pan pot' } });
+```
+
+Each effect's params are macros by the names a desk keys them (`utility/level`, `delay/note`), so the recorded lanes keep their names. A macro writes no spec where its target has one: it takes its first target's under its own name.
+
+An insert's macros carry their hints, written in its template, and an effect is named by its label where it isn't its kind: the Filter as `LP filter`, the Tape delay as `Tape delay`, its own over the Delay's none.
+
+| Effect | Inside | Its macros | Its settings |
+|---|---|---|---|
+| `Utility` | a gain into a pan | level, the gain's, the fader's in dB; pan | `pan/law`: stereo, or a pan pot |
+| `Filter` | a filter | cutoff, the filter's frequency; q, its resonance, flat (0.707) to start | `filter/type`, `filter/slope` |
+| `Limiter` | a limiter | gain 0 dB, ceiling -0.3 dBFS, release 0.3 s, Ableton's | |
+| `Delay` | a delay line into a lowpass, the lowpass back into the line through a gain | sync, note, ms, the line's; feedback and tone, their specs its own, feedback 0.45, tone 2400 Hz to start | `line/longest` |
+| `TapeDelay` | the Delay's, and its wobble: a slow oscillator, its depth a gain, into the line's time by its ms, moving it in seconds | the Delay's; rate 0.5 Hz, depth 0.004 s, 4 ms either way | the Delay's |
+| `Reverb` | a room | | `length`, its own, the room's (`room/length`) |
+
+| | |
+|---|---|
+| `EFFECT_TEMPLATES` | the six, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`), frozen (`content.ts`) |
+| `EFFECT_FORM` | what every effect is: one input and one output, its children free of roles (`form.ts`) |
+
+Tested in node, in its `test/` folder: the six of the effect's form, planned, the Tape delay the Delay's and its wobble; their macros by the names a desk keys them, each at its default; a macro's spec its target's; the Delay's note a choice through its macro, the Utility's pan pot and the Reverb's length settings (`test/effects.test.js`).
