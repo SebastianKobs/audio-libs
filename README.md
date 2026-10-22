@@ -4,11 +4,13 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 
 ## By role
 
-Five groups, each a folder, read bottom up: base, sequencing, music, spatial, modular-audio. A group reads only those before it. Each group's `README.md` says what it holds and what it reads.
+Seven groups, each a folder, read bottom up: base, midi, sequencing, music, midi-devices, spatial, modular-audio. A group reads only those before it. Each group's `README.md` says what it holds and what it reads.
 
 - **[`base/`](base/README.md), at the bottom,** words and helpers every library shares: `util` (maths, searches, events, a bus, seeded draws, addresses, data read for its shape), `automation` (what a param is told as it plays), `params` (a param as a plugin declares it), `html` (HTML made safely).
-- **[`sequencing/`](sequencing/README.md), time, events and MIDI:** `clock` (music time, the beat grid, ticks), `timeline` (what happened, laid out in time, played back), `sequencer` (patterns of events on the grid, clips on tracks, pools of tracks); `midi` (MIDI 2.0's channel voice messages as values), `midi-sequencer` (the input, the stream, the recorder, the recording played back), `clip-player` (a session view's clips, launched into the input); `view/transport` (play, stop, where the music is).
-- **[`music/`](music/README.md), music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would), `scale-device` (the Scale device, a MIDI insert mapping each note into the key chosen).
+- **[`midi/`](midi/README.md), MIDI's protocol:** `protocol` (MIDI 2.0's channel voice messages as values, and what they're played into).
+- **[`sequencing/`](sequencing/README.md), time, events and the MIDI sequencer:** `clock` (music time, the beat grid, ticks), `timeline` (what happened, laid out in time, played back), `sequencer` (patterns of events on the grid, clips on tracks, pools of tracks); `midi-sequencer` (the input, the stream, the recorder, the recording played back), `clip-player` (a session view's clips, launched into the input); `view/transport` (play, stop, where the music is).
+- **[`music/`](music/README.md), music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would).
+- **[`midi-devices/`](midi-devices/README.md), MIDI's devices, inserts on a track's notes as an audio effect is on its sound:** `scale` (the Scale device, mapping each note into the key chosen).
 - **[`spatial/`](spatial/README.md), places and input:** `places` (places perceived from where you are, a world that wraps round), `hearing` (hearing by distance, as values), `gestures` (pointer input in, gestures out).
 - **[`modular-audio/`](modular-audio/README.md), a sound as data, built, and shown:**
   - **`plan/`, a sound as data, no audio:** `format` (what a plan is), `blocks` (the building blocks every builder makes), `planner` (templates made into plans), `effects`, `desk`, `instrument` (forms and templates of each, the templates their content).
@@ -158,7 +160,7 @@ export function mixSmallDesk(context) {
 
 ### 5. An instrument planned, built and played by notes
 
-An instrument planned from a file of instruments on the synth's modules (`plan/instrument`, its `content.ts`), built (`build/web-audio`), and played by MIDI's notes (`build/instrument`, `midi`); two sources on it, one heard from its own place.
+An instrument planned from a file of instruments on the synth's modules (`plan/instrument`, its `content.ts`), built (`build/web-audio`), and played by MIDI's notes (`build/instrument`, `midi/protocol`); two sources on it, one heard from its own place.
 
 ```js
 // Scenario 5: an instrument as a library's user writes it: a file of instruments
