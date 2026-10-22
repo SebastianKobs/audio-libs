@@ -30,6 +30,17 @@ export function upcoming<Event extends PatternEvent>(
   }
   return next;
 }
+// the notes a play of a record unmutes, the pattern running on silently where it was
+// played: from the next one at a place on, a random number of them, 1 up to all, round
+// the loop. One draw
+export function unmute<Event extends PatternEvent>(
+  pat: Pattern<Event>,
+  at: number,
+  rand: () => number,
+  meter: Meter = COMMON_TIME,
+): Event[] {
+  return upcoming(pat, at, 1 + Math.floor(rand() * pat.events.length), meter);
+}
 // a pattern played whole, as a launched clip: from its first event to its last, once, its first in the beat at a place (ticks from the
 // grid's start), each event in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats
 export function whole<Event extends PatternEvent>(

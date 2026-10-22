@@ -16,6 +16,8 @@ lights.step(i, t);                                                       // each
 | `lengthOf(pat, meter)` | a pattern's length in ticks, `libs/sequencing/clock/`'s (`PPQ`, `STEP`, `barTicks()`, `startsBar()`, the clock's) |
 | `patternOf(record, cycle)` | a record as the pattern it is: from the one of its first bar, whole cycles long, looping where it was played (`from`) |
 | `upcoming(pat, at, n)` | a looping pattern's next events from a place, round the loop |
+| `unmute(pat, at, rand)` | a play's run of a pattern's events from a place, 1 up to all, round the loop; one draw |
+| `patternsIn(bank)`, `cycleOf(patterns, meter)` | every pattern in a bank, anything with events, in it or in its sets; its cycle, its longest pattern in whole bars, so what's recorded is as long or longer in whole cycles |
 | `whole(pat, at)` | a pattern played whole, as a launched clip: from its first event to its last, once, its first in the beat at `at`, each event in its place in the beat as kept, so its swing and offbeats stay; its place in the bar moves by whole beats |
 | `due(pat, i)` | what a repeating pattern plays in the grid's 16th `i` |
 | `liveEvents(pat, start, scale, from, to)` | a rhythm played live from where it started, at half, normal or double time (`scale`), its events between two places |
@@ -28,4 +30,4 @@ lights.step(i, t);                                                       // each
 
 **Phrases** (`phrases.ts`): `new Phrases({ region, send, grid })`, a phrase of events kept by its places on the grid (`play(to, events)`, each a `DueEvent`, `{ start, event() }`: where it lies on the grid, in ticks, and the event as it comes due, worked out then), each event worked out and sent as its 16th comes (`step(i)`), those on a 16th handed out already at once; a hold or Stop hands out no 16th, so a phrase waits with the music; whether a clip's phrase still has events to send (`playing(clip)`), a clip's forgotten (`forget(clip)`), all (`clear()`).
 
-Tested in node, in its `test/` folder (`test/sequencer.test.js`, `track-pool.test.js`, `phrases.test.js`, `launcher.test.js`, the launcher's on a light's cues, not notes, looping and played once); phrasing, what isn't a sequencer's, in a library of its own (`libs/music/phrasing/README.md`).
+Tested in node, in its `test/` folder (`test/sequencer.test.js`, `track-pool.test.js`, `phrases.test.js`, `launcher.test.js`, the launcher's on a light's cues, not notes, looping and played once); a phrase's speed and feel and its reshaping are music's, in a library of their own (`libs/music/phrasing/README.md`).

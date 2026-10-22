@@ -12,9 +12,9 @@
 // Track pools: overlapping plays shared out over tracks, as a polysynth shares its voices
 // (TrackPool); how long the plays on a track hold it (Holding).
 // Phrases: events sent as each 16th comes, so a hold pauses them (Phrases).
-export { lengthOf, patternOf } from './pattern.ts';
+export { cycleOf, lengthOf, patternOf, patternsIn } from './pattern.ts';
 export type { Pattern, PatternEvent } from './pattern.ts';
-export { upcoming, whole, due, liveEvents, underWayAt, rescaled, place, placeOn } from './playing.ts';
+export { unmute, upcoming, whole, due, liveEvents, underWayAt, rescaled, place, placeOn } from './playing.ts';
 export type { Grid } from './playing.ts';
 export { ClipLauncher } from './launcher.ts';
 export type { ClipGrid, ClipsTold, LaunchedClip, PlayEvent, Span } from './launcher.ts';

@@ -1,27 +1,20 @@
 // phrasing's unit tests (mockup/src/libs/music/phrasing/; the garden's until ZG41, the sequencer's until L1a;
-// mockup/architecture/sequencer.md): a record kept up to its cap, a slice and whole phrases of it,
-// a speed for how fast you play and a line's feel, the transforms, a run of notes unmuted,
-// a bank and its cycle, on a grid of the tests' own
+// mockup/architecture/sequencer.md): a speed for how fast you play and a line's feel, the transforms,
+// on a grid of the tests' own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   answer,
   breath,
-  cycleOf,
   feelFor,
   halfTime,
   holdLast,
-  keep,
   layBack,
   notesPerBeat,
-  patternsIn,
-  phrases,
   rephrase,
-  slice,
   slide,
   speedAt,
   speedFor,
-  unmute,
 } from '../index.ts';
 import { STEP } from '../../../sequencing/clock/index.ts';
 
@@ -30,33 +23,6 @@ const draws = (...xs) => {
   return () => xs[i++];
 }; // rand() giving these, in order
 const grid = { stepAt: (t) => t * 8, timeAt: (s) => s / 8 }; // 16ths an 8th of a second apart, from 0, straight
-
-test('a record keeps events up to its cap, and then none', () => {
-  const r = [];
-  assert.deepEqual(keep(r, { start: 0 }, 2), { start: 0 });
-  keep(r, { start: 24 }, 2);
-  assert.equal(keep(r, { start: 48 }, 2), null);
-  assert.deepEqual(r, [{ start: 0 }, { start: 24 }]);
-});
-
-test('a slice: a random length from 1 to all of it, drawn first, from the start or from anywhere', () => {
-  assert.deepEqual(slice(10, 'start', draws(0)), [0, 1]);
-  assert.deepEqual(slice(10, 'start', draws(0.99)), [0, 10], 'all of it');
-  assert.deepEqual(
-    slice(10, 'random', draws(0.25, 0.5)),
-    [4, 3],
-    'three, from halfway through the eight places it can start',
-  );
-  assert.deepEqual(slice(10, 'random', draws(0.99, 0.5)), [0, 10]);
-});
-
-test('phrases: whole phrases, 1 up to all of them; a record not all in phrases is sliced', () => {
-  const r = [0, 0, 1, 1, 1, 2].map((phrase, k) => ({ start: k * STEP, phrase }));
-  assert.deepEqual(phrases(r, 'start', draws(0)), [0, 2], 'the first phrase');
-  assert.deepEqual(phrases(r, 'start', draws(0.5)), [0, 5], 'two phrases');
-  assert.deepEqual(phrases(r, 'random', draws(0, 0.99)), [5, 1], 'the last phrase alone');
-  assert.deepEqual(phrases([{ start: 0, phrase: 0 }, { start: 24 }], 'start', draws(0.99)), [0, 2]);
-});
 
 test('a speed for how fast you play: the one of half, normal and double whose notes come closest, as a ratio, to your rate', () => {
   const r = { bars: 1, loop: true, events: Array.from({ length: 16 }, (_, k) => ({ start: k * STEP })) }; // every 16th: 4 a beat
@@ -230,40 +196,4 @@ test('a slide into a note the line arrives start: from below when it climbs, abo
   ];
   slide(d, draws(0.4, 0.2)); // arrivals: the first, after a rest of two 16ths, the long note, the last
   assert.equal(d[1].pitchBend, -1, 'after a rest of two 16ths, staying: at random');
-});
-
-test("a set of patterns' cycle: its longest pattern, in whole bars of the master's, at least one", () => {
-  assert.equal(cycleOf([{ bars: 2 }, { meter: [3, 4], bars: 1 }]), 768, 'two bars of 4/4');
-  assert.equal(
-    cycleOf([
-      { meter: [3, 4], bars: 1 },
-      { meter: [9, 16], bars: 1 },
-    ]),
-    384,
-    'under a bar: one bar',
-  );
-  assert.equal(cycleOf([{ meter: [3, 4], bars: 2 }]), 768, 'a bar and a half: two');
-  assert.equal(cycleOf([]), 384, 'nothing: one bar');
-  assert.equal(cycleOf([{ bars: 1 }], [3, 4]), 288, "in the master's own time signature");
-  const bank = {
-    ASK: { events: [] },
-    WALKS: [[0, 1]],
-    SETS: { a: [{ bars: 2, events: [] }, { events: [] }] },
-    STYLES: { b: { duration: 2 } },
-  };
-  assert.equal(patternsIn(bank).length, 3, "a bank's patterns: anything with events, in it or in its sets");
-});
-
-test('a replay unmutes a run of notes: from the next one on, a random number of them, 1 up to all', () => {
-  const pat = { bars: 1, loop: true, from: 0, events: [{ start: 0 }, { start: 96 }, { start: 240 }] };
-  assert.deepEqual(
-    unmute(pat, 100, draws(0)).map((n) => n.start),
-    [240],
-    'one note: the next',
-  );
-  assert.deepEqual(
-    unmute(pat, 100, draws(0.99)).map((n) => n.start),
-    [240, 384, 480],
-    'all three, round the loop',
-  );
 });

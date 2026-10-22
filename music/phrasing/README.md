@@ -1,15 +1,11 @@
 # phrasing
 
-A phrase played as a player would, on the sequencer's patterns: a rhythm's speed and a line's feel for how fast it's played, what's played kept and a run or slice of it, every pattern in a bank and its cycle, and a phrase reshaped. It imports the clock, the sequencer, MIDI's sequencer and the shared helpers.
+A phrase played as a player would, on the sequencer's patterns: a rhythm's speed and a line's feel for how fast it's played, and a phrase reshaped. It imports the clock, the sequencer, MIDI's sequencer and the shared helpers. What's kept and sliced, a bank's patterns and their cycle, and a replay's run are the sequencer's (`libs/sequencing/sequencer/`), and a record's phrases MIDI's (`libs/sequencing/midi-sequencer/`).
 
 | | |
 |---|---|
 | `speedFor()`, `speedAt()`, `notesPerBeat()` | a rhythm's speed for how fast you play, with hysteresis |
 | `feelFor(speed, current, at, hold)` | a line's feel, half, normal or double, for how fast it's played, with a band so it doesn't flicker |
-| `keep(record, ev, cap)` | keeps an event in a record, up to its cap; the event, or null once it's full |
-| `unmute(pat, at, rand)` | a play's run of a pattern's notes from a place, 1 up to all, round the loop |
-| `patternsIn(bank)`, `cycleOf(patterns, meter)` (`record.ts`) | every pattern in a bank; its cycle, its longest pattern in whole bars, so what's recorded is as long or longer in whole cycles |
-| `slice(n, from, rand)`, `phrases(record, from, rand)` | `[start, length]`: a random length, drawn first, from the start or anywhere; or the same in whole phrases (each event's `ph`) |
 
 **Transforms** (`transforms.ts`), each changing notes (`{ start, deg, sounds, pitchBend, duration, vibrato, phrase, shape, rhythmIndex }`, places in ticks, `sounds` in seconds) in place, as a player would:
 

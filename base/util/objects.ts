@@ -1,4 +1,4 @@
-// ---------- util/objects: a key toggled, a map's entry made when asked, a chain followed through a map, an object updated, frozen or compared ----------
+// ---------- util/objects: a key toggled, a map's entry made when asked, a chain followed through a map, a list kept up to a cap, an object updated, frozen or compared ----------
 
 // a map as entryOf() asks it: a Map, or a WeakMap
 interface Keyed<Key, Value> {
@@ -89,4 +89,12 @@ export function sameData(one: unknown, other: unknown): boolean {
   }
   const record = (data: object): Record<string, unknown> => data as Record<string, unknown>;
   return keys.every((key) => Object.hasOwn(other, key) && sameData(record(one)[key], record(other)[key]));
+}
+// keeps an event in a record, up to its cap; the event, or null once it's full
+export function keep<Item>(record: Item[], ev: Item, cap = Infinity): Item | null {
+  if (record.length >= cap) {
+    return null;
+  }
+  record.push(ev);
+  return ev;
 }

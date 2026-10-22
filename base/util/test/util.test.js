@@ -11,6 +11,7 @@ import {
   DueQueue,
   entryOf,
   isUnder,
+  keep,
   Events,
   firstAfter,
   Draws,
@@ -22,6 +23,7 @@ import {
   placeInOrder,
   sameData,
   seeded,
+  slice,
   SETTLED,
   pickWeighted,
   smoothstep,
@@ -32,6 +34,11 @@ import {
   valueBetween,
 } from '../index.ts';
 import { isNear, near } from './near.js';
+
+const draws = (...xs) => {
+  let i = 0;
+  return () => xs[i++];
+}; // rand() giving these, in order
 
 const MULBERRY32_SEED_1 = [0.6270739405881613, 0.002735721180215478, 0.5274470399599522]; // from an implementation of the reference C of its own
 
@@ -428,4 +435,23 @@ test('an address under another, as text: a name further down, not the other itse
   assert.equal(isUnder('desk/tapping', 'desk/tap'), false);
   assert.equal(isUnder('desk', ''), true);
   assert.equal(isUnder('', ''), false);
+});
+
+test('a record keeps events up to its cap, and then none', () => {
+  const r = [];
+  assert.deepEqual(keep(r, { start: 0 }, 2), { start: 0 });
+  keep(r, { start: 24 }, 2);
+  assert.equal(keep(r, { start: 48 }, 2), null);
+  assert.deepEqual(r, [{ start: 0 }, { start: 24 }]);
+});
+
+test('a slice: a random length from 1 to all of it, drawn first, from the start or from anywhere', () => {
+  assert.deepEqual(slice(10, 'start', draws(0)), [0, 1]);
+  assert.deepEqual(slice(10, 'start', draws(0.99)), [0, 10], 'all of it');
+  assert.deepEqual(
+    slice(10, 'random', draws(0.25, 0.5)),
+    [4, 3],
+    'three, from halfway through the eight places it can start',
+  );
+  assert.deepEqual(slice(10, 'random', draws(0.99, 0.5)), [0, 10]);
 });

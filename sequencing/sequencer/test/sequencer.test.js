@@ -1,24 +1,31 @@
 // The generic sequencer's unit tests (mockup/src/libs/sequencing/sequencer/, a package of its own since L1e, MIDI's part apart since S1d;
 // mockup/architecture/sequencer.md): ticks, patterns and their lengths, a record as the pattern it is, placing and repeating on the grid in
-// ticks, a rhythm played live and its speed, on a grid of the tests' own; their events carry a pitch or a step, passed on, never read. The
-// garden's phrasing, once here, a theme's cycle and a replay's run among it, is its own (mockup/test/unit/phrasing.test.js). What the
+// ticks, patterns and their lengths, a record as the pattern it is, placing and repeating on the grid in ticks, a bank's cycle and a replay's run
+// unmuted, a rhythm played live and its speed, on a grid of the tests' own; their events carry a pitch or a step, passed on, never read. What the
 // garden plays through it is held to the recordings (replays.test.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  cycleOf,
   due,
   lengthOf,
   liveEvents,
   patternOf,
+  patternsIn,
   place,
   placeOn,
   rescaled,
   underWayAt,
+  unmute,
   upcoming,
   whole,
 } from '../index.ts';
 import { STEP } from '../../clock/index.ts';
 
+const draws = (...xs) => {
+  let i = 0;
+  return () => xs[i++];
+}; // rand() giving these, in order
 const grid = { stepAt: (t) => t * 8, timeAt: (s) => s / 8 }; // 16ths an 8th of a second apart, from 0, straight
 
 test("a pattern's length: its bars, in its own time signature, or the master's", () => {
@@ -278,5 +285,41 @@ test('a change of speed runs on where the rhythm had got to, with no jump', () =
   assert.deepEqual(
     liveEvents(r, rescaled(start, 1, 0.5, at), 0.5, at, 600).map((n) => n.start),
     [144, 336, 528],
+  );
+});
+
+test("a set of patterns' cycle: its longest pattern, in whole bars of the master's, at least one", () => {
+  assert.equal(cycleOf([{ bars: 2 }, { meter: [3, 4], bars: 1 }]), 768, 'two bars of 4/4');
+  assert.equal(
+    cycleOf([
+      { meter: [3, 4], bars: 1 },
+      { meter: [9, 16], bars: 1 },
+    ]),
+    384,
+    'under a bar: one bar',
+  );
+  assert.equal(cycleOf([{ meter: [3, 4], bars: 2 }]), 768, 'a bar and a half: two');
+  assert.equal(cycleOf([]), 384, 'nothing: one bar');
+  assert.equal(cycleOf([{ bars: 1 }], [3, 4]), 288, "in the master's own time signature");
+  const bank = {
+    ASK: { events: [] },
+    WALKS: [[0, 1]],
+    SETS: { a: [{ bars: 2, events: [] }, { events: [] }] },
+    STYLES: { b: { duration: 2 } },
+  };
+  assert.equal(patternsIn(bank).length, 3, "a bank's patterns: anything with events, in it or in its sets");
+});
+
+test('a replay unmutes a run of notes: from the next one on, a random number of them, 1 up to all', () => {
+  const pat = { bars: 1, loop: true, from: 0, events: [{ start: 0 }, { start: 96 }, { start: 240 }] };
+  assert.deepEqual(
+    unmute(pat, 100, draws(0)).map((n) => n.start),
+    [240],
+    'one note: the next',
+  );
+  assert.deepEqual(
+    unmute(pat, 100, draws(0.99)).map((n) => n.start),
+    [240, 384, 480],
+    'all three, round the loop',
   );
 });

@@ -60,6 +60,13 @@ export function keptDraws(random: () => number): { random: () => number; again: 
   };
 }
 
+// a slice of a record of count events: [where it starts, how many], a random length from 1 to all of it, from the start, or anywhere
+// (from: 'random'). The length is drawn first
+export function slice(count: number, from: string | undefined, rand: () => number): [number, number] {
+  const len = 1 + Math.floor(rand() * count);
+  return [from === 'random' ? Math.floor(rand() * (count - len + 1)) : 0, len];
+}
+
 // A source of random draws, seeded as it's made, so a run is drawn again from its seed:
 // its own draws (random(), what its owner plays: a pick, a contour, a rhythm),
 // and a play's (play()), a seed of its own drawn from it,
