@@ -574,7 +574,14 @@ test("a lane's param as the desk declares it, by its strip and its controller th
 });
 
 // The model itself, on a clock of the tests' own: 16ths a quarter of a second apart, from 0.
-function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack = false, instruments = [] } = {}) {
+function arrangementOf({
+  regions = [],
+  lanes = [],
+  playhead = null,
+  playingBack = false,
+  instruments = [],
+  midiDevices = [],
+} = {}) {
   const steps = [];
   const clock = {
     t: 0,
@@ -598,8 +605,10 @@ function arrangementOf({ regions = [], lanes = [], playhead = null, playingBack 
     },
   };
   const transport = { playingBack, playhead: () => playhead };
+  const isMidi = (controller) => midiDevices.find(({ name }) => name === controller);
   const declared = {
-    specOf: (strip, controller) => (controller === 'volume' ? STRIP_PARAMS.volume : undefined),
+    specOf: (strip, controller) => (controller === 'volume' ? STRIP_PARAMS.volume : isMidi(controller)),
+    isMidiDevice: (strip, controller) => isMidi(controller) !== undefined,
     controllersOf,
   };
   const recording = { regions: () => regions, lanes: () => lanes };
@@ -668,6 +677,24 @@ test("a group's header unfolds it, with shift every group, as the one clicked go
   );
   arrangement.toggleLanes('tap 0', true);
   assert.deepEqual(arrangement.lanes, [], "shift: every track's closed, as tap 0 goes");
+});
+
+test("a MIDI device's lane, as the source that declares it lays it: its key on the device's choices, marked a MIDI device's; a strip's own volume not", () => {
+  const key = { name: 'key', choices: ['Dreamy', 'Bright'], default: 'Dreamy' };
+  const lanes = [
+    { ...lane('background', 1, 'key'), trackName: 'background/1' },
+    { ...lane('background', 1, 'volume'), trackName: 'background/1' },
+  ];
+  const { arrangement } = arrangementOf({ lanes, midiDevices: [key] });
+  arrangement.show(true);
+  arrangement.toggleLanes('background 1', false);
+  assert.deepEqual(
+    arrangement.lanes.map(({ row, spec, midi }) => [row, spec, midi]),
+    [
+      ['background 1: key', key, true],
+      ['background 1: volume', STRIP_PARAMS.volume, false],
+    ],
+  );
 });
 
 test("an instrument with no notes a row in its section, its lanes under it once opened, in its patch's order", () => {

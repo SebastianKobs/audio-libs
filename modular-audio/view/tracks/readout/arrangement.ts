@@ -84,9 +84,12 @@ export interface PlayheadReadout {
 // What the desk declares, by a strip's name:
 //   - specOf(): a param's range and taper, by its controller there, which its lane is laid
 //     on; none for one nothing declares;
-//   - controllersOf(): the strip's controllers in the order the sound goes through it.
+//   - isMidiDevice(): whether a controller is a MIDI device's, drawn in a colour of its own;
+//   - controllersOf(): the strip's controllers in the order the sound goes through it, a MIDI
+//     device's before the strip's.
 export interface DeclaredReadout {
   specOf(strip: string, controller: string): ParamSpec | undefined;
+  isMidiDevice(strip: string, controller: string): boolean;
   controllersOf(strip: string): readonly string[];
 }
 // The clock, as the arrangement reads it: now, each 16th as it's scheduled, and the grid as

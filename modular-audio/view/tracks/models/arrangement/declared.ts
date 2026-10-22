@@ -11,6 +11,7 @@ import { addressOf, addressText } from '../../../../../base/util/index.ts';
 export function declaredBy(views: DeskViewBuilder): DeclaredReadout {
   return {
     specOf: (strip, controller) => views.control(controlAddress(strip, controller))?.spec,
+    isMidiDevice: () => false, // the desk declares no MIDI devices
     controllersOf: (strip) => controllersOf(views.strip(addressOf(strip))),
   };
 }

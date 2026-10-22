@@ -30,8 +30,12 @@ export interface Look {
 //   - strip: its ground; line: a bar's line, a row's;
 //   - clip: a region played back; live: a region played live;
 //   - text, soft: a label, a bar's number and the notes;
-//   - accent: the present, the playhead and a lane's line.
-export type ArrangementColors = Record<'strip' | 'line' | 'clip' | 'live' | 'text' | 'soft' | 'accent', string>;
+//   - accent: the present, the playhead and a lane's line;
+//   - midi: a MIDI device's lane's line.
+export type ArrangementColors = Record<
+  'strip' | 'line' | 'clip' | 'live' | 'text' | 'soft' | 'accent' | 'midi',
+  string
+>;
 type Colors = ArrangementColors;
 
 const HEADER_HEIGHT = 16; // px: a group's header row, as the names' (index.html)
@@ -118,7 +122,7 @@ export class TimeDrawing {
       return [];
     }
     const area = { top: top + LANE_PAD, height: LANE_HEIGHT - 2 * LANE_PAD };
-    return [drawLane(rows, lane, area, look, colors.accent)];
+    return [drawLane(rows, lane, area, look, lane.midi ? colors.midi : colors.accent)];
   }
   // a region on its row, if its row shows and it's in view: its block, its label and its notes, greyed if it's gone
   #drawRegion(

@@ -30,7 +30,7 @@ export class ScaleDevice implements Receiver {
     this.#from = from;
     this.#into = into;
     this.#key = keyNamed(keys, start);
-    this.spec = { name: 'key', choices: Object.keys(keys), default: start };
+    this.spec = keySpec(keys, start);
   }
   // the messages handed it, in their order, passed on at once: a key controller sets the key for the
   // notes after it in the batch, and is not passed on
@@ -70,6 +70,10 @@ export class ScaleDevice implements Receiver {
   }
 }
 
+// the key as a param's spec: its choices the keys' names, its default the one it starts in
+export function keySpec(keys: Readonly<Record<string, Key>>, start: string): ParamSpec {
+  return { name: 'key', choices: Object.keys(keys), default: start };
+}
 // a key by its name among those handed in
 function keyNamed(keys: Readonly<Record<string, Key>>, name: string): Key {
   const key = keys[name];

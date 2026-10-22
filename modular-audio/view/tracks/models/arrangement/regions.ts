@@ -26,12 +26,14 @@ export interface PlacedRegion {
   gone: boolean;
   notes: readonly RecordedNote[];
 }
-// An opened lane on its row: its controller, its param's range and taper, its points (G5b).
+// An opened lane on its row: its controller, its param's range and taper, its points (G5b);
+// midi: a MIDI device's, drawn in its own colour.
 export interface PlacedLane {
   row: string;
   controller: string;
   spec: ParamSpec;
   points: readonly TimedValue[];
+  midi: boolean;
 }
 
 // each region on its row; none for one with no row
@@ -64,15 +66,17 @@ export function placedLane(
     tracks: TracksReadout;
     strips: readonly ArrangedStrip[];
     opened: ReadonlySet<string>;
-    declared: Pick<DeclaredReadout, 'specOf'>;
+    declared: Pick<DeclaredReadout, 'specOf' | 'isMidiDevice'>;
   },
 ): PlacedLane[] {
   const track = laneRowOf(lane, tracks, strips);
   if (track === null || !opened.has(track)) {
     return [];
   }
-  const spec = declared.specOf(stripOf(lane), lane.controller) ?? SEND_PARAM;
-  return [{ row: laneKeyOf(track, lane.controller), controller: lane.controller, spec, points: lane.points }];
+  const strip = stripOf(lane);
+  const spec = declared.specOf(strip, lane.controller) ?? SEND_PARAM;
+  const midi = declared.isMidiDevice(strip, lane.controller);
+  return [{ row: laneKeyOf(track, lane.controller), controller: lane.controller, spec, points: lane.points, midi }];
 }
 // a region's notes kept whole past the holds they rang through (P3c1), and its end with them, as far as its last
 function keptWholeIn(region: RecordedRegion, song: TimeMap): { notes: RecordedNote[]; to: Seconds } {

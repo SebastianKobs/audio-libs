@@ -2,4 +2,4 @@
 // Its parts:
 //   - scale-device.ts: the device, a Receiver around the one it plays into;
 //   - steps.ts: how far a pitch moves from one key into another, by its step.
-export { ScaleDevice, type ScaleDeviceSetup } from './scale-device.ts';
+export { keySpec, ScaleDevice, type ScaleDeviceSetup } from './scale-device.ts';
