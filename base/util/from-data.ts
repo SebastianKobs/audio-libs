@@ -6,7 +6,8 @@
 //   - { listOf: shape }: a list, each item of that shape;
 //   - { byName: shape }: an object, each of its values of that shape, by name or by address;
 //   - { fields, needs }: an object, each field it writes of its shape, and the fields it needs,
-//     each a field or one of several.
+//     each a field or one of several;
+//   - with `closed: true`, a field it doesn't name is refused too.
 // A light check: what the shape says nothing of is left as it is.
 // What the data means is its reader's check.
 // Where it isn't of its shape, refused: every problem said, where it is, under the file's name.
@@ -25,6 +26,7 @@ export type Shape =
 interface Fields {
   readonly fields?: Readonly<Record<string, Shape>>;
   readonly needs?: readonly (string | readonly string[])[];
+  readonly closed?: true; // a field not named in fields is refused
 }
 // the file data was read from, and what it should have been, as a refusal says them
 interface Read {
@@ -68,7 +70,18 @@ function problemsIn(data: unknown, shape: Shape, at: string): string[] {
     .filter((names) => names.every((name) => data[name] === undefined))
     .map((names) => `${where}no ${names.join(' or ')}`);
   const written = Object.entries(fields.fields ?? {}).filter(([name]) => data[name] !== undefined);
-  return [...missing, ...written.flatMap(([name, field]) => fieldProblems(data[name], field, at, name))];
+  const wrong = written.flatMap(([name, field]) => fieldProblems(data[name], field, at, name));
+  return [...missing, ...wrong, ...unnamedProblems(data, fields, where)];
+}
+// Closed: each field the data writes that the shape doesn't name, after the wrong ones.
+function unnamedProblems(data: Record<string, unknown>, fields: Fields, where: string): string[] {
+  if (!fields.closed) {
+    return [];
+  }
+  const named = new Set(Object.keys(fields.fields ?? {}));
+  return Object.keys(data)
+    .filter((name) => data[name] !== undefined && !named.has(name))
+    .map((name) => `${where}its ${name} not one of its fields`);
 }
 // What keeps an entry, a list's item or a map's, from its shape, by its name there (inserts 2):
 // an object or a map said where it is, as one of its own; a value said as a field's.

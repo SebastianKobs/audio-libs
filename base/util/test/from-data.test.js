@@ -100,3 +100,22 @@ test('data not an object where an object is asked for: none, or a value of its t
     ],
   );
 });
+
+test("a closed shape refuses a field it doesn't name, said where it is; an open one leaves it as it is", () => {
+  const CLOSED_CHANNEL = { ...CHANNEL, closed: true };
+  const CLOSED_DESK = {
+    fields: { kind: 'word', channels: { listOf: CLOSED_CHANNEL } },
+    needs: ['kind', 'channels'],
+    closed: true,
+  };
+  const desk = { kind: 'Studio', channels: [{ name: 'you', role: 'bus', out: 'master' }], vnie: 1 };
+  assert.deepEqual(
+    refusal(() => fromData(desk, CLOSED_DESK, { source: 'desk.yaml', what: 'a desk' })),
+    [
+      'desk.yaml: not of the shape of a desk:',
+      'channels 1: its out not one of its fields',
+      'its vnie not one of its fields',
+    ],
+  );
+  assert.equal(fromData(desk, DESK, { source: 'desk.yaml', what: 'a desk' }), desk);
+});
