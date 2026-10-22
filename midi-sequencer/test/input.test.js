@@ -424,3 +424,66 @@ test('the stream: every play to whoever listens, until they stop', () => {
   sequencer.send({ track: 'tap', clip: { kind: 'vine' } }, [noteOn(2, 2)]);
   assert.deepEqual(got, ['tap']);
 });
+
+// input monitoring by sender: a surface switched off, as a DAW's monitoring of an input is
+function monitoredSequencer() {
+  const received = [];
+  const sequencer = new Sequencer({
+    tracks: (name) => ({ role: 'tap', receive: (messages) => received.push(...messages.map((m) => ({ ...m, name }))) }),
+  });
+  const plays = [];
+  sequencer.onPlay((play) => plays.push(play));
+  return { sequencer, received, plays };
+}
+const garden = { track: 'drone', source: 'garden' };
+
+test("a sender switched off from a time: its held notes hushed there, none let go; its new notes and controllers from then dropped, an earlier note's end passed; another sender's passed", () => {
+  const { sequencer, received } = monitoredSequencer();
+  sequencer.send(garden, [noteOn(1, 1), perNote(1, 'volume', 0.5, 1)]);
+  sequencer.send(garden, [noteOn(2, 1.1)]);
+  sequencer.send({ track: 'drone', source: 'player' }, [noteOn(1, 1.2)]);
+  received.length = 0;
+  sequencer.monitor('garden', false, 4, 0.25);
+  const hushed = received.filter((m) => m.type === 'per-note controller');
+  assert.equal(hushed.length, 2, 'both of its held notes');
+  assert.ok(hushed.every((m) => m.controller === 'volume' && m.value === 0 && m.t === 4 && m.glide === 0.25));
+  assert.ok(!received.some((m) => m.type === 'note off'), 'none let go');
+  assert.equal(new Set(hushed.map((m) => m.index)).size, 2, 'by the track index of each, not the player one');
+  received.length = 0;
+  sequencer.send(garden, [
+    noteOn(3, 3), // before the switch: passed
+    noteOn(4, 5), // from the switch: dropped
+    perNote(4, 'pan', 0.2, 5),
+    noteOff(4, 6),
+    { type: 'controller', controller: 'cutoff', value: 0.3, t: 5 },
+    noteOff(1, 5), // an earlier note's end: passed
+  ]);
+  assert.equal(received.filter((m) => m.type === 'note on').length, 1, 'only the one before the switch');
+  assert.equal(received.filter((m) => m.type === 'note off').length, 1, 'only the earlier note, not the dropped one');
+  assert.ok(!received.some((m) => m.type === 'controller' || m.controller === 'pan'), 'no controller');
+  received.length = 0;
+  sequencer.send({ track: 'drone', source: 'player' }, [
+    noteOn(5, 5),
+    { type: 'controller', controller: 'cutoff', value: 1, t: 5 },
+  ]);
+  assert.equal(received.length, 2, "another sender's passed");
+});
+
+test('a sender switched on again: its held notes brought back to the volume each had, none struck again; nothing of it on the stream', () => {
+  const { sequencer, received, plays } = monitoredSequencer();
+  sequencer.send(garden, [noteOn(1, 1), perNote(1, 'volume', 0.5, 1)]);
+  sequencer.send(garden, [noteOn(2, 1.1)]);
+  sequencer.monitor('garden', false, 4, 0.25);
+  sequencer.send(garden, [perNote(1, 'volume', 0.9, 4.5)]); // dropped: the last volume stays 0.5
+  received.length = 0;
+  plays.length = 0;
+  sequencer.monitor('garden', true, 8, 0.5);
+  const back = received.filter((m) => m.type === 'per-note controller');
+  assert.deepEqual(back.map((m) => m.value).sort(), [0.5, 1], 'each to the volume it had: one set, one never');
+  assert.ok(back.every((m) => m.controller === 'volume' && m.t === 8 && m.glide === 0.5));
+  assert.ok(!received.some((m) => m.type === 'note on'), 'none struck again');
+  assert.deepEqual(plays, [], 'not on the stream, so not recorded');
+  received.length = 0;
+  sequencer.send(garden, [noteOn(6, 9)]);
+  assert.equal(received.length, 1, 'its new notes passed again');
+});

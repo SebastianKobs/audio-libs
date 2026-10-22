@@ -14,7 +14,9 @@ import {
   type SentNote,
 } from '../midi/index.ts';
 import type { Play, PlayedNote, PlayListener } from './stream.ts';
+import type { Seconds } from '../clock/index.ts';
 import { entryOf, Events } from '../util/index.ts';
+import { Monitoring } from './monitoring.ts';
 
 // Where messages go:
 //   - the track they play on;
@@ -69,13 +71,33 @@ export class Sequencer<Name extends string> implements Input<Name> {
   readonly #tracks: (track: Name) => Track;
   readonly #events = new Events<SequencerEvents>(); // its own, so two sequencers are heard apart
   readonly #apart = new Map<string, { rotation: NoteRotation; indices: Map<string, number> }>(); // each track's indices, by sender (P3a)
+  readonly #monitoring = new Monitoring<Name>(); // which senders are heard
 
   constructor({ tracks }: { tracks: (track: Name) => Track }) {
     this.#tracks = tracks;
   }
-  send(to: SentTo<Name>, messages: readonly Message[]): void {
+  // a sender's monitoring switched off from t, or on again, as a DAW's input monitoring: its held notes hushed to
+  // 0, or brought back to their last volume, each gliding by fade, sent to the tracks, not into the stream, so
+  // not recorded; while off, its new notes and controllers from t are dropped, an earlier note's end passed
+  monitor(source: string | undefined, on: boolean, t: Seconds, fade: Seconds): void {
+    if (on) {
+      this.#monitoring.switchOn(source);
+    } else {
+      this.#monitoring.switchOff(source, t);
+    }
+    for (const { track, index, volume } of this.#monitoring.heldBy(source)) {
+      const value = on ? volume : 0;
+      this.#tracks(track).receive([
+        { type: 'per-note controller', index, controller: 'volume', value, t, glide: fade },
+      ]);
+    }
+  }
+  send(to: SentTo<Name>, sent: readonly Message[]): void {
+    const messages = this.#monitoring.passed(to.track, to.source, sent);
     const track = this.#tracks(to.track);
-    track.receive(this.#keptApart(to, messages));
+    const apart = this.#keptApart(to, messages);
+    this.#monitoring.keep(to.track, to.source, apart);
+    track.receive(apart);
     const notes = notesIn(messages);
     const after = afterTheirNotes(messages);
     const controls = controlsIn(messages);
