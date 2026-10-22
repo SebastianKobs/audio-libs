@@ -8,7 +8,7 @@ Five groups, each a folder, read bottom up: base, sequencing, music, spatial, mo
 
 - **[`base/`](base/README.md), at the bottom,** words and helpers every library shares: `util` (maths, searches, events, a bus, seeded draws, addresses, data read for its shape), `automation` (what a param is told as it plays), `params` (a param as a plugin declares it), `html` (HTML made safely).
 - **[`sequencing/`](sequencing/README.md), time, events and MIDI:** `clock` (music time, the beat grid, ticks), `timeline` (what happened, laid out in time, played back), `sequencer` (patterns of events on the grid, clips on tracks, pools of tracks); `midi` (MIDI 2.0's channel voice messages as values), `midi-sequencer` (the input, the stream, the recorder, the recording played back), `clip-player` (a session view's clips, launched into the input); `view/transport` (play, stop, where the music is).
-- **[`music/`](music/README.md), music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would).
+- **[`music/`](music/README.md), music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would), `scale-device` (the Scale device, a MIDI insert mapping each note into the key chosen).
 - **[`spatial/`](spatial/README.md), places and input:** `places` (places perceived from where you are, a world that wraps round), `hearing` (hearing by distance, as values), `gestures` (pointer input in, gestures out).
 - **[`modular-audio/`](modular-audio/README.md), a sound as data, built, and shown:**
   - **`plan/`, a sound as data, no audio:** `format` (what a plan is), `blocks` (the building blocks every builder makes), `planner` (templates made into plans), `effects`, `desk`, `instrument` (forms and templates of each, the templates their content).
@@ -25,7 +25,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | 1 | `base/automation`, `base/params`, `music/music-theory`, `spatial/places` |
 | 2 | `modular-audio/plan/format`, `sequencing/clock`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `sequencing/midi`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
-| 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
+| 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `music/scale-device`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
 | 5 | `modular-audio/build/web-audio-engine`, `modular-audio/plan/effects`, `modular-audio/plan/instrument`, `modular-audio/view/desk/models`, `modular-audio/view/device/dom`, `music/phrasing`, `sequencing/clip-player` |
 | 6 | `modular-audio/build/instrument`, `modular-audio/plan/desk`, `modular-audio/view/desk/dom`, `modular-audio/view/instrument/models` |
 | 7 | `modular-audio/build/desk/mixing`, `modular-audio/view/instrument/dom`, `modular-audio/view/tracks/models` |
