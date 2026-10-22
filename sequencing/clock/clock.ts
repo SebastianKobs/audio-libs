@@ -5,8 +5,6 @@ import { snap, type SnapOptions } from './quantizer.ts';
 import { COMMON_TIME } from './ticks.ts';
 import { Events } from '../../base/util/index.ts';
 
-// time as the sound counts it: a clock time, or a length
-export type Seconds = number;
 // what the clock reads live: its owner's settings, as loose as they are;
 // quantize, the grid snap() uses unless told another (GRIDS)
 export interface ClockSettings extends GridSettings {

@@ -13,7 +13,8 @@
 // Its parts, made here: folded-rows.ts, regions.ts, time-in-view.ts.
 // Looked at on every beat while it shows. Where each 16th fell kept from when it's made, so a
 // region long past lies in its bar.
-import { GridMap, type Seconds } from '../../../../../sequencing/clock/index.ts';
+import { GridMap } from '../../../../../sequencing/clock/index.ts';
+import type { Seconds } from '../../../../../base/util/index.ts';
 import { FoldedRows } from './folded-rows.ts';
 import { placedLane, placedRegions, type PlacedLane, type PlacedRegion } from './regions.ts';
 import { arrangedStrips, type ArrangedStrip, type Row, type SectionLabels } from './rows.ts';

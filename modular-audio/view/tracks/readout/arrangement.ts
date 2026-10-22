@@ -7,7 +7,8 @@
 //   - the declarations (DeclaredReadout): the desk's view models (declaredBy());
 //   - the clock: the one clock (libs/sequencing/clock/), its time, its 16ths and its grid.
 import type { TimedValue } from '../../../../base/automation/index.ts';
-import type { Clock, HeardGrid, Seconds, TimeMap } from '../../../../sequencing/clock/index.ts';
+import type { Clock, HeardGrid, TimeMap } from '../../../../sequencing/clock/index.ts';
+import type { Seconds } from '../../../../base/util/index.ts';
 import type { ParamSpec } from '../../../../base/params/index.ts';
 
 // A note as recorded:

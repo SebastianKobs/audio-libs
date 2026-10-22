@@ -1,6 +1,7 @@
 // ---------- util: small helpers shared by every package ----------
 // Its parts:
 //   - maths (maths.ts);
+//   - time as the sound counts it, a clock time or a length (seconds.ts);
 //   - where a time falls in a list rising by its key (search.ts), and things due at a time, an item put in time order among others (due.ts);
 //   - events (events.ts), and messages as values on a bus (bus.ts);
 //   - a set's key toggled, a map's entry made when first asked for, a chain of keys followed through a map, a list kept up to a cap, an object
@@ -21,6 +22,7 @@ export {
   smoothstep,
   wrapToTile,
 } from './maths.ts';
+export { type Seconds } from './seconds.ts';
 export { firstAfter, lastAtOrBefore, valueBetween } from './search.ts';
 export { DueQueue, placeInOrder } from './due.ts';
 export { Events } from './events.ts';

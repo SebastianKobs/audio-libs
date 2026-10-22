@@ -4,7 +4,8 @@
 //   - the playhead where a press in the ruler puts it, on the nearest beat, until it's let
 //     go and cued (P2).
 // Its window's span and scroll: TimeWindow's; a press's beat: playheadAt().
-import { HISTORY, type GridMap, type Seconds } from '../../../../../sequencing/clock/index.ts';
+import { HISTORY, type GridMap } from '../../../../../sequencing/clock/index.ts';
+import type { Seconds } from '../../../../../base/util/index.ts';
 import { playheadAt } from './playhead.ts';
 import { TimeWindow } from './time-window.ts';
 import type { ArrangementClock, PlayheadReadout } from '../../readout/index.ts';

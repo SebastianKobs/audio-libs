@@ -14,7 +14,8 @@
 //   - each with its note on and its note off together, a fresh index each, the player one
 //     source (note rotation).
 // The looping, and when each note comes due, are the sequencer's clip launcher's.
-import type { Seconds, Ticks } from '../clock/index.ts';
+import type { Ticks } from '../clock/index.ts';
+import type { Seconds } from '../../base/util/index.ts';
 import { ClipLauncher, type ClipGrid, type Pattern, type Span } from '../sequencer/index.ts';
 import type { SentTo, Input, PatternNote } from '../midi-sequencer/index.ts';
 import { NoteRotation, noteMessages, type PerNoteValues } from '../midi/index.ts';

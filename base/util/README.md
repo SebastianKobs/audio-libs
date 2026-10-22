@@ -23,6 +23,7 @@ valueBetween([{ t: 0, v: 0 }, { t: 2, v: 4 }], 1, (p) => p.t, (p) => p.v); // 2:
 | `wrapAngle(a)`, `wrapToTile(v, size)` | an angle's difference into −π to π; a place into −size/2 to size/2, a thing tiled round a view (`maths.ts`) |
 | `firstAfter(items, t, keyOf)`, `lastAtOrBefore(items, t, keyOf)` | in a list rising by its key, by halves: the first later than a time, its index, past them all their length; the last at or before it, none before the first (`search.ts`) |
 | `valueBetween(points, time, timeOf, valueOf)` | a value at a time between timed points, a line between each two, held before the first and after the last (`search.ts`) |
+| `Seconds` | time as the sound counts it: a clock time, or a length, in seconds (`seconds.ts`) |
 | `new DueQueue(timeOf)`: `add(item)`, `takeDue(now)`, `takeBefore(time)`, `items`; `placeInOrder(items, item, timeOf)` | things due at a time, each after those at the same time; those due by now, or before a time, taken out in their order; an item put in time order among others, after those at its time (`due.ts`) |
 | `new Events<Arguments>()`: `on(type, listener)`, `emit(type, ...args)` | events by name: a listener for a type, a function back that stops it; each listener called in the order they came, one may stop as it's called (`events.ts`) |
 | `new Bus<Sent>()` | messages as values, each to whoever listens to its type, as MIDI's messages are; its messages a union of each library's (`bus.ts`) |

@@ -2,7 +2,8 @@
 // Regions: labelled with their clips, greyed once gone, kept whole past a hold.
 // Lanes: an opened track's, on its param's range as its strip declares it.
 import { SEND_PARAM, type ParamSpec } from '../../../../../base/params/index.ts';
-import type { Seconds, TimeMap } from '../../../../../sequencing/clock/index.ts';
+import type { TimeMap } from '../../../../../sequencing/clock/index.ts';
+import type { Seconds } from '../../../../../base/util/index.ts';
 import type { TimedValue } from '../../../../../base/automation/index.ts';
 import { keptWhole } from './note-shapes.ts';
 import { laneRowOf, rowKeyOf, type ArrangedStrip } from './rows.ts';

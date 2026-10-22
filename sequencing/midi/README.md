@@ -1,6 +1,6 @@
 # midi
 
-MIDI 2.0's channel voice messages as values, the protocol alone, as a synth and a sequencer share it and nothing else: the messages, the notes among them, each note a fresh index, and what they're played into. So an instrument speaks MIDI without a sequencer, it stands alone, on the clock's `Seconds` and `libs/base/automation/`'s `TimedValue`. Pure: no Web Audio; its tests in its `test/` folder. Why the messages are MIDI 2.0's: `mockup/architecture/sequencer.md`.
+MIDI 2.0's channel voice messages as values, the protocol alone, as a synth and a sequencer share it and nothing else: the messages, the notes among them, each note a fresh index, and what they're played into. So an instrument speaks MIDI without a sequencer, it stands alone, on `libs/base/util/`'s `Seconds` and `libs/base/automation/`'s `TimedValue`. Pure: no Web Audio; its tests in its `test/` folder. Why the messages are MIDI 2.0's: `mockup/architecture/sequencer.md`.
 
 ```ts
 import { NoteRotation, notesIn, type Receiver } from './index.ts';

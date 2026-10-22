@@ -4,7 +4,8 @@
 //   - the surface's own, for the clips on no player.
 // A clip's ▶ launches it. Its × asks first, as deleting is a deliberate, confirmed action.
 // It reads the clip slots' readout (ClipsReadout, libs/modular-audio/view/tracks/readout/clips.ts).
-import type { Clock, Seconds } from '../../../../sequencing/clock/index.ts';
+import type { Clock } from '../../../../sequencing/clock/index.ts';
+import type { Seconds } from '../../../../base/util/index.ts';
 import type { ClipsReadout, ClipTrack } from '../readout/index.ts';
 
 // A clip on its clip track: its slot, as its holder knows it, its name, how many notes it

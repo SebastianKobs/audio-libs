@@ -1,5 +1,5 @@
 // ---------- midi-sequencer/stream: a play, live or not, as the sequencer hands it to whoever listens ----------
-import type { Seconds } from '../clock/index.ts';
+import type { Seconds } from '../../base/util/index.ts';
 import type { Controller, NoteOff, PerNoteController, PerNoteValues } from '../midi/index.ts';
 
 // A play, as the stream carries it:

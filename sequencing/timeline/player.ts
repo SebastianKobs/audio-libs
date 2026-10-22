@@ -5,10 +5,10 @@
 // stopped, what's under way ended then; played to the end, what's under way ringing out as it lies along the timeline. An event that holds
 // until the next of its own told as it comes due, the one in effect where playback starts picked up from there, never ended. The
 // sequencer's recording player maps it onto notes and a track's controllers (libs/sequencing/midi-sequencer/recording-player.ts)
-import type { Seconds, TimeMap } from '../clock/index.ts';
+import type { TimeMap } from '../clock/index.ts';
 import { timeOf, type TimedEvent } from './timeline.ts';
 import { ALONG_THE_CLOCK, type PlayedFrom } from './timeline-time.ts';
-import { lastAtOrBefore } from '../../base/util/index.ts';
+import { lastAtOrBefore, type Seconds } from '../../base/util/index.ts';
 
 // what playback tells as each moment comes due: an event's start, at the clock time it's heard, from its own time it starts at, later
 // than its start where it's chased; a point of its own; its end; an event that holds, as it comes due, or picked up where playback

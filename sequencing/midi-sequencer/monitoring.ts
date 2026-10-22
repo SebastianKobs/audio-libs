@@ -5,9 +5,8 @@
 //   - an earlier note's end is passed, so no voice is left held.
 // Its held notes are kept by track and by the track's own index, each with its last volume,
 // so switching it on brings each back to the volume it had.
-import type { Seconds } from '../clock/index.ts';
 import type { Message, NoteOff, PerNoteController, PerNoteManagement } from '../midi/index.ts';
-import { entryOf } from '../../base/util/index.ts';
+import { entryOf, type Seconds } from '../../base/util/index.ts';
 
 // a held note, as the track's instrument knows it
 interface HeldNote<Name extends string> {

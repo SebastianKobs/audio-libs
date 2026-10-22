@@ -3,7 +3,7 @@
 //   - play: from the playhead, or on from the present;
 //   - stop: held where it is;
 //   - cue: the playhead set back to a time on the timeline, or none, on the present.
-import type { Seconds } from '../clock/index.ts';
+import type { Seconds } from '../../base/util/index.ts';
 
 export type PlaybackMessage =
   { readonly type: 'play' } | { readonly type: 'stop' } | { readonly type: 'cue'; readonly t: Seconds | null };

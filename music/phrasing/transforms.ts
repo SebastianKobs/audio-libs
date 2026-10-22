@@ -6,8 +6,8 @@
 
 import { type Grid } from '../../sequencing/sequencer/index.ts';
 import { type NotePattern } from '../../sequencing/midi-sequencer/index.ts';
-import type { Seconds, Ticks } from '../../sequencing/clock/index.ts';
-import { modulo, pickFrom } from '../../base/util/index.ts';
+import type { Ticks } from '../../sequencing/clock/index.ts';
+import { modulo, pickFrom, type Seconds } from '../../base/util/index.ts';
 import { STEP, barTicks } from '../../sequencing/clock/index.ts';
 
 // a phrase's note, as the transforms reshape it

@@ -14,8 +14,7 @@ import {
   type SentNote,
 } from '../midi/index.ts';
 import type { Play, PlayedNote, PlayListener } from './stream.ts';
-import type { Seconds } from '../clock/index.ts';
-import { entryOf, Events } from '../../base/util/index.ts';
+import { entryOf, Events, type Seconds } from '../../base/util/index.ts';
 import { Monitoring } from './monitoring.ts';
 
 // Where messages go:

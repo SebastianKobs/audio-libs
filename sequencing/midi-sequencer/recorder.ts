@@ -8,12 +8,11 @@
 // What moves as it's heard: a track's lanes (track-lanes.ts), a note's own (note-lanes.ts).
 // On the timeline since L1c2 (libs/sequencing/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
-import type { Seconds } from '../clock/index.ts';
 import { endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
 import { samePoint, type LanePoint } from './lanes.ts';
 import type { NoteOff, PerNoteController } from '../midi/index.ts';
 import type { Play, PlayedNote } from './stream.ts';
-import { entryOf } from '../../base/util/index.ts';
+import { entryOf, type Seconds } from '../../base/util/index.ts';
 import { changedOn, thinNote, valuesAt, type RecordedNote } from './note-lanes.ts';
 import { TrackLanes, type Lane } from './track-lanes.ts';
 

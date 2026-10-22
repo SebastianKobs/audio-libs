@@ -9,7 +9,7 @@
 // A controller's change, a per-note one's too, carries how it moves there,
 // as an automation point's curve: jumping at its time, or gliding from it by
 // a time constant (glide), so what's recorded plays back as it was heard
-import type { Seconds } from '../clock/index.ts';
+import type { Seconds } from '../../base/util/index.ts';
 import type { TimedValue } from '../../base/automation/index.ts';
 
 // a note that starts: its index, pitch and velocity; which part of its clip's owner sounds it, by its number

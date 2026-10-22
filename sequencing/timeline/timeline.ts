@@ -5,8 +5,8 @@
 // starts, those who went told (onLetGo); an event that holds what the one before it of its key held, by the caller's equality, thinned
 // once it's settled. What's in effect at a time, and what starts in a range. The sequencer's recorder keeps what's heard on it, its
 // regions and lanes its own views of it (libs/sequencing/midi-sequencer/recorder.ts)
-import { HISTORY, type Seconds } from '../clock/index.ts';
-import { entryOf, lastAtOrBefore, placeInOrder } from '../../base/util/index.ts';
+import { HISTORY } from '../clock/index.ts';
+import { entryOf, lastAtOrBefore, placeInOrder, type Seconds } from '../../base/util/index.ts';
 
 // an event on the timeline: when, and how long, none while it's open or while it holds until the next of its key
 export interface TimedEvent {

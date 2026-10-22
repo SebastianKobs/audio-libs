@@ -6,7 +6,8 @@
 //   - an event off its 16th where it falls in it.
 // Knows nothing of what its events are: whoever launched them plays them (play()).
 // Each launch has a number of its own.
-import type { BeatGrid, Seconds } from '../clock/index.ts';
+import type { BeatGrid } from '../clock/index.ts';
+import type { Seconds } from '../../base/util/index.ts';
 import type { Pattern, PatternEvent } from './pattern.ts';
 import { beatTicks, STEP } from '../clock/index.ts';
 import { due, whole } from './playing.ts';

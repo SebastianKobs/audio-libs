@@ -13,7 +13,7 @@
 // Its parts: the clock, its timeline, ticks and scheduler (clock.ts, Clock); the beat grid (beat-grid.ts, BeatGrid), its swing (swing.ts),
 // its song time (song-time.ts, SongTime); the edge to Web Audio (audio-clock.ts, AudioClock); the grids a time snaps to (quantizer.ts); time in ticks, a meter's bars and beats
 // (ticks.ts); items held until a tick brings their time (cues.ts); where each 16th fell as it was heard (grid-map.ts)
-export { Clock, LOOKAHEAD, type ClockSettings, type Seconds } from './clock.ts';
+export { Clock, LOOKAHEAD, type ClockSettings } from './clock.ts';
 export { BeatGrid, type GridSettings } from './beat-grid.ts';
 export { HISTORY, type TimeMap } from './song-time.ts';
 export { PPQ, STEP, COMMON_TIME, barTicks, beatTicks, startsBar, type Meter, type Ticks } from './ticks.ts';
