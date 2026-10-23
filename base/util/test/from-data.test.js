@@ -119,3 +119,23 @@ test("a closed shape refuses a field it doesn't name, said where it is; an open 
   );
   assert.equal(fromData(desk, DESK, { source: 'desk.yaml', what: 'a desk' }), desk);
 });
+
+test('a value of any one of several shapes is read as it is; one of none refused, said as all of them', () => {
+  const GENE = {
+    fields: { default: { anyOf: ['word or number', { listOf: 'word' }] }, kind: { oneOf: ['rule'] } },
+    needs: ['default'],
+    closed: true,
+  };
+  for (const written of [3, 'white', ['white', 'ochre'], []]) {
+    const gene = { default: written };
+    assert.equal(fromData(gene, GENE, { source: 'g.yaml', what: 'a gene' }), gene, JSON.stringify(written));
+  }
+  assert.deepEqual(
+    refusal(() => fromData({ default: [1, 2], kind: 'rule' }, GENE, { source: 'g.yaml', what: 'a gene' })),
+    ['g.yaml: not of the shape of a gene:', 'its default not a word or a number, or a list'],
+  );
+  assert.deepEqual(
+    refusal(() => fromData({ default: true }, { byName: GENE }, { source: 'g.yaml', what: 'genes' })),
+    ['g.yaml: not of the shape of genes:', 'default: not an object'],
+  );
+});

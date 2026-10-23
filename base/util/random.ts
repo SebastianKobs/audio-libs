@@ -1,4 +1,4 @@
-// ---------- util/random: a seeded generator, the same run of draws for a seed; a pick from a list, each as likely or by its weight; draws kept to draw again; a seeded source of draws, each play a seed of its own ----------
+// ---------- util/random: a seeded generator, the same run of draws for a seed; a seed from a text; a pick from a list, each as likely or by its weight; draws kept to draw again; a seeded source of draws, each play a seed of its own ----------
 // mulberry32 (Tommy Ettinger's): a 32-bit state, stepped and scrambled at each draw.
 // Small and fast: enough for a game's or a sequencer's choices, not for anything secret.
 
@@ -9,6 +9,8 @@ export interface PlayDraws {
 }
 
 const SEEDS = 2 ** 32; // how many seeds there are: mulberry32's state, 32 bits
+const FNV_OFFSET = 2166136261; // FNV-1a's start and prime, 32 bits
+const FNV_PRIME = 16777619;
 
 // a generator from a seed: the same seed, the same numbers, each in [0, 1)
 export function seeded(seed: number): () => number {
@@ -19,6 +21,15 @@ export function seeded(seed: number): () => number {
     mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
     return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
   };
+}
+// a seed from a text, the same text the same seed: FNV-1a, each character xored in, then multiplied by a prime
+export function seedOf(text: string): number {
+  let hash = FNV_OFFSET;
+  for (const char of text) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, FNV_PRIME);
+  }
+  return hash >>> 0;
 }
 // an item from a list, each as likely, by the random given; none from an empty list
 export function pickFrom<Item>(list: readonly Item[], random: () => number = Math.random): Item | undefined {

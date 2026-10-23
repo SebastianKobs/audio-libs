@@ -23,6 +23,7 @@ import {
   placeInOrder,
   sameData,
   seeded,
+  seedOf,
   slice,
   SETTLED,
   pickWeighted,
@@ -162,6 +163,18 @@ test('a seeded generator: the same seed draws the same numbers, each in [0, 1); 
     'each in [0, 1)',
   );
   assert.deepEqual(draw(1, 3), MULBERRY32_SEED_1, "mulberry32's first three for seed 1");
+});
+
+// FNV-1a over a text's characters: the sketches' hashSeed(), so an id seeds its own stream
+test("a seed from a text: the same text the same 32-bit seed, another text another; FNV-1a's known values", () => {
+  assert.equal(seedOf('genome'), seedOf('genome'), 'the same text, the same seed');
+  assert.notEqual(seedOf('genome'), seedOf('genomes'), 'another text, another seed');
+  assert.equal(seedOf(''), 2166136261, "FNV-1a's offset for no text");
+  assert.equal(seedOf('a'), 3826002220, "FNV-1a's 32-bit hash of a");
+  for (const text of ['tap:1.2:3.4:16', 'origin', 'é']) {
+    const seed = seedOf(text);
+    assert.ok(Number.isInteger(seed) && seed >= 0 && seed < 2 ** 32, `${text}: a 32-bit unsigned integer`);
+  }
 });
 
 test('smoothstep, as GLSL has it: 0 up to the low edge, 1 from the high one, eased between; edges the other way round, falling', () => {

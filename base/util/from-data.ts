@@ -4,6 +4,7 @@
 //   - 'word', 'number', 'switch' (true or false), 'word or number';
 //   - { oneOf: words }: one of these words;
 //   - { listOf: shape }: a list, each item of that shape;
+//   - { anyOf: shapes }: a value of any one of these shapes;
 //   - { byName: shape }: an object, each of its values of that shape, by name or by address;
 //   - { fields, needs }: an object, each field it writes of its shape, and the fields it needs,
 //     each a field or one of several;
@@ -20,6 +21,7 @@ export type Shape =
   | 'word or number'
   | { readonly oneOf: readonly string[] }
   | { readonly listOf: Shape }
+  | { readonly anyOf: readonly Shape[] }
   | { readonly byName: Shape }
   | Fields;
 // an object: its fields' shapes where it writes them; the fields it needs, each one or one of several
@@ -102,16 +104,24 @@ function fieldProblems(value: unknown, shape: Shape, at: string, name: string): 
   if ('oneOf' in shape) {
     return shape.oneOf.includes(value as string) ? [] : [`${its} ${shown(value)}, not ${listed(shape.oneOf)}`];
   }
+  if ('anyOf' in shape) {
+    const fits = shape.anyOf.some((alternative) => fieldProblems(value, alternative, at, name).length === 0);
+    return fits ? [] : [`${its} not ${saidOf(shape)}`];
+  }
   if ('listOf' in shape) {
     if (!Array.isArray(value)) {
       return [`${its} not a list`];
     }
     return value.flatMap((item: unknown, index) => entryProblems(item, shape.listOf, at, `${name} ${index + 1}`));
   }
+  return objectProblems(value, shape, at, name);
+}
+// What keeps a field's value from an object's or a map's shape
+function objectProblems(value: unknown, shape: Shape, at: string, name: string): string[] {
   if (!isObject(value)) {
-    return [`${its} not an object`];
+    return [`${at ? `${at}: ` : ''}its ${name} not an object`];
   }
-  if ('byName' in shape) {
+  if (typeof shape === 'object' && 'byName' in shape) {
     return Object.entries(value).flatMap(([key, entry]) => entryProblems(entry, shape.byName, at, `${name} ${key}`));
   }
   return problemsIn(value, shape, under(at, name));
@@ -122,7 +132,24 @@ function under(at: string, place: string): string {
 }
 // whether a shape is an object's or a map's, whose problems say where they are
 function isContainer(shape: Shape): boolean {
-  return typeof shape === 'object' && !('oneOf' in shape) && !('listOf' in shape);
+  return typeof shape === 'object' && !('oneOf' in shape) && !('listOf' in shape) && !('anyOf' in shape);
+}
+// what a shape is, as a refusal says it isn't: a word, a list, an object, or each of an anyOf's alternatives
+function saidOf(shape: Shape): string {
+  if (typeof shape === 'string') {
+    return VALUES[shape]!.said; // every word a Shape is has its value
+  }
+  if ('oneOf' in shape) {
+    return listed(shape.oneOf);
+  }
+  if ('listOf' in shape) {
+    return 'a list';
+  }
+  if ('anyOf' in shape) {
+    const said = shape.anyOf.map(saidOf);
+    return said.length < 2 ? said.join('') : `${said.slice(0, -1).join(', ')}, or ${said.at(-1)}`;
+  }
+  return 'an object';
 }
 // an object, not a list
 function isObject(data: unknown): data is Record<string, unknown> {
