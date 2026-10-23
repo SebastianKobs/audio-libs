@@ -7,7 +7,7 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 Eight groups, each a folder, read bottom up: base, generative, midi, sequencing, music, midi-devices, spatial, modular-audio. A group reads only those before it. Each group's `README.md` says what it holds and what it reads.
 
 - **[`base/`](base/README.md), at the bottom,** words and helpers every library shares: `util` (maths, searches, events, a bus, seeded draws, addresses, data read for its shape), `automation` (what a param is told as it plays), `params` (a param as a plugin declares it), `html` (HTML made safely).
-- **[`generative/`](generative/README.md), the rules the visual ideas found, medium-free, reading nothing outside the group:** `randomness` (where a draw comes from, handed in), `genetics` (values varied a little at a time, crossed, kept in a lineage), `rewriting` (an L-system's letters rewritten, a production as a gene), `automata` (a one-row automaton, its rule as a gene), `articulation` (what a hand's gesture makes along a stroke).
+- **[`generative/`](generative/README.md), the rules the visual ideas found, medium-free, reading nothing outside the group:** `randomness` (where a draw comes from, handed in), `genetics` (values varied a little at a time, crossed, kept in a lineage), `rewriting` (an L-system's letters rewritten, a production as a gene), `automata` (a one-row automaton, its rule as a gene), `articulation` (what a hand's gesture makes along a stroke), `sync` (coupled oscillators falling into step, a note pulling them to flash), `trails` (a slime mould's agents on a field, food drawing them).
 - **[`midi/`](midi/README.md), MIDI's protocol:** `protocol` (MIDI 2.0's channel voice messages as values, and what they're played into).
 - **[`sequencing/`](sequencing/README.md), time, events and the MIDI sequencer:** `clock` (music time, the beat grid, ticks), `timeline` (what happened, laid out in time, played back), `sequencer` (patterns of events on the grid, clips on tracks, pools of tracks); `midi-sequencer` (the input, the stream, the recorder, the recording played back), `clip-player` (a session view's clips, launched into the input); `view/transport` (play, stop, where the music is).
 - **[`music/`](music/README.md), music:** `music-theory` (notes, keys, the standard scales, a play style), `phrasing` (a phrase played as a player would).
@@ -25,7 +25,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | Layer | Libraries |
 |---|---|
 | 0 | `base/html`, `base/util`, `generative/randomness` |
-| 1 | `base/automation`, `base/params`, `generative/articulation`, `generative/automata`, `generative/genetics`, `generative/rewriting`, `music/music-theory`, `spatial/places` |
+| 1 | `base/automation`, `base/params`, `generative/articulation`, `generative/automata`, `generative/genetics`, `generative/rewriting`, `generative/sync`, `generative/trails`, `music/music-theory`, `spatial/places` |
 | 2 | `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
 | 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
