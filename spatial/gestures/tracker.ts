@@ -201,17 +201,23 @@ export class GestureTracker implements Tracking {
   // how fast the hand moves, on the screen: screen heights a second, smoothed over
   // about "hand smoothing" (speedOf()). After a standstill the first move spans the
   // rest, and the first of a drag comes from the press, so it isn't known (null) until
-  // the next, and then that move's own
+  // the next, and then that move's own.
+  // Moves stamped at one time (a mouse's, coalesced, many a frame) count in the next
+  // move with a time of its own, measured from the last one that had one.
   #handSpeed(pointer: Pointer, screenX: number, screenY: number, t: number): void {
     const dt = t - pointer.t;
     if (!(dt > 0)) {
       return;
     }
+    const fromX = pointer.timedX ?? pointer.x;
+    const fromY = pointer.timedY ?? pointer.y;
+    pointer.timedX = screenX;
+    pointer.timedY = screenY;
     if (dt >= REST || pointer.state === 'pressed') {
       pointer.speed = null;
       return;
     }
-    const moveSpeed = Math.hypot(screenX - pointer.x, screenY - pointer.y) / this.handedIn.height / dt;
+    const moveSpeed = Math.hypot(screenX - fromX, screenY - fromY) / this.handedIn.height / dt;
     pointer.speed =
       pointer.speed == null ? moveSpeed : approach(pointer.speed, moveSpeed, dt, this.settings.handSmooth);
   }

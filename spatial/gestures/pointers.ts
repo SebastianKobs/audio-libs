@@ -52,6 +52,8 @@ export interface Pointer {
   g: FloorPoint | null;
   track?: Stroke | null;
   speed?: number | null;
+  timedX?: number; // where the last move with a time of its own was: moves stamped at one time count from it
+  timedY?: number;
   pan?: number;
   mate?: Pointer | null;
 }

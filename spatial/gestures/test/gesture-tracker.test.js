@@ -332,6 +332,31 @@ test("a drag's hand speed: screen heights a second, smoothed; from the press or 
   assert.equal(tracker.speedOf(8), null, 'let go: none');
 });
 
+// a mouse's moves come many a frame, coalesced by the browser, those of a frame often at one time stamp (playtest: "on a desktop
+// with a mouse it mostly stays in halftime even on moderately fast movement")
+test("moves at one time keep their distance: it counts in the next move with a time of its own, so a mouse's speed is a finger's", () => {
+  clock.useFake(0);
+  tracker.configure({ height: 800 });
+  let t = 0;
+  let x = 100;
+  tracker.down({ id: 9, button: 0, x, y: 400, t, g: null });
+  // a frame's moves, 16 of them, all stamped with the frame's time
+  const frame = (pxPerS) => {
+    t += 0.016;
+    clock.advance(0.016);
+    for (let k = 0; k < 16; k++) {
+      x += (pxPerS * 0.016) / 16;
+      tracker.move({ id: 9, x, y: 400, t, g: null });
+    }
+  };
+  for (let k = 0; k < 70; k++) {
+    frame(800);
+  }
+  const speed = tracker.speedOf(9);
+  tracker.up({ id: 9, x, y: 400, t, g: null });
+  assert.ok(Math.abs(speed - 1) < 0.02, `a screen height a second: ${speed}`);
+});
+
 test('an oval is round enough, and so is a circle the other way round after a straight start, with the loop at the circle', () => {
   assert.equal(loops(events('oval')).length, 1);
   const [l] = loops(events('circle the other way, after a straight start'));
