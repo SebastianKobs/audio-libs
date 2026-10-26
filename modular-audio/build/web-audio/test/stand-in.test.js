@@ -62,7 +62,7 @@ test('with only the way out named, the tree is every path as before: the source 
   assert.equal(JSON.stringify(got).match(/oscillator/g).length, 2);
 });
 
-// a note's time worked out as its 16th comes (P3c1), from the grid's time added up step by step, lies a float's noise from where it was
+// a note's time worked out as its 16th comes, from the grid's time added up step by step, lies a float's noise from where it was
 // worked out at once: within a nanosecond of the start, written as the start
 test('a time within a nanosecond of the start written as the start, a float’s noise; one further as it is', () => {
   const ctx = new StandInContext(() => 0);

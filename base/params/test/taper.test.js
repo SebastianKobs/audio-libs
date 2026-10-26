@@ -1,4 +1,4 @@
-// A param's taper (mockup/src/libs/base/params/taper.ts, U2c4a; libs/synth/'s until U2c4a2): where a value lies on a control, a lane or a CC, 0 at its bottom to 1 at its
+// A param's taper (mockup/src/libs/base/params/taper.ts): where a value lies on a control, a lane or a CC, 0 at its bottom to 1 at its
 // top, and back, declared with the param as VST3 and AU declare theirs, so every surface turns a position into a value one way
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -6,7 +6,7 @@ import { faderGain, faderPosition, positionOf, valueAt } from '../index.ts';
 import { near } from '../../util/test/near.js';
 
 // the fader law, as a console's and Ableton's: a fader's position to its gain by dB, not in a straight line, so unity sits two thirds of
-// the way up and the bottom of its travel is the long drop to silence (mixer-surface/fader.ts's until U2c4a)
+// the way up and the bottom of its travel is the long drop to silence
 test("the fader law: silence at the bottom, unity two thirds up, +6 dB at the top, the master's unity at its top; a position back from its gain", () => {
   assert.deepEqual(
     [faderGain(0), faderGain(2 / 3), faderGain(1)].map((g) => +g.toFixed(9)),

@@ -140,7 +140,7 @@ test("a solo click: that strip alone, the others let go first; again, none; with
   assert.deepEqual(clicked({}, ['my tap', '1']), ['my tap/1/solo 1'], "a pool's copy");
 });
 
-test("what strips feed, for a view's lights: each through its way out, and the sends said to be up, a pool's copies added among them; a name not on the desk kept, not followed (Z3, LAY12f)", () => {
+test("what strips feed, for a view's lights: each through its way out, and the sends said to be up, a pool's copies added among them; a name not on the desk kept, not followed", () => {
   const mixer = mixerOn({ copies: { 'my tap': [1] } }).views.desk();
   const sorted = (names) => [...names].sort();
   assert.deepEqual(
@@ -161,7 +161,7 @@ test("what strips feed, for a view's lights: each through its way out, and the s
   assert.deepEqual(sorted(mixer.reached(['clips tap'], () => true)), ['clips tap'], 'a clip track, not a strip');
 });
 
-test("a meter's level and a reading by address, as the implementation hears them: a strip's peak, a block's at a point, what a limiter takes away (LAY12f)", () => {
+test("a meter's level and a reading by address, as the implementation hears them: a strip's peak, a block's at a point, what a limiter takes away", () => {
   const { views } = mixerOn({
     peaks: { you: 0.4, 'master/limiter in': 0.9 },
     readings: { 'master/limiter reduction': 3 },

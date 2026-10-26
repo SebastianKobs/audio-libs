@@ -1,6 +1,6 @@
 // ---------- the tests' gesture tracker: one of its own, by the names its functions had before it was a class ----------
 // The unit tests and the vectors' writer (run-gestures.js) drive it whole, its input in and its events out, a tracker as the garden
-// makes one (garden.ts), from its package's entry, on a clock and settings of its own, so its tests go wherever it goes (R14); the
+// makes one (garden.ts), from its package's entry, on a clock and settings of its own, so its tests go wherever it goes; the
 // replays' recorder drives the garden's own
 import { Clock } from '../../../sequencing/clock/index.ts';
 import { GestureTracker, TRACKER_DEFAULTS, type GestureEvents, type TrackerSettings } from '../index.ts';

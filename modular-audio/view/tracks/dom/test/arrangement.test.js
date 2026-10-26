@@ -1,4 +1,4 @@
-// The arrangement drawn (mockup/src/libs/modular-audio/view/tracks/dom/arrangement/; mockup/src/mixer-surface/arrangement/ until SHAPE4b), its parts that
+// The arrangement drawn (mockup/src/libs/modular-audio/view/tracks/dom/arrangement/), its parts that
 // need no page: the time in view in pixels, as its drawer lays it out; a canvas sized for the screen's pixels, the arrangement's and the
 // limiter's history's (canvas.ts)
 import { test } from 'node:test';
@@ -11,7 +11,7 @@ test("a place's x in view, 8 px a 16th from the place at its left edge", () => {
   assert.equal(xOf(100, 52), 48 * STEP_PX, 'the present a bar from the right edge of a view four bars wide');
 });
 
-test('the place under an x in the time in view, the other way from xOf (P2)', () => {
+test('the place under an x in the time in view, the other way from xOf', () => {
   assert.equal(placeAt(xOf(77, 52), 52), 77);
   assert.equal(placeAt(0, 52), 52);
 });

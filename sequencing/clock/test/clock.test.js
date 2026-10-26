@@ -1,5 +1,5 @@
 // The clock's unit tests (mockup/src/libs/sequencing/clock/; mockup/architecture/tests.md), on a clock and settings of its own, so they go wherever
-// it goes (R14), in fake mode: time moves only when a test says, so every result is exact. Audio contexts are stand-ins that say what time
+// it goes, in fake mode: time moves only when a test says, so every result is exact. Audio contexts are stand-ins that say what time
 // they think it is (fake-audio.js)
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
@@ -474,8 +474,8 @@ test("a grid not started stands at its first 16th, whatever the clock's time, as
   near(own.grid.straightAt(start + 4 * own.grid.stepDuration()), 4, 'started: going on from its first 16th:', 1e-9);
 });
 
-// the transport's stop (P1, mockup/architecture/done.md): the clock's time running on, the grid's place, the song position, held
-test("held, the grid hands out no 16th, its place held at the first 16th not handed out, those before it played, while the clock's time runs on; a time before the hold where it was; released, it goes on from that place, its next 16th at once, none skipped (P1, P2)", () => {
+// the transport's stop: the clock's time running on, the grid's place, the song position, held
+test("held, the grid hands out no 16th, its place held at the first 16th not handed out, those before it played, while the clock's time runs on; a time before the hold where it was; released, it goes on from that place, its next 16th at once, none skipped", () => {
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const t0 = clock.now();
@@ -497,7 +497,7 @@ test("held, the grid hands out no 16th, its place held at the first 16th not han
   assert.equal(stepsDuring(() => clock.advance(0.5))[0].i, next, 'none skipped');
 });
 
-test('held from a time on, the beat playback starts on: the 16ths before it handed out, none from it, its place held there; released, going on from it (P3b)', () => {
+test('held from a time on, the beat playback starts on: the 16ths before it handed out, none from it, its place held there; released, going on from it', () => {
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const place = clock.grid.nextStepNumber + 3;
@@ -511,8 +511,8 @@ test('held from a time on, the beat playback starts on: the 16ths before it hand
   assert.equal(stepsDuring(() => clock.advance(0.5))[0].i, place, 'going on from it');
 });
 
-// song time (P3b's fix): the time the music played, the grid's holds taken out, a stop's or a playback's, as the arrangement shows it
-test("a clock time's song time, the grid's holds taken out: before a hold as it is, within one where it stood, after one less its length, held now all from it; and back (P3b)", () => {
+// song time: the time the music played, the grid's holds taken out, a stop's or a playback's, as the arrangement shows it
+test("a clock time's song time, the grid's holds taken out: before a hold as it is, within one where it stood, after one less its length, held now all from it; and back", () => {
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const held = clock.now();
@@ -534,7 +534,7 @@ test("a clock time's song time, the grid's holds taken out: before a hold as it 
 });
 
 // stopped between two 16ths, the song stood from the moment Stop was pressed, though the 16ths handed out ahead of it played on: a playback
-// across it jumped, and its playhead with it (P3b, found after it was committed)
+// across it jumped, and its playhead with it (found after it was committed)
 test('stopped between two 16ths, the song stands from the 16th it is held at, those handed out before it played on: a time between as it is', () => {
   clock.useAudio(fakeAudio());
   clock.advance(1.01);
@@ -577,7 +577,7 @@ test("a bar in ticks, in its time signature, or the master's; a beat, the meter'
   assert.deepEqual([beatTicks(), beatTicks([6, 8])], [96, 48]);
 });
 
-test("a 16th that starts a bar, in its time signature: every 16th one in 4/4, the master's when none is given, every 12th in 3/4 (G0.1c)", () => {
+test("a 16th that starts a bar, in its time signature: every 16th one in 4/4, the master's when none is given, every 12th in 3/4", () => {
   assert.deepEqual(
     [0, 1, 15, 16, 32].map((i) => startsBar(i)),
     [true, false, false, true, true],

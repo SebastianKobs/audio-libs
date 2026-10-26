@@ -162,7 +162,7 @@ test('a replay placed but not yet sounding shows on its track as waiting, as a l
   assert.deepEqual(s.at(2.5, 2).tap.tracks[0], { owner: null, clip: b, lit: false, waiting: b }, 'a done: b waits');
 });
 
-test("your playing goes on its kind's pool, its group, when the view gives one, on the track it was played on, held until it has rung out, as a replay holds its track (N3)", () => {
+test("your playing goes on its kind's pool, its group, when the view gives one, on the track it was played on, held until it has rung out, as a replay holds its track", () => {
   const s = session({ myGroupOf: (k) => (k === 'tap' ? 'my tap' : null) });
   const [a, b] = [flower(1), flower(2)];
   const yours = (owner, track, t) => ({
@@ -199,7 +199,7 @@ test("your playing goes on its kind's pool, its group, when the view gives one, 
   assert.equal(s.at(2.75, 2.5)['my tap'].tracks[0].owner, null, 'rung out: its track free');
 });
 
-test("your playing on no pool track, a recording's from before N2: not the session's (N3)", () => {
+test("your playing on no pool track, a recording's from before N2: not the session's", () => {
   const s = session({ myGroupOf: () => 'my tap' });
   s.heard({ owner: flower(1), kind: 'tap', role: 'tap', live: true, track: null, notes: [{ t: 1, pitch: 60 }] });
   assert.deepEqual(s.at(1.5, 0.5), {});
@@ -224,7 +224,7 @@ test("a play can name the clip it plays, as a visitor's song names its motif: th
   assert.equal(at.tracks[0].clip, 'ask');
 });
 
-test("a note with no length, held until its note off, lights for as long as its play holds its track, as the background's held sound (G0.1b2)", () => {
+test("a note with no length, held until its note off, lights for as long as its play holds its track, as the background's held sound", () => {
   const s = session({ groupOf: (k) => (['ambient', 'brushes', 'bass'].includes(k) ? 'background' : k) });
   const drone = { kind: 'ambient' };
   s.heard({
@@ -246,7 +246,7 @@ test("a note with no length, held until its note off, lights for as long as its 
   );
 });
 
-test("a held note lights from its note on until its note off comes as a play of its own (G2a): your phrase note on its pool track, held until it's let go (N3), a held part's on its", () => {
+test("a held note lights from its note on until its note off comes as a play of its own: your phrase note on its pool track, held until it's let go, a held part's on its", () => {
   const s = session({
     groupOf: (k) => (k === 'ambient' ? 'background' : k),
     myGroupOf: (k) => (k === 'vine' ? 'my trace' : null),
@@ -274,7 +274,7 @@ test("a held note lights from its note on until its note off comes as a play of 
   assert.equal(s.at(11, 10.5)['background'].tracks[0].lit, false, 'let go there');
 });
 
-test("a track's own controllers, and a note's changes after it, a play of their own with no notes (G3a): nothing the session shows, no group made", () => {
+test("a track's own controllers, and a note's changes after it, a play of their own with no notes: nothing the session shows, no group made", () => {
   const s = session({ myGroupOf: (kind) => (kind === 'tap' ? 'my tap' : null) });
   s.heard({
     owner: null,
@@ -298,7 +298,7 @@ test("a track's own controllers, and a note's changes after it, a play of their 
 
 // played back, a background track carries two senders' notes of one part: the live garden's held chord, hushed, and the recording's,
 // each numbering its notes from 0. A note off of the playback's let go the live chord's note of its index too, and the track showed nothing
-// as the chord sounded on (P3b, found after it was committed)
+// as the chord sounded on (found after it was committed)
 test("a held note let go only by its own sender's note off: the playback's of an index doesn't end the live garden's of that index", () => {
   const s = session({ groupOf: (k) => (k === 'ambient' ? 'background' : k) });
   const drone = { kind: 'ambient' };

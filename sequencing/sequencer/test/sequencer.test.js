@@ -44,7 +44,7 @@ test("placing a pattern on the grid, in ticks: from the beat it starts on, or at
   assert.equal(swung(24), 0.145, 'with the swing as the grid has it now');
 });
 
-// a phrase sent as its events come due needs their places, not their times: worked out when each comes, with the grid as it is then (P3c2)
+// a phrase sent as its events come due needs their places, not their times: worked out when each comes, with the grid as it is then
 test('where a pattern lies on the grid, in 16ths, as place() times it: from the beat it starts on, or at its phrase’s own place in the beat', () => {
   const on = placeOn(144, 2, grid); // starts on the beat at 2 s, the 16th 16
   assert.deepEqual([144, 168, 240].map(on), [16, 17, 20]);

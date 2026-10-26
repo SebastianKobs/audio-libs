@@ -1,4 +1,4 @@
-// The MIDI protocol's unit tests (mockup/src/libs/midi/protocol/, its test/ folder; G0a, mockup/architecture/done.md; the sequencer's until V1): a
+// The MIDI protocol's unit tests (mockup/src/libs/midi/protocol/): a
 // control surface's messages, MIDI 2.0's channel voice messages as values, and the notes among them; a note's index, handed out by note
 // rotation. The sequencer's input, which passes them on, is tested in libs/sequencing/midi-sequencer/test/input.test.js
 import { test } from 'node:test';
@@ -67,7 +67,7 @@ test("a note's per-note controllers sent with it are its values as it starts; an
   assert.deepEqual(note.controllers, { volume: 0.5, pan: -0.2 });
 });
 
-test("a note's #3 Pitch changes sent with it are its glides, each at its time, apart from its values as it starts (G0d2)", () => {
+test("a note's #3 Pitch changes sent with it are its glides, each at its time, apart from its values as it starts", () => {
   const [note] = notesIn([
     noteOn(3, 10),
     perNote(3, 'bend', -1, 10),
@@ -82,7 +82,7 @@ test("a note's #3 Pitch changes sent with it are its glides, each at its time, a
   ]);
 });
 
-test("a note's messages, as notesIn() reads them back: its note on, its values as it starts, its glides at their times, its note off where its length is known (DRY7)", () => {
+test("a note's messages, as notesIn() reads them back: its note on, its values as it starts, its glides at their times, its note off where its length is known", () => {
   const note = {
     pitch: 60,
     velocity: 0.5,

@@ -150,7 +150,7 @@ test('a bus: a message sent, a value with its type, reaches whoever listens to i
 });
 
 // mulberry32 (Tommy Ettinger's): a 32-bit seed in, a repeatable run of numbers in [0, 1) out; its first draws for seed 1 as the
-// reference algorithm gives them, so another implementation (the Flutter app's) can be checked against it (G0g)
+// reference algorithm gives them, so another implementation (the Flutter app's) can be checked against it
 test('a seeded generator: the same seed draws the same numbers, each in [0, 1); another seed others; its first draws the reference ones', () => {
   const draw = (seed, count = 1000) => {
     const random = seeded(seed);
@@ -401,7 +401,7 @@ test("a number near another: within a float's rounding, or as asked", () => {
   assert.throws(() => near(1, 2, 'a step'), /a step: 1, not within 1e-9 of 2/);
 });
 
-test("values kept live by name, as a device's: copies of their start, set in place so what holds one hears the change, read as copies, reset to their start; each set told (DRY8d)", () => {
+test("values kept live by name, as a device's: copies of their start, set in place so what holds one hears the change, read as copies, reset to their start; each set told", () => {
   const copies = new LiveCopies({ reverb: { mix: 0.3, tail: { length: 2 } } });
   const live = copies.of('reverb');
   const tail = live.tail;

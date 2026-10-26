@@ -1,4 +1,4 @@
-// pattern-note's unit tests (mockup/src/libs/sequencing/midi-sequencer/pattern-note.ts; MUSIC1): a record's whole phrases, or a slice of it
+// pattern-note's unit tests (mockup/src/libs/sequencing/midi-sequencer/pattern-note.ts): a record's whole phrases, or a slice of it
 // where a note isn't in a phrase; the tests' own draws
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

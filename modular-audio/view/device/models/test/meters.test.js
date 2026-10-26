@@ -1,4 +1,4 @@
-// The level meters as models (mockup/src/libs/modular-audio/view/device/models/meters.ts, limiter-history.ts; libs/view/dom/ until SHAPE5a0a3c): how a level bar
+// The level meters as models (mockup/src/libs/modular-audio/view/device/models/meters.ts, limiter-history.ts): how a level bar
 // falls, as a DIN peak meter's, each bar's level kept by its key; the limiter's history, a column each interval, the loudest of its frames.
 // Where a level shows on a meter's scale is its drawer's (libs/modular-audio/view/device/dom/test/meter-view.test.js)
 import { test } from 'node:test';

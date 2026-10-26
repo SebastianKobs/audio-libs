@@ -99,7 +99,7 @@ test("one clip a track: launched again, its notes the new clip's, sent where it 
   assert.equal(into.sent.length, 1, 'stopped');
 });
 
-test("a launched clip's notes carry its launch's region, the clip player's own; launched again in its place, a new one (G1a)", () => {
+test("a launched clip's notes carry its launch's region, the clip player's own; launched again in its place, a new one", () => {
   const into = input();
   const clips = new ClipPlayer({ input: into, grid });
   launch(clips, { to: to('drums'), pattern });

@@ -1,4 +1,4 @@
-// The level meters' unit tests (mockup/src/libs/modular-audio/view/device/dom/meter-view.ts; mockup/src/mixer-surface/meters.ts until LAY12d1): where a level shows on a meter's scale;
+// The level meters' unit tests (mockup/src/libs/modular-audio/view/device/dom/meter-view.ts): where a level shows on a meter's scale;
 // how it falls, a model's since SHAPE5a0a3c (libs/modular-audio/view/device/models/test/meters.test.js). Where the desk takes its peaks is the builder's (builder.test.js). Where a gain shows on a fader, its law, a param's
 // taper since U2c4a (libs/base/params/test/taper.test.js)
 import { test } from 'node:test';

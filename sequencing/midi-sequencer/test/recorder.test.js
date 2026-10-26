@@ -1,7 +1,7 @@
-// The recorder (G1b, mockup/architecture/done.md), as Ableton records the session into its arrangement: every play the stream carries
-// into the region it's of (G1a), told apart by its element and its number, a play with none a region of its own; a play its sender
+// The recorder, as Ableton records the session into its arrangement: every play the stream carries
+// into the region it's of, told apart by its element and its number, a play with none a region of its own; a play its sender
 // leaves out (unrecorded), left out, and one its owner says to leave out; a region from its first note to the end of its last, one with a held note open until its element's next region begins; the
-// last 30 minutes kept. And what moves as it's heard, as automation (G3b): a track's controllers as its lanes, a note's changes on the note,
+// last 30 minutes kept. And what moves as it's heard, as automation: a track's controllers as its lanes, a note's changes on the note,
 // every change kept but a point that changes nothing
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,7 +22,7 @@ const play = (owner, region, notes, more = {}) => ({
 });
 const spans = (regions) => regions.map((region) => [region.owner, region.from, region.to, region.notes.length]);
 
-test("a replay, one play with all its notes: one region, from its first note to the end of its last, with its track, its track's name and until; what it drew its track's controllers, none of the region's (LAY14b)", () => {
+test("a replay, one play with all its notes: one region, from its first note to the end of its last, with its track, its track's name and until; what it drew its track's controllers, none of the region's", () => {
   const recorder = new Recorder();
   recorder.heard(play(flower, 1, [1, 1.5, 2], { track: 0, trackName: 'replay tap 1', until: 4 }));
   const [region] = recorder.regions(5);
@@ -73,7 +73,7 @@ test("a loop, a play a note: one region while it loops, launched again another; 
   ]);
 });
 
-test("a held note (G2a): its region open until its note off comes as a play of its own, by the note's index, ended there; its glides, its pitch's changes, its pitch's lane (DRY7)", () => {
+test("a held note: its region open until its note off comes as a play of its own, by the note's index, ended there; its glides, its pitch's changes, its pitch's lane", () => {
   const recorder = new Recorder();
   recorder.heard(play(bloom, 1, [{ t: 2, pitch: 48, index: 7 }], { live: true }));
   assert.deepEqual(spans(recorder.regions(10)), [[bloom, 2, Infinity, 1]], 'open while held');
@@ -93,7 +93,7 @@ test("a held note (G2a): its region open until its note off comes as a play of i
 });
 
 // a note sent with its length sounds that long whatever holds come, a held one until its note off came: told apart, so a hold in the
-// recording keeps the one whole (P3c1, mockup/architecture/done.md)
+// recording keeps the one whole
 test('a note with no length as it comes marked held, its end told after it; one sent with its length not', () => {
   const recorder = new Recorder();
   recorder.heard(play(bloom, 1, [{ t: 2, pitch: 48, index: 7 }], { live: true }));
@@ -102,7 +102,7 @@ test('a note with no length as it comes marked held, its end told after it; one 
   assert.deepEqual([held.notes[0].held, sent.notes[0].held], [true, undefined]);
 });
 
-test("a held part's key changes (G2a): the notes let go there end in the old region; a note held through ends there too and starts again in the new, as it sounds on", () => {
+test("a held part's key changes: the notes let go there end in the old region; a note held through ends there too and starts again in the new, as it sounds on", () => {
   const recorder = new Recorder();
   const drone = { kind: 'ambient' };
   const part = { track: 0, until: Infinity };
@@ -158,7 +158,7 @@ test("the last 30 minutes kept: a region ended before then let go; a long loop's
   );
 });
 
-// a track's own controllers, a play of their own on it, no element's (G3a): its kind and number, as its replays have them
+// a track's own controllers, a play of their own on it, no element's: its kind and number, as its replays have them
 const controls = (kind, track, changes) => ({
   owner: null,
   kind,
@@ -173,7 +173,7 @@ const point = (t, value, glide) => (glide === undefined ? { t, value } : { t, va
 const pointsOf = (lanes, kind, track, controller) =>
   lanes.find((lane) => lane.kind === kind && lane.track === track && lane.controller === controller)?.points;
 
-test("a track's controller changes kept as its lanes (G3b): a lane a controller, by the track's kind and number as its regions have them and its name as they were sent to it, each point a value at a time, jumping there or gliding by its time constant", () => {
+test("a track's controller changes kept as its lanes: a lane a controller, by the track's kind and number as its regions have them and its name as they were sent to it, each point a value at a time, jumping there or gliding by its time constant", () => {
   const recorder = new Recorder();
   recorder.heard(
     controls('tap', 0, [
@@ -209,7 +209,7 @@ test("a lane's points in time order, as Web Audio plays them: a glide sent now c
   );
 });
 
-test('a point that changes nothing thinned once a second past (G3b): a jump to the value the jump before set, a glide to the value the glide before went to by its time constant; one changing the value or the way kept', () => {
+test('a point that changes nothing thinned once a second past: a jump to the value the jump before set, a glide to the value the glide before went to by its time constant; one changing the value or the way kept', () => {
   const recorder = new Recorder();
   recorder.heard(
     controls('tap', 0, [
@@ -258,7 +258,7 @@ test('the last 30 minutes kept for a lane too: its points before them let go but
   assert.deepEqual(pointsOf(recorder.lanes(2000), 'tower', 2, 'dull'), [point(100, 0.6), point(1900, 0.2)]);
 });
 
-test("a note's changes after it kept on it (G3b), its own lanes, on its element's latest note of that index; thinned the same way, the first against its value as it starts", () => {
+test("a note's changes after it kept on it, its own lanes, on its element's latest note of that index; thinned the same way, the first against its value as it starts", () => {
   const recorder = new Recorder();
   const tap = (t, index) => ({ t, pitch: 60, duration: 0.2, index, controllers: { volume: 0.5, pan: 0.2 } });
   recorder.heard(play(flower, 1, [tap(1, 3)], { live: true }));
@@ -293,7 +293,7 @@ test("a held note carried into its element's next region carries its values as t
   assert.deepEqual(carried.lanes, { volume: [point(4, 0.2)] });
 });
 
-test("a play its sender leaves out of the recording left out, whatever it carries: what's played back isn't recorded again (P3a), the live garden's held notes hushed and brought back as the arrangement plays back aren't what was played (P3b)", () => {
+test("a play its sender leaves out of the recording left out, whatever it carries: what's played back isn't recorded again, the live garden's held notes hushed and brought back as the arrangement plays back aren't what was played", () => {
   const recorder = new Recorder();
   recorder.heard(play(flower, 1, [1, 2], { playback: true, unrecorded: true }));
   recorder.heard(play(flower, 2, [3]));
@@ -322,7 +322,7 @@ test('a held note let go before it sounded, its note off for a time before its n
   assert.deepEqual([region.from, region.to], [5, 5]);
 });
 
-test("a note's glides sent with it kept as its pitch's lane, a value at each time, as its changes after it are (DRY7)", () => {
+test("a note's glides sent with it kept as its pitch's lane, a value at each time, as its changes after it are", () => {
   const recorder = new Recorder();
   recorder.heard(play(flower, 1, [{ t: 2, pitch: 60, duration: 2, index: 3, glides: [[2.5, 62]] }]));
   const [note] = recorder.regions(5)[0].notes;

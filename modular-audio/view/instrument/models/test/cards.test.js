@@ -4,7 +4,7 @@
 //   - its preset on its voice card, read through a preset's readout: each value its preset's, values from outside over its own
 //     where its card has them;
 //   - how each is set: a note's source by the note, a value from outside by what it says, the rest live;
-//   - a value or a setting set: sent as the app's message (SHAPE3b), the bank's preset changed by whoever hears it, the card
+//   - a value or a setting set: sent as the app's message, the bank's preset changed by whoever hears it, the card
 //     reading it; planned again as the bank's changes.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

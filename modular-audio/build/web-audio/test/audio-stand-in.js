@@ -6,7 +6,7 @@
 // inputs sorted, numbers to 10 significant digits, times from `t0`, and how often a node was disconnected. A named node met on the way is
 // a ref to its name, written once under it, as itself, so a desk with every strip named is written strip by strip, not once for every path
 
-const NOISE = 1e-9; // s: a time this near the start written as the start, a float's noise, as a time added up step by step has (P3c1)
+const NOISE = 1e-9; // s: a time this near the start written as the start, a float's noise, as a time added up step by step has
 const PARAMS = {
   gain: { gain: 1 },
   oscillator: { frequency: 440, detune: 0 },

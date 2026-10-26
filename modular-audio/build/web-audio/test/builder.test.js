@@ -268,7 +268,12 @@ test("a meter on a node's main output by its address, made as it's first read; a
     [outOf(context, level)[0]],
     "the limiter's in: its drive, after its way in",
   );
-  assert.equal(typeof what.reading(['limit'], 'reduction'), 'number', 'what it takes away, as it says');
+  made('compressor')[0].reduction = -6;
+  assert.equal(
+    what.reading(['limit'], 'reduction'),
+    6,
+    "what it takes away, as it says: the compressor's, its sign turned",
+  );
   assert.throws(() => what.peak(['nowhere']), /nowhere: not built/);
   assert.throws(() => what.peak(['limit'], 'side'), /limit: no point side/);
   assert.throws(() => what.reading(['level'], 'reduction'), /level: no reading reduction/);

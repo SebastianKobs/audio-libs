@@ -41,7 +41,7 @@ const tracks = {
 const replay = (kind, track) => ({ clip: {}, kind, role: kind, live: false, track, from: 1, to: 2 });
 const yours = (kind, track) => ({ clip: {}, kind, role: ROLE[kind], live: true, track, from: 1, to: 2 });
 
-test("the rows as the session view groups its tracks: your kinds' pools first, each once your playing uses one, as many tracks as it ever used (N3); a kind's once its replays use one, the background's first", () => {
+test("the rows as the session view groups its tracks: your kinds' pools first, each once your playing uses one, as many tracks as it ever used; a kind's once its replays use one, the background's first", () => {
   const unfolded = new Set(['my tap', 'my trace', 'background', 'tap', 'vine']);
   const rows = rowsOf(
     [yours('tap', 1), yours('vine', 0), replay('vine', 0), replay('tap', 2), replay('bass', 0)],
@@ -77,7 +77,7 @@ test('the groups start folded, each its first track alone under its header, mark
   );
 });
 
-test("a region's row: yours on its kind's pool's track by its number (N3), a replay on its group's, the background's sounds on the background's; none for yours on no track, a recording's from before N2", () => {
+test("a region's row: yours on its kind's pool's track by its number, a replay on its group's, the background's sounds on the background's; none for yours on no track, a recording's from before N2", () => {
   assert.deepEqual(
     [yours('vine', 3), replay('tap', 1), replay('ambient', 2), yours('tap', null)].map((region) =>
       rowKeyOf(region, tracks),
@@ -86,7 +86,7 @@ test("a region's row: yours on its kind's pool's track by its number (N3), a rep
   );
 });
 
-// the lanes' rows (G5a): the desk's strips with no notes of their own, rows below the replay tracks, as the session view's sections; a
+// the lanes' rows: the desk's strips with no notes of their own, rows below the replay tracks, as the session view's sections; a
 // track with lanes marked, closed until opened, and opened its lanes under it, a row each, named by its controller, in the order the
 // sound goes through its strip
 const strips = [
@@ -134,7 +134,7 @@ test("the desk's strips with no notes of their own: rows of their own below the 
   );
 });
 
-test("a lane's row: a replay's, a background track's or a pool track's of yours by its group and number (N3), a strip's on its own, your kinds' channels' among them; none for a strip with no row", () => {
+test("a lane's row: a replay's, a background track's or a pool track's of yours by its group and number, a strip's on its own, your kinds' channels' among them; none for a strip with no row", () => {
   assert.deepEqual(
     [
       lane('tap', 1, 'air/cutoff'),
@@ -148,7 +148,7 @@ test("a lane's row: a replay's, a background track's or a pool track's of yours 
   );
 });
 
-test("a pool's group shown once a lane of one of its tracks is recorded, as a replay kind's is (N3)", () => {
+test("a pool's group shown once a lane of one of its tracks is recorded, as a replay kind's is", () => {
   const rows = rowsOf([], tracks, new Set(), { lanes: [lane('my circle', 1, 'air/cutoff')] });
   assert.deepEqual(
     rows.map(({ key, header }) => (header ? `[${key}]` : key)),
@@ -165,7 +165,7 @@ const ORDERS = {
 };
 const controllersOf = (strip) => ORDERS[strip] ?? [];
 
-test("a track with lanes marked closed, until it's opened: then its lanes under it, a row each, named by its key's slot and param, a send by its return (U2c4b2), in the order the sound goes through its strip, as the desk's view models list it, a dullness after its Utility; a lane's track a row even with no region", () => {
+test("a track with lanes marked closed, until it's opened: then its lanes under it, a row each, named by its key's slot and param, a send by its return, in the order the sound goes through its strip, as the desk's view models list it, a dullness after its Utility; a lane's track a row even with no region", () => {
   const lanes = [
     lane('tap', 1, 'volume'),
     lane('tap', 1, 'send/reverb'),
@@ -258,7 +258,7 @@ test('a young recording shows from its start at the left edge, the present movin
   assert.equal(view.left, 12, 'then following, the present a bar from the right edge');
 });
 
-// the playhead played back follows as the present does (P3b): it jumped a bar from the right edge as playback started, and, scrolled back
+// the playhead played back follows as the present does: it jumped a bar from the right edge as playback started, and, scrolled back
 // first, wasn't followed at all, running off the view
 test('a head that starts in view, the playhead played back from where it was set: the view stays, the head running across it, then followed a bar from the right edge, as the present is; the view never going back by itself', () => {
   const view = new TimeWindow();
@@ -288,7 +288,7 @@ test('scrolled back, a head that starts is followed again; one out of view broug
   assert.equal(view.right, 21, 'out of view: brought a bar from the right edge');
 });
 
-// a region's notes inside it (G4b): each held at its pitch, pieces at each glide, a line for each move, a slide in from its bend; a held
+// a region's notes inside it: each held at its pitch, pieces at each glide, a line for each move, a slide in from its bend; a held
 // one open to now; the region's pitch range, its notes' lowest to highest, what they slide in from and glide to among them
 
 test("a note's shape: held at its pitch from its start to its end; one still held open to now; none that hasn't sounded yet", () => {
@@ -342,7 +342,7 @@ test("a note's glides, its pitch's lane: a piece at each pitch it glides to, a l
 });
 
 // a note sent with its length rang on through a hold that came as it sounded, a stop's or the live garden's while the arrangement played
-// back: drawn whole, its end where song time gets to its length past the hold, not cut where it began (P3c1)
+// back: drawn whole, its end where song time gets to its length past the hold, not cut where it began
 test('a note sent with its length kept whole past a hold it rang through: its end where song time gets to its length; a held one, one with no end yet, one clear of the hold as they are', () => {
   // held from 5 s to 8 s
   const song = {
@@ -376,7 +376,7 @@ test("a region's pitch range: its notes' lowest to highest, what they slide in f
   assert.equal(pitchRange([{ t: 1 }]), null);
 });
 
-// inside the lanes (G5b): a lane's line as Web Audio plays its points, a jump a step, a glide setTargetAtTime's curve; a control's place on
+// inside the lanes: a lane's line as Web Audio plays its points, a jump a step, a glide setTargetAtTime's curve; a control's place on
 // its whole range, as its control shows it
 test("a lane's line: a jump straight up or down at its time, held until the next; held at the last to the end; nothing before the first point; from the last point before the view", () => {
   const points = [
@@ -468,7 +468,7 @@ test('points at one time: the line passes through each in turn, from the level b
   assert.deepEqual(corners(1.5), atOne, 'the view starting after them');
 });
 
-test("a control's place on its whole range, by its param's declared taper (U2c4c): a volume, a Utility's level and a send by the fader law, unity two thirds up; a pan centred; a cutoff and a delay's time by octaves; a mute on or off; the limiter's on their own ranges", () => {
+test("a control's place on its whole range, by its param's declared taper: a volume, a Utility's level and a send by the fader law, unity two thirds up; a pan centred; a cutoff and a delay's time by octaves; a mute on or off; the limiter's on their own ranges", () => {
   const cutoff = BLOCKS.filter.params.find(({ name }) => name === 'frequency'); // a Filter's cutoff, its block's
   const level = BLOCKS.gain.params.find(({ name }) => name === 'gain'); // a Utility's level, its gain block's
   const pan = PAN; // a Utility's pan, its pan block's
@@ -494,7 +494,7 @@ test("a control's place on its whole range, by its param's declared taper (U2c4c
   near(positionOf(DELAY_TIME.ms, -1), 0);
 });
 
-test("a lane's name, as the arrangement shows it, by its key: its slot and param, a send by its return's name, a strip's own by its param (U2c4b2); a param deeper in its slot by its own name (a patch's setting)", () => {
+test("a lane's name, as the arrangement shows it, by its key: its slot and param, a send by its return's name, a strip's own by its param; a param deeper in its slot by its own name (a patch's setting)", () => {
   const controllers = [
     'osc 1/osc/wave',
     'osc 1/osc/phase',
@@ -524,7 +524,7 @@ test("a lane's name, as the arrangement shows it, by its key: its slot and param
   );
 });
 
-test("where a click in the ruler puts the playhead: on the nearest beat; at or past the present, or a beat's rounding onto it, none, back on the present; never before the earliest, its first beat after (P2)", () => {
+test("where a click in the ruler puts the playhead: on the nearest beat; at or past the present, or a beat's rounding onto it, none, back on the present; never before the earliest, its first beat after", () => {
   const where = (place, earliest = 0) => playheadAt(place, { present: 40, perBeat: 4, earliest });
   assert.deepEqual(
     [where(10.9), where(13.9), where(38.1), where(41), where(-3), where(10, 16.5)],

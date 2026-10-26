@@ -347,7 +347,7 @@ test('a desk written short refused where it is wrong, every failure said: a chan
   });
 });
 
-// a desk of the old routing's tests (libs/mixer/, gone in LAY11c3), each track a channel of its own
+// a desk with a routing of its own, each track a channel of its own
 const ROUTED = {
   kind: 'Routed',
   channels: [

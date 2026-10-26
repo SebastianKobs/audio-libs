@@ -1,4 +1,4 @@
-// The views' HTML tag (mockup/src/libs/base/html/elements.ts; mockup/src/mixer-surface/session-view/html.ts until LAY12d1): every value escaped as the HTML is made,
+// The views' HTML tag (mockup/src/libs/base/html/elements.ts): every value escaped as the HTML is made,
 // so a name with <, >, & or " stays text; HTML the tag made goes in as it is, and a list's items one after another
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

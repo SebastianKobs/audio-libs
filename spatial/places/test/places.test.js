@@ -1,4 +1,4 @@
-// The spatial part's unit tests (mockup/src/libs/spatial/places, its test/ folder since Y2; drawn out of the space in Y1), on places written by
+// The spatial part's unit tests (mockup/src/libs/spatial/places), on places written by
 // hand, perceived as nothing but a distance: a place with a lifetime, perceived from a listener as it moves, its moves from a time on, and
 // what follows them; a world that wraps round. What the sound makes of them is the space's (mockup/test/unit/space.test.js)
 import { test } from 'node:test';

@@ -54,7 +54,7 @@ test('tracks are never taken away: as many as ever played at once', () => {
   );
 });
 
-test("a play held open, its end not known as it starts, holds its track until it's ended; then free once its tail has died away (N2)", () => {
+test("a play held open, its end not known as it starts, holds its track until it's ended; then free once its tail has died away", () => {
   const r = new TrackPool();
   const [a, b] = [1, 2].map(flower);
   const held = r.place(a, 0, Infinity);
@@ -63,7 +63,7 @@ test("a play held open, its end not known as it starts, holds its track until it
   assert.equal(r.place(b, 3, 4), 0, 'ended: free again from its end, the lowest');
 });
 
-test("a play may join its owner's track while the owner holds it, as notes from one place share a voice: the same track, held until the later end; one that doesn't join takes another (N5)", () => {
+test("a play may join its owner's track while the owner holds it, as notes from one place share a voice: the same track, held until the later end; one that doesn't join takes another", () => {
   const r = new TrackPool();
   const [a, b] = [1, 2].map(flower);
   assert.equal(r.place(a, 0, 4), 0);
@@ -75,7 +75,7 @@ test("a play may join its owner's track while the owner holds it, as notes from 
   assert.equal(r.tracks.length, 3);
 });
 
-test("a play joins only a track its owner still holds: free again, it's placed there afresh; taken by another, the lowest free (N5)", () => {
+test("a play joins only a track its owner still holds: free again, it's placed there afresh; taken by another, the lowest free", () => {
   const r = new TrackPool();
   const [a, b] = [1, 2].map(flower);
   r.place(a, 0, 2);
@@ -85,7 +85,7 @@ test("a play joins only a track its owner still holds: free again, it's placed t
   assert.equal(r.place(a, 6, 7, { join: true }), 1, "a's last track b's now");
 });
 
-test("joined, a play held open keeps the track until it's ended, and one ringing on past that end keeps it longer (N5)", () => {
+test("joined, a play held open keeps the track until it's ended, and one ringing on past that end keeps it longer", () => {
   const r = new TrackPool();
   const a = flower(1);
   const held = r.place(a, 0, Infinity);

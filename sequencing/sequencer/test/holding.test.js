@@ -1,4 +1,4 @@
-// The holding's unit tests (mockup/src/libs/sequencing/sequencer/holding.ts, N5): how long the plays on one track hold it
+// The holding's unit tests (mockup/src/libs/sequencing/sequencer/holding.ts): how long the plays on one track hold it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Holding } from '../holding.ts';

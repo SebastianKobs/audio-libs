@@ -77,14 +77,14 @@ test("the Delay's note a choice through its macro, onto its line; the Utility's 
   );
 });
 
-test("each effect's label, the name a device shows it by, where it isn't its kind: the Filter a lowpass, the Tape delay its own over the Delay's none (LAY12d1)", () => {
+test("each effect's label, the name a device shows it by, where it isn't its kind: the Filter a lowpass, the Tape delay its own over the Delay's none", () => {
   assert.deepEqual(
     ['Utility', 'Filter', 'Limiter', 'Delay', 'TapeDelay', 'Reverb'].map((kind) => planner.plan(kind).node.label),
     [undefined, 'LP filter', undefined, undefined, 'Tape delay', undefined],
   );
 });
 
-test("each insert's macros carry their words, the hints a device shows, from its template: the Utility's, the Filter's, the Limiter's (LAY12e1)", () => {
+test("each insert's macros carry their words, the hints a device shows, from its template: the Utility's, the Filter's, the Limiter's", () => {
   const hints = (kind) =>
     planner.plan(kind).node.macros.map(({ spec, hint }) => [spec.name, typeof hint === 'string' && hint.length > 20]);
   assert.deepEqual(hints('Utility'), [

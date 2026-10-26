@@ -1,4 +1,4 @@
-// The sequencer's input's unit tests (mockup/src/libs/sequencing/midi-sequencer/input.ts; G0a, mockup/architecture/done.md): the input, which passes a
+// The sequencer's input's unit tests (mockup/src/libs/sequencing/midi-sequencer/input.ts): the input, which passes a
 // track's messages on to its instrument at once and puts the play they make into the stream; the messages themselves and a note's index,
 // handed out by note rotation, libs/midi/protocol/'s since V1 (libs/midi/protocol/test/midi.test.js). What the garden plays through it is held to the
 // recordings (replays.test.js)
@@ -20,7 +20,7 @@ test("the input: a track's messages go to its instrument at once, as they're sen
   assert.deepEqual(received, [messages], 'within the call: no tick waited for');
 });
 
-// the stream a sequencer's own (L1b): no module state, so two sequencers, a page's and a test's, are heard apart
+// the stream a sequencer's own: no module state, so two sequencers, a page's and a test's, are heard apart
 test("each sequencer's own stream: its listeners hear its plays, not another sequencer's, until they stop", () => {
   const tracks = () => ({ role: 'tap', receive: () => {} });
   const mine = new Sequencer({ tracks });
@@ -61,7 +61,7 @@ test('the input: and into the stream as the play they make, its notes as the str
       notes: [{ t: 2, pitch: 62, velocity: 1, duration: 0.125, part: 1, index: 5 }],
       trackName: 'tap',
     },
-    'its index, which a later end names it by (G2a); its velocity (G3a); the track it was sent to, by name',
+    'its index, which a later end names it by; its velocity; the track it was sent to, by name',
   );
 });
 
@@ -79,7 +79,7 @@ test("the input: per-note management alone goes to the instrument at once, and p
   assert.deepEqual(plays, []);
 });
 
-test("the input: a track's instrument looked up by its name, as a replay track's is made the first time it's played on (G0d)", () => {
+test("the input: a track's instrument looked up by its name, as a replay track's is made the first time it's played on", () => {
   const asked = [];
   const instrument = { role: 'tap', receive: () => {} };
   const sequencer = new Sequencer({
@@ -92,7 +92,7 @@ test("the input: a track's instrument looked up by its name, as a replay track's
   assert.deepEqual(asked, ['replay tap 2']);
 });
 
-test("the input: a controller, a track's parameter by name, a value at a time, jumping there or gliding by its time constant, to its instrument; into the stream a play of its own on its track, no element, its kind and number as a replay's where they come with it (G3a)", () => {
+test("the input: a controller, a track's parameter by name, a value at a time, jumping there or gliding by its time constant, to its instrument; into the stream a play of its own on its track, no element, its kind and number as a replay's where they come with it", () => {
   const received = [];
   const sequencer = new Sequencer({
     tracks: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
@@ -121,7 +121,7 @@ test("the input: a controller, a track's parameter by name, a value at a time, j
   ]);
 });
 
-test("the input: a track's controller with nothing to name its kind, named by its track (G3a)", () => {
+test("the input: a track's controller with nothing to name its kind, named by its track", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -156,7 +156,7 @@ test("the input: a replay's play into the stream with what the stream carries of
   );
 });
 
-test("the input: a vine's replayed note in the stream with its bend and vibrato depth among its per-note controllers, by MIDI's names, and its glides, as sent (DRY7)", () => {
+test("the input: a vine's replayed note in the stream with its bend and vibrato depth among its per-note controllers, by MIDI's names, and its glides, as sent", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -192,7 +192,7 @@ test("the input: a vine's replayed note in the stream with its bend and vibrato 
   ]);
 });
 
-test('the way back: each note the input passes on handed to its listeners at once, with where it went, after the instrument and the stream have it (G0e)', () => {
+test('the way back: each note the input passes on handed to its listeners at once, with where it went, after the instrument and the stream have it', () => {
   const order = [];
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => order.push('instrument') }) });
   const back = [];
@@ -221,19 +221,19 @@ test('the way back: each note the input passes on handed to its listeners at onc
   );
 });
 
-test('the way back: messages with no note on hand nothing back; a listener stopped hears no more (G0e)', () => {
+test('the way back: messages with no note on hand nothing back; a listener stopped hears no more', () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const back = [];
   const stop = sequencer.onNote((address, note) => back.push(note));
   sequencer.send({ track: 'replay tap 1' }, [{ type: 'controller', controller: 'level', value: 0.5, t: 3 }]);
-  sequencer.send({ track: 'tap', clip: { kind: 'tap' } }, [noteOff(1, 3)]); // a note off with its clip, as every one comes (G2a)
+  sequencer.send({ track: 'tap', clip: { kind: 'tap' } }, [noteOff(1, 3)]); // a note off with its clip, as every one comes
   assert.deepEqual(back, []);
   stop();
   sequencer.send({ track: 'tap', clip: { kind: 'tap' } }, [noteOn(1, 4)]);
   assert.deepEqual(back, []);
 });
 
-test("a held note's glide and note off sent later (G2a): each a play of its own, no notes, by the note's index, its glide a change of its pitch (DRY7); every note with its index", () => {
+test("a held note's glide and note off sent later: each a play of its own, no notes, by the note's index, its glide a change of its pitch; every note with its index", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -257,7 +257,7 @@ test("a held note's glide and note off sent later (G2a): each a play of its own,
   );
 });
 
-test("a send with new notes and others' note offs, as a held part's key changes (G2a): one play, its notes and its ends", () => {
+test("a send with new notes and others' note offs, as a held part's key changes: one play, its notes and its ends", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'held 1', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -269,7 +269,7 @@ test("a send with new notes and others' note offs, as a held part's key changes 
   );
 });
 
-test("the way back hands on each note off sent after its note, a held note's, with where it went (G2b); one sent with its note on, its length, not", () => {
+test("the way back hands on each note off sent after its note, a held note's, with where it went; one sent with its note on, its length, not", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'hold', receive: () => {} }) });
   const ends = [];
   const stop = sequencer.onNoteOff((address, end) => ends.push({ track: address.track, ...end }));
@@ -282,7 +282,7 @@ test("the way back hands on each note off sent after its note, a held note's, wi
   assert.deepEqual(ends, [{ track: 'hold', type: 'note off', index: 4, t: 3 }]);
 });
 
-test('every note in the stream with its velocity, 0 to 1, as its note on had it (G3a)', () => {
+test('every note in the stream with its velocity, 0 to 1, as its note on had it', () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -298,7 +298,7 @@ test('every note in the stream with its velocity, 0 to 1, as its note on had it 
   );
 });
 
-test("a note's per-note controllers sent with it in the stream as its controllers, by MIDI's names, its values as it starts: how it's heard from its own place, its rise, its bend and vibrato depth; its #3 Pitch changes its glides (G3a, DRY7)", () => {
+test("a note's per-note controllers sent with it in the stream as its controllers, by MIDI's names, its values as it starts: how it's heard from its own place, its rise, its bend and vibrato depth; its #3 Pitch changes its glides", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'hold', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -328,7 +328,7 @@ test("a note's per-note controllers sent with it in the stream as its controller
   assert.deepEqual(note.glides, [[10.5, 62]]);
 });
 
-test('a note with no per-note controllers has none in the stream, nor glides with none (G3a)', () => {
+test('a note with no per-note controllers has none in the stream, nor glides with none', () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'trace', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -337,7 +337,7 @@ test('a note with no per-note controllers has none in the stream, nor glides wit
   assert.deepEqual(['controllers' in plays[0].notes[0], 'glides' in plays[0].notes[0]], [false, false]);
 });
 
-test("a per-note controller sent after its note, #3 Pitch, its glide, among them: a play of its own by the note's index, a change, jumping there or gliding by its time constant (G3a, DRY7)", () => {
+test("a per-note controller sent after its note, #3 Pitch, its glide, among them: a play of its own by the note's index, a change, jumping there or gliding by its time constant", () => {
   const sequencer = new Sequencer({ tracks: () => ({ role: 'tap', receive: () => {} }) });
   const plays = [];
   const stop = sequencer.onPlay((play) => plays.push(play));
@@ -371,9 +371,9 @@ test("a per-note controller sent after its note, #3 Pitch, its glide, among them
   );
 });
 
-// senders kept apart (P3a, mockup/architecture/done.md; M's, brought forward): on one track, two senders' notes of one index each reach
+// senders kept apart (M's, brought forward): on one track, two senders' notes of one index each reach
 // the instrument by an index of its own, a note off ending its own; the stream keeps each sender's own
-test("two senders' notes of one index on one track kept apart: the instrument hears each note by an index of its own, a note off ending its own; the stream keeps each sender's index (P3a)", () => {
+test("two senders' notes of one index on one track kept apart: the instrument hears each note by an index of its own, a note off ending its own; the stream keeps each sender's index", () => {
   const received = [];
   const sequencer = new Sequencer({
     tracks: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),
@@ -397,7 +397,7 @@ test("two senders' notes of one index on one track kept apart: the instrument he
   );
 });
 
-test("a note ringing out after its note off still gets its sender's changes and its detach, though its index is free again for a new note, last in turn (P3a)", () => {
+test("a note ringing out after its note off still gets its sender's changes and its detach, though its index is free again for a new note, last in turn", () => {
   const received = [];
   const sequencer = new Sequencer({
     tracks: () => ({ role: 'tap', receive: (messages) => received.push(...messages) }),

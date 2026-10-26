@@ -39,7 +39,7 @@ test('the output after what is built: from silence, faded in, never at full volu
   assert.ok(FADE_IN >= 0.1 && FADE_OUT < FADE_IN, 'in slowly, out quickly');
 });
 // Firefox skips a glide on a gain nothing has gone through yet: the first sound to come came at
-// full volume. A silent source into it from the start keeps it fading (LAY11b, measured in Firefox).
+// full volume. A silent source into it from the start keeps it fading (measured in Firefox).
 test('the output kept awake: a silent source into it from the start, so its fade in holds however late the first sound comes', () => {
   const context = new StandInContext(() => 4);
   const output = new Output(context);

@@ -1,4 +1,4 @@
-// The lanes played back (P4b, mockup/architecture/done.md): each track's controllers as they were recorded, from the playhead, each point
+// The lanes played back: each track's controllers as they were recorded, from the playhead, each point
 // at its time in song time, to the lane's track, marked played back; picked up where playback starts, as a sounding note is chased; a lane
 // moved by hand while it plays back passed over; and the strips back as they were when it started, but one moved by hand
 import { test } from 'node:test';

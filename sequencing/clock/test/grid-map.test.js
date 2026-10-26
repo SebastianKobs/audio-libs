@@ -57,12 +57,12 @@ test("a time's place on the grid as it was played: between two 16ths, as far as 
   assert.deepEqual(
     [2, 4.5, 8.5, 12].map((place) => map.timeOf(place)),
     [0.5, 1.125, 2.0625, 2.5],
-    "and back, a place's time (G5b)",
+    "and back, a place's time",
   );
 });
 
 // a playback across a stop or an earlier playback jumped there, its playhead with it: the hold, where no 16th fell, took the room of the
-// 16th it came in (P3b, found after it was committed)
+// 16th it came in (found after it was committed)
 test('a hold where no 16th fell takes no room: the 16ths either side of it a 16th apart, a time within it where the grid stood, and back', () => {
   const clock = fakeClock();
   const map = new GridMap({ clock });
@@ -78,7 +78,7 @@ test('a hold where no 16th fell takes no room: the 16ths either side of it a 16t
   assert.equal(map.timeOf(1.8), 0.45, 'and back');
 });
 
-test('16ths skipped as the ticks lag: a time between those heard lies as far as it lies between them, the 16ths skipped counted, and back (G5b)', () => {
+test('16ths skipped as the ticks lag: a time between those heard lies as far as it lies between them, the 16ths skipped counted, and back', () => {
   const clock = fakeClock();
   const map = new GridMap({ clock });
   clock.play(0, 0, 0.25);
@@ -89,7 +89,7 @@ test('16ths skipped as the ticks lag: a time between those heard lies as far as 
   assert.equal(map.timeOf(3), 0.75);
 });
 
-test('the grid held, a time from the hold on lies at the place it was held at, the 16ths scheduled ahead of it not counted: the present stands still (P2)', () => {
+test('the grid held, a time from the hold on lies at the place it was held at, the 16ths scheduled ahead of it not counted: the present stands still', () => {
   const clock = fakeClock();
   const map = new GridMap({ clock });
   for (let i = 0; i < 8; i++) {

@@ -147,7 +147,7 @@ test("a place's side: the listener's side times the width, at most the width; sh
   assert.deepEqual([e.position.x, e.position.z, f.position.x, f.position.z], [65, -62, 61, -64]);
 });
 
-// a replay track's distance (mockup/architecture/views.md, C2; F3a): one emitter kept for the track, moved to each note's place as it
+// a replay track's distance: one emitter kept for the track, moved to each note's place as it
 // sounds, panned from the note's side, following the listener in between; never let go, its until the play's, so a quiet corner hears it
 // only while it plays
 test("a kept emitter, a track's: moved to each note's place at its time; following you in between, its side where its note put it; never let go", () => {
