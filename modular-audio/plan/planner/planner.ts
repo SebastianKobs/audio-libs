@@ -185,19 +185,21 @@ export class Planner {
     const { value } = valued(spec, values[macro.name] ?? macro.value, [...at, macro.name]);
     return { spec, value, ...(macro.hint !== undefined && { hint: macro.hint }), maps: macro.maps };
   }
-  // the jacks of a template's block children whose channels their blocks don't fix
+  // the jacks of a template's children whose channels aren't fixed: a block's, or a template's written without
   #loose(template: Template): LooseJack[] {
     return (template.children ?? []).flatMap(({ name, kind }) => {
-      const block = this.#catalog.block(kind);
-      if (!block) {
-        return [];
-      }
+      const jacks = this.#jacksOf(kind);
       return (['inputs', 'outputs'] as const).flatMap((side) =>
-        block[side]
+        jacks[side]
           .filter((jack) => jack.channels === undefined)
           .map((jack) => ({ child: name, side, name: jack.name })),
       );
     });
+  }
+  // the jacks a child's kind declares, a block's or its template's; none for a kind that's neither
+  #jacksOf(kind: string): Pick<Block, 'inputs' | 'outputs'> {
+    const declared = this.#catalog.block(kind) ?? this.#catalog.template(kind);
+    return { inputs: declared?.inputs ?? [], outputs: declared?.outputs ?? [] };
   }
 }
 

@@ -46,13 +46,13 @@ test("a template of templates: a child's template planned into it, its role kept
   assert.equal(paramAt(plan, ['utility', 'gain', 'gain']).value, 0.5, 'and on onto its gain');
 });
 
-test("a child's words, its label, the name a view shows it by: carried into its node where its template writes one, a pool's child's too; none where it writes none", () => {
+test("a child's words, its label and its short label, the names a view shows it by, the short one in little room: carried into its node where its template writes one, a pool's child's too; none where it writes none", () => {
   const labelled = new Planner(
     [
       {
         kind: 'Pair',
         children: [
-          { name: 'first', kind: 'gain', label: 'the first' },
+          { name: 'first', kind: 'gain', label: 'the first', short: '1st' },
           { name: 'second', kind: 'gain' },
         ],
         pools: [{ child: { name: 'copy', kind: 'gain', label: 'a copy' }, wires: [] }],
@@ -64,23 +64,8 @@ test("a child's words, its label, the name a view shows it by: carried into its 
   assert.equal(node.children[0].label, 'the first');
   assert.equal('label' in node.children[1], false, 'none where it writes none');
   assert.equal(node.pools[0].child.label, 'a copy');
-});
-
-test("a child's short label, the name a view shows it by in little room: carried into its node where its template writes one; none where it writes none", () => {
-  const { node } = new Planner(
-    [
-      {
-        kind: 'Pair',
-        children: [
-          { name: 'first', kind: 'gain', label: 'the first', short: '1st' },
-          { name: 'second', kind: 'gain' },
-        ],
-      },
-    ],
-    [],
-  ).plan('Pair');
   assert.equal(node.children[0].short, '1st');
-  assert.equal('short' in node.children[1], false, 'none where it writes none');
+  assert.equal('short' in node.children[1], false, 'no short one where it writes none');
 });
 
 test("a template's own label, the name a view shows what's made of it by: its node's, a child's own label over it", () => {
@@ -149,6 +134,32 @@ test("a jack's channels as they come, where its block doesn't fix them: those wi
   const loop = planner.plan('Loop');
   assert.deepEqual(channels(loop, 'delay'), [1, 1]);
   assert.deepEqual(channels(loop, 'feedback'), [1, 1]);
+  const unfed = new Planner([{ kind: 'Unfed', children: [{ name: 'gain', kind: 'gain' }] }], []).plan('Unfed');
+  assert.deepEqual(channels(unfed, 'gain'), [1, 1], 'mono where nothing comes');
+  const stage = { kind: 'Stage', inputs: [{ name: 'in' }], outputs: [{ name: 'out' }], children: [] };
+  const through = (source) =>
+    new Planner(
+      [
+        stage,
+        {
+          kind: 'Chain',
+          inputs: [{ name: 'in', channels: source }],
+          outputs: [{ name: 'out', channels: source }],
+          children: [{ name: 'stage', kind: 'Stage' }],
+          wires: [
+            { from: { input: 'in' }, to: { node: 'stage', input: 'in' } },
+            { from: { node: 'stage', output: 'out' }, to: { output: 'out' } },
+          ],
+        },
+      ],
+      [],
+    ).plan('Chain');
+  assert.deepEqual(
+    channels(through(1), 'stage'),
+    [1, 1],
+    'a template child written without channels: mono where mono comes',
+  );
+  assert.deepEqual(channels(through(2), 'stage'), [2, 2], 'stereo where a stereo source feeds it');
 });
 
 test('a value a block needs and has no default for refused, naming it; a template not handed in refused', () => {
