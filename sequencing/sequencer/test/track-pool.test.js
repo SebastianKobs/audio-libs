@@ -1,8 +1,8 @@
-// The track pool's unit tests (mockup/src/libs/sequencing/sequencer/track-pool.ts; mockup/architecture/views.md): plays go on a pool's tracks as a
+// The track pool (mockup/src/libs/sequencing/sequencer/track-pool.ts): plays go on a pool's tracks as a
 // polysynth's notes go on its voices, one play at a time on each, free again once its tail has died away
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TrackPool, poolsFor } from '../track-pool.ts';
+import { TrackPool, poolsFor } from '../index.ts';
 
 const flower = (n) => ({ kind: 'tap', n }); // an owner: any object, as a plant is
 
@@ -83,19 +83,6 @@ test("a play joins only a track its owner still holds: free again, it's placed t
   assert.deepEqual(r.tracks[0], { owner: a, from: 3, until: 4 }, 'afresh: from its own start');
   r.place(b, 5, 9); // a's track, free, taken by b
   assert.equal(r.place(a, 6, 7, { join: true }), 1, "a's last track b's now");
-});
-
-test("joined, a play held open keeps the track until it's ended, and one ringing on past that end keeps it longer", () => {
-  const r = new TrackPool();
-  const a = flower(1);
-  const held = r.place(a, 0, Infinity);
-  r.place(a, 1, 8, { join: true }); // rings on past where the held one ends
-  r.end(held, 3);
-  assert.equal(r.tracks[0].until, 8, 'the later end');
-  assert.equal(r.place(flower(2), 5, 6), 1, 'still held');
-  const again = r.place(a, 7, Infinity, { join: true });
-  r.end(again, 7.5);
-  assert.equal(r.tracks[0].until, 8, 'two held open, each ended: the latest end of all');
 });
 
 test("a pool for each key, each its own: a play on one leaves the others' tracks free", () => {

@@ -1,4 +1,4 @@
-// The generic sequencer's unit tests (mockup/src/libs/sequencing/sequencer/): ticks, patterns and their lengths, placing
+// The generic sequencer (mockup/src/libs/sequencing/sequencer/): patterns and their lengths, placing
 // and repeating on the grid, a bank's cycle, a replay's run unmuted, a rhythm played live and its speed, on a grid of the tests' own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -28,24 +28,21 @@ test("a pattern's length: its bars, in its own time signature, or the master's",
   assert.equal(lengthOf({}, [3, 4]), 288, "a bar of the master's, when it has no meter or bars of its own");
 });
 
-test("placing a pattern on the grid, in ticks: from the beat it starts on, or at its phrase's own place in the beat", () => {
+// a phrase sent as its events come due needs their places, not their times: worked out when each comes, with the grid as it is then
+test('where a pattern lies on the grid, as place() times it and placeOn() puts it in 16ths: from the beat it starts on, or at its phrase’s own place in the beat; a triplet whole, the swing as the grid has it now', () => {
   const at = place(144, 2, grid); // kept from tick 144, the 16th 6; starts on the beat at 2 s, the 16th 16
   assert.deepEqual([144, 168, 240].map(at), [2, 2.125, 2.5]);
   const own = place(144, 2, grid, 'phrase'); // 144 is two 16ths into its beat
   assert.deepEqual([144, 168].map(own), [2.25, 2.375]);
-  assert.equal(place(16, 2, grid, 'phrase')(16), 2 + 16 / 24 / 8, "a triplet's place in the beat, whole in ticks");
+  assert.equal(place(16, 2, grid, 'phrase')(16), 2 + 16 / 24 / 8, "a triplet's place in the beat");
   const swung = place(0, 0, { stepAt: (t) => t * 8, timeAt: (s) => s / 8 + (s % 2 ? 0.02 : 0) });
   assert.equal(swung(24), 0.145, 'with the swing as the grid has it now');
-});
-
-// a phrase sent as its events come due needs their places, not their times: worked out when each comes, with the grid as it is then
-test('where a pattern lies on the grid, in 16ths, as place() times it: from the beat it starts on, or at its phrase’s own place in the beat', () => {
-  const on = placeOn(144, 2, grid); // starts on the beat at 2 s, the 16th 16
+  const on = placeOn(144, 2, grid);
   assert.deepEqual([144, 168, 240].map(on), [16, 17, 20]);
   assert.deepEqual([144, 168].map(placeOn(144, 2, grid, 'phrase')), [18, 19], 'two 16ths into its beat');
   assert.deepEqual(
-    [144, 168, 240].map((at) => grid.timeAt(on(at))),
-    [144, 168, 240].map(place(144, 2, grid)),
+    [144, 168, 240].map((tick) => grid.timeAt(on(tick))),
+    [144, 168, 240].map(at),
     "and place()'s times its places'",
   );
 });

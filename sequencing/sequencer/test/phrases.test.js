@@ -1,4 +1,4 @@
-// Phrases of events sent as each 16th comes (mockup/src/libs/sequencing/sequencer/phrases.ts): a phrase kept by its places on the grid, so a hold or Stop pauses it
+// Phrases of events sent as each 16th comes (mockup/src/libs/sequencing/sequencer/phrases.ts): a phrase kept by its places on the grid, so a hold pauses it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Phrases } from '../index.ts';
@@ -22,8 +22,8 @@ function noteAt(start, worked) {
     },
   };
 }
-const flower = { kind: 'tap' };
-const to = { track: 'replay tap/1', clip: flower };
+const light = { name: 'first light' };
+const to = { track: 'track 1', clip: light };
 
 test("a phrase's notes sent as their 16th comes, not all at once: those in one 16th in one send, each worked out then, the phrase one region", () => {
   const { sent, region, send } = sentWith();
@@ -72,19 +72,19 @@ test('held, a phrase waits: no 16th, nothing sent; going on, the rest as the 16t
   );
 });
 
-test('a plant deleted, or the garden cleared: its phrase sends nothing more', () => {
+test('a light deleted, or the floor cleared: its phrase sends nothing more', () => {
   const { sent, region, send } = sentWith();
   const phrases = new Phrases({ region, send, grid: { nextStepNumber: 0 } });
-  const vine = { kind: 'vine' };
+  const other = { name: 'second light' };
   phrases.play(to, [noteAt(0, []), noteAt(STEP, [])]);
-  phrases.play({ track: 'replay vine/1', clip: vine }, [noteAt(STEP, [])]);
+  phrases.play({ track: 'track 2', clip: other }, [noteAt(STEP, [])]);
   phrases.step(0);
-  phrases.forget(flower);
+  phrases.forget(light);
   phrases.step(1);
   assert.deepEqual(
     sent.map(({ to: { clip } }) => clip),
-    [flower, vine],
-    "the flower's second note not sent, the vine's",
+    [light, other],
+    "the first light's second note not sent, the second light's",
   );
   phrases.play(to, [noteAt(2 * STEP, [])]);
   phrases.clear();
@@ -92,14 +92,14 @@ test('a plant deleted, or the garden cleared: its phrase sends nothing more', ()
   assert.equal(sent.length, 2, 'cleared');
 });
 
-// a visitor sings from a frame, on the next 16th, which the grid may have handed out already, within its lookahead
+// a phrase may begin from a frame, on the next 16th, which the grid may have handed out already, within its lookahead
 test("a phrase begun on a 16th the grid has handed out already: its notes there sent at once, the rest as their 16ths come; whether a clip's phrase still has notes to send", () => {
   const { sent, region, send } = sentWith();
   const grid = { nextStepNumber: 5 };
   const phrases = new Phrases({ region, send, grid });
-  const visitor = { kind: 'visitor' };
+  const late = { name: 'late light' };
   phrases.play(
-    { track: 'replay visitor/1', clip: visitor },
+    { track: 'track 3', clip: late },
     [4, 6].map((sixteenth) => noteAt(sixteenth * STEP, [])),
   );
   assert.deepEqual(
@@ -107,7 +107,7 @@ test("a phrase begun on a 16th the grid has handed out already: its notes there 
     [[4]],
     'the 16th handed out already: at once',
   );
-  assert.equal(phrases.playing(visitor), true, 'its next note to come');
+  assert.equal(phrases.playing(late), true, 'its next note to come');
   phrases.step(5);
   phrases.step(6);
   assert.deepEqual(
@@ -118,5 +118,5 @@ test("a phrase begun on a 16th the grid has handed out already: its notes there 
     ],
     'the phrase one region',
   );
-  assert.equal(phrases.playing(visitor), false, 'played out');
+  assert.equal(phrases.playing(late), false, 'played out');
 });

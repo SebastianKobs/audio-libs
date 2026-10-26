@@ -1,7 +1,7 @@
-// The holding's unit tests (mockup/src/libs/sequencing/sequencer/holding.ts): how long the plays on one track hold it
+// The holding (mockup/src/libs/sequencing/sequencer/holding.ts): how long the plays on one track hold it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Holding } from '../holding.ts';
+import { Holding } from '../index.ts';
 
 test('a track held until the latest end of its plays, never while one is held open; held open, until it is ended', () => {
   const holding = new Holding();

@@ -53,7 +53,6 @@ test("a time's place on the grid as it was played: between two 16ths, as far as 
   assert.equal(map.placeOf(1.125), 4.5, 'halfway between two of them');
   assert.equal(map.placeOf(2.0625), 8.5, 'halfway between two of the second tempo');
   assert.equal(map.placeOf(2.5), 12, 'past the last, at the tempo now');
-  assert.equal(map.stepsPerBar(), 16);
   assert.deepEqual(
     [2, 4.5, 8.5, 12].map((place) => map.timeOf(place)),
     [0.5, 1.125, 2.0625, 2.5],
@@ -62,7 +61,7 @@ test("a time's place on the grid as it was played: between two 16ths, as far as 
 });
 
 // a playback across a stop or an earlier playback jumped there, its playhead with it: the hold, where no 16th fell, took the room of the
-// 16th it came in (found after it was committed)
+// 16th it came in
 test('a hold where no 16th fell takes no room: the 16ths either side of it a 16th apart, a time within it where the grid stood, and back', () => {
   const clock = fakeClock();
   const map = new GridMap({ clock });

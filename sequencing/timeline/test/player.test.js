@@ -1,4 +1,4 @@
-// The timeline's player (mockup/src/libs/sequencing/timeline/; mockup/architecture/tests.md), on events of their own, not notes: a hand's presses
+// The timeline's player (mockup/src/libs/sequencing/timeline/), on events of their own, not notes: a hand's presses
 // played back, each its start, its pressure's points and its release, as a performer is told them; a pointer's tilt, events that hold
 // until the next of theirs, each told as it comes due, the one in effect where playback starts picked up from there
 import { test } from 'node:test';
@@ -156,7 +156,7 @@ test('stopped: what is under way ended then, nothing more told, no place; played
   ]);
 });
 
-test('events that hold: the one in effect where it starts picked up at once, from there; each after it until the end as it comes due; at one time before what starts there; never ended, stopped or finished', () => {
+test('events that hold: the one in effect where it starts picked up at once, from there, one at that very point too; each after it until the end as it comes due; at one time before what starts there; never ended, stopped or finished; across a hold taken out, the next as far after as it lies along the timeline', () => {
   const performing = performer();
   const player = new Player({ performer: performing });
   const tilt = [
@@ -165,23 +165,23 @@ test('events that hold: the one in effect where it starts picked up at once, fro
     { t: 4, value: 0.5 },
     { t: 9, value: 0 },
   ];
-  const lean = [{ t: 5, value: 7 }];
+  const lean = [
+    { t: 3, value: 4 },
+    { t: 5, value: 7 },
+  ];
   player.play({ events: [{ t: 5, finger: 0, duration: 2 }], held: [tilt, lean] }, { from: 3, at: 100, end: 6 });
   player.due(200);
   assert.deepEqual(performing.heard, [
     ['hold', 1, 100, 3],
+    ['hold', 4, 100, 3],
     ['hold', 0.5, 101, undefined],
     ['hold', 7, 102, undefined],
     ['start', 0, 102, 5],
   ]);
   player.stop(103);
   player.finish(104);
-  assert.deepEqual(performing.heard.slice(4), [['end', 0, 103]], 'only what was under way ended, none that holds');
-});
-
-test('an event that holds right where playback starts picked up from there; in timeline time, a hold played past', () => {
-  const performing = performer();
-  const player = new Player({ performer: performing, timeline: HELD });
+  assert.deepEqual(performing.heard.slice(5), [['end', 0, 103]], 'only what was under way ended, none that holds');
+  const acrossHold = performer();
   const held = [
     [
       { t: 1, value: 1 },
@@ -189,10 +189,11 @@ test('an event that holds right where playback starts picked up from there; in t
       { t: 8, value: 3 },
     ],
   ];
-  player.play({ events: [], held }, { from: 1, at: 0, end: 10 });
-  player.due(3.5);
+  const past = new Player({ performer: acrossHold, timeline: HELD });
+  past.play({ events: [], held }, { from: 1, at: 0, end: 10 });
+  past.due(3.5);
   assert.deepEqual(
-    performing.heard,
+    acrossHold.heard,
     [
       ['hold', 1, 0, 1],
       ['hold', 2, 2, undefined],
