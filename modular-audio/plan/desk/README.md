@@ -1,32 +1,65 @@
-# plan/desk
+# modular-audio/plan/desk
 
-The desk's forms, a desk written short, its mute and solo. A desk is a template, planned as any (`libs/modular-audio/plan/planner/`); this library says what a valid one is, makes one from a desk written short, and says which channels a mute or a solo silences. It imports `libs/modular-audio/plan/format/`, `libs/modular-audio/plan/planner/`, `libs/modular-audio/plan/effects/`, `libs/base/params/` and `libs/base/util/`.
+The desk's forms, a desk written short, its mute and solo. A desk is a template, planned as any; this library says what a valid one is, makes one from a desk written short, and says which channels a mute or a solo silences.
+
+Depends on: `base/params`, `base/util`, `modular-audio/plan/effects`, `modular-audio/plan/format`, `modular-audio/plan/planner`.
 
 ```ts
-import { DESK_FORMS, deskTemplates } from './index.ts';
+import { DESK_FORMS, deskTemplates, silenced, type Desk } from './index.ts';
 import { EFFECT_FORM } from '../effects/index.ts';
 import { EFFECT_TEMPLATES } from '../effects/content.ts';
+import { isComposite } from '../format/index.ts';
 import { Planner } from '../planner/index.ts';
-const templates = [...EFFECT_TEMPLATES, ...deskTemplates(desk, channels)];
-const plan = new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], presets).plan(desk.kind);
+
+const desk: Desk = {
+  kind: 'Studio',
+  channels: [
+    { name: 'reverb', role: 'return', inserts: [{ name: 'reverb', kind: 'Reverb' }] },
+    { name: 'tap', role: 'channel', inserts: [{ name: 'utility', kind: 'Utility', values: { level: 0.7 } }] },
+    { name: 'master', role: 'master', inserts: [{ name: 'limiter', kind: 'Limiter' }] },
+  ],
+};
+const { node } = new Planner([...EFFECT_TEMPLATES, ...deskTemplates(desk)], [EFFECT_FORM, ...DESK_FORMS]).plan('Studio');
+if (isComposite(node)) {
+  silenced(node, { muted: new Set(['tap']), soloed: new Set() }); // Set { 'tap' }
+}
 ```
 
-**A channel** is a console's, its parts in one order: its inserts, effects, any number; its mute (`cut`), a gain, after the inserts, as a console's cut; its fader; its pan, where it has one; its sends, one child (`send`). Its own params are a strip's, `libs/base/params/`'s `STRIP_PARAMS`: `volume`, `pan`, `mute` and `solo`; mute and solo are switches wired to nothing, what they silence the desk's rule's (`silenced()`), set on each channel's `cut` by its address.
+A channel is a console's, its parts in one order:
 
-**A send** goes to a return: one on each channel for each return before it on the desk, none that feeds it, as a desk's knobs; a return has one for every other, as Ableton's; a pool's channel has one for every return. A return's send into one after it can close a loop, the desk's only loops: a delay of 3 ms after its amount, a block's length (128 samples at 44.1 kHz), since Web Audio mutes a loop without a delay in it. Its sends into returns before it never close one, so they stay as they are. Each is a select between its two taps, then a gain, its amount a param by the return's name (`you/send/reverb`). Its tap is a setting of its select (`you/send/reverb tap/input`): post (`a`), after the fader and the pan, to start, or pre (`b`), after the mute, before the fader, as a console's PRE button.
+1. Its inserts, effects, any number.
+2. Its mute (`cut`), a gain after the inserts, as a console's cut.
+3. Its fader.
+4. Its pan, where it has one.
+5. Its sends, one child (`send`).
 
-**The master** is the last bus: its inserts and its fader alone, its volume at `master/volume`; no pan, mute, solo or sends.
+Its own params are a strip's (`STRIP_PARAMS` in `libs/base/params/`): `volume`, `pan`, `mute` and `solo`. Mute and solo are switches wired to nothing; what they silence is the desk's rule (`silenced()`), set on each channel's `cut` by its address.
 
-**A desk written short**, as YAML writes it: its channels in order, each by its name and role (a channel, fed from outside; a bus; a return; the master), its label where it's shown by another name, its short label for little room, a send's knob to it, written there or on a channel written apart (`channel`), its own parts over that one's; each one's way out (`out`), a bus, the master where it names none; a send's tap by its return (`taps`), where it isn't its channel's own; its pools, channels that come and go, each copy wired as its pool's channel. A channel written apart has its inserts, a pan or none (`pan: false`), its fader's start (`volume`), its sends' tap (`tap`), and the channel it's built on (`extends`), whose inserts come first.
+A send goes to a return:
 
-| | |
+- A channel has one for each return before it on the desk, none that feeds it, as a desk's knobs. A return has one for every other, as Ableton's; a pool's channel has one for every return.
+- A return's send into one after it can close a loop, the desk's only loops. It has a delay of 3 ms after its amount, a block's length (128 samples at 44.1 kHz), since Web Audio mutes a loop without a delay in it. Sends into returns before it never close one.
+- Each send is a select between its two taps, then a gain, its amount a param by the return's name (`you/send/reverb`). Its tap is a setting of its select (`you/send/reverb tap/input`): post (`a`), after the fader and the pan, to start, or pre (`b`), after the mute and before the fader, as a console's PRE button.
+
+The master is the last bus: its inserts and its fader alone, its volume at `master/volume`; no pan, mute, solo or sends.
+
+A desk written short, as YAML writes it:
+
+- its channels in order, each by its name and role (a channel, fed from outside; a bus; a return; the master), with its label where it's shown by another name and its short label for little room;
+- a send's knob to a return, written on the channel or on a channel written apart (`channel`), its own parts over that one's;
+- each one's way out (`out`), a bus, the master where it names none; a send's tap by its return (`taps`), where it isn't its channel's own;
+- its pools, channels that come and go, each copy wired as its pool's channel.
+
+A channel written apart has its inserts, a pan or none (`pan: false`), its fader's start (`volume`), its sends' tap (`tap`), and the channel it's built on (`extends`), whose inserts come first.
+
+| Export | What it does |
 |---|---|
-| `DESK_FORMS`, `DeskRole` | what every channel and every desk is, as forms: a channel's roles in order, the wires between them; a desk's channels by role, at least one channel, a pool of them one, exactly one master, a way out into a bus or the master, a send into a return, no loops, every way out ending in the master (`channel-form.ts`, `desk-form.ts`) |
-| `deskTemplates(desk, channels)`, `Desk`, `DeskChannel`, `DeskPool` | a desk written short made into templates: the desk's, of the desk's form, its own inputs into its channels and buses, and each channel's and its sends', a pool's among them; refused where it's written wrong, every failure said: a channel not handed in, or built in a loop; a way out into no bus; a tap for a return it has no send to (`desk-templates.ts`) |
-| `Channel`, `ChannelParts`, `Insert`, `Tap`, `SEND`, `Parts`, `OnDesk`, `Send`, `layered()`, `channelTemplates(parts, onDesk)`, `CHANNEL_FORM` | a channel written short, apart or on a desk; made into a template of the channel's form, its stages and sends filled in and wired (`channel.ts`); the sends' child's name, a send's address on a channel under it (`send/reverb`); a lone channel, its parts layered, the base first, made into templates of its form, apart from any desk (`CHANNEL_FORM` in `channel-form.ts`) |
-| `controlAddress(strip, controller)` | a controller on a strip as its param's address on the desk: the strip's address in front, a pool's copy's its pool's name and number (`lead/3/send/reverb`) (`channel.ts`) |
-| `deskOf(data, source)`, `channelOf(data, source)` | a desk or a channel read from data, YAML's, its shape checked before `deskTemplates()`'s: its kind a word, its channels a list, each its name and its role, its inserts each its name and its kind or a preset, its pan, volume and taps; every failure said, naming its file; their shapes written as data beside their types, checked by `libs/base/util/`'s `fromData()` (`desk.ts`, `channel.ts`; `shape.ts`'s own checks); the roles and taps they hold to the desk's own lists (`DESK_ROLES`, `TAPS`) |
-| `silenced(desk, { muted, soloed })`, `Muting`, `MUTE_GLIDE` | which channels a mute or a solo silences, as Ableton's, over a desk plan's wires: those muted, and what feeds them, a bus muted silencing what goes into it, its sends among them; with any soloed, every one but what a soloed one needs to be heard, its way out to the master and what feeds it; a return never by a solo, the master never; a pool's copies where the caller adds them; `MUTE_GLIDE`, a cut's time constant, 10 ms, at once with no click (`mute-solo.ts`) |
-| `DeskMessage` | a desk's edit by address, as a message on a bus: a param's value or a setting (`messages.ts`) |
+| `DESK_FORMS`, `CHANNEL_FORM`, `DeskRole` | What every channel and every desk is, as forms: a channel's roles in order and their wires; a desk's channels by role, exactly one master, a way out into a bus or the master, sends into returns and no loops (`channel-form.ts`, `desk-form.ts`). |
+| `deskTemplates(desk, channels?)`, `Desk`, `DeskChannel`, `DeskPool` | A desk written short made into templates: the desk's, of the desk's form, and each channel's and its sends', a pool's among them. It's refused where it's written wrong, every failure said (`desk-templates.ts`). |
+| `channelTemplates(parts, onDesk)`, `layered()`, `Channel`, `ChannelParts`, `Insert`, `Tap`, `Parts`, `OnDesk`, `Send` | A channel written short, apart or on a desk, made into a template of the channel's form, its stages and sends filled in and wired. `layered()` layers a channel's parts, the base first (`channel.ts`). |
+| `SEND`, `controlAddress()` | The sends' child's name. `controlAddress(strip, controller)` is a controller on a strip as its param's address on the desk, a pool's copy by its pool's name and number (`lead/3/send/reverb`) (`channel.ts`). |
+| `deskOf()`, `channelOf()` | A desk or a channel read from data such as YAML, its shape checked before `deskTemplates()`'s. Every failure is said, naming its file (`desk.ts`, `channel.ts`). |
+| `silenced()`, `Muting`, `MUTE_GLIDE` | Which channels a mute or a solo silences over a desk plan's wires, as Ableton's: those muted and what feeds them, and with any soloed, every one but what a soloed one needs to be heard. A return is never silenced by a solo, the master never; `MUTE_GLIDE` is a cut's time constant, 10 ms (`mute-solo.ts`). |
+| `DeskMessage` | A desk's edit by address, as a message on a bus: a param's value or a setting (`messages.ts`). |
 
-Tested in node, in its `test/` folder, on small desks (`test/desks.js`): a channel of the channel's form, its own params; its wires, its sends taken pre and post; the master's; a send for each return before a channel, none that feeds it, a return's to every other, those into one after it delayed, a pool's for every one, each tap post unless said; the desk's own inputs, ways out, sends and pools; a channel built on another; a desk written wrong refused; mute and solo on the routing, a pool's copy among them; a desk and a channel read from data (`test/desk.test.js`).
+Tests: `test/desk.test.js`, on small desks in `test/desks.js`.

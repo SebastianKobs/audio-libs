@@ -1,20 +1,46 @@
-# libs/modular-audio/view/tracks/models
+# modular-audio/view/tracks/models
 
-View models built from a plan, with no DOM: handed a plan and its values through a port, they hand back what a view shows of it and what it can do, as MVVM's view models do. Reads only the plan's format and the params' specs, the clock for the arrangement and the clip tracks, and the clip slots' port (`libs/modular-audio/view/tracks/readout/`), the desk's models (`libs/modular-audio/view/desk/models/`). It imports `libs/base/automation/`, `libs/sequencing/clock/`, `libs/base/params/`, `libs/modular-audio/plan/desk/`, `libs/modular-audio/plan/format/`, `libs/base/util/`, `libs/modular-audio/view/desk/models/` and `libs/modular-audio/view/tracks/readout/`.
+The session view's and the arrangement's view models, no DOM: handed what they read through the readouts and the desk's view models, they hand back what a view shows and what it can do, as MVVM's view models do.
 
-| Part | Holds |
+Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/desk`, `modular-audio/view/desk/models`, `modular-audio/view/tracks/readout`, `sequencing/clock`.
+
+```ts
+import type { ClipsReadout } from '../readout/index.ts';
+import { ClipTracks, Views } from './index.ts';
+
+const views = new Views();
+views.onShow((view) => console.log(view)); // 'session', 'arrangement' or null
+views.tab('session', true); // the session view's tab opened; views.shown is 'session'
+
+declare const surface: ClipsReadout;
+declare const clock: { now(): number };
+const clips = new ClipTracks({ surface, clock, launch: () => {}, remove: () => {} });
+clips.tracks; // a clip track for each of the control surface's
+clips.drop(slot); // a clip's ×: the first click asks, a second a moment later, within 3 s, deletes
+```
+
+A clip's × is a deliberate, confirmed action:
+
+1. The first click asks, "delete?".
+2. A second click on it, after a moment (0.4 s) and within 3 s, deletes the clip.
+3. Anything else, or nothing for 3 s, stops asking.
+
+| Export | What it does |
 |---|---|
-| `clip-tracks.ts` | `ClipTracks`: the clip tracks, as a session view shows them, a clip track for each of a control surface's (`libs/modular-audio/view/tracks/readout/`): each clip track's clips read from what holds them, a clip player's slots or the surface's own for the clips on none, in the order held, each once, its name, its note count and whether it plays, its holder's to say (`ShownClip`); a clip's ▶ launching it, its × asking first, a second click after a moment and within 3 s deleting it, anything else or 3 s unanswered stopping it asking, through the functions it's handed |
-| `placed.ts` | `placedOn()`: where a play goes, its group of tracks and its track, as the tracks' groups say (`groupOf()`): played live, the pool its kind is played on; played back, or a lane, its kind's group; none on no group or no track. The session's and the arrangement's rows alike |
-| `session.ts` (`Session`, `TrackShown`, `GroupShown`) | `Session`: what the session view shows of what's played, read in its own words, the MIDI sequencer's stream fitting them by their shape: plays kept per group of tracks, a group as many tracks as its plays ever used, what's played live on its kind's pool, a clip's play on its group (`groupOf()`, handed in); a look at a time (`at()`), each track what holds it and whether it sounded since, or the play waiting for its first note, each group's clips that sounded; a loop holding its track while it plays, a held note until its note off, by its sender; `TrackShown`, a track as a look shows it: what holds it and whether it sounded since, or what waits for it; `GroupShown`, a group as a look shows it: its tracks, and the clips that sounded since the last look |
-| `session-tracks.ts` | `SessionTracks`: the session's tracks as its desk shows them (`DeskGroup`s), from a look at the session in the control surface's groups (`TracksReadout`): the tracks with notes, in the groups' order, those played live marked, a group shown once its first play adds a track; each track named from its group's name and numbered from 1, at its channel's address on the desk (handed in), what it plays now, its clip and a name its play gives after it, a dash with none, lit while it sounds, waiting while a play waits for its first note; what sounded since the last look, a played-back group's clips and each lit track's channel, for the folded sections' lights |
-| `views.ts` (`Views`, `ViewName`) | `Views`: the session view and the arrangement, which one is open, or none, a tab each opening and closing it, another's closing as this one opens leaving it shown; whoever listens told as it changes; `ViewName`, a view, its tab's name |
-| `arrangement/arrangement.ts` | `Arrangement`: what was heard laid out in time, as Ableton's arrangement, in 16ths and rows, the pixels its drawer's: its rows (`rows`), the regions on them, each labelled by its clip, played live or not, greyed once its clip is gone, kept whole past a hold it rang through (`regions`, `PlacedRegion`), the opened tracks' lanes, each on its param's range as the desk declares it, one nothing declares by the fader law (`lanes`, `PlacedLane`); looked at on every beat while it shows (`show()`, `look()`); each frame, the time in view following the present, or the playhead while it plays back, until it's scrolled back (`frame(span)`, `scrollBy()`, `left`, `right`, `following`); a group folded, a track's lanes opened, with shift every one as it goes (`toggleGroup()`, `toggleLanes()`); the playhead placed by a press in the ruler on the nearest beat, its release cueing its time through the function it's handed, then following the playback it starts or jumps (`press()`, `placeAt()`, `release()`, `cue`); where each 16th fell, the clock's `GridMap` (`map`); its parts, made by it: the rows as folded (`folded-rows.ts`, `FoldedRows`), the regions and lanes on their rows (`regions.ts`, `placedRegions()`, `placedLane()`), the time in view (`time-in-view.ts`, `TimeInView`, on `time-window.ts` and `playhead.ts`) |
-| `arrangement/declared.ts` | `declaredBy()`: what the desk declares, read from its view models: a lane's param, by its strip and its controller there, no MIDI devices; a strip's controllers in the order the sound goes through it, its inserts' controls, its sends, its volume, pan, mute and solo |
-| `arrangement/rows.ts` (`Row`, `SectionLabels`) | `Row`, one row of the arrangement: a header, its group's name, folding the group; a track, open once it has lanes, and whether they show; a lane, named by its controller. The rows, as the session view groups its tracks: the tracks' groups, each once used, as many tracks as it ever used, folded to its first; the desk's strips with no notes below them, always, from the desk, each bus with those that go into it, the returns, the master, and the instruments each patch's own track, in the groups the session view labels its sections (`arrangedStrips()`, `ArrangedStrip`, `SectionLabels`); a track's lanes under it once opened, in the order its strip lists them, one it doesn't after |
-| `arrangement/lane-names.ts` | What a lane is known by: its row's key (`laneKeyOf()`); its name, its slot and param, a send by its return (`laneName()`); the strip it's on (`stripOf()`) |
-| `arrangement/time-window.ts`, `playhead.ts` | The time in view, in 16ths, following a head a bar from the right edge, scrolled back, never before the earliest; where a click in the ruler puts the playhead, on the nearest beat |
-| `arrangement/note-shapes.ts` (`noteShape`, `NoteShape`, `pitchRange`) | A region's notes as drawn, their pieces, glides and slides, a note kept whole past a hold; `noteShape`, a note's pieces, glides and slide in up to now, held or not; `NoteShape`, its pieces, lines and slide; `pitchRange`, a region's pitch range, its notes' lowest to highest |
-| `arrangement/lane-shapes.ts` (`laneLine`, `Corner`) | A lane's line, its points played as automation, a glide's curve sampled until it settles; `laneLine`, the line from a time to a time; `Corner`, a value at a time |
+| `new ClipTracks({ surface, clock, launch, remove })`: `tracks`, `asking`, `clipsOn()`, `launch()`, `drop()`, `stopAsking()`, `expire()` | The clip tracks as a session view shows them. `clipsOn(track)` reads a track's clips from what holds them, in the order held, each once; a clip's ▶ launches it and its × asks first (`clip-tracks.ts`). |
+| `ShownClip` | A clip on its clip track: its slot, its name, how many notes it holds and whether it plays (`clip-tracks.ts`). |
+| `new Session(tracks)`: `heard()`, `at()`, `kept()` | What the session view shows of what's played, read in its own words, the MIDI sequencer's stream fitting them by their shape. `heard(play)` keeps a play on its group of tracks; `at(now, since)` is a look: each track's holder and whether it sounded since, or the play waiting for its first note (`session.ts`). |
+| `TrackShown`, `GroupShown` | A track as a look shows it, what holds it and whether it sounded since or what waits for it; a group as a look shows it, its tracks and the clips that sounded since the last look (`session.ts`). |
+| `new SessionTracks({ tracks, trackAt })`: `groups()`, `sounded()` | The session's tracks as its desk shows them, from a look at the session in the control surface's groups: the tracks with notes, those played live marked, each named from its group and numbered from 1, at its channel's address on the desk. `sounded()` is what sounded since the last look, for the folded sections' lights (`session-tracks.ts`). |
+| `new Views()`: `shown`, `tab()`, `onShow()` | The session view and the arrangement, which one is open or none, a tab each opening and closing it; whoever listens is told as it changes (`views.ts`). |
+| `ViewName` | A view, its tab's name: `session` or `arrangement` (`views.ts`). |
+| `new Arrangement({ recording, transport, declared, tracks, desk, instruments, sections, clock, cue })`: `rows`, `regions`, `lanes`, `playhead`, `following`, `left`, `right`, `now`, `map`, `show()`, `frame()`, `look()`, `toggleLanes()`, `toggleGroup()`, `press()`, `placeAt()`, `release()`, `scrollBy()` | What was heard laid out in time, as Ableton's arrangement, in 16ths and rows, the pixels its drawer's. Its rows, regions and opened lanes are kept as they were heard, and it looks again on every beat while it shows (`arrangement/arrangement.ts`). |
+| `PlacedRegion`, `PlacedLane` | A region on its row: labeled by its clip, played live or not, grayed once its clip is gone, its notes kept whole past a hold it rang through. An opened lane on its row is on its param's range as the desk declares it, a MIDI device's in a color of its own (`arrangement/regions.ts`). |
+| `Row`, `ArrangedStrip`, `SectionLabels` | One row: a header that folds its group, a track (open once it has lanes), or a lane named by its controller. The desk's strips and the instruments with no notes of their own are arranged by the session view's sections (`arrangement/rows.ts`). |
+| `declaredBy(views)` | What the desk declares, read from its view models: a lane's param by its strip and its controller there, and a strip's controllers in the order the sound goes through it (`arrangement/declared.ts`). |
+| `noteShape()`, `pitchRange()`, `NoteShape` | A region's notes as drawn: a note's pieces, glides and slide, a note kept whole past a hold; and a region's pitch range, its notes' lowest to highest (`arrangement/note-shapes.ts`). |
+| `laneLine()`, `Corner` | A lane's line, its points played as automation, a glide's curve sampled until it settles; a `Corner` is a value at a time (`arrangement/lane-shapes.ts`). |
 
-Tested in node, in its `test/` folder: the clip tracks, the session, the session's tracks, the views and the arrangement, each its own file.
+The arrangement keeps each group folded to its first track until it's unfolded, and a track's lanes under it once they're opened. Each `frame()` moves the time in view, following the present or the playhead while it plays back, until it's scrolled back. A press in the ruler places the playhead on the nearest beat, and its release cues it.
+
+Tests: `test/clip-tracks.test.js`, `test/session.test.js`, `test/session-tracks.test.js`, `test/views.test.js` and `test/arrangement.test.js`.

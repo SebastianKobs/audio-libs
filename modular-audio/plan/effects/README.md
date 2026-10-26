@@ -1,6 +1,8 @@
-# plan/effects
+# modular-audio/plan/effects
 
-The effects as templates: Utility, Filter, Limiter, Delay, Tape delay and Reverb, each a YAML file, its comments the reasons. The Tape delay is built on the Delay (`extends: Delay`), only its wobble written. Handed to the planner (`libs/modular-audio/plan/planner/`) with their form; an owner's or a desk's presets are values and settings on them, by address. It imports `libs/base/util/` and `libs/modular-audio/plan/planner/`.
+The effects as templates: Utility, Filter, Limiter, Delay, Tape delay and Reverb, each a YAML file, its comments the reasons. The Tape delay is built on the Delay (`extends: Delay`), only its wobble written. Handed to the planner with their form; an owner's or a desk's presets are values and settings on them, by address.
+
+Depends on: `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/plan/planner`.
 
 Its face, `index.ts`, is the form alone; the six templates are its content, `content.ts`, imported apart, so a desk's forms load no YAML.
 
@@ -26,9 +28,9 @@ An insert's macros carry their hints, written in its template, and an effect is 
 | `TapeDelay` | the Delay's, and its wobble: a slow oscillator, its depth a gain, into the line's time by its ms, moving it in seconds | the Delay's; rate 0.5 Hz, depth 0.004 s, 4 ms either way | the Delay's |
 | `Reverb` | a room | | `length`, its own, the room's (`room/length`) |
 
-| | |
+| Export | What it does |
 |---|---|
-| `EFFECT_TEMPLATES` | the six, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`), frozen (`content.ts`) |
-| `EFFECT_FORM` | what every effect is: one input and one output, its children free of roles (`form.ts`) |
+| `EFFECT_TEMPLATES` | The six, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`) and frozen (`content.ts`). |
+| `EFFECT_FORM` | What every effect is: one input and one output, its children free of roles (`form.ts`). |
 
-Tested in node, in its `test/` folder: the six of the effect's form, planned, the Tape delay the Delay's and its wobble; their macros by the names a desk keys them, each at its default; a macro's spec its target's; the Delay's note a choice through its macro, the Utility's pan pot and the Reverb's length settings (`test/effects.test.js`).
+Tests: `test/effects.test.js`: the six planned, their macros by the names a desk keys them, each at its default, and the settings.

@@ -1,37 +1,50 @@
-# build/instrument
+# modular-audio/build/instrument
 
-MIDI's notes played into an instrument: its voices juggled on what's built. Handed the instrument's plan, what's built of it (the contract's `Built`, `libs/modular-audio/build/contract/`) and the time now, it's what the notes are played into, a `Receiver` (`libs/midi/protocol/`). It makes no sound: what's built makes the sound, the plan says what each note sets. On it, an instrument, one patch from a file of instruments planned by name and built by the builder handed in, its edits glided or built again (`Instrument`); and a multitimbral sound module, a part for each patch, each playing a patch from its bank, an edit reaching every part that plays it (`SoundModule`); and the automation fitted to its bank, a patch's value set at its time as the bank's edit (`InstrumentAutomation`); and its control surface, a patch's knob moved by hand played into the sequencer as a controller on the patch's own track (`InstrumentSurface`). It reads the clock's ticks, the plan's format, the synth's note (`libs/modular-audio/plan/instrument/`'s `NOTE_SETTINGS`, the sources' names its pools' note keys), a note's frequency (`libs/music/music-theory/`) and the floor of silence (`libs/base/params/`).
+MIDI's notes played into an instrument: its voices juggled on what's built. It's a `Receiver` handed the instrument's plan, what's built of it and the time now. It makes no sound: what's built makes the sound, the plan says what each note sets.
+
+Depends on: `base/automation`, `base/params`, `base/util`, `midi/protocol`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/plan/instrument`, `modular-audio/plan/planner`, `music/music-theory`, `sequencing/clock`.
 
 ```ts
+import { noteMessages } from '../../../midi/protocol/index.ts';
+import type { Built } from '../contract/index.ts';
+import type { Plan } from '../../plan/format/index.ts';
 import { Voices } from './index.ts';
-const voices = new Voices(built, plan, () => context.currentTime, () => ({ 'voice/decay': 0.6 })); // its voice cards' own values
-voices.receive(noteMessages({ pitch: 69, velocity: 0.8, t: 2, duration: 0.5 }, index)); // a voice added at 2 s, its gate opened, closed at 2.5 s
-voices.edit({ 'voice/cutoff': 900 }); // an edit, glided on every voice of its card sounding
-voices.rebuild(changed); // a change of structure while notes sound
+
+declare const built: Built;
+declare const plan: Plan;
+declare const context: BaseAudioContext;
+const voices = new Voices(built, plan, () => context.currentTime, () => ({ 'voice/decay': 0.6 })); // the voice card's own values
+voices.receive(noteMessages({ pitch: 69, velocity: 0.8, t: 2, duration: 0.5 }, 0)); // a voice added at 2 s, its gate opened, closed at 2.5 s
+voices.edit({ 'voice/cutoff': 900 }); // glided on every voice of its card that sounds
+voices.rebuild(plan); // a change of structure while notes sound
 ```
 
-How it plays a note:
-1. a note on: a copy of its pool's voice card added at its time (`Built.add(copy, at)`), a drum rack's pad's by its key, none where no pool plays it; its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is built at them (set at its time, a biquad took a cutoff at its block's edge, a voice's first milliseconds through another), its frequency, its velocity and the per-note controllers sent with it, its gate opened last; its glides glided by its voice card's `glide`, a jump with none; held until its note off, closed at its `longest` only where its voice card has one (0, none, its default: a held note sounds until it's let go);
-2. a note off: its gate closed at its time, no sooner than its `shortest`, its sources stopped by when it's silent, where that's known then (`Built.stopBy()`); a per-note controller sent later a change at its time, gliding as it says, its pitch glided;
-3. a voice let go once it has rung out, as the next messages come; at once where its sender detaches its note.
+How it plays a note, in order:
 
-Its voice cards' own values, a knob's or an edit's, by their addresses in the instrument (`voice/cutoff`, `pad 38/env 1/decay`), where a voice card has them: read and set on each voice as it's added, before its sources; an edit set on every voice of its card sounding, gliding.
+1. A note on adds a copy of its pool's voice card at its time (`Built.add()`), a drum rack's pad's by its key, none where no pool plays it.
+2. Its note's sources are set by the pool's addresses as it's added, before it sounds: its frequency, its velocity and the per-note controllers sent with it, its gate opened last.
+3. Its glides are glided by the voice card's `glide`, a jump with none. A note is held until its note off, closed at the card's `longest` only where the card has one.
+4. A note off closes its gate at its time, no sooner than the card's `shortest`, and stops its sources by when it's silent, where that's known then (`Built.stopBy()`).
+5. A voice is let go once it has rung out, as the next messages come, or at once where its sender detaches its note.
 
-When a voice has rung out, worked out from its voice card's plan, as a synth stops a note's sources (`silence.ts`):
-1. a gain resting at nothing, opened only by envelopes, closes once they have all faded, what's built saying when each has (`Built.faded()`); one another source opens too, an LFO, never;
-2. a block is silent from where a gain it is closes, or as late as the latest of where its sound goes, followed across its composites and through their macros; the voice's own output never;
-3. a source nothing closes is silent as its note's last envelope fades: a gate's release, a trigger's run, which goes on past its note off (every struck sound, a tap, a chime, the brushes);
-4. a sound into a stage's param, an envelope on a filter's cutoff after the gain, is heard only while sound reaches that stage; a stage with a tail, a delay, a reverb, sounds on past its input (its block's `tail`, `libs/modular-audio/plan/blocks/`);
-5. the voice has rung out once every source is: an oscillator, a noise, an envelope; an LFO or FM with the sound it moves.
+A voice has rung out, worked out from its voice card's plan as a synth stops a note's sources (`silence.ts`):
 
-| | |
+1. A gain resting at nothing, opened only by envelopes, closes once they have all faded, what's built saying when each has (`Built.faded()`); an LFO opens one too, and never closes it.
+2. A block is silent from where a gain it feeds closes, or as late as the latest of where its sound goes, followed across composites and through macros. The voice's own output never is.
+3. A source nothing closes is silent as its note's last envelope fades: a gate's release, or a trigger's run, which goes on past the note off.
+4. A stage with a tail, a delay or a reverb, sounds on past its input (its block's `tail`, `libs/modular-audio/plan/blocks/`).
+5. The voice has rung out once every source is: an oscillator, a noise, an envelope.
+
+| Export | What it does |
 |---|---|
-| `Voices` | MIDI's notes played into an instrument's plan on what's built: `receive(messages)`; an input for each source, its notes kept apart (`input()`); at most its polyphony sounding, 16 unless handed another, the oldest taken over; the voices playing now, each from its start until it's silent (`sounding`); `edit(values)`, its voice cards' own; `rebuild(plan)`, each sounding note's gate told again at its own time (`voices.ts`) |
-| `Silence` | when a voice of a voice card has rung out, by its envelopes' faded times and its note's end (`silence.ts`, not exported) |
-| `Instrument`, `InstrumentMaking` | one instrument playing one patch: its plan the patch's, from a file of instruments (`libs/modular-audio/plan/instrument/`'s `patchPlan()`), built by the builder handed in, into where it's told; its messages moved onto what's built's time; its voice cards' own values from outside, set on each card it has; an edit of a patch it plays glided where its settings are the same, else built again; `plays(name)`, its own patch or a pad's; `tempo(beat)`; `input(into)`, an input of its own for a track, its notes kept apart, each voice into what `into()` gives; `sounding`, the voices it sounds now (`instrument.ts`) |
-| `SoundModule`, `PartMaking` | a multitimbral sound module: `part(patch, making)`, the part for a patch, an instrument playing it from its bank by name, made the first time it's asked for, its making asked for then alone, then kept: every track playing the patch plays into it; `controlOf(patch, address)`, a param's or a setting's spec in a patch (`PatchControl`), from its voice card; `sounding(patch)`, the voices its part sounds now, 0 for one not made yet; a patch edited in the bank (`LiveCopies`), every part that plays it edited, one made after made as edited; `tempo(beat)` told every part, one unchanged passed over (`sound-module.ts`) |
-| `InstrumentAutomation` | the instrument's automation, fitted to its bank as the desk's is to the desk: `control(patch, controller)`, a choice's index set back as the choice, a patch's value or setting held on the clock's cues until its time, no lead, then set as the bank's edit (a setting as a setting edited, its voices built again) by its patch and its address, one already due at once; the instrument glides there itself, so a controller's own glide is passed over (`instrument-automation.ts`) |
-| `InstrumentSurface` | the instrument's own control surface, as the desk's is the desk's: `edit(message)`, a patch's value played in as a controller on the patch's track, now, gliding unless it's a choice, a switch or a time that never glides, a choice by its index, a setting too (a waveform), as a switch is played; a reset handed to the bank at once, not recorded; `onControl()`, each move told, as the transport hears it (`instrument-surface.ts`) |
-| `TestNotes`, `HeldTestNote`, `PhrasedTestNote` | a test note, its note and message the synth's (`libs/modular-audio/plan/instrument/`): `play(key, note)`, an input of its own on its role's instrument for each key, made at its first test note, played straight into it, never through a sequencer, so never recorded; a fresh index each (MIDI 2.0's note rotation), phrased as its owner says, held at most 30 s; let go as its button is (`test-notes.ts`); pressed and let go as messages on a bus, by its key (`hear()`, `TestNoteMessage`) |
+| `new Voices(built, plan, now, own?, polyphony?)`: `receive()`, `input()`, `edit()`, `rebuild()`, `sounding` | MIDI's notes played into an instrument's plan on what's built. `input(into)` gives an input of its own, its notes kept apart, each voice into what `into()` gives; at most 16 voices sound unless handed another, the oldest taken over (`voices.ts`). |
+| `new Instrument(making)`: `receive()`, `input()`, `plays()`, `tempo()`, `edited()`, `sounding`, `patch` | One instrument playing one patch from a file of instruments, built by the builder handed in, its messages moved onto what's built's time. An edit of its patch is glided where its settings are the same, else built again (`instrument.ts`). |
+| `InstrumentMaking` | What an instrument is made with: the file of `instruments`, its `patch`, the `builder`, `into`, `now` and `at`, optional `cardValues` and `polyphony` (`instrument.ts`). |
+| `new SoundModule({ instruments, bank })`: `part()`, `controlOf()`, `sounding()`, `tempo()` | A multitimbral sound module. `part(patch, making)` makes the part for a patch the first time it's asked for and keeps it, so every track playing the patch plays into it; an edit in the bank reaches every part that plays it (`sound-module.ts`). |
+| `PartMaking` | What a part is made with: an instrument's making without its file and its patch (`sound-module.ts`). |
+| `new InstrumentAutomation({ bank, clock, controlOf })`: `control()` | The instrument's automation, fitted to its bank as the desk's is to the desk. `control(patch, controller)` holds a patch's value or setting on the clock's cues until its time, then sets it as the bank's edit (`instrument-automation.ts`). |
+| `new InstrumentSurface({ bank, clock, input, track, controlOf })`: `edit()`, `onControl()` | The instrument's control surface. `edit(message)` plays a knob moved by hand into the sequencer as a controller on the patch's own track, gliding unless it's a choice, a switch or a time; a reset goes to the bank at once, not recorded (`instrument-surface.ts`). |
+| `new TestNotes({ instrumentFor, phrase })`: `play()`, `hear()` | A device view's test note: an input of its own on its role's instrument for each key, played straight into it, never through a sequencer, so never recorded. `play(key, note)` holds a note at most 30 s until its `HeldTestNote` is released (`test-notes.ts`). |
+| `HeldTestNote`, `PhrasedTestNote` | A test note as it sounds, let go as its button is; a test note as it's phrased, with its length (`test-notes.ts`). |
 
-Tested in node, in its `test/` folder, on a stand-in for what's built (`test/built.js`) and the format's synth: a note on, its voice added, its sources set, its gate last; a note off, its shortest, a held note, its longest where written; per-note controllers, set as it starts, changed later, its pitch glided; a drum rack's pads; a voice let go once it has rung out, a gain resting at nothing an envelope closes, held and decayed to nothing before its note ends, a source nothing closes as its last release fades, an LFO with the sound it moves, a note detached; its sources stopped by when it's silent, a trigger's envelope running on; a gain an LFO opens too never closed; a change of structure; its voice cards' own values, a drum rack's pads' apart; two inputs' notes of one index kept apart, each voice into its input's destination; a note past its polyphony taking over a voice, the voices sounding counted (`test/voices.test.js`). An instrument on a patch of a file of instruments: built by its builder, its messages retimed, its voice cards' own values from outside, an edit glided or built again, a rack's pad its own; an input of its own, its notes retimed, each voice into its destination, the voices sounding counted (`test/instrument.test.js`); a sound module, a part for a patch made once and kept, a param's spec in a patch from its voice card, its voices sounding counted, an edit reaching every part that plays it, one made after made as edited, its tempo, one unchanged passed over (`test/sound-module.test.js`); the test notes, an instrument for each key made once, a fresh index, held at most 30 s, its note off as it's let go (`test/test-notes.test.js`); the automation, a patch's value set at its time as the bank's edit, by its patch and its address, one already due set at once, a choice set back from its index (`test/instrument-automation.test.js`); the surface, a value played in as a controller on its patch's track, a choice by its index, a setting and a reset the bank's (`test/instrument-surface.test.js`).
+Tests: `test/voices.test.js`, `test/instrument.test.js`, `test/sound-module.test.js`, `test/test-notes.test.js`, `test/instrument-automation.test.js` and `test/instrument-surface.test.js`, on a stand-in for what's built in `test/built.js`.

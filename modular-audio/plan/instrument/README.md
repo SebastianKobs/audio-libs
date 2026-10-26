@@ -1,13 +1,30 @@
-# plan/instrument
+# modular-audio/plan/instrument
 
-An instrument's templates and forms, its modules a synth's: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons, a module named as it is on a synth's panel and never as a block is; the note's sources the voice card's macros. Handed to the planner (`libs/modular-audio/plan/planner/`) with its forms; a patch is a preset on an architecture. It imports `libs/base/util/`, `libs/base/params/`, `libs/modular-audio/plan/format/` and `libs/modular-audio/plan/planner/`.
+An instrument's templates and forms, its modules a synth's: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons. A module is named as it is on a synth's panel and never as a block is; the note's sources are the voice card's macros. A patch is a preset on an architecture.
+
+Depends on: `base/params`, `base/util`, `modular-audio/plan/format`, `modular-audio/plan/planner`.
 
 ```ts
 import { SYNTH_FORMS } from './index.ts';
 import { MODULE_TEMPLATES } from './content.ts';
-import { Planner } from '../planner/index.ts';
-const planner = new Planner([...MODULE_TEMPLATES, pluck], SYNTH_FORMS);
-planner.plan('Pluck', { values: { 'osc 1/tune': 24 } });   // a voice card, an octave and a fifth up
+import { Planner, type WrittenTemplate } from '../planner/index.ts';
+
+const sine: WrittenTemplate = {
+  kind: 'Sine',
+  form: 'architecture',
+  outputs: [{ name: 'out', channels: 1 }],
+  children: [
+    { name: 'osc 1', kind: 'VCO', role: 'source' },
+    { name: 'out', kind: 'Out', role: 'out' },
+  ],
+  wires: [
+    { from: { node: 'osc 1', output: 'out' }, to: { node: 'out', input: 'in' } },
+    { from: { node: 'out', output: 'out' }, to: { output: 'out' } },
+  ],
+  macros: [{ name: 'frequency', maps: [{ to: ['osc 1', 'frequency'], factor: 1, offset: 0 }] }],
+};
+const planner = new Planner([...MODULE_TEMPLATES, sine], SYNTH_FORMS);
+planner.plan('Sine', { values: { 'osc 1/tune': 24 } }); // a voice card, two octaves up
 ```
 
 A voice card is wired as a hardware synth's: its sources into its chain's stages, the stages into its one output, its modulators into the params of any module, a module's macro among them, as Ableton's macros take modulation. What multiplies is a gain in series, as a modular's VCAs: an FM's index after a gain the note's frequency sets, an envelope's velocity after the envelope, an LFO's depth as a share of the note's frequency through its scale. A ratio to the note is a tune in semitones, onto a detune in cents, as pitch adds where ratios multiply.
@@ -18,28 +35,28 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 | `Noise source` | source | a noise through a filter into its level | level; cutoff, resonance; tune (onto the filter's detune, an offset from the keys); offset; stop | `noise/color`, `noise/loop`, `filter/type`, `filter/slope` |
 | `LFO` | modulator | an oscillator into its depth into a scale | sync, note, hz, its oscillator's rate; depth, in its target's units; scale, 1, or the note's frequency | `osc/wave`, `osc/phase` |
 | `FM` | modulator | an oscillator into a scale, the note's frequency, into its index | frequency; tune, its ratio; scale; index; stop | `osc/wave` |
-| `Envelope generator` | modulator | an envelope into a gain its note's velocity sets | gate, the note's; delay, attack, hold, decay, sustain, release; amount, in its target's units; velocity | `envelope/curve`, `envelope/mode` |
+| `Envelope generator` | modulator | an envelope into a gain its note's velocity sets | gate, the note's; delay, attack, hold, decay, sustain, release; amount, in its target's units; velocity | `envelope/mode` |
 | `VCA` | stage | a gain an envelope moves into its level | gain, open at 1, at 0 where an envelope opens it; level | |
 | `VCF` | stage | a filter | cutoff, resonance; tune (onto its detune, a sweep in semitones, an offset from the keys) | `filter/type`, `filter/slope` |
 | `Tremolo` | stage | a gain an LFO moves | gain | |
 | `Ring` | stage | the sound into a gain at 0, an oscillator moving it | frequency; tune; stop | `osc/wave` |
 | `Out` | output | its volume, then the note's own (MIDI 2.0's per-note #7) | volume, note volume | |
 
-| | |
+| Export | What it does |
 |---|---|
-| `NOTE_SOURCES`, `NoteSource`, `OWN_NOTE_VALUES` | a note's sources into a voice, as a voice card's CV, each a param's spec: frequency, gate, velocity, its volume (#7, a held note hushed), bend, and the per-note controllers by MIDI's names where it has them, vibrato depth and rate, breath, decay time, rise; at its default where a note sends none (`note.ts`); `OWN_NOTE_VALUES`, the note's own values, a keyboard's per-note controllers, as a test note sets them |
-| `NOTE_SETTINGS` | the note's settings: the time constant a later pitch glides by, its shortest, its longest, 0 none, a held note sounding until its note off (`note.ts`) |
-| `ARCHITECTURE_FORM` | what a voice card is: sources, modulators, stages and its one output, by role; sources into stages or out, stages into the next or out, the output out of the card, modulators into params of any role; no loops, every way out ending in its output (`architecture-form.ts`) |
-| `SOURCE_FORM`, `MODULATOR_FORM`, `STAGE_FORM`, `OUTPUT_FORM`, `SYNTH_FORMS` | a module's form by its job, its jacks; the synth's forms, the architecture's then its modules' (`architecture-form.ts`) |
-| `INSTRUMENT_FORM` | an instrument's form: its voices, each of the architecture's form, each into its one output (`architecture-form.ts`) |
-| `instrumentOf(kind, chains, architectures)`, `Chain` | an instrument's template: one chain with no key, a pool of voices, each a copy of its voice card, the patch's preset on its architecture; each chain with its key, a drum rack, a pool for each pad, played by its key; the note's sources into the voice card's macros of their names; two chains with no key, a key twice, an architecture not handed in refused (`instrument.ts`) |
-| `changesFrom(before, after, architecture)`, `Changes` | a preset changed on the same architecture: each value and setting that differs, by its address, one let go back to the architecture's start; another architecture refused, another instrument (`preset.ts`) |
-| `PresetMessage`, `edited(preset, message)` | what's asked of a bank's patch by its name, as a bus carries it (`libs/base/util/`'s `Bus`): `preset edited`, a value or a setting (`of`) set by its address, as a knob sets it; `preset reset`, back to where it started; a preset edited as its message asks, a new one, the one handed in left alone (`preset.ts`) |
-| `instrumentsOf(data, source, modules)`, `Instruments`, `RackPad` | a file of instruments read, as a person writes it (YAML, `instruments.yaml`): the instruments by their names, each its voice card's children, wires and macros, made templates of a voice card's form, its name its kind, one mono output; the patches by names of their own, each the instrument it plays (`instrument:`), made presets, the instrument their kind, read as every preset file is (`presetsOf()`); the racks, each pad a key and a patch; its shape checked as it loads, every failure under the file's name, a pad naming a patch the file hasn't refused; on the modules handed in, kept with it (`modules`) (`instruments-file.ts`) |
-| `LiveBank` | a bank's patches as they play, a synth's edit buffer: each a live copy of its start (`LiveCopies`), `edit(message)` a value or a setting edited, or the patch reset, as messages on a bus ask, each change told (`live-bank.ts`) |
-| `MODULE_TEMPLATES` | the ten, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`), frozen (`content.ts`), imported apart |
-| `cardPlanner(instruments, more)` | the planner of voice cards: a file's modules and its own templates, and any more given (`patch-plans.ts`) |
-| `patchPlan(name, instruments)`, `chainsOf(instruments, name)` | a patch's instrument planned from a file of instruments, by its name: a pool of voices of its voice card, or a drum rack, a pool for each pad; its chains, the patch alone or its rack's pads, each its key (`patch-plans.ts`) |
-| `TestNote`, `TestNoteMessage` | a test note, its pitch, velocity, time and own values; pressed on a key's instrument or let go, as a message on a bus (`test-note.ts`) |
+| `NOTE_SOURCES`, `NoteSource`, `OWN_NOTE_VALUES` | A note's sources into a voice, as a voice card's CV, each a param's spec: frequency, gate, velocity, volume, bend and the per-note controllers by MIDI's names, at their default where a note sends none. `OWN_NOTE_VALUES` are the note's own values, as a test note sets them (`note.ts`). |
+| `NOTE_SETTINGS` | The note's settings: the time constant a later pitch glides by, its shortest, and its longest, 0 for none (`note.ts`). |
+| `ARCHITECTURE_FORM`, `INSTRUMENT_FORM` | What a voice card is: sources, modulators, stages and its one output, by role, no loops, every way out ending in its output. An instrument's form is its voices, each of the architecture's form, each into its one output (`architecture-form.ts`). |
+| `SOURCE_FORM`, `MODULATOR_FORM`, `STAGE_FORM`, `OUTPUT_FORM`, `SYNTH_FORMS` | A module's form by its job, its jacks. `SYNTH_FORMS` are the synth's forms, the architecture's then its modules' (`architecture-form.ts`). |
+| `instrumentOf(kind, chains, architectures)`, `Chain` | An instrument's template: one chain with no key makes a pool of voices, each a copy of its voice card. Chains with keys make a drum rack, a pool for each pad, played by its key (`instrument.ts`). |
+| `changesFrom()`, `Changes` | A preset changed on the same architecture: each value and setting that differs, by its address, one let go back to the architecture's start (`preset.ts`). |
+| `PresetMessage`, `edited()` | What's asked of a bank's patch by its name, as a bus carries it: `preset edited` sets a value or a setting by its address, `preset reset` puts it back where it started. `edited(preset, message)` makes a new preset, the one handed in left alone (`preset.ts`). |
+| `instrumentsOf(data, source, modules)`, `Instruments`, `RackPad` | A file of instruments read as a person writes it: the instruments by their names, the patches (each the instrument it plays, as a preset), the racks (each pad a key and a patch). Its shape is checked as it loads, every failure under the file's name (`instruments-file.ts`). |
+| `LiveBank` | A bank's patches as they play, a synth's edit buffer: each a live copy of its start, `edit(message)` setting a value or a setting or resetting the patch, each change told (`live-bank.ts`). |
+| `MODULE_TEMPLATES` | The ten modules read from their YAML, each checked for its shape as it loads and frozen; imported apart from `content.ts`. |
+| `cardPlanner()`, `patchPlan()`, `chainsOf()` | `cardPlanner(instruments, more)` is the planner of voice cards. `patchPlan(name, instruments)` plans a patch's instrument from a file by its name, a pool of voices or a drum rack; `chainsOf()` gives its chains, each with its key (`patch-plans.ts`). |
+| `TestNote`, `TestNoteMessage` | A test note, its pitch, velocity, time and own values; pressed on a key's instrument or let go, as a message on a bus (`test-note.ts`). |
 
-Tested in node, in its `test/` folder, on the tests' voice card and file of instruments (`pluck.js`): the note's sources on their controls; the modules, each of its form, its macros by name, a tune onto a detune; a voice card of the architecture's form, and one refused where it breaks it, every failure said; an instrument of one patch and a drum rack, and one refused; a preset's changes; a live bank, edited and reset as asked; a file of instruments read, and one refused; a patch planned from a file by its name, its chains, the planner of its voice cards (`test/patch-plans.test.js`).
+The instruments a theme plays are its own file of instruments (`themes/`), read by `instrumentsOf()`; this library has none.
+
+Tests: `test/synth.test.js`, `test/instrument.test.js`, `test/instruments-file.test.js` and `test/patch-plans.test.js`, on the tests' voice card and file of instruments in `test/pluck.js`.
