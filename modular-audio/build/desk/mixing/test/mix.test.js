@@ -1,9 +1,9 @@
-// The live mix's mute and solo (mockup/src/libs/modular-audio/build/desk/mixing/mix.ts), the mixing desk's own, set by its mute() and
+// The live mix's mute and solo (libs/modular-audio/build/desk/mixing/mix.ts), the mixing desk's own, set by its mute() and
 // solo(), on the mixing desk on a stand-in for what's built (test/built.js) and the desk library's small studio:
 //   - a mute: its channel cut, gliding, once the desk is built; let go, back;
-//   - a mute taking along the strips its setup says;
+//   - a mute taking along the strips its setup says, a bus's with what feeds it;
 //   - a solo keeping what a soloed strip needs to be heard, never an FX bus;
-//   - a track's channel cut as it's added.
+//   - a track's channel cut as it's added, muted itself or through its bus.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MixingDesk } from '../index.ts';
@@ -30,18 +30,6 @@ test('a mute: its channel cut, gliding, once the desk is built; let go, back', (
   assert.deepEqual(desk.mixState(), { muted: new Set(), soloed: new Set() });
 });
 
-test("a bus muted taking along what feeds it, a track's channel among them as it's added", () => {
-  const { desk, built, build } = deskOn(MixingDesk, PLAN);
-  build();
-  desk.mute('you', true);
-  assert.deepEqual(cuts(built), [
-    ['you', 0],
-    ['tap', 0],
-  ]);
-  desk.channelOf('my tap/3');
-  assert.deepEqual(cuts(built).at(-1), ['my tap/3', 0]);
-});
-
 test('a solo keeping what a soloed strip needs to be heard, its way out; never an FX bus', () => {
   const { desk, built, build } = deskOn(MixingDesk, PLAN);
   build();
@@ -49,11 +37,20 @@ test('a solo keeping what a soloed strip needs to be heard, its way out; never a
   assert.deepEqual(cuts(built), [['sings', 0]]);
 });
 
-test("a track's channel cut as it's added, its pool's copy", () => {
-  const { desk, built, build } = deskOn(MixingDesk, PLAN);
-  desk.mute('my tap/3', true);
-  build();
-  assert.deepEqual(cuts(built), [], 'not added yet');
-  desk.channelOf('my tap/3');
-  assert.deepEqual(cuts(built), [['my tap/3', 0]]);
+test("a track's channel cut as it's added, muted itself or through its bus", () => {
+  const own = deskOn(MixingDesk, PLAN);
+  own.desk.mute('my tap/3', true);
+  own.build();
+  assert.deepEqual(cuts(own.built), [], 'not added yet');
+  own.desk.channelOf('my tap/3');
+  assert.deepEqual(cuts(own.built), [['my tap/3', 0]]);
+  const bus = deskOn(MixingDesk, PLAN);
+  bus.build();
+  bus.desk.mute('you', true);
+  assert.deepEqual(cuts(bus.built), [
+    ['you', 0],
+    ['tap', 0],
+  ]);
+  bus.desk.channelOf('my tap/3');
+  assert.deepEqual(cuts(bus.built).at(-1), ['my tap/3', 0]);
 });

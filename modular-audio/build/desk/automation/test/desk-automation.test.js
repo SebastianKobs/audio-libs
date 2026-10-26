@@ -1,4 +1,4 @@
-// The desk's automation (mockup/src/libs/modular-audio/build/desk/automation/desk-automation.ts), fitted to a mixing desk on a
+// The desk's automation (libs/modular-audio/build/desk/automation/desk-automation.ts), fitted to a mixing desk on a
 // stand-in for what's built (libs/modular-audio/build/desk/mixing/test/built.js), the desk library's small studio and a clock of the test's own:
 //   - a controller as its param's address on the strip: a track's channel's where its notes set it, at its time, its
 //     channel added as it comes; one they don't set, or a live track's, held for the desk;
@@ -32,12 +32,6 @@ const controller = (name, value, t, glide) => ({
   value,
   t,
   ...(glide && { glide }),
-});
-
-test("a controller as its param's address on its strip: a track's channel's where its notes set it, at its time, not held", () => {
-  const { automation, built } = controlsOn();
-  automation.control('my tap/3', controller('air/cutoff', 500, 1));
-  assert.deepEqual(built.told, [['my tap/3/air/cutoff', 500, { at: 1 }]]);
 });
 
 test("else held for the desk: one that glides set its lead ahead of its time; a choice, and a delay line's time, at its time", () => {

@@ -1,9 +1,8 @@
-// The desk's own control surface, a strip's control moved by hand (mockup/src/libs/modular-audio/build/desk/automation/desk-surface.ts), on the desk on a stand-in for what's built
+// The desk's own control surface, a strip's control moved by hand (libs/modular-audio/build/desk/automation/desk-surface.ts), on the desk on a stand-in for what's built
 // (libs/modular-audio/build/desk/mixing/test/built.js) and the desk library's small studio, played into an input of the test's own:
 //   - played in as a controller on the strip's track, now, with the stream's label its owner hands in, none for a
-//     strip of the desk's own;
-//   - gliding there where the desk says, a switch at once;
-//   - each move told to whoever listens;
+//     strip of the desk's own, gliding there where the desk says, a switch at once, each move told to whoever
+//     listens;
 //   - a desk's edit as the app's message: a param played in as a controller, a choice by its index; a setting, the
 //     desk built again with it.
 import { test } from 'node:test';
@@ -30,10 +29,16 @@ function surfaceOn() {
   return { ...on, surface: new DeskSurface({ desk, automation, clock, input, label }), sent };
 }
 
-test("played in as a controller on the strip's track, now, with its label, gliding where the desk says; a switch at once", () => {
+test("played in as a controller on the strip's track, now, with its label, gliding where the desk says; a switch at once; each move told", () => {
   const { surface, sent } = surfaceOn();
+  const told = [];
+  surface.onControl((strip, controller) => told.push([strip, controller]));
   surface.control('my tap/3', 'volume', 0.5);
   surface.control('tap', 'mute', 1);
+  assert.deepEqual(told, [
+    ['my tap/3', 'volume'],
+    ['tap', 'mute'],
+  ]);
   assert.deepEqual(sent, [
     [
       { track: 'my tap/3', play: { kind: 'tap', track: 3 } },
@@ -41,14 +46,6 @@ test("played in as a controller on the strip's track, now, with its label, glidi
     ],
     [{ track: 'tap', play: undefined }, [{ type: 'controller', controller: 'mute', value: 1, t: 3 }]],
   ]);
-});
-
-test('each move told to whoever listens, its strip and its controller', () => {
-  const { surface } = surfaceOn();
-  const told = [];
-  surface.onControl((strip, controller) => told.push([strip, controller]));
-  surface.control('tap', 'volume', 0.5);
-  assert.deepEqual(told, [['tap', 'volume']]);
 });
 
 test("a desk's edit as the app's message: a param played in as a controller on its strip's track, a choice by its index; a setting, the desk built again with it", () => {
