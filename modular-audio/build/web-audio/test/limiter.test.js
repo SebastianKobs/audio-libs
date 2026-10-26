@@ -8,20 +8,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
 import { makeupOf, WebAudioBuilder } from '../index.ts';
-import { blockNode, oneBlockPlan } from './blocks.js';
+import { blockNode, builtOn, last, oneBlockPlan } from './blocks.js';
 import { near } from '../../../../base/util/test/near.js';
 
 const dB = (gain) => 20 * Math.log10(gain);
-const last = (param) => param.events.at(-1);
 
 // a limiter built on a stand-in context at 12 s, into its output; its drive, its compressor and its makeup taken back, in the
 // order the sound goes through them
 function limiterOn(values) {
-  const context = new StandInContext(() => 12);
-  const built = new WebAudioBuilder({ context, beat: () => 0.5, random: () => 0.5 }).build(
-    oneBlockPlan('limiter', values),
-    { into: context.destination },
-  );
+  const { context, what: built } = builtOn(oneBlockPlan('limiter', values), { now: 12 });
   const [back] = into(context, context.destination)
     .flatMap((node) => [node, ...into(context, node)])
     .filter((node) => node.kind === 'gain' && into(context, node).some((before) => before.kind === 'compressor'));

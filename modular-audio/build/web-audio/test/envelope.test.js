@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
-import { oneBlockPlan } from './blocks.js';
+import { builtOn, oneBlockPlan } from './blocks.js';
 import { eventTime, levelAt } from '../../../../base/automation/index.ts';
 import { SILENCE } from '../../../../base/params/index.ts';
 import { near } from '../../../../base/util/test/near.js';
@@ -33,11 +33,6 @@ function envelopeOn(values = PLUCK, settings = {}) {
   const [source] = context.rec.nodes.filter((node) => node.kind === 'constant');
   const told = (from) => source.offset.events.slice(from);
   return { context, what, source, told };
-}
-// what's built of a plan at 4 s on a stand-in context
-function built(plan) {
-  const context = new StandInContext(() => 4);
-  return { what: new WebAudioBuilder({ context, beat: () => 0.5 }).build(plan, { into: context.destination }) };
 }
 // what its level is told as its gate opens at 5 s, a pluck's: charging past 2, cut there; settling onto 1
 const OPENED = [
@@ -153,5 +148,5 @@ test("when it has faded for good, what's built says by its address: from the sta
   const swept = envelopeOn({ ...PLUCK, sustain: 0, amount: 21 }, { mode: 'trigger' });
   swept.what.set(['gate'], 1, { at: 5 });
   near(swept.what.faded([]), 5.75, 'a sweep of 21 semitones too');
-  assert.throws(() => built(oneBlockPlan('gain')).what.faded([]), /no reading faded/);
+  assert.throws(() => builtOn(oneBlockPlan('gain')).what.faded([]), /no reading faded/);
 });

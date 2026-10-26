@@ -4,11 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { phrases } from '../index.ts';
 import { STEP } from '../../clock/index.ts';
-
-const draws = (...xs) => {
-  let i = 0;
-  return () => xs[i++];
-}; // rand() giving these, in order
+import { draws } from '../../../base/util/test/draws.js';
 
 test('phrases: whole phrases, 1 up to all of them; a record not all in phrases is sliced', () => {
   const r = [0, 0, 1, 1, 1, 2].map((phrase, k) => ({ start: k * STEP, phrase }));

@@ -5,22 +5,10 @@
 //   - a copy added twice, a pool not there, a copy not added refused.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext, into, outOf } from './audio-stand-in.js';
-import { WebAudioBuilder } from '../index.ts';
-import { blockNode, THEREMIN } from './blocks.js';
+import { into, outOf } from './audio-stand-in.js';
+import { blockNode, builtOn, THEREMIN } from './blocks.js';
 import { SYNTH } from '../../../plan/format/test/plans.ts';
 
-// what's built of a plan on a stand-in context, from a source where it has an input; the context's nodes by their kind
-function built(plan, now = 4) {
-  const context = new StandInContext(() => now);
-  const source = context.createGain();
-  const what = new WebAudioBuilder({ context, beat: () => 0.5, random: () => 0.5 }).build(plan, {
-    into: context.destination,
-    from: { in: source },
-  });
-  const made = (kind) => context.rec.nodes.filter((node) => node.kind === kind && node !== source);
-  return { context, source, what, made };
-}
 // an instrument with a block in its voice no builder makes
 function withTheremin(instrument) {
   const [pool] = instrument.node.pools;
@@ -56,7 +44,7 @@ const DESK = {
 };
 
 test("a voice added from an instrument's pool: built from its voice card, into the instrument's output, a node there where voices come and go; set by its own address", () => {
-  const { context, what, made } = built(SYNTH);
+  const { context, what, made } = builtOn(SYNTH, { from: 'in' });
   assert.equal(made('oscillator').length, 0, 'no voice until one is added');
   what.add(['voice', '1']);
   const [out] = into(context, context.destination);
@@ -77,7 +65,7 @@ test("a voice added from an instrument's pool: built from its voice card, into t
 });
 
 test("a copy added with a destination of its own: its output into it, not into the composite's", () => {
-  const { context, what, made } = built(SYNTH);
+  const { context, what, made } = builtOn(SYNTH, { from: 'in' });
   const [out] = into(context, context.destination);
   const destination = context.createGain();
   what.add(['voice', '1'], undefined, destination);
@@ -88,7 +76,7 @@ test("a copy added with a destination of its own: its output into it, not into t
 });
 
 test("a voice's placeholders by its own address, gone as it's let go", () => {
-  const { what } = built(withTheremin(SYNTH));
+  const { what } = builtOn(withTheremin(SYNTH), { from: 'in' });
   what.add(['voice', '1']);
   what.add(['voice', '2']);
   assert.deepEqual(what.placeholders, [
@@ -100,7 +88,7 @@ test("a voice's placeholders by its own address, gone as it's let go", () => {
 });
 
 test('a voice let go: its sources stopped, its nodes disconnected, its address no longer set; the other kept', () => {
-  const { context, what, made } = built(SYNTH);
+  const { context, what, made } = builtOn(SYNTH, { from: 'in' });
   what.add(['voice', '1']);
   what.add(['voice', '2']);
   const [first, second] = made('oscillator');
@@ -124,7 +112,7 @@ test('a voice let go: its sources stopped, its nodes disconnected, its address n
 });
 
 test("a desk's pool of channels: a copy fed from the desk's own input, into the bus, as its pool's rule wires it, a node at the desk's input and output", () => {
-  const { context, source, what, made } = built(DESK);
+  const { context, source, what, made } = builtOn(DESK, { from: 'in' });
   what.add(['replay', '3']);
   const [deskIn] = outOf(context, source);
   const [bus, master, replay] = made('gain').filter(
@@ -138,7 +126,7 @@ test("a desk's pool of channels: a copy fed from the desk's own input, into the 
 });
 
 test('refused: a copy added twice, a pool not there, a copy numbered from 0, one let go not added', () => {
-  const { what } = built(SYNTH);
+  const { what } = builtOn(SYNTH, { from: 'in' });
   what.add(['voice', '2']);
   assert.throws(() => what.add(['voice', '2']), /voice\/2: added already/);
   assert.throws(() => what.add(['choir', '1']), /choir: no pool/);
@@ -147,7 +135,7 @@ test('refused: a copy added twice, a pool not there, a copy numbered from 0, one
 });
 
 test("a copy's way in by its address: a sound fed into it, as a track's instrument into its channel; a copy not added refused", () => {
-  const { context, what, made } = built(DESK);
+  const { context, what, made } = builtOn(DESK, { from: 'in' });
   const before = made('gain').length;
   const copy = ['replay', '1'];
   what.add(copy);
@@ -161,7 +149,7 @@ test("a copy's way in by its address: a sound fed into it, as a track's instrume
 });
 
 test("a copy's meter forgotten as it's let go: the copy added again, its meter made again on it", () => {
-  const { context, what, made } = built(DESK);
+  const { context, what, made } = builtOn(DESK, { from: 'in' });
   what.add(['replay', '1']);
   what.peak(['replay', '1']);
   what.letGo(['replay', '1']);

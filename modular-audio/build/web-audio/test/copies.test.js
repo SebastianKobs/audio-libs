@@ -4,23 +4,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Copies } from '../index.ts';
-import { blockNode } from './blocks.js';
+import { blockNode, composite } from './blocks.js';
 
-// a composite of its children, as a plan has it
-function composite(name, children) {
-  return {
-    name,
-    kind: 'Room',
-    inputs: [],
-    outputs: [],
-    params: [],
-    settings: [],
-    children,
-    wires: [],
-    macros: [],
-    pools: [],
-  };
-}
 // a desk of three rooms, each a level and a reverb, and a channel with neither; an owner recording what it's told
 function deskOf() {
   const room = (name) =>

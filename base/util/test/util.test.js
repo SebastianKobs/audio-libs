@@ -35,11 +35,7 @@ import {
   valueBetween,
 } from '../index.ts';
 import { isNear, near } from './near.js';
-
-const draws = (...xs) => {
-  let i = 0;
-  return () => xs[i++];
-}; // rand() giving these, in order
+import { draws } from './draws.js';
 
 const MULBERRY32_SEED_1 = [0.6270739405881613, 0.002735721180215478, 0.5274470399599522]; // from an implementation of the reference C of its own
 

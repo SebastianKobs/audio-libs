@@ -6,43 +6,25 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { CROSSFADE, RING_OUT, WebAudioBuilder } from '../index.ts';
-import { blockNode } from './blocks.js';
+import { blockNode, builtOn, composite } from './blocks.js';
 import { SYNTH, UTILITY } from '../../../plan/format/test/plans.ts';
 
-// what's built of a plan on a stand-in context at a time, fed from a source; the context's nodes by their kind
-function built(plan, now = 4) {
-  const context = new StandInContext(() => now);
-  const source = context.createGain();
-  const what = new WebAudioBuilder({ context, beat: () => 0.5, random: () => 0.5 }).build(plan, {
-    into: context.destination,
-    from: { in: source },
-  });
-  const made = (kind) => context.rec.nodes.filter((node) => node.kind === kind && node !== source);
-  return { context, source, what, made };
-}
 // a sound of its own: an oscillator into a gain, out
 const TONE = {
   version: 1,
-  node: {
-    name: 'tone',
+  node: composite('tone', [blockNode('osc', 'oscillator'), blockNode('level', 'gain')], {
     kind: 'Tone',
-    inputs: [],
     outputs: [{ name: 'out', channels: 1 }],
-    params: [],
-    settings: [],
-    children: [blockNode('osc', 'oscillator'), blockNode('level', 'gain')],
     wires: [
       { from: { node: 'osc', output: 'out' }, to: { node: 'level', input: 'in' } },
       { from: { node: 'level', output: 'out' }, to: { output: 'out' } },
     ],
-    macros: [],
-    pools: [],
-  },
+  }),
 };
 
 test('what only processes sound built again: its input moved over to the new, the old left to ring out, unfaded, let go once it has', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const { context, source, what, made } = built(UTILITY);
+  const { context, source, what, made } = builtOn(UTILITY, { from: 'in' });
   const [oldGain] = made('gain');
   const [oldPan] = made('panner');
   what.rebuild(UTILITY);
@@ -62,7 +44,7 @@ test('what only processes sound built again: its input moved over to the new, th
 
 test('what makes sound of its own built again: the old faded out, the new faded in, over the crossfade; its oscillator stopped once faded, let go once it has rung out', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const { context, what, made } = built(TONE);
+  const { context, what, made } = builtOn(TONE, { from: 'in' });
   const [oldOsc] = made('oscillator');
   const [oldLevel] = made('gain');
   what.rebuild(TONE);
@@ -117,7 +99,7 @@ test('built again twice: the second fades out what the first faded in through th
     ],
     'faded out by the fade it came in by',
   );
-  const copied = built(SYNTH);
+  const copied = builtOn(SYNTH, { from: 'in' });
   const destination = copied.context.createGain();
   copied.what.add(['voice', '1'], 3.5, destination);
   copied.what.rebuild(SYNTH);
@@ -128,11 +110,11 @@ test('built again twice: the second fades out what the first faded in through th
 });
 
 test('what was told kept as it was built again: the values set, a macro by its own address, the copies added', () => {
-  const effect = built(UTILITY);
+  const effect = builtOn(UTILITY, { from: 'in' });
   effect.what.set(['level'], 0.3);
   effect.what.rebuild(UTILITY);
   assert.deepEqual(effect.made('gain').at(-1).gain.events.at(-1), ['set', 0.3, 4], "the level's, onto the new gain");
-  const instrument = built(SYNTH);
+  const instrument = builtOn(SYNTH, { from: 'in' });
   instrument.what.add(['voice', '2']);
   instrument.what.set(['voice', '2', 'oscillator', 'frequency'], 330);
   instrument.what.rebuild(SYNTH);
@@ -144,7 +126,7 @@ test('what was told kept as it was built again: the values set, a macro by its o
 });
 
 test('a copy added at its time, built again: added again at that time, its sources started then, as its note did', () => {
-  const instrument = built(SYNTH);
+  const instrument = builtOn(SYNTH, { from: 'in' });
   instrument.what.add(['voice', '1'], 3.5);
   instrument.what.add(['voice', '2']);
   instrument.what.rebuild(SYNTH);
@@ -154,7 +136,7 @@ test('a copy added at its time, built again: added again at that time, its sourc
 
 test('a copy with a destination of its own, built again: added again into it, the old faded out and the new in there', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const { context, what, made } = built(SYNTH);
+  const { context, what, made } = builtOn(SYNTH, { from: 'in' });
   const destination = context.createGain();
   what.add(['voice', '1'], 3.5, destination);
   const [oldVca] = outOf(context, made('oscillator')[0]);
@@ -186,7 +168,7 @@ test('a copy with a destination of its own, built again: added again into it, th
 });
 
 test('a preset that changes a setting: built again with it, its values set on the new; one that keeps it, passed over', () => {
-  const { what, made } = built(UTILITY);
+  const { what, made } = builtOn(UTILITY, { from: 'in' });
   what.preset({ 'pan/pan': 0.5 }, { 'pan/law': 'pan pot' });
   const [, newPan] = made('panner');
   assert.ok(newPan, 'built again');
@@ -197,7 +179,7 @@ test('a preset that changes a setting: built again with it, its values set on th
 });
 
 test('a meter on what was built before a rebuild made again on the new as it is read, the old one forgotten', () => {
-  const { context, what } = built(UTILITY);
+  const { context, what } = builtOn(UTILITY, { from: 'in' });
   const splitters = () => context.rec.nodes.filter((node) => node.kind === 'splitter');
   what.peak([]);
   what.rebuild(UTILITY);
@@ -208,7 +190,7 @@ test('a meter on what was built before a rebuild made again on the new as it is 
 });
 
 test("what's fed into what's built, and its ways in, fed into what's built anew: the old let go of, the new fed", () => {
-  const { context, what, made } = built(UTILITY);
+  const { context, what, made } = builtOn(UTILITY, { from: 'in' });
   const fed = context.createGain();
   what.feed([], fed);
   const way = what.wayInto([]);

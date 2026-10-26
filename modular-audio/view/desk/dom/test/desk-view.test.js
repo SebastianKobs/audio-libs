@@ -9,24 +9,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deskHtml, fedBy, trackHtml } from '../index.ts';
 import { DeskViewBuilder } from '../../models/index.ts';
-import { addressText } from '../../../../../base/util/index.ts';
-import { STUDIO } from '../../models/test/desk.js';
+import { studioReadout } from '../../models/test/desk.js';
 
 // the small desk's view models, its values and roles by address, live unless said
-function viewsOn({ values = {}, roles = {}, copies = {} } = {}) {
-  return new DeskViewBuilder(
-    {
-      plan: STUDIO,
-      valueOf: (address) => values[addressText(address)],
-      startOf: () => undefined,
-      roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
-      slotOf: () => undefined,
-    },
-    () => {},
-  );
+function viewsOn(readout = {}) {
+  return new DeskViewBuilder(studioReadout(readout), () => {});
 }
 const NO_LEVEL = () => 0;
 
@@ -34,14 +21,14 @@ test("the desk's own channels drawn: its buses, a bus with those that go into it
   const { buses, returns, master } = deskHtml(viewsOn(), NO_LEVEL);
   assert.match(
     buses.text,
-    /^<div class="kind bus-group"><div class="track"[^>]*><div class="name" data-open="you" data-title="my playing">my playing<\/div>/,
-  );
-  assert.match(buses.text, /data-open="tap" data-title="my tap">my tap<\/div><div class="route">to my playing<\/div>/);
-  assert.match(
-    buses.text,
-    /<\/div><div class="track"[^>]*><div class="name" data-open="ambient" data-title="background">/,
+    /^<div class="track"[^>]*><div class="name" data-open="sings" data-title="background">/,
     'background alone, no box',
   );
+  assert.match(
+    buses.text,
+    /<\/div><div class="kind bus-group"><div class="track"[^>]*><div class="name" data-open="you" data-title="my playing">my playing<\/div>/,
+  );
+  assert.match(buses.text, /data-open="tap" data-title="my tap">my tap<\/div><div class="route">to my playing<\/div>/);
   assert.match(
     returns.text,
     /^<div class="track"[^>]*><div class="name" data-open="reverb" data-title="reverb">reverb<\/div><div class="route">to master<\/div>/,

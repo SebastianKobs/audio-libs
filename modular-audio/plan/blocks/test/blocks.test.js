@@ -7,7 +7,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BLOCKS, biquadQs } from '../index.ts';
 import { near } from '../../../../base/util/test/near.js';
-import { dBOf, FADER_GAIN, isSwitch, NOTE_VALUES, timeParamsIn } from '../../../../base/params/index.ts';
+import { onControl } from '../../../../base/params/test/on-control.js';
+import { FADER_GAIN, isSwitch, NOTE_VALUES, timeParamsIn } from '../../../../base/params/index.ts';
 
 const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise', 'limiter', 'envelope', 'select'];
 const MONO = 1;
@@ -22,14 +23,6 @@ function declared({ params, settings, inputs, outputs }) {
     inputs: inputs.map(jack),
     outputs: outputs.map(jack),
   };
-}
-// whether a value is one its spec's control can take: within its range, a gain's in dB, or one of its choices
-function onControl({ range, choices, dB }, value) {
-  if (choices) {
-    return choices.includes(value);
-  }
-  const shown = dB ? dBOf(value) : value;
-  return shown >= range[0] && shown <= range[1];
 }
 
 test('the ten blocks, each declared by its kind, the contract every builder meets', () => {

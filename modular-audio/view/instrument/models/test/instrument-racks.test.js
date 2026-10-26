@@ -9,7 +9,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { InstrumentRacks } from '../index.ts';
-import { paramAt, settingAt } from '../../../../plan/format/index.ts';
+import { planReadoutOf } from '../../../device/readout/test/plan-readout.js';
 import { CARD } from '../../../device/models/test/card.js';
 
 // the pluck, and one with a rise of its own, as the note's sources' macros
@@ -17,28 +17,15 @@ const RISING = { ...CARD, node: { ...CARD.node, macros: [...CARD.node.macros, ma
 // the roles' instruments: a pluck playing on the tap, a drum rack's two pads on the hold, the trace with none
 const PATCHES = { tap: 'pluck', hold: 'kit', trace: undefined };
 const CARDS = {
-  tap: [{ patch: 'pluck', planReadout: planReadoutOn(CARD), send: () => {} }],
+  tap: [{ patch: 'pluck', planReadout: planReadoutOf(CARD), send: () => {} }],
   hold: [
-    { patch: 'pluck', key: 36, planReadout: planReadoutOn(CARD), send: () => {} },
-    { patch: 'swell', key: 38, planReadout: planReadoutOn(RISING), send: () => {} },
+    { patch: 'pluck', key: 36, planReadout: planReadoutOf(CARD), send: () => {} },
+    { patch: 'swell', key: 38, planReadout: planReadoutOf(RISING), send: () => {} },
   ],
 };
 
 function macro(name) {
   return { spec: { name, range: [0, 1, 0.01] }, value: 0, maps: [] };
-}
-// a plan's readout of the tests' own onto a voice card: every value the plan's
-function planReadoutOn(plan) {
-  return {
-    plan,
-    valueOf: () => undefined,
-    startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: () => undefined,
-  };
 }
 // the racks on the tests' instruments, each message sent kept
 function racksOn() {

@@ -1,8 +1,5 @@
-// The generic sequencer's unit tests (mockup/src/libs/sequencing/sequencer/, a package of its own since L1e, MIDI's part apart since S1d;
-// mockup/architecture/sequencer.md): ticks, patterns and their lengths, a record as the pattern it is, placing and repeating on the grid in
-// ticks, patterns and their lengths, a record as the pattern it is, placing and repeating on the grid in ticks, a bank's cycle and a replay's run
-// unmuted, a rhythm played live and its speed, on a grid of the tests' own; their events carry a pitch or a step, passed on, never read. What the
-// garden plays through it is held to the recordings (replays.test.js)
+// The generic sequencer's unit tests (mockup/src/libs/sequencing/sequencer/): ticks, patterns and their lengths, placing
+// and repeating on the grid, a bank's cycle, a replay's run unmuted, a rhythm played live and its speed, on a grid of the tests' own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -21,11 +18,8 @@ import {
   whole,
 } from '../index.ts';
 import { STEP } from '../../clock/index.ts';
+import { draws } from '../../../base/util/test/draws.js';
 
-const draws = (...xs) => {
-  let i = 0;
-  return () => xs[i++];
-}; // rand() giving these, in order
 const grid = { stepAt: (t) => t * 8, timeAt: (s) => s / 8 }; // 16ths an 8th of a second apart, from 0, straight
 
 test("a pattern's length: its bars, in its own time signature, or the master's", () => {

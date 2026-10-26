@@ -5,23 +5,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { hearing, hearMax, moved } from '../hearing.ts';
-import { Space } from '../index.ts';
+import { heardAs, nothing, onFloor, r10, setup } from './listening.js';
 
 const vectors = JSON.parse(
   readFileSync(new URL('../../../../../../shared/test-vectors/space/hearing.json', import.meta.url), 'utf8'),
 );
-const r10 = (v) => +v.toPrecision(10);
-const onFloor = (x, z) => ({ x, y: 0, z }); // a place on the floor, y up
-const heardAs = (c, f) =>
-  c.d.forEach((d, i) => {
-    const h = f(d);
-    assert.deepEqual(
-      [r10(h.level), r10(h.cutoff), r10(h.room)],
-      [c.level[i], c.cutoff[i], c.room[i]],
-      `${JSON.stringify(c.settings)}, at ${d}`,
-    );
-  });
-
 test('the model: level, cutoff and room at every distance as the vectors have them, for the defaults and with each setting moved', () => {
   assert.equal(vectors.format, 1);
   for (const c of vectors.cases) {
@@ -60,21 +48,6 @@ const followerSeen = () => {
   const calls = [];
   return { calls, follower: (value, when) => calls.push([value, when]) };
 };
-const nothing = () => {}; // hears, for an emitter whose values the test doesn't look at
-// a listener of the test's own: a plain distance, with no wrap, and 10 units to either side as full
-function setup(more = {}) {
-  const at = { x: 0, z: 0 };
-  const hearingSettings = { range: 8, hearing: 40, falloff: 1, dull: 1, room: 1, width: 0.6, ...more };
-  const space = new Space({
-    settings: hearingSettings,
-    listener: {
-      distance: ({ x, z }) => Math.hypot(x - at.x, z - at.z),
-      side: ({ x }) => Math.max(-1, Math.min(1, (x - at.x) / 10)),
-    },
-  });
-  return { at, hearingSettings, space };
-}
-
 test('the model, with its settings read live', () => {
   const { space, hearingSettings } = setup();
   assert.equal(space.hearMax(), 40);

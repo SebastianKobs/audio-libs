@@ -12,27 +12,15 @@ import { deviceHtml, faderHtml, knobHtml, meterHtml, stillPanHtml } from '../../
 import { html } from '../../../../../base/html/index.ts';
 import { ViewBuilder } from '../../../device/models/index.ts';
 import { DeskViewBuilder } from '../../models/index.ts';
-import { addressText } from '../../../../../base/util/index.ts';
 import { positionOf } from '../../../../../base/params/index.ts';
-import { STUDIO } from '../../models/test/desk.js';
+import { studioReadout } from '../../models/test/desk.js';
+import { planReadoutOf } from '../../../device/readout/test/plan-readout.js';
 
 const LOOK = { route: 'to master', sendLabel: (to) => `${to}!`, level: 0.5 };
 
 // the small desk's view models, its values and roles by address, live unless said; the slots' words by address
-function viewsOn({ values = {}, roles = {}, slots = {} } = {}) {
-  return new DeskViewBuilder(
-    {
-      plan: STUDIO,
-      valueOf: (address) => values[addressText(address)],
-      startOf: () => undefined,
-      roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: () => [],
-      slotOf: (address) => slots[addressText(address)],
-    },
-    () => {},
-  );
+function viewsOn(readout = {}) {
+  return new DeskViewBuilder(studioReadout(readout), () => {});
 }
 
 test('a knob drawn: its label, its bar by its taper, a gain its unity marked, its text; live, marked with its address and its hint; a pan from its middle; one that does nothing', () => {
@@ -153,19 +141,7 @@ test("a setting with a range shown as a knob only where it's live: a room's leng
       settings: [{ spec: { name: 'length', unit: 's', range: [0.2, 8, 0.1] }, value: 3.5 }],
     },
   };
-  const devicesOn = (by) =>
-    new ViewBuilder(
-      {
-        plan: room,
-        valueOf: () => undefined,
-        startOf: () => undefined,
-        roleOf: () => ({ by }),
-        peakOf: () => 0,
-        copiesOf: () => [],
-        slotOf: () => undefined,
-      },
-      () => {},
-    ).device([]);
+  const devicesOn = (by) => new ViewBuilder(planReadoutOf(room, { roles: { length: { by } } }), () => {}).device([]);
   const look = { status: 'room', hintOf: () => '' };
   assert.match(deviceHtml(devicesOn('live'), look).text, /<span>length \(s\)<\/span>/);
   assert.doesNotMatch(deviceHtml(devicesOn('fixed'), look).text, /length/);
@@ -194,19 +170,7 @@ const ECHO = {
 };
 // the delay's device, its values by address
 function echoOn(values = {}) {
-  return new ViewBuilder(
-    {
-      plan: ECHO,
-      valueOf: (address) => values[addressText(address)],
-      startOf: () => undefined,
-      roleOf: () => ({ by: 'live' }),
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: () => [],
-      slotOf: () => undefined,
-    },
-    () => {},
-  ).device([]);
+  return new ViewBuilder(planReadoutOf(ECHO, { values }), () => {}).device([]);
 }
 
 test("a device's switch drawn on or off, marked for a click; a choice as a list of its options, the one it is chosen; its time by its sync, the note while synced, the ms while free", () => {
@@ -233,6 +197,6 @@ test("a device's switch drawn on or off, marked for a click; a choice as a list 
 
 test('every value escaped as it is made', () => {
   const views = viewsOn();
-  const text = stripHtml(views.strip(['ambient']), { ...LOOK, name: '<b>&"' }).text;
+  const text = stripHtml(views.strip(['sings']), { ...LOOK, name: '<b>&"' }).text;
   assert.match(text, /<div class="name">&#60;b&#62;&#38;&#34;<\/div>/);
 });

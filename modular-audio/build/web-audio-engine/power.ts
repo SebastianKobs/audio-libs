@@ -36,7 +36,7 @@ export interface AudioPowerMaking {
 // The engine as its users ask for it, as they need it: none until the audio starts.
 export type EngineOnceStarted = () => ClockedContext | null;
 
-const STOP_AFTER = 400; // ms before a pause suspends the context: the fade out has gone quiet
+export const STOP_AFTER = 400; // ms before a pause suspends the context: the fade out has gone quiet
 
 export class AudioPower {
   readonly #making: AudioPowerMaking;

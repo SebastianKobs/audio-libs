@@ -1,6 +1,5 @@
-// phrasing's unit tests (mockup/src/libs/music/phrasing/; the garden's until ZG41, the sequencer's until L1a;
-// mockup/architecture/sequencer.md): a speed for how fast you play and a line's feel, the transforms,
-// on a grid of the tests' own
+// phrasing's unit tests (mockup/src/libs/music/phrasing/): a speed for how fast you play and a line's feel,
+// the transforms, on a grid of the tests' own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -17,11 +16,8 @@ import {
   speedFor,
 } from '../index.ts';
 import { STEP } from '../../../sequencing/clock/index.ts';
+import { draws } from '../../../base/util/test/draws.js';
 
-const draws = (...xs) => {
-  let i = 0;
-  return () => xs[i++];
-}; // rand() giving these, in order
 const grid = { stepAt: (t) => t * 8, timeAt: (s) => s / 8 }; // 16ths an 8th of a second apart, from 0, straight
 
 test('a speed for how fast you play: the one of half, normal and double whose notes come closest, as a ratio, to your rate', () => {

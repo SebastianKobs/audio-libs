@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into, outOf } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
-import { blockNode, THEREMIN } from './blocks.js';
+import { blockNode, chainOf, composite, THEREMIN } from './blocks.js';
 import { DESK, UTILITY } from '../../../plan/format/test/plans.ts';
 import { near } from '../../../../base/util/test/near.js';
 
@@ -20,29 +20,6 @@ function builderOn() {
   const made = (kind) => context.rec.nodes.filter((node) => node.kind === kind);
   return { context, builder, made };
 }
-// a plan of its children wired in a row, from the first to the last, the last into its output
-function chainOf(...children) {
-  const wires = children.slice(1).map((child, index) => ({
-    from: { node: children[index].name, output: 'out' },
-    to: { node: child.name, input: 'in' },
-  }));
-  return {
-    version: 1,
-    node: {
-      name: 'chain',
-      kind: 'Chain',
-      inputs: [],
-      outputs: [{ name: 'out', channels: 2 }],
-      params: [],
-      settings: [],
-      children,
-      wires: [...wires, { from: { node: children.at(-1).name, output: 'out' }, to: { output: 'out' } }],
-      macros: [],
-      pools: [],
-    },
-  };
-}
-
 test('a plan built between where its sound comes from and where it goes: the Utility, a composite opened, its gain into its pan, wired by names', () => {
   const { context, builder, made } = builderOn();
   const source = context.createGain();
@@ -188,20 +165,14 @@ test('a sound into a macro fanned out to its targets, a gain each at its factor,
     value: 0,
     maps: maps.map(([to, factor]) => ({ to, factor, offset: 0 })),
   });
-  const composite = (name, children, wires, macros) => ({
-    name,
-    kind: name,
-    inputs: [],
-    outputs: [{ name: 'out', channels: 1 }],
-    params: [],
-    settings: [],
-    children,
-    wires: [...wires, { from: { node: children.at(-1).name, output: 'out' }, to: { output: 'out' } }],
-    macros,
-    pools: [],
-  });
+  const wired = (name, children, wires, macros) =>
+    composite(name, children, {
+      outputs: [{ name: 'out', channels: 1 }],
+      wires: [...wires, { from: { node: children.at(-1).name, output: 'out' }, to: { output: 'out' } }],
+      macros,
+    });
   const vco = (name) =>
-    composite(
+    wired(
       name,
       [blockNode('osc', 'oscillator'), blockNode('level', 'gain')],
       [{ from: { node: 'osc', output: 'out' }, to: { node: 'level', input: 'in' } }],
@@ -213,9 +184,9 @@ test('a sound into a macro fanned out to its targets, a gain each at its factor,
         ]),
       ],
     );
-  const card = composite('card', [vco('inner')], [], [macro('pitch', [[['inner', 'tune'], 2]])]);
+  const card = wired('card', [vco('inner')], [], [macro('pitch', [[['inner', 'tune'], 2]])]);
   const into = (node, param) => ({ from: { node: 'lfo', output: 'out' }, to: { node, param } });
-  const patch = composite(
+  const patch = wired(
     'patch',
     [blockNode('lfo', 'oscillator'), card, vco('vco')],
     [into('vco', 'tune'), into('vco', 'both'), into('card', 'pitch')],

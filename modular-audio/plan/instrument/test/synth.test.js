@@ -10,15 +10,12 @@ import { ARCHITECTURE_FORM, NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, SYNTH_
 import { MODULE_TEMPLATES } from '../content.ts';
 import { Planner } from '../../planner/index.ts';
 import { isSwitch } from '../../../../base/params/index.ts';
+import { onControl } from '../../../../base/params/test/on-control.js';
 import { paramAt, settingAt } from '../../format/index.ts';
 import { PLUCK } from './pluck.js';
 
 const planner = new Planner(MODULE_TEMPLATES, SYNTH_FORMS);
 
-// whether a value is one its spec's control can take: within its range, or one of its choices
-function onControl({ range, choices }, value) {
-  return choices ? choices.includes(value) : value >= range[0] && value <= range[1];
-}
 // a planned module's params, its macros by name, each its value
 function paramsOf(kind) {
   return Object.fromEntries(planner.plan(kind).node.macros.map(({ spec, value }) => [spec.name, value]));

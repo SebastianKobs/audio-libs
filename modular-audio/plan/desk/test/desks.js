@@ -2,10 +2,11 @@
 //   REPLAY: a channel written apart: its air and a Utility panning as a pan pot, no pan of its own, its sends
 //     taken before its fader.
 //   TOWER: a channel built on REPLAY, a dullness after it.
-//   STUDIO: today's desk, small: the reverb, the garden sings bus, a delay into it, your bus, your taps' channel
+//   STUDIO: a small desk: the reverb, the garden sings bus, a delay into it, your bus, your taps' channel
 //     into it, the master with its limiter; a pool of your taps' tracks, a pool of towers' replays.
 //   PRESETS: a theme's, the delay's echo.
-// planned(): a desk written short, STUDIO unless another, planned with the effects, the forms and the presets.
+// planned(): a desk written short, STUDIO unless another, planned with the effects, the forms and the presets;
+//   the words a view shows its channels and pools by, a label and a short label, given by name.
 import { DESK_FORMS, deskTemplates } from '../index.ts';
 import { Planner } from '../../planner/index.ts';
 import { EFFECT_FORM } from '../../effects/index.ts';
@@ -61,8 +62,19 @@ export const STUDIO = {
 
 export const PRESETS = { echo: { kind: 'Delay', values: { note: '1/8.', feedback: 0.5 } } };
 
-// a desk written short, planned with the effects, the forms and the presets
-export function planned(desk = STUDIO) {
-  const templates = [...EFFECT_TEMPLATES, ...deskTemplates(desk, [REPLAY, TOWER])];
-  return new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], PRESETS).plan(desk.kind);
+// a desk written short, planned with the effects, the forms and the presets; labels and short labels by name, a
+// channel's or a pool's
+export function planned(desk = STUDIO, { labels = {}, shorts = {} } = {}) {
+  const worded = (item) => ({
+    ...item,
+    ...(labels[item.name] && { label: labels[item.name] }),
+    ...(shorts[item.name] && { short: shorts[item.name] }),
+  });
+  const written = {
+    ...desk,
+    channels: desk.channels.map(worded),
+    ...(desk.pools && { pools: desk.pools.map(worded) }),
+  };
+  const templates = [...EFFECT_TEMPLATES, ...deskTemplates(written, [REPLAY, TOWER])];
+  return new Planner(templates, [EFFECT_FORM, ...DESK_FORMS], PRESETS).plan(written.kind);
 }

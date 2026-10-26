@@ -5,5 +5,5 @@
 //     the output faded out and the context suspended, and back on;
 //   - engine-building.ts: the Web Audio builder in the engine's context, its buffers shared.
 export { ClockedContext, type ClockedContextOptions } from './context.ts';
-export { AudioPower, type BrowserAudio, type EngineOnceStarted } from './power.ts';
+export { AudioPower, STOP_AFTER, type BrowserAudio, type EngineOnceStarted } from './power.ts';
 export { EngineBuilding, buildingIn, type BuildingIn } from './engine-building.ts';

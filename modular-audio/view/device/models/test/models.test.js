@@ -8,11 +8,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CustomViews, ViewBuilder } from '../index.ts';
-import { paramAt, settingAt } from '../../../../plan/format/index.ts';
 import { addressText } from '../../../../../base/util/index.ts';
 import { UTILITY } from '../../../../plan/format/test/plans.ts';
 import { positionOf } from '../../../../../base/params/index.ts';
 import { near } from '../../../../../base/util/test/near.js';
+import { planReadoutOf } from '../../readout/test/plan-readout.js';
 
 // a delay's own: a switch, a choice and a ms as macros; its line's longest time a setting
 const DELAY = {
@@ -48,16 +48,7 @@ const DELAY = {
 // one live unless said; what's sent kept.
 function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
   const sent = [];
-  const planReadout = {
-    plan,
-    valueOf: (address) => values[addressText(address)],
-    startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
-    roleOf: (address) => roles[addressText(address)] ?? { by: 'live' },
-    peakOf: () => 0,
-    readingOf: () => 0,
-    copiesOf: () => [],
-    slotOf: (address) => slots[addressText(address)],
-  };
+  const planReadout = planReadoutOf(plan, { values, roles, slots });
   return { views: new ViewBuilder(planReadout, (command) => sent.push(command)), sent };
 }
 
@@ -232,19 +223,7 @@ test("a knob set from what's typed, read as its text shows it: a gain in dB, -âˆ
       settings: [],
     },
   };
-  const models = new ViewBuilder(
-    {
-      plan,
-      valueOf: () => undefined,
-      startOf: () => undefined,
-      roleOf: () => ({ by: 'live' }),
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: () => [],
-      slotOf: () => undefined,
-    },
-    (command) => sent.push(command.value),
-  );
+  const models = new ViewBuilder(planReadoutOf(plan), (command) => sent.push(command.value));
   const typed = (name, text) => models.control([name]).setText(text);
   assert.deepEqual(
     [typed('gain', '-6'), typed('gain', '-âˆž'), typed('pan', 'L20'), typed('pan', 'C'), typed('pan', 'R50')],

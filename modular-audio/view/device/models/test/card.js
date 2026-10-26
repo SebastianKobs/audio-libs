@@ -1,7 +1,7 @@
 // A voice card of the tests' own, a pluck, as the view models' and the view library's tests read it; its models on a plan's readout
 // of the tests' own
 import { ViewBuilder } from '../index.ts';
-import { paramAt, settingAt } from '../../../../plan/format/index.ts';
+import { planReadoutOf } from '../../readout/test/plan-readout.js';
 
 // a block of the tests' own, its params by name and value
 function block(name, kind, role, params) {
@@ -53,21 +53,5 @@ export const CARD = {
 };
 // a view builder on a plan's readout of the tests' own: every value the plan's, every one live
 export function builderOn(plan) {
-  return new ViewBuilder(
-    {
-      plan,
-      valueOf: () => undefined,
-      startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
-      roleOf: () => ({ by: 'live' }),
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: () => [],
-      slotOf: () => undefined,
-    },
-    () => {},
-  );
-}
-// a card's view models, what's done on them sent through its send
-export function cardModels({ planReadout, send }) {
-  return new ViewBuilder(planReadout, send);
+  return new ViewBuilder(planReadoutOf(plan), () => {});
 }

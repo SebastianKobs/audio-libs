@@ -1,25 +1,10 @@
 // What's built of a desk, a stand-in for the desk's tests: each call recorded, by its address as text; a way in by its
 // address and its input, as text; its meters' levels and readings as a test sets them, by their address and point.
-class DeskBuiltStandIn {
-  levels = new Map();
-  told = [];
-  added = [];
-  presets = [];
-  tempi = [];
-  placeholders = [];
+import { BuiltStandIn } from '../../../contract/test/built.js';
 
-  set(address, value, when = {}) {
-    this.told.push([address.join('/'), value, when]);
-  }
-  add(copy) {
-    this.added.push(copy.join('/'));
-  }
-  preset(values, settings) {
-    this.presets.push([values, settings]);
-  }
-  tempo(beat) {
-    this.tempi.push(beat);
-  }
+class DeskBuiltStandIn extends BuiltStandIn {
+  levels = new Map();
+
   peak(address, point = '') {
     return this.levels.get([...address, point].join('/')) ?? 0;
   }
@@ -29,14 +14,6 @@ class DeskBuiltStandIn {
   wayInto(address, input = 'in') {
     return `into ${[...address, input].join('/')}`;
   }
-  automate() {}
-  stopBy() {}
-  letGo() {}
-  rebuild() {}
-  faded() {
-    return Infinity;
-  }
-  dispose() {}
 }
 // A setup of the test's own: no track live, nothing set by notes.
 const SETUP = { isLive: () => false, setBy: () => undefined };

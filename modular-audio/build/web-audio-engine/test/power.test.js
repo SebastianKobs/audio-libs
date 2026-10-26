@@ -6,9 +6,9 @@
 // Resume: faded in again, never at full volume: from where the fade got to if the context hadn't stopped yet, else
 // from silence, the context resumed; started if it hadn't.
 // Woken: back on after the browser stopped the sound, the audio never started by it.
-import { test, mock } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { AudioPower } from '../index.ts';
+import { AudioPower, STOP_AFTER } from '../index.ts';
 import { FADE_IN, FADE_OUT } from '../../web-audio/index.ts';
 import { into, StandInContext } from '../../web-audio/test/audio-stand-in.js';
 
@@ -79,47 +79,39 @@ test('paused: nothing started; resumed, started', () => {
   assert.deepEqual([power.paused, power.started, kept.told], [false, true, [1]]);
 });
 
-test('paused: the output faded out, the context suspended once it has; resumed before that, faded back in from where it got to', () => {
-  mock.timers.enable({ apis: ['setTimeout'] });
-  try {
-    const { power } = powerOn();
-    power.start();
-    const context = power.engine.audioContext;
-    power.pause();
-    assert.deepEqual(lastFade(power), ['target', 0, 4, FADE_OUT]);
-    mock.timers.tick(399);
-    assert.equal(context.state, 'running', 'still fading');
-    power.resume();
-    assert.deepEqual(lastFade(power), ['target', 1, 4, FADE_IN], 'back before it stopped: from where the fade got to');
-    mock.timers.tick(10);
-    assert.equal(context.state, 'running', 'it never stops');
-  } finally {
-    mock.timers.reset();
-  }
+test('paused: the output faded out, the context suspended once it has; resumed before that, faded back in from where it got to', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { power } = powerOn();
+  power.start();
+  const context = power.engine.audioContext;
+  power.pause();
+  assert.deepEqual(lastFade(power), ['target', 0, 4, FADE_OUT]);
+  t.mock.timers.tick(STOP_AFTER - 1);
+  assert.equal(context.state, 'running', 'still fading');
+  power.resume();
+  assert.deepEqual(lastFade(power), ['target', 1, 4, FADE_IN], 'back before it stopped: from where the fade got to');
+  t.mock.timers.tick(10);
+  assert.equal(context.state, 'running', 'it never stops');
 });
 
-test('paused long enough, the context suspended; resumed, faded in from silence and the context resumed', () => {
-  mock.timers.enable({ apis: ['setTimeout'] });
-  try {
-    const { power } = powerOn();
-    power.start();
-    const context = power.engine.audioContext;
-    power.pause();
-    mock.timers.tick(400);
-    assert.equal(context.state, 'suspended');
-    const fades = power.output.node.gain.events.length;
-    power.pause();
-    assert.equal(power.output.node.gain.events.length, fades, 'not running: nothing to fade');
-    power.resume();
-    assert.deepEqual(power.output.node.gain.events.slice(fades), [
-      ['cancel', 4],
-      ['set', 0, 4],
-      ['target', 1, 4, FADE_IN],
-    ]);
-    assert.equal(context.state, 'running');
-  } finally {
-    mock.timers.reset();
-  }
+test('paused long enough, the context suspended; resumed, faded in from silence and the context resumed', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { power } = powerOn();
+  power.start();
+  const context = power.engine.audioContext;
+  power.pause();
+  t.mock.timers.tick(STOP_AFTER);
+  assert.equal(context.state, 'suspended');
+  const fades = power.output.node.gain.events.length;
+  power.pause();
+  assert.equal(power.output.node.gain.events.length, fades, 'not running: nothing to fade');
+  power.resume();
+  assert.deepEqual(power.output.node.gain.events.slice(fades), [
+    ['cancel', 4],
+    ['set', 0, 4],
+    ['target', 1, 4, FADE_IN],
+  ]);
+  assert.equal(context.state, 'running');
 });
 
 test('woken: back on after the browser stopped the sound, from silence; never started by it, nor while paused', () => {

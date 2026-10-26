@@ -344,22 +344,7 @@ test("the audio context's time jumps a chunk at a time: the clock maps to where 
 test('the first press, while the audio is still starting, sounds as it starts, however long the page was open', () => {
   clock.useFake(600); // the page has been open for 10 minutes
   // a new audio context: suspended at time 0, running 80 ms later, its time starting from 0 then
-  let state = 'suspended';
-  let startedAt = null;
-  const listeners = [];
-  const a = {
-    get state() {
-      return state;
-    },
-    get currentTime() {
-      return startedAt === null ? 0 : clock.now() - startedAt;
-    },
-    addEventListener(type, fn) {
-      if (type === 'statechange') {
-        listeners.push(fn);
-      }
-    },
-  };
+  const a = fakeAudio({ suspended: true });
   clock.useAudio(a);
   const tap = clock.audio.toContext(clock.quantize(clock.now())); // the press that started the audio plays its note now
   assert.ok(
@@ -367,9 +352,7 @@ test('the first press, while the audio is still starting, sounds as it starts, h
     `scheduled at ${tap} s of the audio's time, not near its start`,
   );
   clock.advance(0.08, { ticks: false });
-  state = 'running';
-  startedAt = clock.now();
-  listeners.forEach((fn) => fn());
+  a.start();
   clock.advance(0.3);
   near(clock.audio.toContext(clock.now()), a.currentTime, 'and once it runs, the offset is found:', 0.026);
 });

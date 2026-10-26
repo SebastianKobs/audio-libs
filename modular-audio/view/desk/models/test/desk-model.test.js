@@ -1,5 +1,5 @@
 // The strips and the desk model (mockup/src/libs/modular-audio/view/desk/models), in node, on a small desk (test/desk.js) and a plan's
-// in of the tests' own:
+// readout of the tests' own:
 //   - a channel as a strip, by its form: its shown name, where it goes, its inserts as devices, its sends'
 //     knobs, its fader, pan, mute and solo, its level; quiet where its cut is at 0; a pool's copy too;
 //   - a desk read as its strips: its buses, each with the buses that go into it, its returns, its master, in the
@@ -9,22 +9,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { channelGroups, DeskViewBuilder, shortName } from '../index.ts';
 import { addressText } from '../../../../../base/util/index.ts';
-import { STUDIO } from './desk.js';
+import { studioPlan, studioReadout } from './desk.js';
 
 // The desk's view models on a plan's readout of the tests' own: values and peaks by address, the copies
 // each pool has, every control live; what's sent kept.
-function mixerOn({ values = {}, peaks = {}, readings = {}, copies = {} } = {}) {
+function mixerOn(readout = {}) {
   const sent = [];
-  const planReadout = {
-    plan: STUDIO,
-    valueOf: (address) => values[addressText(address)],
-    startOf: () => undefined,
-    roleOf: () => ({ by: 'live' }),
-    peakOf: (address, point) => peaks[[addressText(address), point].filter(Boolean).join(' ')] ?? 0,
-    readingOf: (address, reading) => readings[`${addressText(address)} ${reading}`] ?? 0,
-    copiesOf: (pool) => (copies[addressText(pool)] ?? []).map((number) => [...pool, String(number)]),
-    slotOf: () => undefined,
-  };
+  const planReadout = studioReadout(readout);
   return { views: new DeskViewBuilder(planReadout, (command) => sent.push(command)), sent };
 }
 
@@ -42,7 +33,10 @@ test("a channel as a strip, by its form: its name as shown, its label's, else it
   );
   assert.deepEqual(
     tap.sends.map(({ name, address }) => [name, addressText(address)]),
-    [['reverb', 'tap/send/reverb']],
+    [
+      ['reverb', 'tap/send/reverb'],
+      ['delay 1', 'tap/send/delay 1'],
+    ],
   );
   assert.deepEqual(
     [tap.volume, tap.pan, tap.mute, tap.solo].map(({ address }) => addressText(address)),
@@ -53,7 +47,7 @@ test("a channel as a strip, by its form: its name as shown, its label's, else it
 
 test("a channel's name in little room, as a send's knob shows it: its short label, else its label, else its own", () => {
   assert.deepEqual(
-    [['reverb'], ['you'], ['master']].map((address) => shortName(STUDIO, address)),
+    [['reverb'], ['you'], ['master']].map((address) => shortName(studioPlan(), address)),
     ['rev', 'my playing', 'master'],
   );
 });
@@ -73,7 +67,10 @@ test("a pool's copy as a strip: its pool's channel, under its address, named by 
   assert.deepEqual([copy.name, copy.out, copy.role], ['my tap 2', 'my tap', 'channel']);
   assert.deepEqual(
     copy.sends.map(({ address, value }) => [addressText(address), value]),
-    [['my tap/2/send/reverb', 0.5]],
+    [
+      ['my tap/2/send/reverb', 0.5],
+      ['my tap/2/send/delay 1', 0],
+    ],
   );
 });
 
@@ -91,13 +88,13 @@ test("a desk read as its strips, in the plan's order: its buses, each with the b
   assert.deepEqual(
     mixer.buses.map(({ bus, members }) => [bus.name, members.map(({ name }) => name)]),
     [
-      ['my playing', ['my tap']],
       ['background', []],
+      ['my playing', ['my tap']],
     ],
   );
   assert.deepEqual(
     mixer.returns.map(({ name }) => name),
-    ['reverb'],
+    ['reverb', 'delay 1'],
   );
   assert.equal(mixer.master.name, 'master');
 });
@@ -135,7 +132,7 @@ test("a solo click: that strip alone, the others let go first; again, none; with
     'tap/solo 1',
   ]);
   assert.deepEqual(clicked({ 'tap/solo': 1 }, ['tap']), ['tap/solo 0'], 'again: none');
-  assert.deepEqual(clicked({ 'tap/solo': 1 }, ['ambient'], true), ['ambient/solo 1'], 'with shift, added');
+  assert.deepEqual(clicked({ 'tap/solo': 1 }, ['sings'], true), ['sings/solo 1'], 'with shift, added');
   assert.deepEqual(clicked({ 'tap/solo': 1, 'you/solo': 1 }, ['tap'], true), ['tap/solo 0'], 'with shift, let go');
   assert.deepEqual(clicked({}, ['my tap', '1']), ['my tap/1/solo 1'], "a pool's copy");
 });

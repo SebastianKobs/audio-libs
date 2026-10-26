@@ -19,7 +19,7 @@ import { playheadAt } from '../arrangement/playhead.ts';
 import { faderPosition, PAN, SEND_PARAM, STRIP_PARAMS, positionOf } from '../../../../../base/params/index.ts';
 import { BLOCKS, DELAY_TIME, LIMITER_SPECS } from '../../../../plan/blocks/index.ts';
 import { near, isNear } from '../../../../../base/util/test/near.js';
-import { STUDIO } from '../../../desk/models/test/desk.js';
+import { studioReadout } from '../../../desk/models/test/desk.js';
 
 // the tracks, as a control surface names them: your kinds' pools first, then each kind's group,
 // the background's sounds sharing one
@@ -534,19 +534,7 @@ test("where a click in the ruler puts the playhead: on the nearest beat; at or p
 
 // the desk's view models on a plan's readout of the tests' own, every value at its plan's
 function viewsOf() {
-  return new DeskViewBuilder(
-    {
-      plan: STUDIO,
-      valueOf: () => undefined,
-      startOf: () => undefined,
-      roleOf: () => ({ by: 'live' }),
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: () => [],
-      slotOf: () => undefined,
-    },
-    () => {},
-  );
+  return new DeskViewBuilder(studioReadout(), () => {});
 }
 
 test("a strip's controllers in the order the sound goes through it, as its view model has them: its inserts' controls, its sends, its volume, pan, mute and solo; a pool's copy's too; none for a strip not on the desk", () => {
@@ -556,13 +544,27 @@ test("a strip's controllers in the order the sound goes through it, as its view 
     'utility/pan',
     'utility/pan/law',
     'send/reverb',
+    'send/delay 1',
     'volume',
     'pan',
     'mute',
     'solo',
   ]);
-  assert.deepEqual(declared.controllersOf('my tap/2'), ['send/reverb', 'volume', 'pan', 'mute', 'solo']);
-  assert.deepEqual(declared.controllersOf('master'), ['volume']);
+  assert.deepEqual(declared.controllersOf('my tap/2'), [
+    'air/cutoff',
+    'air/q',
+    'air/filter/type',
+    'air/filter/slope',
+    'utility/level',
+    'utility/pan',
+    'utility/pan/law',
+    'send/reverb',
+    'send/delay 1',
+    'volume',
+    'mute',
+    'solo',
+  ]);
+  assert.deepEqual(declared.controllersOf('master'), ['limiter/gain', 'limiter/ceiling', 'limiter/release', 'volume']);
   assert.deepEqual(declared.controllersOf('nowhere'), []);
 });
 

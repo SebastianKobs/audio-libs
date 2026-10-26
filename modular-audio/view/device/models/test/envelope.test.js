@@ -4,8 +4,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { envelopeDrawing, ViewBuilder } from '../index.ts';
-import { paramAt, settingAt } from '../../../../plan/format/index.ts';
 import { near } from '../../../../../base/util/test/near.js';
+import { planReadoutOf } from '../../readout/test/plan-readout.js';
 
 // an envelope of the tests' own, its stages by name, its mode a setting
 function envelopeOf(values, mode = 'gate') {
@@ -30,19 +30,7 @@ function envelopeOf(values, mode = 'gate') {
       settings: [{ spec: { name: 'mode', choices: ['gate', 'trigger'] }, value: mode }],
     },
   };
-  const models = new ViewBuilder(
-    {
-      plan,
-      valueOf: () => undefined,
-      startOf: (address) => (paramAt(plan, address) ?? settingAt(plan, address))?.value,
-      roleOf: () => ({ by: 'live' }),
-      peakOf: () => 0,
-      readingOf: () => 0,
-      copiesOf: () => [],
-      slotOf: () => undefined,
-    },
-    () => {},
-  );
+  const models = new ViewBuilder(planReadoutOf(plan), () => {});
   return models.device([]);
 }
 
