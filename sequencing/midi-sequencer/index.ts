@@ -12,5 +12,6 @@ export { Sequencer } from './input.ts';
 export { Recorder } from './recorder.ts';
 export type { Region } from './recorder.ts';
 export type { Lane } from './track-lanes.ts';
+export { laneValueAt, lastValueAt } from './lanes.ts';
 export { RecordingPlayer } from './recording-player.ts';
 export type { SentTo, Input, NoteListener, NoteOffListener, Track } from './input.ts';

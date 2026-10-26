@@ -1,7 +1,7 @@
 // The clip player (mockup/src/libs/sequencing/clip-player/player.ts), as Ableton's session view: tracks of clip slots, a clip launched from its
 // slot, a pattern looping on its track, its notes sent into the sequencer's input as they come due, each with its note on and its note
 // off together, a fresh index each; straight under the swing or on it; its velocity read as each note comes due, none leaving it out;
-// one clip a track; its notes sent as pitches, transposed by its semitones as it's launched
+// its notes sent as pitches, transposed by its semitones as it's launched
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ClipPlayer } from '../index.ts';
@@ -30,10 +30,11 @@ const pattern = {
   ],
 };
 
-test('a launched clip sends each note as it comes due, its note on and its note off together, a fresh index each, round its loop', () => {
+test("a launched clip sends each note as it comes due, its note on and its note off together, a fresh index each, round its loop; a straight clip's notes on its straight grid under the swing", () => {
   const into = input();
   const clips = new ClipPlayer({ input: into, grid });
   launch(clips, { to: to('drums'), pattern });
+  launch(clips, { to: to('bass'), pattern, straight: true });
   clips.step(0, 0);
   clips.step(1, SIXTEENTH + SWING);
   clips.step(2, 2 * SIXTEENTH);
@@ -42,19 +43,14 @@ test('a launched clip sends each note as it comes due, its note on and its note 
     into.sent.map(({ to: where, messages }) => [where.track, ...messages.map((m) => [m.type, m.index, m.pitch, m.t])]),
     [
       ['drums', ['note on', 0, 40, 0], ['note off', 0, undefined, SIXTEENTH]],
-      ['drums', ['note on', 1, 38, SIXTEENTH + SWING], ['note off', 1, undefined, SIXTEENTH + SWING + 2 * SIXTEENTH]],
-      ['drums', ['note on', 2, 40, 16 * SIXTEENTH], ['note off', 2, undefined, 17 * SIXTEENTH]],
+      ['bass', ['note on', 1, 40, 0], ['note off', 1, undefined, SIXTEENTH]],
+      ['drums', ['note on', 2, 38, SIXTEENTH + SWING], ['note off', 2, undefined, SIXTEENTH + SWING + 2 * SIXTEENTH]],
+      ['bass', ['note on', 3, 38, SIXTEENTH], ['note off', 3, undefined, 3 * SIXTEENTH]],
+      ['drums', ['note on', 4, 40, 16 * SIXTEENTH], ['note off', 4, undefined, 17 * SIXTEENTH]],
+      ['bass', ['note on', 5, 40, 16 * SIXTEENTH], ['note off', 5, undefined, 17 * SIXTEENTH]],
     ],
-    'on the swing, its length on the straight grid',
+    'on the swing, its length on the straight grid; the straight clip on the straight grid, its swing taken back',
   );
-});
-
-test("a straight clip plays under the swing: a swung 16th's note at its straight time", () => {
-  const into = input();
-  const clips = new ClipPlayer({ input: into, grid });
-  launch(clips, { to: to('bass'), pattern, straight: true });
-  clips.step(1, SIXTEENTH + SWING);
-  assert.equal(into.sent[0].messages[0].t, SIXTEENTH, 'its swing taken back');
 });
 
 test("a clip's velocity is read as each note comes due; none leaves the note out", () => {
@@ -72,31 +68,6 @@ test("a clip's velocity is read as each note comes due; none leaves the note out
     [0.5, 1],
     'at half, left out, then full',
   );
-});
-
-// which clip a track plays, in what order, and stop() the launcher's (launcher.test.js): here a launch's own address and velocity
-test("one clip a track: launched again, its notes the new clip's, sent where it sends them, at its velocity; stop() ends it", () => {
-  const into = input();
-  const clips = new ClipPlayer({ input: into, grid });
-  launch(clips, { to: to('drums'), pattern });
-  launch(
-    clips,
-    {
-      to: { track: 'drums', clip: { kind: 'kit' }, live: false },
-      pattern: { bars: 1, loop: true, events: [{ start: 0, duration: STEP, pitch: 50 }] },
-      velocity: () => 0.5,
-    },
-    'kit',
-  );
-  clips.step(0, 0);
-  assert.deepEqual(
-    into.sent.map(({ to: where, messages }) => [where.track, where.clip.kind, messages[0].pitch, messages[0].velocity]),
-    [['drums', 'kit', 50, 0.5]],
-    "the new clip's notes, to its clip, at its velocity",
-  );
-  clips.stop('drums');
-  clips.step(16, 16 * SIXTEENTH);
-  assert.equal(into.sent.length, 1, 'stopped');
 });
 
 test("a launched clip's notes carry its launch's region, the clip player's own; launched again in its place, a new one", () => {
