@@ -3,12 +3,12 @@
 //     oscillator's as it's built, running free;
 //   - a source's stop, its stop after it starts, 0 none; changed once started, moved;
 //   - a copy stopped by a time, as it's gone silent: each of its sources then, none later than its own stop;
-//   - a noise looped where it says, started drawn into its buffer up to its offset;
+//   - a noise looped where it says, its buffer by its color, started drawn into it up to its offset;
 //   - an oscillator's rate synced: its note at the beat, in Hz, a new tempo followed; free, its
 //     frequency.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StandInContext } from './audio-stand-in.js';
+import { StandInContext, into } from './audio-stand-in.js';
 import { Buffers, WebAudioBuilder } from '../index.ts';
 import { blockNode, builtOn, instrumentOf, oneBlockPlan } from './blocks.js';
 
@@ -63,9 +63,10 @@ test("a copy stopped by a time, as it's gone silent: each of its sources then, n
 });
 
 test('a noise looped where it says, its buffer by its color; started drawn into its buffer up to its offset', () => {
-  const { made } = builtOn(oneBlockPlan('noise', { offset: 1.5 }, { loop: 'on', color: 'breath' }));
+  const { context: heard, made } = builtOn(oneBlockPlan('noise', { offset: 1.5 }, { loop: 'on', color: 'breath' }));
   const [hiss] = made('buffer');
   assert.deepEqual([hiss.loop, hiss.buffer.duration, hiss.starts], [true, 0.2, [[4, 0.75]]]);
+  assert.deepEqual(into(heard, heard.destination), [hiss], 'a source with nothing wired into it');
   const context = new StandInContext(() => 4);
   const draws = new WebAudioBuilder({ context, beat: () => 0.5, random: () => 0.5, draws: () => 0.25 });
   draws.build(oneBlockPlan('noise', { offset: 1.5 }), { into: context.destination });

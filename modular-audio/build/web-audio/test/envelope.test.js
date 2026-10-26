@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
-import { CHARGED, DONE } from '../../../plan/blocks/index.ts';
+import { CHARGED, DONE, envelopeCurve } from '../../../plan/blocks/index.ts';
 import { builtOn, oneBlockPlan } from './blocks.js';
 import { eventTime, levelAt } from '../../../../base/automation/index.ts';
 import { SILENCE } from '../../../../base/params/index.ts';
@@ -32,13 +32,17 @@ function envelopeOn(values = PLUCK, settings = {}) {
   const told = (from) => source.offset.events.slice(from);
   return { context, what, source, told };
 }
-// what its level is told as its gate opens at 5 s, a pluck's: charging past 2, cut there; settling onto 1
+// what its level is told as its gate opens at 5 s: the plan's curve for PLUCK, after the cancel
 const OPENED = [
   ['cancel', 5],
-  ['set', 0, 5],
-  ['target', 2.6, 5, 0.25 / CHARGED],
-  ['set', 2, 5.25],
-  ['target', 1, 5.25, 0.5 / DONE],
+  ...envelopeCurve(
+    { delay: 0, attack: PLUCK.attack, hold: 0, decay: PLUCK.decay, sustain: PLUCK.sustain },
+    PLUCK.amount,
+    {
+      opened: 5,
+      release: PLUCK.release,
+    },
+  ),
 ];
 // events as kinds and times, and what each is told, to a nanosecond: a value continued from where it is
 const rounded = (events) =>

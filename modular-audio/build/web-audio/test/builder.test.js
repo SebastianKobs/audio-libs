@@ -38,7 +38,7 @@ test('a plan built between where its sound comes from and where it goes: the Uti
   assert.deepEqual(built.placeholders, []);
 });
 
-test('each block made by its kind, at its values and settings: an oscillator and a noise started, a filter at 24 dB two in series, a delay by the beat, a reverb its impulse, a limiter', () => {
+test('each block made by its kind, at its values and settings: an oscillator started, a filter at 24 dB two in series, a delay by the beat, a reverb its impulse, a limiter', () => {
   const { context, builder, made } = builderOn();
   builder.build(
     chainOf(
@@ -69,7 +69,7 @@ test('each block made by its kind, at its values and settings: an oscillator and
   );
   assert.deepEqual(outOf(context, biquads[0]), [biquads[1]], 'in series');
   near(biquads[0].Q.value, 20 * Math.log10(0.5412), 'flat: its stages a Butterworth, in dB', 1e-3);
-  near(biquads[1].Q.value, 20 * Math.log10(1.3066), '', 1e-3);
+  near(biquads[1].Q.value, 20 * Math.log10(1.3066), 'its second stage, in dB', 1e-3);
   const [pan] = made('panner');
   assert.deepEqual(
     [pan.pan.value, pan.channelCountMode === 'explicit'],
@@ -80,7 +80,6 @@ test('each block made by its kind, at its values and settings: an oscillator and
   assert.deepEqual([delay.extra.max, delay.delayTime.value], [2, BEAT / 2], 'its longest; synced, an 8th at the beat');
   const [room] = made('convolver');
   assert.deepEqual([room.buffer.duration, room.buffer.numberOfChannels], [1.5, 2], 'its impulse, its length');
-  assert.ok(made('compressor').length === 1, 'a limiter: a compressor between its drive and its makeup');
 });
 
 test("a signal wired into a delay's time, by its ms: into its line's own time, moving it in seconds, as Web Audio's does; into its note, refused", () => {
@@ -131,16 +130,6 @@ test("a select: the input its setting names passed on, the other taken in nowher
     assert.deepEqual(outOf(context, gains[held]), [], `${input}: the other wired into nothing`);
     assert.equal(gains.length, 3, `${input}: the two before it and its way out, nothing for the other`);
   }
-});
-
-test('a noise, looping, started, its buffer by its color; a source with nothing wired into it', () => {
-  const { context, builder, made } = builderOn();
-  builder.build(chainOf(blockNode('hiss', 'noise', {}, { color: 'breath', loop: 'on' })), {
-    into: context.destination,
-  });
-  const [hiss] = made('buffer');
-  assert.deepEqual([hiss.loop, hiss.buffer.duration, hiss.starts.length], [true, 0.2, 1]);
-  assert.deepEqual(into(context, context.destination), [hiss]);
 });
 
 test("a placeholder for a block it can't make, said by its address: its sound passed straight through, a source silent", () => {
@@ -294,7 +283,7 @@ test("what a node is built as, by its address, for who names it or listens to it
     'its compressor among them',
   );
   assert.ok(!under.includes(bus), 'none of another');
-  assert.deepEqual(what.nodesUnder([]).length >= under.length + 1, true, "the top's: all of them");
+  assert.equal(what.nodesUnder([]).length, 4, "the top's: all of them, the gain and the limiter's three");
   assert.throws(() => what.jacksOf(['nowhere']), /nowhere: not built/);
 });
 

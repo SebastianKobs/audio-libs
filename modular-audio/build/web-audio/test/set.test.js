@@ -35,7 +35,7 @@ test('a param set by its address: now, at a time, or gliding there from now; a m
   assert.deepEqual(last(twice.made('gain')[0].gain), ['set', 0.5, 4], 'mapped: twice its value');
 });
 
-test("a filter's frequency and resonance set on every stage, its resonance in Web Audio's dB", () => {
+test("a filter's frequency and resonance set on every stage, its resonance in Web Audio's dB, a bandpass's a ratio", () => {
   const { what, made } = builtOn(oneBlockPlan('filter', {}, { slope: '24' }));
   what.set(['frequency'], 900);
   assert.deepEqual(
@@ -58,6 +58,10 @@ test("a filter's frequency and resonance set on every stage, its resonance in We
     ],
     'its detune on every stage, as a cutoff in cents follows an envelope',
   );
+  const bandpass = builtOn(oneBlockPlan('filter', { resonance: 2 }, { type: 'bandpass' }));
+  assert.equal(bandpass.made('biquad')[0].Q.value, 2, 'a bandpass: a ratio already');
+  bandpass.what.set(['resonance'], 3);
+  assert.deepEqual(last(bandpass.made('biquad')[0].Q), ['set', 3, 4], 'set, a ratio still');
 });
 
 test("a delay's time: its note while synced, its ms while free, its switch between them; a new tempo followed while synced, gliding", () => {
@@ -132,12 +136,7 @@ test("an address with no param refused; a setting refused, a preset's; a placeho
   assert.throws(() => what.set(['pan', 'law'], 'pan pot'), /pan\/law: a setting, sent with a preset/);
   const theremin = builtOn({ version: 1, node: THEREMIN });
   assert.deepEqual(theremin.what.placeholders, [[]]);
-  theremin.what.set(['pitch'], 0.2); // nothing built to move
-});
-
-test("a bandpass's resonance a ratio in Web Audio, as a plan writes it; a lowpass's in dB", () => {
-  const { what, made } = builtOn(oneBlockPlan('filter', { resonance: 2 }, { type: 'bandpass' }));
-  assert.equal(made('biquad')[0].Q.value, 2, 'a ratio already');
-  what.set(['resonance'], 3);
-  assert.deepEqual(last(made('biquad')[0].Q), ['set', 3, 4], 'set, a ratio still');
+  const built = theremin.context.rec.nodes.length;
+  theremin.what.set(['pitch'], 0.2);
+  assert.equal(theremin.context.rec.nodes.length, built, 'nothing built to move');
 });

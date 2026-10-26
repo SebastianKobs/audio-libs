@@ -125,20 +125,12 @@ test('what was told kept as it was built again: the values set, a macro by its o
   assert.equal(instrument.made('oscillator').length, 2, 'a voice let go not added again, what it was told forgotten');
 });
 
-test('a copy added at its time, built again: added again at that time, its sources started then, as its note did', () => {
-  const instrument = builtOn(SYNTH, { from: 'in' });
-  instrument.what.add(['voice', '1'], 3.5);
-  instrument.what.add(['voice', '2']);
-  instrument.what.rebuild(SYNTH);
-  const [, , again, againNow] = instrument.made('oscillator');
-  assert.deepEqual([again.starts, againNow.starts], [[[3.5]], [[]]], 'at its time; one added now, now');
-});
-
-test('a copy with a destination of its own, built again: added again into it, the old faded out and the new in there', (t) => {
+test('a copy with a destination of its own, built again: added again into it, at its time, the old faded out and the new in there', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { context, what, made } = builtOn(SYNTH, { from: 'in' });
   const destination = context.createGain();
   what.add(['voice', '1'], 3.5, destination);
+  what.add(['voice', '2']);
   const [oldVca] = outOf(context, made('oscillator')[0]);
   what.rebuild(SYNTH);
   const [fadeOut, fadeIn] = into(context, destination);
@@ -159,9 +151,10 @@ test('a copy with a destination of its own, built again: added again into it, th
     'the new faded in',
   );
   assert.deepEqual(outOf(context, oldVca), [fadeOut], 'the old copy into its fade');
-  const [newVca] = outOf(context, made('oscillator')[1]);
+  const [, , again, againNow] = made('oscillator');
+  const [newVca] = outOf(context, again);
   assert.deepEqual(outOf(context, newVca), [fadeIn], 'the new copy into its fade');
-  assert.deepEqual(made('oscillator')[1].starts, [[3.5]], 'added again at its time');
+  assert.deepEqual([again.starts, againNow.starts], [[[3.5]], [[]]], 'added again at its time; one added now, now');
   t.mock.timers.tick(RING_OUT);
   assert.ok(context.rec.disconnects.includes(fadeOut), 'the old fade let go with it');
   assert.ok(!context.rec.disconnects.includes(fadeIn), 'the new kept');
