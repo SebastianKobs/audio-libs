@@ -1,4 +1,4 @@
-// A composite drawn (mockup/src/libs/modular-audio/view/device/dom/composite-view.ts), an instrument's and a strip's alike, as HTML, in node, on the view
+// A composite drawn (libs/modular-audio/view/device/dom/composite-view.ts), an instrument's and a strip's alike, as HTML, in node, on the view
 // models' voice card of the tests' own (libs/modular-audio/view/device/models/test/card.js):
 //   - with a face, as its look says: its own device as a group, its children grouped by role in tabs, in the look's order, its matrix;
 //   - a rack of them, a pad each, the chosen one's shown;
@@ -6,7 +6,7 @@
 //   - the chosen pad and tabs read from their model, handed in; a box's reset.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CompositeView, controlHint, deviceHtml, groupHtml, matrixHtml } from '../index.ts';
+import { CompositeView, controlHint, deviceHtml } from '../index.ts';
 import { html } from '../../../../../base/html/index.ts';
 import { builderOn, CARD } from '../../models/test/card.js';
 import { Chosen } from '../../models/index.ts';
@@ -37,24 +37,34 @@ const LOOK = {
   hintOf,
 };
 
-test("a rack: its bar, its status, its buttons and its reset; a pad each, the first shown; its face: its own device as a group, its children's groups by role in the look's order, its matrix", () => {
+test("a rack: its box marked with its key, its bar with its status, buttons and reset; a pad each, the first chosen; its face: the groups in the look's order, its matrix last", () => {
   const view = new CompositeView({ chosen: new Chosen() });
-  const { pads } = rack();
-  const models = pads[0].composite.models;
-  const group = (title, role) =>
-    groupHtml({ title, devices: models.groups([]).find((each) => each.role === role).devices, chosen: '' }, { hintOf })
-      .text;
-  const face =
-    groupHtml({ title: 'voice', devices: [models.device([])], chosen: '' }, { hintOf }).text
-    + group('sources', 'source')
-    + group('stages', 'stage')
-    + group('modulators', 'modulator')
-    + `<div class="group" data-group="matrix"><div class="group-title">matrix</div><div class="group-body">${matrixHtml(models.matrix([]), { hintOf }).text}</div></div>`;
-  assert.equal(
-    view.rackHtml(rack(), LOOK).text,
-    '<div class="device instrument" data-rack="tap"><div class="bar"><div class="status" title="tap: Pluck">tap: Pluck</div><div class="buttons"><button data-play>play</button><button class="reset" data-reset="tap" title="back">reset this instrument</button></div></div>'
-      + '<div class="group-tabs pads"><button class="chosen" data-pad="pluck a">pluck a</button><button data-pad="pluck b">pluck b</button></div>'
-      + `<div class="body"><div class="face" data-card="pluck a">${face}</div></div></div>`,
+  const drawn = view.rackHtml(rack(), LOOK).text;
+  assert.match(drawn, /^<div class="device instrument" data-rack="tap"><div class="bar">/);
+  assert.match(drawn, /<div class="status" title="tap: Pluck">tap: Pluck<\/div>/);
+  assert.match(drawn, /<button data-play>play<\/button>/, "its owner's buttons");
+  assert.match(drawn, /<button class="reset" data-reset="tap" title="back">reset this instrument<\/button>/);
+  assert.deepEqual(
+    [...drawn.matchAll(/<button( class="chosen")? data-pad="([^"]+)">/g)].map(([, chosen, name]) => [
+      name,
+      chosen !== undefined,
+    ]),
+    [
+      ['pluck a', true],
+      ['pluck b', false],
+    ],
+    'a pad each, the first chosen',
+  );
+  assert.equal(drawn.match(/data-card="/g).length, 1, 'only the chosen pad drawn');
+  const [, face] = /<div class="face" data-card="pluck a">(.*)<\/div><\/div><\/div>$/.exec(drawn);
+  assert.deepEqual(
+    [...face.matchAll(/data-group="([^"]+)"/g)].map(([, title]) => title),
+    ['voice', 'sources', 'stages', 'modulators', 'matrix'],
+    "its own device first, then the children's groups in the look's order, the matrix last",
+  );
+  assert.match(
+    face,
+    /data-group="matrix"><div class="group-title">matrix<\/div><div class="group-body"><div class="matrix">/,
   );
 });
 

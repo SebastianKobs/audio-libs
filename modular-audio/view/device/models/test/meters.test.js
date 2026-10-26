@@ -1,4 +1,4 @@
-// The level meters as models (mockup/src/libs/modular-audio/view/device/models/meters.ts, limiter-history.ts): how a level bar
+// The level meters as models (libs/modular-audio/view/device/models/meters.ts, limiter-history.ts): how a level bar
 // falls, as a DIN peak meter's, each bar's level kept by its key; the limiter's history, a column each interval, the loudest of its frames.
 // Where a level shows on a meter's scale is its drawer's (libs/modular-audio/view/device/dom/test/meter-view.test.js)
 import { test } from 'node:test';
@@ -18,7 +18,7 @@ test("each strip's level, by its key: up at once to its peak, then falling as a 
   assert.equal(levels.of('you'), 0);
   assert.equal(levels.fall('you', 0.5, 0.1), 0.5, 'up at once');
   const fallen = levels.fall('you', 0, 0.75);
-  assert.ok(fallen < 0.5 && fallen > 0.05, `10 dB down after 0.75 s: ${fallen}`);
+  near(20 * Math.log10(fallen / 0.5), -10, '0.75 s: 10 dB down, 20 dB in 1.5 s');
   assert.equal(levels.of('you'), fallen, 'kept');
 });
 

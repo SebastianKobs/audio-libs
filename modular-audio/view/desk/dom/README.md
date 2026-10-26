@@ -1,6 +1,6 @@
 # libs/modular-audio/view/desk/dom
 
-A desk drawn in the DOM, on a device's drawers (`libs/modular-audio/view/device/dom/`). It imports `libs/base/params/`, `libs/base/util/`, `libs/base/html/`, the device models and drawers it draws with, and the desk's view models (`libs/modular-audio/view/desk/models/`).
+A desk drawn in the DOM, on a device's drawers (`libs/modular-audio/view/device/dom/`). It imports `libs/base/util/`, `libs/base/html/`, the device models and drawers it draws with, and the desk's view models (`libs/modular-audio/view/desk/models/`).
 
 | Part | Holds |
 |---|---|
