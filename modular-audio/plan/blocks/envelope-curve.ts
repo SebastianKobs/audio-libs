@@ -24,9 +24,9 @@ export interface EnvelopeTimes {
 // how far past its peak the attack charges, a share of it, as the CEM3310 is documented
 const OVERSHOOT = 1.3;
 // time constants an attack takes to charge from 0 to its peak, toward OVERSHOOT
-const CHARGED = Math.log(OVERSHOOT / (OVERSHOOT - 1));
+export const CHARGED = Math.log(OVERSHOOT / (OVERSHOOT - 1));
 // time constants a decay or a release takes to come within the floor of silence of where it goes
-const DONE = Math.log(1 / SILENCE);
+export const DONE = Math.log(1 / SILENCE);
 
 // Its stages from its gate opening, until its sustain; amount: its top, in its target's units.
 // One that runs on (continuous) starts as its node is made, its first a value, not set at a time.

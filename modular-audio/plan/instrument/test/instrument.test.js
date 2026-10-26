@@ -4,7 +4,7 @@
 //   - a drum rack: a pool for each pad, played by its key, each its own patch;
 //   - refused: two chains with no key, a key twice, an architecture not handed in;
 //   - a preset changed: each value and setting that differs, by its address, one let go back to its start;
-//   - a live bank: its patches as they play, edited or reset as the app's messages ask.
+//   - a preset edited as a message says; a live bank: its patches as they play, edited or reset as the app's messages ask.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { changesFrom, edited, instrumentOf, LiveBank, SYNTH_FORMS } from '../index.ts';
@@ -104,7 +104,7 @@ test("a preset changed: each value and setting that differs, by its address; one
   );
 });
 
-test('a preset edited, as a message says: a value or a setting by its address, the rest as it was, the preset handed in left alone', () => {
+test("a preset edited, as a message says: a value or a setting by its address, the rest as it was, the preset handed in left alone; a live bank: its patches as they play, edited as the app's message asks, reset to its start; each told", () => {
   const edit = (address, value, of) => ({ type: 'preset edited', patch: 'bright', of, address, value });
   assert.deepEqual(edited(BRIGHT, edit(['osc 1', 'tune'], 7, 'values')), {
     kind: 'Pluck',
@@ -116,22 +116,13 @@ test('a preset edited, as a message says: a value or a setting by its address, t
     settings: { 'osc 1/osc/wave': 'square' },
   });
   assert.equal(BRIGHT.values['osc 1/tune'], 12, 'left alone');
-});
-
-test("a live bank: its patches as they play, a value or a setting edited as the app's message asks, reset to its start; each told", () => {
   const bank = new LiveBank({ bright: BRIGHT });
   const told = [];
   bank.onSet((name, preset) => told.push([name, preset.values['osc 1/tune']]));
-  bank.edit({ type: 'preset edited', patch: 'bright', of: 'values', address: ['osc 1', 'tune'], value: 7 });
-  bank.edit({
-    type: 'preset edited',
-    patch: 'bright',
-    of: 'settings',
-    address: ['osc 1', 'osc', 'wave'],
-    value: 'square',
-  });
-  assert.deepEqual(bank.current('bright').values['osc 1/tune'], 7);
-  assert.deepEqual(bank.current('bright').settings['osc 1/osc/wave'], 'square');
+  bank.edit(edit(['osc 1', 'tune'], 7, 'values'));
+  bank.edit(edit(['osc 1', 'osc', 'wave'], 'square', 'settings'));
+  assert.equal(bank.current('bright').values['osc 1/tune'], 7);
+  assert.equal(bank.current('bright').settings['osc 1/osc/wave'], 'square');
   bank.edit({ type: 'preset reset', patch: 'bright' });
   assert.deepEqual(bank.current('bright'), BRIGHT);
   assert.deepEqual(told, [

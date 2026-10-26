@@ -1,14 +1,12 @@
 // A file of instruments read (mockup/src/libs/modular-audio/plan/instrument/instruments-file.ts), in node, on a small file of the tests' own, its
 // instrument the tests' voice card (pluck.js):
-//   - each instrument a template of a voice card's form, its name its kind, one mono output, planned as the planner takes it;
+//   - each instrument a template of a voice card's form, its name its kind, one mono output;
 //   - each patch a preset, by a name of its own, the instrument it plays its kind; each rack its pads;
-//   - refused where it isn't of its shape, every failure said under the file's name; a pad naming no patch.
+//   - refused where it isn't of its shape, every failure said under the file's name, its message whole; a pad naming no patch.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { instrumentsOf, SYNTH_FORMS } from '../index.ts';
+import { instrumentsOf } from '../index.ts';
 import { MODULE_TEMPLATES } from '../content.ts';
-import { Planner } from '../../planner/index.ts';
-import { paramAt } from '../../format/index.ts';
 import { PLUCK_CARD as voiceCard, PLUCK_FILE as FILE } from './pluck.js';
 
 test("each instrument a template of a voice card's form, its name its kind, one mono output; each patch a preset by a name of its own, the instrument it plays its kind; each rack its pads", () => {
@@ -22,8 +20,6 @@ test("each instrument a template of a voice card's form, its name its kind, one 
     rtlprnf: { kind: 'Pluck', settings: { 'osc 1/osc/wave': 'triangle' } },
   });
   assert.deepEqual(racks, { kit: [{ key: 38, patch: 'bright' }] });
-  const plan = new Planner([...MODULE_TEMPLATES, ...templates], SYNTH_FORMS).plan('Pluck', patches.bright);
-  assert.equal(paramAt(plan, ['osc 1', 'tune']).value, 12, 'planned as the planner takes it');
 });
 
 test("a file refused where it isn't of its shape, every failure said under its name; a pad naming no patch", () => {
@@ -31,20 +27,14 @@ test("a file refused where it isn't of its shape, every failure said under its n
     instruments: { Pluck: { ...voiceCard, children: [{ name: 'osc 1' }] } },
     patches: { bright: { values: { 'osc 1/tune': 12 } } },
   };
-  assert.throws(
-    () => instrumentsOf(astray, 'astray.yaml', MODULE_TEMPLATES),
-    (error) => {
-      assert.match(error.message, /^astray\.yaml: not of the shape of instruments:/);
-      assert.match(error.message, /patches/);
-      return true;
-    },
-  );
-  assert.throws(
-    () => instrumentsOf({ ...astray, patches: FILE.patches }, 'astray.yaml', MODULE_TEMPLATES),
-    /astray\.yaml: Pluck/,
-  );
+  assert.throws(() => instrumentsOf(astray, 'astray.yaml', MODULE_TEMPLATES), {
+    message: 'astray.yaml: not of the shape of instruments:\n  patches bright: no instrument',
+  });
+  assert.throws(() => instrumentsOf({ ...astray, patches: FILE.patches }, 'astray.yaml', MODULE_TEMPLATES), {
+    message: 'astray.yaml: Pluck: not of the shape of a template:\n  children 1: no kind or preset',
+  });
   assert.throws(
     () => instrumentsOf({ ...FILE, racks: { kit: [{ key: 38, patch: 'dull' }] } }, 'kit.yaml', MODULE_TEMPLATES),
-    /kit\.yaml: rack kit: pad 38 plays dull, no patch in it/,
+    { message: 'kit.yaml: rack kit: pad 38 plays dull, no patch in it' },
   );
 });

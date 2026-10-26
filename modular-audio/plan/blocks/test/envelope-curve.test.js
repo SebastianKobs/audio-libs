@@ -6,16 +6,12 @@
 //   - its whole curve from its gate opening at a time, released where it has closed.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { envelopeCurve, envelopeRelease, envelopeStages } from '../index.ts';
+import { CHARGED, DONE, envelopeCurve, envelopeRelease, envelopeStages } from '../index.ts';
 import { levelAt } from '../../../../base/automation/index.ts';
 import { SILENCE } from '../../../../base/params/index.ts';
 import { near } from '../../../../base/util/test/near.js';
 
 const NONE = { delay: 0, attack: 0, hold: 0, decay: 0, sustain: 1 };
-// the attack's time constant, a time over it: an RC charging toward 1.3, at 1 after the attack's time
-const CHARGED = Math.log(1.3 / (1.3 - 1));
-// a decay's and a release's, a time over it: within the floor of silence of where it goes, at its time
-const DONE = Math.log(1 / SILENCE);
 
 test('its stages: after its delay up over its attack, toward 1.3 times its peak, cut there; held over its hold; down to its sustain over its decay, approaching it', () => {
   const times = { delay: 0.5, attack: 0.25, hold: 0.25, decay: 0.5, sustain: 0.5 };

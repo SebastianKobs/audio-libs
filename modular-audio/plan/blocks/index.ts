@@ -13,7 +13,7 @@ export { STOP, type Block, type Jack } from './block.ts';
 export { BLOCKS, type BlockKind } from './blocks.ts';
 export { DELAY_TIME } from './delay.ts';
 export { ENVELOPE_SPECS } from './envelope.ts';
-export { envelopeCurve, envelopeRelease, envelopeStages, type EnvelopeTimes } from './envelope-curve.ts';
+export { CHARGED, DONE, envelopeCurve, envelopeRelease, envelopeStages, type EnvelopeTimes } from './envelope-curve.ts';
 export { biquadQs, FILTER_SLOPE, RESONANCE, type FilterStages } from './filter.ts';
 export { LIMITER_SPECS } from './limiter.ts';
 export { NOISE_SECONDS } from './noise.ts';

@@ -11,6 +11,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
 import { WebAudioBuilder } from '../index.ts';
+import { CHARGED, DONE } from '../../../plan/blocks/index.ts';
 import { builtOn, oneBlockPlan } from './blocks.js';
 import { eventTime, levelAt } from '../../../../base/automation/index.ts';
 import { SILENCE } from '../../../../base/params/index.ts';
@@ -18,9 +19,6 @@ import { near } from '../../../../base/util/test/near.js';
 
 // a pluck's stages, its amount 2; times a float adds up exactly
 const PLUCK = { attack: 0.25, decay: 0.5, sustain: 0.5, release: 0.25, amount: 2 };
-// time constants an attack takes to charge to its peak, toward 1.3 times it; a decay or a release to settle
-const CHARGED = Math.log(1.3 / (1.3 - 1));
-const DONE = Math.log(1 / SILENCE);
 
 // An envelope built at 4 s on a stand-in context:
 // its constant source, and what its level is told from an event on.

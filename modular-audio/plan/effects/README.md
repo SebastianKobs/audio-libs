@@ -31,4 +31,4 @@ An insert's macros carry their hints, written in its template, and an effect is 
 | `EFFECT_TEMPLATES` | the six, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`), frozen (`content.ts`) |
 | `EFFECT_FORM` | what every effect is: one input and one output, its children free of roles (`form.ts`) |
 
-Tested in node, in its `test/` folder: the six of the effect's form, planned, the Tape delay the Delay's and its wobble; their macros by the names a desk keys them, each at its default; a macro's spec its target's; the Delay's note a choice through its macro, the Utility's pan pot and the Reverb's length settings (`test/effects.test.js`).
+Tested in node, in its `test/` folder: the six of the effect's form, planned, the Tape delay the Delay's and its wobble; their macros by the names a desk keys them, each at its default, the Utility's level the fader's in dB; each effect's label where it isn't its kind, and every macro hinted where its effect hints any; the Delay's note a choice through its macro, the Utility's pan pot and the Reverb's length settings (`test/effects.test.js`).

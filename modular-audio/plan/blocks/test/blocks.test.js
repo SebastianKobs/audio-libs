@@ -2,9 +2,11 @@
 //   - the ten blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
-//   - what each declares: its names in short standard terms, its settings' choices.
+//   - what each declares: its names in short standard terms, its choices, units and defaults;
+//   - the rules it keeps apart: a switch, a taper, the fader's gain, a tune's reach, a free start, a release.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { isDeepStrictEqual } from 'node:util';
 import { BLOCKS, biquadQs } from '../index.ts';
 import { near } from '../../../../base/util/test/near.js';
 import { onControl } from '../../../../base/params/test/on-control.js';
@@ -14,12 +16,27 @@ const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise'
 const MONO = 1;
 const STEREO = 2;
 
-// what each block declares, by name: its params, its settings, its inputs and outputs, a channel count where it's fixed
+// a param's or a setting's name, then its unit, its choices and its default where it has them
+function specText({ name, unit, choices, default: start }) {
+  const words = [name];
+  if (unit) {
+    words.push(unit);
+  }
+  if (choices) {
+    words.push(isDeepStrictEqual(choices, NOTE_VALUES) ? 'NOTE_VALUES' : choices.join('|'));
+  }
+  if (start !== undefined) {
+    words.push(`=${start}`);
+  }
+  return words.join(' ');
+}
+
+// what each block declares: its params and settings as text, its inputs and outputs by name, a channel count where it's fixed
 function declared({ params, settings, inputs, outputs }) {
   const jack = ({ name, channels }) => (channels === undefined ? name : `${name} ${channels}`);
   return {
-    params: params.map((spec) => spec.name),
-    settings: settings.map((spec) => spec.name),
+    params: params.map(specText),
+    settings: settings.map(specText),
     inputs: inputs.map(jack),
     outputs: outputs.map(jack),
   };
@@ -51,99 +68,75 @@ test("every block's params and settings on a control, a range or choices, a defa
   }
 });
 
-test('what each block declares, in short standard terms: its params, its settings, its inputs and outputs, mono or stereo where it fixes them', () => {
+test("what each block declares, in short standard terms: its params and settings with their units, choices and defaults, its inputs and outputs, mono or stereo where it fixes them; the rules beside its table: switches, a time with a sync switch, rates by octaves, the fader's gain, an LFO's floor, a tune of four octaves, a free start, a release to start", () => {
   assert.deepEqual(Object.fromEntries(Object.entries(BLOCKS).map(([kind, block]) => [kind, declared(block)])), {
     oscillator: {
-      params: ['sync', 'note', 'frequency', 'detune', 'stop'],
-      settings: ['wave', 'phase'],
+      params: ['sync =0', 'note NOTE_VALUES =1/4', 'frequency Hz =440', 'detune cents =0', 'stop s =0'],
+      settings: ['wave sine|triangle|square|sawtooth =sine', 'phase reset|free =reset'],
       inputs: [],
       outputs: [`out ${MONO}`],
     },
-    gain: { params: ['gain'], settings: [], inputs: ['in'], outputs: ['out'] },
+    gain: { params: ['gain dB =1'], settings: [], inputs: ['in'], outputs: ['out'] },
     filter: {
-      params: ['frequency', 'resonance', 'detune'],
-      settings: ['type', 'slope'],
+      params: ['frequency Hz =24000', 'resonance =0.707', 'detune cents =0'],
+      settings: ['type lowpass|highpass|bandpass =lowpass', 'slope dB/oct 12|24 =12'],
       inputs: ['in'],
       outputs: ['out'],
     },
-    pan: { params: ['pan'], settings: ['law'], inputs: ['in'], outputs: [`out ${STEREO}`] },
-    delay: { params: ['sync', 'note', 'ms'], settings: ['longest'], inputs: ['in'], outputs: ['out'] },
-    reverb: { params: [], settings: ['length'], inputs: ['in'], outputs: [`out ${STEREO}`] },
-    noise: { params: ['offset', 'stop'], settings: ['color', 'loop'], inputs: [], outputs: [`out ${MONO}`] },
-    limiter: { params: ['gain', 'ceiling', 'release'], settings: [], inputs: ['in'], outputs: ['out'] },
-    envelope: {
-      params: ['gate', 'delay', 'attack', 'hold', 'decay', 'sustain', 'release', 'amount'],
-      settings: ['mode'],
+    pan: { params: ['pan =0'], settings: ['law stereo|pan pot =stereo'], inputs: ['in'], outputs: [`out ${STEREO}`] },
+    delay: {
+      params: ['sync =1', 'note NOTE_VALUES =1/8', 'ms ms =417'],
+      settings: ['longest s =4'],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
+    reverb: { params: [], settings: ['length s =3.5'], inputs: ['in'], outputs: [`out ${STEREO}`] },
+    noise: {
+      params: ['offset s =0', 'stop s =0'],
+      settings: ['color noise|breath =noise', 'loop off|on =off'],
       inputs: [],
       outputs: [`out ${MONO}`],
     },
-    select: { params: [], settings: ['input'], inputs: ['a', 'b'], outputs: ['out'] },
+    limiter: { params: ['gain dB', 'ceiling dBFS', 'release s'], settings: [], inputs: ['in'], outputs: ['out'] },
+    envelope: {
+      params: [
+        'gate =0',
+        'delay s =0',
+        'attack s =0',
+        'hold s =0',
+        'decay s =0',
+        'sustain =1',
+        'release s =0.1',
+        'amount =1',
+      ],
+      settings: ['mode gate|trigger =gate'],
+      inputs: [],
+      outputs: [`out ${MONO}`],
+    },
+    select: { params: [], settings: ['input a|b =a'], inputs: ['a', 'b'], outputs: ['out'] },
   });
-});
-
-test("the blocks' choices: an oscillator's waves, a filter's three types, a pan's laws, a noise's colors, a select's inputs; a delay's time with a sync switch, synced to the note values; an envelope's gate a switch; a filter's frequency and resonance by octaves; a gain the fader's", () => {
-  const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
-  assert.deepEqual(setting('oscillator', 'wave').choices, ['sine', 'triangle', 'square', 'sawtooth']);
-  assert.deepEqual(setting('filter', 'type').choices, ['lowpass', 'highpass', 'bandpass']);
-  assert.deepEqual([setting('filter', 'slope').choices, setting('filter', 'slope').default], [['12', '24'], '12']);
-  assert.deepEqual(setting('pan', 'law').choices, ['stereo', 'pan pot']);
-  assert.deepEqual(setting('noise', 'color').choices, ['noise', 'breath']);
-  assert.deepEqual(
-    [setting('select', 'input').choices, setting('select', 'input').default],
-    [['a', 'b'], 'a'],
-    'the input it passes on, by its name',
-  );
-  assert.ok(isSwitch(param('delay', 'sync')));
-  assert.deepEqual(param('delay', 'note').choices, NOTE_VALUES);
-  assert.equal(param('delay', 'ms').unit, 'ms');
-  assert.ok(isSwitch(param('envelope', 'gate')), 'opened and closed by the note');
-  assert.deepEqual([param('filter', 'frequency').taper, param('filter', 'resonance').taper], ['octaves', 'octaves']);
-  assert.deepEqual(param('gain', 'gain'), { ...FADER_GAIN, unit: 'dB', default: 1 }, "a gain the fader's, in dB, at 1");
-});
-
-test("a voice's blocks: an oscillator's rate a time with a sync switch, free its frequency in Hz, down to an LFO's, its phase reset with each note or running free; a source's stop, at 0 none, to play until it's let go; a noise looped or not, its offset into its buffer; an oscillator's detune and a filter's wide enough for a tune of four octaves; an envelope's curve an ARP's, no setting, its mode the gate's or a trigger's, running on past the note-off", () => {
-  const setting = (kind, name) => BLOCKS[kind].settings.find((spec) => spec.name === name);
-  const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
-  assert.ok(isSwitch(param('oscillator', 'sync')));
-  assert.deepEqual(param('oscillator', 'note').choices, NOTE_VALUES);
-  assert.deepEqual(
-    [param('oscillator', 'frequency').unit, param('oscillator', 'sync').default],
-    ['Hz', 0],
-    'free to start, as every oscillator and LFO today',
-  );
-  assert.ok(
-    param('oscillator', 'frequency').range[0] <= 0.025,
-    "the slowest LFO today's, a quarter of a hertz's tenth",
-  );
+  for (const [kind, name] of [
+    ['delay', 'sync'],
+    ['oscillator', 'sync'],
+    ['envelope', 'gate'],
+  ]) {
+    assert.ok(isSwitch(param(kind, name)), `${kind}/${name}: a switch`);
+  }
   assert.deepEqual(timeParamsIn(BLOCKS.oscillator.params.map(({ name }) => name)), {
     sync: 'sync',
     note: 'note',
     free: 'frequency',
   });
-  assert.deepEqual(
-    [setting('oscillator', 'phase').choices, setting('oscillator', 'phase').default],
-    [['reset', 'free'], 'reset'],
-  );
-  for (const kind of ['oscillator', 'noise']) {
-    assert.deepEqual(
-      [param(kind, 'stop').unit, param(kind, 'stop').default],
-      ['s', 0],
-      `${kind}: none, at 0, to start`,
-    );
-  }
-  assert.deepEqual([setting('noise', 'loop').choices, setting('noise', 'loop').default], [['off', 'on'], 'off']);
-  assert.deepEqual([param('noise', 'offset').unit, param('noise', 'offset').default], ['s', 0]);
+  assert.deepEqual([param('filter', 'frequency').taper, param('filter', 'resonance').taper], ['octaves', 'octaves']);
+  assert.deepEqual(param('gain', 'gain'), { ...FADER_GAIN, unit: 'dB', default: 1 }, "a gain the fader's, in dB, at 1");
+  assert.ok(param('oscillator', 'frequency').range[0] <= 0.025, "the slowest LFO's, a quarter of a hertz's tenth");
   for (const kind of ['oscillator', 'filter']) {
     const [low, high] = param(kind, 'detune').range;
     assert.ok(low <= -4800 && high >= 4800, `${kind}: four octaves either way, ${low}..${high}`);
-    assert.deepEqual([param(kind, 'detune').unit, param(kind, 'detune').default], ['cents', 0]);
   }
-  assert.deepEqual(
-    [setting('envelope', 'mode').choices, setting('envelope', 'mode').default],
-    [['gate', 'trigger'], 'gate'],
-  );
   assert.ok(param('envelope', 'release').default > 0, 'a release to start, a trigger running on past the note-off');
+  assert.equal(param('oscillator', 'sync').default, 0, 'free to start, as every oscillator and LFO');
 });
 
 test("a filter's stages, for a builder that builds it from biquads: at 12 dB one, at its resonance, Web Audio's own where none; at 24 two in series, a lowpass's or a highpass's a 4th-order Butterworth's at 0.707, its second moved by the resonance; a bandpass's both at it", () => {

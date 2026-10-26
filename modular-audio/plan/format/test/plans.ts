@@ -3,10 +3,12 @@
 //   UTILITY: an effect, a gain into a pan; its level and pan macros onto theirs.
 //   SYNTH: an instrument, a pool of voices; a voice an oscillator into a gain its envelope moves.
 //   DESK: a desk, four channels, one with a tap into a return.
+//   ROOM: a reverb whose own length setting stands for its room's.
 import type { Node, Plan } from '../index.ts';
 
 const STEREO = 2;
 const MONO = 1;
+const LENGTH = { name: 'length', unit: 's', range: [0.2, 8, 0.1] } as const;
 // a gain block's, the fader's in dB, at 1: a Utility's level its
 const GAIN = { unit: 'dB', range: [-60, 6, 0.1], dB: true, taper: 'fader', default: 1 } as const;
 
@@ -164,6 +166,25 @@ export const DESK: Plan = {
       { from: { node: 'reverb', output: 'out' }, to: { node: 'master', input: 'in' } },
       { from: { node: 'master', output: 'out' }, to: { output: 'out' } },
     ],
+    macros: [],
+    pools: [],
+  },
+};
+
+// a reverb: its length a setting of its own, standing for the room's
+export const ROOM: Plan = {
+  version: 1,
+  node: {
+    name: 'reverb',
+    kind: 'Reverb',
+    inputs: [],
+    outputs: [],
+    params: [],
+    settings: [{ spec: LENGTH, value: 3.5, to: ['room', 'length'] }],
+    children: [
+      { name: 'room', kind: 'reverb', inputs: [], outputs: [], params: [], settings: [{ spec: LENGTH, value: 3.5 }] },
+    ],
+    wires: [],
     macros: [],
     pools: [],
   },

@@ -1,5 +1,4 @@
 // The plan format's unit tests (mockup/src/libs/modular-audio/plan/format):
-//   - a plan is data, stored as JSON: its examples read back as they were (test/plans.ts, held to the format by the type check);
 //   - a stored plan's version: this format's, or refused, naming what was found;
 //   - a node, a param or a setting found by its address;
 //   - a macro's value onto its targets; a pool's copies, their names and their wires;
@@ -8,7 +7,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  VERSION,
   copyOf,
   feeds,
   macroIn,
@@ -27,19 +25,10 @@ import {
   withCopies,
   withSettings,
 } from '../index.ts';
-import { DESK, SYNTH, UTILITY } from './plans.ts';
+import { DESK, ROOM, SYNTH, UTILITY } from './plans.ts';
 import { near } from '../../../../base/util/test/near.js';
 
-test('a plan is data, stored as JSON: an effect, an instrument and a desk read back from their JSON as they were, their version read', () => {
-  for (const plan of [UTILITY, SYNTH, DESK]) {
-    const stored = JSON.parse(JSON.stringify(plan));
-    assert.deepEqual(stored, plan);
-    assert.equal(versionOf(stored), VERSION);
-  }
-});
-
 test("a stored plan's version: this format's, 1; one with none, one that isn't a whole number, or a newer one refused, naming what it found", () => {
-  assert.equal(VERSION, 1);
   assert.equal(versionOf({ version: 1, node: {} }), 1);
   assert.throws(() => versionOf({ node: {} }), /found none/);
   assert.throws(() => versionOf('a plan'), /found none/, 'no plan at all');
@@ -168,24 +157,6 @@ test("a plan's settings changed by address, a new plan, the old as it was: a chi
 });
 
 test("a composite's own setting changed by its address: it and the child's it stands for, together", () => {
-  const length = { name: 'length', unit: 's', range: [0.2, 8, 0.1] };
-  const room = {
-    version: 1,
-    node: {
-      name: 'reverb',
-      kind: 'Reverb',
-      inputs: [],
-      outputs: [],
-      params: [],
-      settings: [{ spec: length, value: 3.5, to: ['room', 'length'] }],
-      children: [
-        { name: 'room', kind: 'reverb', inputs: [], outputs: [], params: [], settings: [{ spec: length, value: 3.5 }] },
-      ],
-      wires: [],
-      macros: [],
-      pools: [],
-    },
-  };
-  const longer = withSettings(room, { length: 5 });
+  const longer = withSettings(ROOM, { length: 5 });
   assert.deepEqual([settingAt(longer, ['length']).value, settingAt(longer, ['room', 'length']).value], [5, 5]);
 });

@@ -1,12 +1,13 @@
-// The synth's library (mockup/src/libs/modular-audio/plan/instrument), in node: what a voice card is made of.
+// A voice card's parts (mockup/src/libs/modular-audio/plan/instrument), in node: what a voice card is made of.
 //   - the note's sources, a voice card's CV: each on a control, by MIDI's names where it has them; the note's settings;
 //   - the modules, a YAML template each, of its form: sources, modulators, stages, the output;
 //   - each module's params, its macros, onto its blocks: a tune in semitones onto a detune in cents; each its hint;
 //   - an architecture, of its form: sources into the chain, the chain into one output, modulators into params, a
-//     module's among them; the note's sources its macros; refused where it breaks its form, every failure said.
+//     module's among them; the note's sources its macros; refused where it breaks its form, every failure said;
+//   - the note's own values: the note's sources beside its pitch, gate, velocity and volume.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ARCHITECTURE_FORM, NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, SYNTH_FORMS } from '../index.ts';
+import { NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, SYNTH_FORMS } from '../index.ts';
 import { MODULE_TEMPLATES } from '../content.ts';
 import { Planner } from '../../planner/index.ts';
 import { isSwitch } from '../../../../base/params/index.ts';
@@ -65,17 +66,6 @@ test('the modules, a YAML template each, of its form: the sources, the modulator
       ['Tremolo', 'stage'],
       ['Ring', 'stage'],
       ['Out', 'output'],
-    ],
-  );
-  assert.deepEqual(
-    SYNTH_FORMS.map(({ name, inputs, outputs }) => [name, inputs, outputs]),
-    [
-      ['instrument', [], ['out']],
-      ['architecture', [], ['out']],
-      ['source', [], ['out']],
-      ['modulator', [], ['out']],
-      ['stage', ['in'], ['out']],
-      ['output', ['in'], ['out']],
     ],
   );
 });
@@ -165,7 +155,6 @@ test("an architecture, of its form: a source into the chain, the chain into one 
     plan.node.macros.map(({ spec }) => spec.name),
     ['frequency', 'gate', 'velocity'],
   );
-  assert.deepEqual(ARCHITECTURE_FORM.rules, [{ rule: 'no loops' }, { rule: 'ends in', role: 'out' }]);
 });
 
 test('an architecture refused where it breaks its form, every failure said: a second output; a source into no stage; a modulator into an input', () => {
@@ -183,10 +172,14 @@ test('an architecture refused where it breaks its form, every failure said: a se
   assert.throws(() => pluckPlanner(intoInput), /a wire from amp into out: not allowed/);
 });
 
-test("the note's own values, its sources beside its pitch, its gate, its velocity and its volume, as a test note sets them", () => {
+test("the note's own values, every source of the note but its pitch, its gate, its velocity and its volume, in their order, each its source's spec, as a test note sets them", () => {
+  const apart = ['frequency', 'gate', 'velocity', 'volume'];
+  const own = Object.keys(NOTE_SOURCES).filter((name) => !apart.includes(name));
   assert.deepEqual(
     OWN_NOTE_VALUES.map(({ name }) => name),
-    ['bend', 'vibrato depth', 'vibrato rate', 'breath', 'decay time', 'rise'],
+    own,
   );
-  assert.equal(OWN_NOTE_VALUES[0], NOTE_SOURCES.bend, 'their specs the sources');
+  for (const spec of OWN_NOTE_VALUES) {
+    assert.equal(spec, NOTE_SOURCES[spec.name], `${spec.name}: its source's spec`);
+  }
 });

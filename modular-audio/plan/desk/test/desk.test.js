@@ -6,7 +6,8 @@
 //   - the desk of the desk's form: its inputs, each way out and send, its pools;
 //   - a channel built on another; a desk written wrong refused, every failure said;
 //   - silenced(): which channels a mute or a solo silences, as Ableton's, over a plan's wires;
-//   - a controller on a strip as its param's address on the desk: the strip's address in front.
+//   - a controller on a strip as its param's address on the desk: the strip's address in front;
+//   - a desk's plan stored as JSON and read back.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -21,7 +22,7 @@ import {
   silenced,
 } from '../index.ts';
 import { SEND_PARAM, STRIP_PARAMS } from '../../../../base/params/index.ts';
-import { copyOf, nodeAt, paramAt, settingAt } from '../../format/index.ts';
+import { copyOf, nodeAt, paramAt, settingAt, VERSION, versionOf } from '../../format/index.ts';
 import { EFFECT_FORM } from '../../effects/index.ts';
 import { EFFECT_TEMPLATES } from '../../effects/content.ts';
 import { Planner } from '../../planner/index.ts';
@@ -288,37 +289,39 @@ test("a channel built on another: its base's inserts, then its own; its pan, vol
   );
 });
 
-test("a channel's words on a desk, its label, the name a view shows it by: on its node, a pool's on its child; read from data, its shape checked", () => {
-  const labelled = {
+test("a channel's words on a desk, its label and its short label, the names a view shows it by, the short one in little room (a send's knob): on its node, a pool's on its child; read from data, their shape checked", () => {
+  const worded = {
     ...STUDIO,
-    channels: STUDIO.channels.map((channel) =>
-      channel.name === 'you' ? { ...channel, label: 'my playing' } : channel,
-    ),
+    channels: STUDIO.channels.map((channel) => {
+      if (channel.name === 'you') {
+        return { ...channel, label: 'my playing' };
+      }
+      return channel.name === 'reverb' ? { ...channel, short: 'rev' } : channel;
+    }),
     pools: [{ ...STUDIO.pools[0], label: 'my taps' }, STUDIO.pools[1]],
   };
-  const plan = planned(labelled);
+  const plan = planned(worded);
   assert.deepEqual(
     [nodeAt(plan, ['you']).label, nodeAt(plan, ['my tap']).label, nodeAt(plan, ['tap']).label],
     ['my playing', 'my taps', undefined],
   );
-  assert.equal(deskOf(labelled, 'desks.js').channels[3].label, 'my playing');
+  assert.deepEqual([nodeAt(plan, ['reverb']).short, nodeAt(plan, ['you']).short], ['rev', undefined]);
+  assert.equal(deskOf(worded, 'desks.js').channels[3].label, 'my playing');
   assert.throws(
     () => deskOf({ kind: 'Studio', channels: [{ name: 'you', role: 'bus', label: 3 }] }, 'desks.js'),
     /label/,
   );
-});
-
-test("a channel's short label on a desk, the name a view shows it by in little room (a send's knob): on its node; read from data, its shape checked", () => {
-  const shortened = {
-    ...STUDIO,
-    channels: STUDIO.channels.map((channel) => (channel.name === 'reverb' ? { ...channel, short: 'rev' } : channel)),
-  };
-  const plan = planned(shortened);
-  assert.deepEqual([nodeAt(plan, ['reverb']).short, nodeAt(plan, ['you']).short], ['rev', undefined]);
   assert.throws(
     () => deskOf({ kind: 'Studio', channels: [{ name: 'reverb', role: 'return', short: 3 }] }, 'desks.js'),
     /short/,
   );
+});
+
+test("a desk's plan is data, stored as JSON: read back from its JSON as it was, its version read", () => {
+  const plan = planned();
+  const stored = JSON.parse(JSON.stringify(plan));
+  assert.deepEqual(stored, plan);
+  assert.equal(versionOf(stored), VERSION);
 });
 
 test('a desk written short refused where it is wrong, every failure said: a channel not handed in, or built in a loop; a way out into no bus on the desk; a tap for a return it has no send to', () => {

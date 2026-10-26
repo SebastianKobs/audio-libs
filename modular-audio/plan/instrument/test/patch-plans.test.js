@@ -2,12 +2,13 @@
 // (pluck.js):
 //   - the planner of its voice cards: the modules' templates and the file's own;
 //   - a patch's chains: the patch alone, or its rack's pads, each its key;
-//   - a patch's instrument, by its name: a pool of voices of its voice card, or a drum rack, a pool for each pad.
+//   - a patch's instrument, by its name: a pool of voices of its voice card, or a drum rack, a pool for each pad;
+//   - a patch's plan stored as JSON and read back.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cardPlanner, chainsOf, instrumentsOf, patchPlan } from '../index.ts';
 import { MODULE_TEMPLATES } from '../content.ts';
-import { paramAt, settingAt } from '../../format/index.ts';
+import { paramAt, settingAt, VERSION, versionOf } from '../../format/index.ts';
 import { PLUCK_FILE } from './pluck.js';
 
 const INSTRUMENTS = instrumentsOf(PLUCK_FILE, 'pluck.yaml', MODULE_TEMPLATES);
@@ -38,4 +39,11 @@ test("a patch's instrument by its name: a pool of voices of its voice card; a ra
     kit.node.pools.map(({ key }) => key),
     [38],
   );
+});
+
+test("a patch's plan is data, stored as JSON: read back from its JSON as it was, its version read", () => {
+  const plan = patchPlan('bright', INSTRUMENTS);
+  const stored = JSON.parse(JSON.stringify(plan));
+  assert.deepEqual(stored, plan);
+  assert.equal(versionOf(stored), VERSION);
 });
