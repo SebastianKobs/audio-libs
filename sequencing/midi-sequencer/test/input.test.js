@@ -367,14 +367,13 @@ test("a sender switched off from a time: its held notes hushed there, none let g
   sequencer.send(surface, [noteOn(1, 1), perNote(1, 'volume', 0.5, 1)]);
   sequencer.send(surface, [noteOn(2, 1.1)]);
   sequencer.send({ track: 'pad', source: 'keys' }, [noteOn(1, 1.2)]);
-  received.length = 0;
+  received.splice(0);
   sequencer.monitor('surface', false, 4, 0.25);
-  const hushed = received.filter((m) => m.type === 'per-note controller');
-  assert.equal(hushed.length, 2, 'both of its held notes');
-  assert.ok(hushed.every((m) => m.controller === 'volume' && m.value === 0 && m.t === 4 && m.glide === 0.25));
-  assert.ok(!received.some((m) => m.type === 'note off'), 'none let go');
-  assert.equal(new Set(hushed.map((m) => m.index)).size, 2, "by the track index of each, not the keys sender's");
-  received.length = 0;
+  assert.deepEqual(
+    received.splice(0),
+    [0, 1].map((index) => ({ ...perNote(index, 'volume', 0, 4), glide: 0.25, name: 'pad' })),
+    "both its held notes hushed, none let go, by the track index of each, not the keys sender's",
+  );
   sequencer.send(surface, [
     noteOn(3, 3), // before the switch: passed
     noteOn(4, 5), // from the switch: dropped
@@ -383,15 +382,26 @@ test("a sender switched off from a time: its held notes hushed there, none let g
     { type: 'controller', controller: 'cutoff', value: 0.3, t: 5 },
     noteOff(1, 5), // an earlier note's end: passed
   ]);
-  assert.equal(received.filter((m) => m.type === 'note on').length, 1, 'only the one before the switch');
-  assert.equal(received.filter((m) => m.type === 'note off').length, 1, 'only the earlier note, not the dropped one');
-  assert.ok(!received.some((m) => m.type === 'controller' || m.controller === 'pan'), 'no controller');
-  received.length = 0;
+  assert.deepEqual(
+    received.splice(0),
+    [
+      { ...noteOn(3, 3), name: 'pad' },
+      { ...noteOff(0, 5), name: 'pad' },
+    ],
+    "only the note before the switch, and the earlier note's end; no controller, not the dropped note's end",
+  );
   sequencer.send({ track: 'pad', source: 'keys' }, [
     noteOn(5, 5),
     { type: 'controller', controller: 'cutoff', value: 1, t: 5 },
   ]);
-  assert.equal(received.length, 2, "another sender's passed");
+  assert.deepEqual(
+    received,
+    [
+      { ...noteOn(4, 5), name: 'pad' },
+      { type: 'controller', controller: 'cutoff', value: 1, t: 5, name: 'pad' },
+    ],
+    "another sender's passed, its note on the track's next index",
+  );
 });
 
 test('a sender switched on again: its held notes brought back to the volume each had, none struck again; nothing of it on the stream', () => {
@@ -400,15 +410,18 @@ test('a sender switched on again: its held notes brought back to the volume each
   sequencer.send(surface, [noteOn(2, 1.1)]);
   sequencer.monitor('surface', false, 4, 0.25);
   sequencer.send(surface, [perNote(1, 'volume', 0.9, 4.5)]); // dropped: the last volume stays 0.5
-  received.length = 0;
-  plays.length = 0;
+  received.splice(0);
+  plays.splice(0);
   sequencer.monitor('surface', true, 8, 0.5);
-  const back = received.filter((m) => m.type === 'per-note controller');
-  assert.deepEqual(back.map((m) => m.value).sort(), [0.5, 1], 'each to the volume it had: one set, one never');
-  assert.ok(back.every((m) => m.controller === 'volume' && m.t === 8 && m.glide === 0.5));
-  assert.ok(!received.some((m) => m.type === 'note on'), 'none struck again');
+  assert.deepEqual(
+    received.splice(0),
+    [
+      { ...perNote(0, 'volume', 0.5, 8), glide: 0.5, name: 'pad' },
+      { ...perNote(1, 'volume', 1, 8), glide: 0.5, name: 'pad' },
+    ],
+    'each to the volume it had, one set, one never; none struck again',
+  );
   assert.deepEqual(plays, [], 'not on the stream, so not recorded');
-  received.length = 0;
   sequencer.send(surface, [noteOn(6, 9)]);
-  assert.equal(received.length, 1, 'its new notes passed again');
+  assert.deepEqual(received, [{ ...noteOn(2, 9), name: 'pad' }], 'its new notes passed again');
 });

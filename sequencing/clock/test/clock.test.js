@@ -1,19 +1,24 @@
 // The clock (mockup/src/libs/sequencing/clock/), on a clock and settings of its own, in fake mode: time moves
 // only when a test says, so every result is exact. Audio contexts are stand-ins that say what time they think it is (fake-audio.js)
-import { test, beforeEach } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { barTicks, beatTicks, Clock, GRIDS, LOOKAHEAD, PPQ, startsBar, STEP } from '../index.ts';
 import { fakeAudioOn } from './fake-audio.js';
 import { near } from '../../../base/util/test/near.js';
 
-// the tests' settings, read live by their clock as a tool's are, put back before each test: as the tool starts them (2026-10-12)
+// the tests' settings, read live by their clock as a tool's are: as the tool starts them
 const SETTINGS = { bpm: 72, swing: 0, swingOn: '16ths', quantize: '1/16' };
-const settings = { ...SETTINGS };
-const clock = new Clock({ settings });
-const fakeAudio = fakeAudioOn(clock);
+
+// a clock of the test's own, in fake mode at 100 s, its settings and its stand-in audio contexts
+function clockOf() {
+  const settings = { ...SETTINGS };
+  const clock = new Clock({ settings });
+  clock.useFake(100);
+  return { clock, settings, fakeAudio: fakeAudioOn(clock) };
+}
 // the steps the clock sends while fn runs
-function stepsDuring(fn) {
+function stepsDuring(clock, fn) {
   const got = [];
   const off = clock.onStep((i, t) => got.push({ i, t }));
   fn();
@@ -21,12 +26,8 @@ function stepsDuring(fn) {
   return got;
 }
 
-beforeEach(() => {
-  Object.assign(settings, SETTINGS);
-  clock.useFake(100);
-});
-
 test('the grid matches the shared test vectors', () => {
+  const { clock, settings } = clockOf();
   const { cases } = JSON.parse(
     readFileSync(new URL('../../../../../../shared/test-vectors/clock/grid.json', import.meta.url), 'utf8'),
   );
@@ -45,6 +46,7 @@ test('the grid matches the shared test vectors', () => {
 });
 
 test('taps land as the shared test vectors say, on every tap grid, next and nearest, straight and swung', () => {
+  const { clock, settings, fakeAudio } = clockOf();
   const { cases } = JSON.parse(
     readFileSync(new URL('../../../../../../shared/test-vectors/clock/taps.json', import.meta.url), 'utf8'),
   );
@@ -66,6 +68,9 @@ test('taps land as the shared test vectors say, on every tap grid, next and near
 });
 
 test('stepAt and timeAt undo each other, swung on 16ths and on 8ths', () => {
+  const { clock, settings, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio()); // a started grid: before that it stands at its first 16th
+  clock.advance(1);
   for (const swingOn of ['16ths', '8ths']) {
     for (const swing of [0, 0.5, 1, 1.14, 2]) {
       Object.assign(settings, { swing, swingOn });
@@ -77,6 +82,9 @@ test('stepAt and timeAt undo each other, swung on 16ths and on 8ths', () => {
 });
 
 test('straightTime and straightAt undo each other: a place sounds unswung, on the beats where the swing plays it too', () => {
+  const { clock, settings, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio()); // a started grid: before that it stands at its first 16th
+  clock.advance(1);
   for (const swingOn of ['16ths', '8ths']) {
     for (const swing of [0, 1.14, 2]) {
       Object.assign(settings, { swing, swingOn });
@@ -93,6 +101,7 @@ test('straightTime and straightAt undo each other: a place sounds unswung, on th
 });
 
 test('swing on 16ths moves only the second 16th of each 8th; on 8ths, the second 8th of each beat', () => {
+  const { clock, settings } = clockOf();
   Object.assign(settings, { swing: 1, swingOn: '16ths' });
   const sd = clock.grid.stepDuration();
   const at = (s) => (clock.grid.timeAt(s) - clock.grid.timeAt(0)) / sd;
@@ -106,6 +115,7 @@ test('swing on 16ths moves only the second 16th of each 8th; on 8ths, the second
 });
 
 test("quantize off: a tap plays at once, with the audio's next chunk plus 5 ms, never earlier, even for a time already past", () => {
+  const { clock, settings, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   settings.quantize = 'off';
@@ -114,6 +124,7 @@ test("quantize off: a tap plays at once, with the audio's next chunk plus 5 ms, 
 });
 
 test("with swing, a tap lands on the first swung 16th it can, never skipping one that hasn't sounded yet", () => {
+  const { clock, settings, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   for (const swingOn of ['16ths', '8ths']) {
@@ -140,6 +151,7 @@ test("with swing, a tap lands on the first swung 16th it can, never skipping one
 });
 
 test('every tap grid, straight, whatever the swing: on its grid as if nothing swung, quarters on the beats, triplets three to two beats, a beat or an 8th, and always the next step', () => {
+  const { clock, settings, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const sd = clock.grid.stepDuration();
@@ -175,6 +187,7 @@ test('every tap grid, straight, whatever the swing: on its grid as if nothing sw
 });
 
 test("triplets don't swing: with swing, a triplet tap lands on the straight triplet grid either way", () => {
+  const { clock, settings, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   for (const swingOn of ['16ths', '8ths']) {
@@ -191,6 +204,7 @@ test("triplets don't swing: with swing, a triplet tap lands on the straight trip
 });
 
 test('nearest: a tap nearer the step just gone sounds at once and belongs to it; nearer the next, or halfway, it waits for that one', () => {
+  const { clock, settings, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   for (const q of ['1/4', '1/8t', '1/16']) {
@@ -235,6 +249,7 @@ test('nearest: a tap nearer the step just gone sounds at once and belongs to it;
 });
 
 test('the catch: with nearest, the step just gone counts only for a tap at most `late` after it; a later one waits for the next', () => {
+  const { clock, settings, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   Object.assign(settings, { quantize: '1/4', swing: 0 });
@@ -259,8 +274,9 @@ test('the catch: with nearest, the step just gone counts only for a tap at most 
 });
 
 test('steps come in order, each once, a little ahead, while the audio runs', () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
-  const got = stepsDuring(() => clock.advance(2));
+  const got = stepsDuring(clock, () => clock.advance(2));
   assert.ok(got.length >= Math.floor(2 / clock.grid.stepDuration()), `${got.length} steps in 2 s`);
   got.forEach((s, k) => {
     if (k) {
@@ -275,28 +291,31 @@ test('steps come in order, each once, a little ahead, while the audio runs', () 
 });
 
 test('nothing is scheduled while the audio is suspended', () => {
+  const { clock, fakeAudio } = clockOf();
   const a = fakeAudio();
   clock.useAudio(a);
   clock.advance(0.5);
   a.suspend();
-  assert.equal(stepsDuring(() => clock.advance(1)).length, 0);
+  assert.equal(stepsDuring(clock, () => clock.advance(1)).length, 0);
   a.resume();
-  assert.ok(stepsDuring(() => clock.advance(0.5)).length > 0);
+  assert.ok(stepsDuring(clock, () => clock.advance(0.5)).length > 0);
 });
 
 test('when the ticks lag, the steps missed are skipped silently and the grid keeps its place', () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const grid0 = clock.grid.nextStepTime - clock.grid.nextStepNumber * clock.grid.stepDuration(); // where step 0 lies
   const before = clock.grid.nextStepNumber;
   clock.advance(1.5, { ticks: false });
-  const got = stepsDuring(() => clock.advance(0.03));
+  const got = stepsDuring(clock, () => clock.advance(0.03));
   assert.ok(got.length > 0 && got.length <= 3, `${got.length} steps right after the lag, not a pile`);
   assert.ok(got[0].i > before + 3, 'the missed ones are skipped');
   near(clock.grid.nextStepTime - clock.grid.nextStepNumber * clock.grid.stepDuration(), grid0, 'same grid:', 1e-9);
 });
 
 test('toContext and fromContext map between the clock and the audio context', () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio({ behind: 3 }));
   clock.advance(1);
   near(clock.audio.toContext(clock.now()), clock.now() - 3);
@@ -304,6 +323,7 @@ test('toContext and fromContext map between the clock and the audio context', ()
 });
 
 test("the audio context's time jumps a chunk at a time: the clock maps to where the audio is, and a tap starts with its next chunk", () => {
+  const { clock, fakeAudio } = clockOf();
   const block = 0.032;
   const a = fakeAudio({ behind: 3, block });
   clock.useAudio(a);
@@ -325,6 +345,7 @@ test("the audio context's time jumps a chunk at a time: the clock maps to where 
 });
 
 test('the first press, while the audio is still starting, sounds as it starts, however long the page was open', () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useFake(600); // the page has been open for 10 minutes
   // a new audio context: suspended at time 0, running 80 ms later, its time starting from 0 then
   const a = fakeAudio({ suspended: true });
@@ -343,6 +364,7 @@ test('the first press, while the audio is still starting, sounds as it starts, h
 // Stop suspends the audio while the clock's time runs on: a note sent then, or let go then, as Play's playback sends its first beat, sounds
 // as the audio resumes, not as late as it was suspended (KNOWN_BUGS.md, 2026-10-12)
 test('while the audio is suspended, a clock time maps to where its time stands, and from its resume to where it runs, before a tick finds the offset again; a tick after, the offset is found', () => {
+  const { clock, fakeAudio } = clockOf();
   const a = fakeAudio({ behind: 3 });
   clock.useAudio(a);
   clock.advance(1);
@@ -359,6 +381,7 @@ test('while the audio is suspended, a clock time maps to where its time stands, 
 });
 
 test("a clock of its own reads the settings it's given, live: its own tempo, swing and grid, apart from another's", () => {
+  const { clock, settings, fakeAudio } = clockOf();
   const mine = { bpm: 120, swing: 0, swingOn: '16ths', quantize: '1/8' };
   const own = new Clock({ settings: mine });
   own.useFake(0);
@@ -385,6 +408,7 @@ test("a clock of its own reads the settings it's given, live: its own tempo, swi
 });
 
 test("the offset is settled after the audio's first second, and again a second after a resume", () => {
+  const { clock, fakeAudio } = clockOf();
   const a = fakeAudio();
   clock.useAudio(a);
   clock.advance(0.5);
@@ -401,6 +425,7 @@ test("the offset is settled after the audio's first second, and again a second a
 });
 
 test('as the clocks drift apart, the offset follows, slowly', () => {
+  const { clock, fakeAudio } = clockOf();
   const a = fakeAudio({ behind: 3, rate: 1.0002 }); // the audio clock 200 ppm fast
   clock.useAudio(a);
   clock.advance(1.2);
@@ -413,12 +438,14 @@ test('as the clocks drift apart, the offset follows, slowly', () => {
 });
 
 test("a pointer event's timestamp is on the same timeline", () => {
+  const { clock } = clockOf();
   near(clock.fromEvent(1500), 1.5, '', 1e-12);
 });
 
 // before the audio starts: the music hasn't, so the song position stands where it will start, as the transport's lane shows it, not
 // counting from the page's load and jumping back on the first click (2026-10-12)
 test("a grid not started stands at its first 16th, whatever the clock's time, as one held does; started with the audio, it goes on from there", () => {
+  const { fakeAudio } = clockOf();
   const own = new Clock({ settings: { ...SETTINGS } });
   own.useFake(100);
   assert.equal(own.grid.running, false);
@@ -433,6 +460,7 @@ test("a grid not started stands at its first 16th, whatever the clock's time, as
 
 // the transport's stop: the clock's time running on, the grid's place, the song position, held
 test("held, the grid hands out no 16th, its place held at the first 16th not handed out, those before it played, while the clock's time runs on; a time before the hold where it was; released, it goes on from that place, its next 16th at once, none skipped", () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const t0 = clock.now();
@@ -441,7 +469,7 @@ test("held, the grid hands out no 16th, its place held at the first 16th not han
   clock.grid.hold(t0);
   assert.equal(clock.grid.held, true);
   assert.equal(clock.grid.heldAt, t0);
-  assert.equal(stepsDuring(() => clock.advance(2)).length, 0, 'no 16th while held');
+  assert.equal(stepsDuring(clock, () => clock.advance(2)).length, 0, 'no 16th while held');
   near(clock.now(), t0 + 2, "the clock's time running on:", 1e-9);
   assert.equal(clock.grid.straightAt(clock.now()), next, 'its place held: the first 16th not handed out');
   assert.equal(clock.grid.straightAt(t0 - 1), earlier, 'a time before the hold where it was: only the present held');
@@ -451,25 +479,27 @@ test("held, the grid hands out no 16th, its place held at the first 16th not han
   assert.equal(clock.grid.heldAt, null);
   near(clock.grid.straightAt(t1), next, 'going on from the place held:', 1e-9);
   near(clock.grid.nextStepTime, t1, 'its next 16th at once:', 1e-9);
-  assert.equal(stepsDuring(() => clock.advance(0.5))[0].i, next, 'none skipped');
+  assert.equal(stepsDuring(clock, () => clock.advance(0.5))[0].i, next, 'none skipped');
 });
 
 test('held from a time on, the beat playback starts on: the 16ths before it handed out, none from it, its place held there; released, going on from it', () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const place = clock.grid.nextStepNumber + 3;
   clock.grid.holdFrom(clock.grid.straightTime(place));
   assert.equal(clock.grid.held, false, 'not yet');
-  const got = stepsDuring(() => clock.advance(2));
+  const got = stepsDuring(clock, () => clock.advance(2));
   assert.equal(got.at(-1).i, place - 1, 'the 16ths before it handed out, none from it');
   assert.equal(clock.grid.held, true);
   assert.equal(clock.grid.straightAt(clock.now()), place, 'its place held there');
   clock.grid.release(clock.now());
-  assert.equal(stepsDuring(() => clock.advance(0.5))[0].i, place, 'going on from it');
+  assert.equal(stepsDuring(clock, () => clock.advance(0.5))[0].i, place, 'going on from it');
 });
 
 // song time: the time the music played, the grid's holds taken out, a stop's or a playback's, as the arrangement shows it
 test("a clock time's song time, the grid's holds taken out: before a hold as it is, within one where it stood, after one less its length, held now all from it; and back", () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1);
   const held = clock.now();
@@ -493,6 +523,7 @@ test("a clock time's song time, the grid's holds taken out: before a hold as it 
 // stopped between two 16ths, the song stood from the moment Stop was pressed, though the 16ths handed out ahead of it played on: a playback
 // across it jumped, and its playhead with it
 test('stopped between two 16ths, the song stands from the 16th it is held at, those handed out before it played on: a time between as it is', () => {
+  const { clock, fakeAudio } = clockOf();
   clock.useAudio(fakeAudio());
   clock.advance(1.01);
   const grid = clock.grid;
@@ -510,6 +541,7 @@ test('stopped between two 16ths, the song stands from the 16th it is held at, th
 });
 
 test("a beat by the meter's unit: 16ths to a beat and its length, and to a bar; a quarter in 4/4, an 8th in 6/8", () => {
+  const { clock, settings } = clockOf();
   const grid = clock.grid;
   assert.deepEqual(
     [grid.stepsPerBeat(), grid.beatDuration(), grid.stepsPerBar()],
@@ -539,6 +571,7 @@ test("a 16th that starts a bar, in its time signature: every 16th one in 4/4, th
 });
 
 test('ticks to seconds at the tempo, and back; a time as ticks on the grid, swung or straight, and back', () => {
+  const { clock, settings, fakeAudio } = clockOf();
   const grid = clock.grid;
   assert.equal(grid.secondsOf(STEP), grid.stepDuration(), 'a 16th');
   near(grid.ticksIn(grid.beatDuration()), PPQ, 'a beat');
@@ -552,6 +585,7 @@ test('ticks to seconds at the tempo, and back; a time as ticks on the grid, swun
 });
 
 test('the next line of so many 16ths at or after a time: the next beat, the next bar', () => {
+  const { clock, fakeAudio } = clockOf();
   const grid = clock.grid;
   clock.useAudio(fakeAudio());
   clock.advance(1);
@@ -565,6 +599,7 @@ test('the next line of so many 16ths at or after a time: the next beat, the next
 });
 
 test("song time as a time map: the grid's song time and back; a time never reached, never, held or not", () => {
+  const { clock, fakeAudio } = clockOf();
   const grid = clock.grid;
   clock.useAudio(fakeAudio());
   clock.advance(1);

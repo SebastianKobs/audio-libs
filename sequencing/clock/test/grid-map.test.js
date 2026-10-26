@@ -21,10 +21,6 @@ function fakeClock() {
       get heldAt() {
         return grid.heldAt;
       },
-      stepDuration: () => grid.stepDuration,
-      meter: () => [4, 4],
-      stepsPerBeat: () => 4,
-      stepsPerBar: () => 16,
       songTime: (t) =>
         grid.holds.reduce((song, { from, to }) => (t > from ? song - (Math.min(t, to) - from) : song), t),
       timeOfSong: (song) => grid.holds.reduce((t, { from, to }) => (t > from ? t + to - from : t), song),

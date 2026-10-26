@@ -25,12 +25,11 @@ function rack() {
   }));
   return { key: 'tap', pads };
 }
-const resets = [];
 const LOOK = {
   kind: 'instrument',
   status: 'tap: Pluck',
   buttons: html`<button data-play>play</button>`,
-  reset: { label: 'reset this instrument', title: 'back', run: () => resets.push('tap') },
+  reset: { label: 'reset this instrument', title: 'back', run: () => {} },
   own: 'voice',
   groups: GROUPS,
   matrix: true,
@@ -95,18 +94,6 @@ test("flat, as a strip's insert: its controls in a device of its own, its status
   assert.deepEqual(ran, ['vca']);
 });
 
-// what a composite is drawn into, of the test's own: what's drawn kept as text; its box, the element a view of its own is in
-function within(own) {
-  const box = { querySelectorAll: (selector) => (selector === '[data-own]' ? [own] : []) };
-  return {
-    drawn: [],
-    insertAdjacentHTML(where, text) {
-      this.drawn.push(text);
-    },
-    lastElementChild: box,
-  };
-}
-
 test("a view of its own, by its device's kind: drawn before its controls, marked; once in the page, redrawn on every frame until it's gone", () => {
   const view = new CompositeView({ chosen: new Chosen() });
   const shown = [];
@@ -132,3 +119,15 @@ test("a view of its own, by its device's kind: drawn before its controls, marked
   view.redraw();
   assert.deepEqual(shown.slice(1), ['redrawn', 'redrawn'], 'gone: no more');
 });
+
+// what a composite is drawn into, of the test's own: what's drawn kept as text; its box, the element a view of its own is in
+function within(own) {
+  const box = { querySelectorAll: (selector) => (selector === '[data-own]' ? [own] : []) };
+  return {
+    drawn: [],
+    insertAdjacentHTML(where, text) {
+      this.drawn.push(text);
+    },
+    lastElementChild: box,
+  };
+}

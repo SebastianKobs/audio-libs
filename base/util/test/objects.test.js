@@ -1,8 +1,9 @@
 // libs/base/util/objects.ts: a key toggled in a set, a map's entry made when asked for, a chain of keys
-// followed through a map, a list kept up to a cap, an object updated in place, data compared
+// followed through a map, a list kept up to a cap, an object updated in place, data frozen or compared
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chainFrom, entryOf, keep, sameData, toggleIn, updateInPlace } from '../index.ts';
+import * as util from '../index.ts';
+import { chainFrom, entryOf, frozen, keep, sameData, toggleIn, updateInPlace } from '../index.ts';
 
 test('a key toggled in a set: taken out if it was in, put in if not; or put in or taken out as asked', () => {
   const muted = new Set(['bass']);
@@ -93,6 +94,15 @@ test('a chain of keys followed through a map: each item naming the next, to one 
   );
   assert.deepEqual(chainFrom('x', byKey, next), { keys: ['x', 'y'], again: 'x' });
   assert.deepEqual(chainFrom(undefined, byKey, next), { keys: [], again: undefined });
+});
+
+test("data frozen all the way down, so a write anywhere in it throws; the data itself handed back; a module's namespace left as it is", () => {
+  const palette = { colors: ['red', 'blue'], scale: { root: 60, steps: [0, 2, 4] } };
+  assert.equal(frozen(palette), palette, 'the same data, frozen in place');
+  assert.throws(() => (palette.scale = {}), TypeError, 'its own key');
+  assert.throws(() => palette.colors.push('green'), TypeError, 'an array in it');
+  assert.throws(() => (palette.scale.steps[0] = 1), TypeError, 'an array in an object in it');
+  assert.equal(frozen(util), util, 'a namespace is no data to freeze, and no write reaches its exports');
 });
 
 test('data the same as other data: numbers, strings and nulls by value, arrays item by item in order, objects key by key in any order', () => {

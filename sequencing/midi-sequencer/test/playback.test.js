@@ -5,16 +5,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RecordingPlayer } from '../index.ts';
 
-const flower = { kind: 'tap' };
-// a region of a flower's on replay tap 1, its notes as the recorder keeps them, its track's name as its plays were sent
+const riff = { kind: 'lead' };
+// a region of a riff's on the track 'played lead 1', its notes as the recorder keeps them, its track's name as its plays were sent
 const region = (notes, more = {}) => ({
-  owner: flower,
-  clip: flower,
-  kind: 'tap',
-  role: 'tap',
+  owner: riff,
+  clip: riff,
+  kind: 'lead',
+  role: 'lead',
   live: false,
   track: 0,
-  trackName: 'replay tap 1',
+  trackName: 'played lead 1',
   notes,
   from: notes[0].t,
   to: 99,
@@ -171,7 +171,7 @@ test("stopped, what's sounding let go at once and nothing more sent; to the trac
   const [{ to }] = sent;
   assert.deepEqual(
     { track: to.track, clip: to.clip, live: to.live, source: to.source, playback: to.play.playback },
-    { track: 'replay tap 1', clip: flower, live: false, source: 'playback', playback: true },
+    { track: 'played lead 1', clip: riff, live: false, source: 'playback', playback: true },
   );
 });
 
