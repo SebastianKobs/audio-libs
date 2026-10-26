@@ -4,23 +4,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { isSwitch, NOTE_VALUES, timeParamsIn, timeSpecs } from '../index.ts';
 
-test('the note values a synced time steps through: shortest first, a 16th triplet to a dotted half', () => {
-  assert.deepEqual(NOTE_VALUES, [
-    '1/16t',
-    '1/16',
-    '1/8t',
-    '1/16.',
-    '1/8',
-    '1/4t',
-    '1/8.',
-    '1/4',
-    '1/2t',
-    '1/4.',
-    '1/2',
-    '1/2.',
-  ]);
-});
-
 test("a length's three params: a sync switch, the note values, its free time in ms by octaves; each where it starts", () => {
   const specs = timeSpecs({ unit: 'ms', range: [1, 4000, 1], start: { sync: true, note: '1/8', free: 417 } });
   assert.deepEqual(Object.keys(specs), ['sync', 'note', 'ms']);

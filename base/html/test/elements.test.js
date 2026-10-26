@@ -4,12 +4,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { html } from '../index.ts';
 
-test('a value is escaped as the HTML is made: a name with <, >, & or " stays text, in an element or an attribute', () => {
+test('a value is escaped as the HTML is made: a name with <, >, & or " stays text, in an element or an attribute; a string that only looks like HTML is text too', () => {
   const name = 'a <b> & "c"';
   assert.equal(
     html`<i title="${name}">${name}</i>`.text,
     '<i title="a &#60;b&#62; &#38; &#34;c&#34;">a &#60;b&#62; &#38; &#34;c&#34;</i>',
   );
+  assert.equal(html`<div>${'<br>'}</div>`.text, '<div>&#60;br&#62;</div>', 'not HTML the tag made');
 });
 
 test('a number goes in as its text, and so does a string with nothing to escape', () => {
@@ -19,8 +20,4 @@ test('a number goes in as its text, and so does a string with nothing to escape'
 test('HTML the tag made goes in as it is, and a list, its items one after another', () => {
   const cells = ['1 < 2', 'two'].map((text) => html`<b>${text}</b>`);
   assert.equal(html`<div>${cells}${html`<br>`}${[]}</div>`.text, '<div><b>1 &#60; 2</b><b>two</b><br></div>');
-});
-
-test("a string that only looks like HTML isn't HTML the tag made: it's text", () => {
-  assert.equal(html`<div>${'<br>'}</div>`.text, '<div>&#60;br&#62;</div>');
 });

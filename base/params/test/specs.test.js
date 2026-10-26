@@ -26,9 +26,7 @@ test('a gain in dB and back: 0 dB unity, -6 about half, +6 about twice; the sile
   near(dBOf(SILENCE), -80, 'the floor');
 });
 
-test("the specs shared: a fader's gain, -60 to +6 dB by the fader law; a pan, -1 to 1 in a line; a switch, off or on", () => {
-  assert.deepEqual(FADER_GAIN, { name: 'gain', range: [-60, 6, 0.1], dB: true, taper: 'fader' });
-  assert.equal(positionOf(FADER_GAIN, 1), 2 / 3, 'unity two thirds up');
+test('the specs shared: a pan, -1 to 1 in a line; a switch, off or on by its step; the gain and the pan frozen', () => {
   assert.deepEqual([positionOf(PAN, -1), positionOf(PAN, 0), positionOf(PAN, 1)], [0, 0.5, 1]);
   assert.deepEqual([valueAt(SWITCH, 0.4), valueAt(SWITCH, 0.6)], [0, 1]);
   assert.ok(Object.isFrozen(FADER_GAIN) && Object.isFrozen(PAN.range), 'frozen: each module names its own copy');

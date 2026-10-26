@@ -25,9 +25,10 @@ test("a time's seconds: synced, its note value at the beat; free, its millisecon
   near(timeSeconds({ sync: true, note: '1/4', free: 4, unit: 'Hz' }, beat), beat, 'a rate synced: a turn a beat');
 });
 
-test('the note values a synced time steps through: each longer than the last', () => {
+test('the note values a synced time steps through: each longer than the last, a 16th triplet to a dotted half', () => {
   const beats = NOTE_VALUES.map(noteValueBeats);
   assert.ok(beats.every((length, index) => index === 0 || length > beats[index - 1]));
+  assert.deepEqual([NOTE_VALUES[0], NOTE_VALUES.at(-1)], ['1/16t', '1/2.']);
 });
 
 test("a synced time's free value at a beat: where its note is then, in its free unit, to its step", () => {

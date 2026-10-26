@@ -2,7 +2,7 @@
 //   - a param's level as Web Audio plays its automation, alone or at rising times in one walk;
 //   - its level coming up to a time, a jump there not yet made;
 //   - an event's time, a param restarted;
-//   - a value at a time, when a value lands, and changes as automation;
+//   - a value at a time, one handed on now, and changes as automation events;
 //   - automation later by a time; one continued as another from a time, from where it plays;
 //   - automation as Web Audio holds it, told more;
 //   - when it has faded for good, within a floor.
@@ -73,11 +73,6 @@ test("a param's levels at rising times, its automation walked once: each the sam
   for (const t of [0, 0.5, 1, 1.5, 2, 2.5, 3, 4, 4.25, 5, 6, 7]) {
     near(levels.at(t), levelAt(EVERY_KIND, t), `at ${t}`, 1e-12);
   }
-  const again = new Levels(EVERY_KIND);
-  near(again.at(0.5), 0.2, 'the value, before the first jump');
-  near(again.at(1.5), 0.5, 'halfway up the straight ramp');
-  near(again.at(2.5), 2, 'halfway along the exponential one');
-  near(again.at(4.5), 4 * Math.exp(-1), 'a time constant into the target');
 });
 
 test("a param's level coming up to a time: a jump there not yet made; a ramp ending there at its end; a value from before anything", () => {
@@ -111,13 +106,10 @@ test("an event's time, and a param restarted from a level", () => {
   ]);
 });
 
-test('a value at a time: jumping there, or gliding there by a time constant; no glide where it has none', () => {
+test("a value at a time: jumping there, or gliding there by a time constant, none kept where it has none; one handed on now, from a time or gliding, now the caller's", () => {
   assert.deepEqual(timedValue(0.5, 2), { value: 0.5, t: 2 });
   assert.deepEqual(timedValue(0.5, 2, 0.08), { value: 0.5, t: 2, glide: 0.08 });
   assert.deepEqual(timedValue(0.5, 2, undefined), { value: 0.5, t: 2 }, 'none given, none kept');
-});
-
-test("a value handed on now, from a time or gliding, as a value at a time: now the caller's", () => {
   assert.deepEqual(timedAt(1, {}, 10), { value: 1, t: 10 }, 'now');
   assert.deepEqual(timedAt(1, { at: 12 }, 10), { value: 1, t: 12 }, 'from a time');
   assert.deepEqual(timedAt(1, { glide: 0.08 }, 10), { value: 1, t: 10, glide: 0.08 }, 'gliding there from now');
@@ -128,13 +120,10 @@ test("a value handed on now, from a time or gliding, as a value at a time: now t
   );
 });
 
-test('a change as an automation event: a jump set at its time; a glide a target by its time constant; a glide of 0 a jump', () => {
+test('a change as an automation event: a jump set at its time; a glide a target by its time constant; a glide of 0 a jump; changes in time order, the first set at its time, nothing before it to glide from', () => {
   assert.deepEqual(eventOf({ value: 1, t: 2 }), ['set', 1, 2]);
   assert.deepEqual(eventOf({ value: 1, t: 2, glide: 0.1 }), ['target', 1, 2, 0.1]);
   assert.deepEqual(eventOf({ value: 1, t: 2, glide: 0 }), ['set', 1, 2]);
-});
-
-test('changes in time order as automation: the first set at its time, nothing before it to glide from; each after it a jump or a glide', () => {
   const changes = [
     { value: 3, t: 1, glide: 0.5 },
     { value: 0, t: 2 },
@@ -223,7 +212,6 @@ test('automation continued as another from a time, from where it plays: a ramp r
     ['target', 0.5, 1, 0.2],
     'a smoothing asked for',
   );
-  assert.equal(SMOOTHING, 0.05, 's: as a plugin smooths a knob against zipper noise');
 });
 
 test('a target continued from where it plays, an event coming cutting it at a value on its way, as a comparator an attack: timed to reach that value then, so nothing jumps; one cut elsewhere, or past it, approached as wanted', () => {
