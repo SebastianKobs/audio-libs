@@ -7,3 +7,19 @@ A sound as data (`plan/`), built (`build/`) and shown (`view/`), as a modular st
 - `view/`: `device`, `desk`, `instrument` and `tracks`, each in `readout/`, `models/` and `dom/`: a plan's devices, a desk's strips, an instrument's patches, the session view and the arrangement. `tracks` is here, not in `sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
 
 Reads: `base/` (`util`, `params`, `automation`, `html`); of `sequencing/` only `clock/`, and `midi/protocol/` (the engine, `build/instrument`, `desk/automation`, `view/tracks`); `music/music-theory/` (`build/instrument`). Nothing of `spatial/`.
+
+## The words
+
+One word for each thing, the same in the plan, the builders and the views.
+
+- **Node:** inputs and outputs, any number, none included; params, edited or automated as it plays; settings, chosen as it's built, a change a rebuild. One kind of node, so a plan is one tree.
+- **Block:** a node with nothing inside, small and fixed, what every builder knows: oscillator, gain, filter, pan, delay, reverb, noise, limiter, envelope, select.
+- **Composite:** a node with an inside: children wired together, its inputs and outputs wired to theirs, its own params, macros, mapped onto theirs. An effect, a channel, a desk and a synth's module are composites.
+- **Module:** a synth's, named as on a synth's panel (`VCO`, `VCF`, `Envelope generator`), never called a block.
+- **Template:** a composite described short, its values, settings and children resolved as it's built. A **form** is what a template has to fulfill, a kind's: a channel's, a desk's, a voice card's. The planner declares it and checks a template against it as the template is made.
+- **Two layers:** the planner makes plans from templates and forms, with no audio. A builder makes a plan sound and knows no channel or desk. A plan describes itself, so builders and views read only `plan/format/` and `plan/blocks/`, never the planner. Plans are JSON, templates YAML, each checked against its form as it's loaded.
+- **Address:** a param's path from the plan's top, by its children's names, with slashes (`desk/channel 3/utility/level`). The one name for editing, automating and modulating; a setting's address edits only. A pool's copy is named by its pool and its number (`my tone/3`).
+- **Pool and owner:** children that come and go, an instrument's voices, a drum rack's pads, a desk's pooled channels, are copies of a pool's child. A node and a composite are timeless: the owner of the copies makes them and lets them go, and has no audio of its own.
+- **Voice card:** a fixed graph of modules, in the roles source, modulator, stage and one output. The note sets its params as CV does: pitch, velocity, gate. The instrument keeps one ready and copies it for each note.
+- **Patch:** a preset on an architecture. The architecture is the voice card's template; the preset holds its params' values and settings.
+- **Channel and desk:** a channel is a console's: inserts, cut, fader, pan, sends. A desk is channels and exactly one master, a template of the desk's form with the routing in it. An **effect** (Utility, Filter, Limiter, Delay, Tape delay, Reverb) is a composite from a template, an **insert** one on a channel; a **send** taps a channel, pre or post fader, into a **return**.
