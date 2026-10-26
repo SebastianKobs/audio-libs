@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RecordingPlayer } from '../index.ts';
-import { isNear } from '../../../base/util/test/near.js';
+import { near } from '../../../base/util/test/near.js';
 
 // a player, and what it sends, each controller with where it went
 function playerWith({ skip } = {}) {
@@ -47,19 +47,17 @@ test("a track's lanes played back from a time: picked up there at their values t
   player.due(110);
   const [tapAt, masterAt, tapLater] = sent;
   assert.equal(tapAt.to.track, 'replay tap 1');
-  assert.ok(
-    isNear(tapAt.value, 0.8 + (0.5 - 0.8) * Math.exp(-0.05 / 0.1)) && tapAt.t === 100,
-    'gliding up, where it had got to',
-  );
+  near(tapAt.value, 0.8 + (0.5 - 0.8) * Math.exp(-0.05 / 0.1), 'gliding up, where it had got to');
+  assert.equal(tapAt.t, 100, 'at the time it was picked up');
   assert.equal(tapAt.glide, undefined, 'set there at once');
   assert.equal(masterAt.to.track, 'master', "a strip's by its name");
-  assert.ok(isNear(masterAt.value, 0.5 + 0.5 * Math.exp(-0.55)), 'gliding down, where it had got to');
+  near(masterAt.value, 0.5 + 0.5 * Math.exp(-0.55), 'gliding down, where it had got to');
   assert.deepEqual(
     [tapLater.to.track, tapLater.value, tapLater.controller],
     ['replay tap 1', 0.2, 'volume'],
     'its point after, at its time',
   );
-  assert.ok(isNear(tapLater.t, 101.95));
+  near(tapLater.t, 101.95, 'its point after, at its time');
   assert.equal(sent.length, 3);
   assert.deepEqual(
     [tapAt.to.source, tapAt.to.play.playback, tapAt.type],
@@ -90,12 +88,14 @@ test('back as they were when it started: each lane it played set to its value at
   sent.length = 0;
   player.leave(104);
   assert.deepEqual(
-    sent.map(({ to, value, t }) => [to.track, +value.toFixed(9), t]),
+    sent.map(({ to, t }) => [to.track, t]),
     [
-      ['replay tap 1', +(0.8 + (0.5 - 0.8) * Math.exp(-1 / 0.1)).toFixed(9), 104],
-      ['master', +(0.5 + 0.5 * Math.exp(-1.5)).toFixed(9), 104],
+      ['replay tap 1', 104],
+      ['master', 104],
     ],
   );
+  near(sent[0].value, 0.8 + (0.5 - 0.8) * Math.exp(-1 / 0.1), 'the tap back at its value');
+  near(sent[1].value, 0.5 + 0.5 * Math.exp(-1.5), 'the master back at its value');
   player.leave(105);
   assert.equal(sent.length, 2, 'put back once');
 });

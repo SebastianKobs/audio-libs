@@ -38,9 +38,9 @@ test('the tracker matches the shared test vectors', () => {
         const { t, angle, ...rest } = got[k];
         const { t: wt, angle: wa, ...wrest } = want;
         assert.deepEqual(rest, wrest, `${f}: "${c.name}", event ${k}`);
-        assert.ok(Math.abs(t - wt) <= 1e-9, `${f}: "${c.name}", event ${k}: t ${t}, not ${wt}`);
+        near(t, wt, `${f}: "${c.name}", event ${k}: t ${t}, not ${wt}`, 1e-9);
         if (wa !== undefined) {
-          assert.ok(Math.abs(angle - wa) <= 1e-9, `${f}: "${c.name}", event ${k}: angle ${angle}, not ${wa}`);
+          near(angle, wa, `${f}: "${c.name}", event ${k}: angle ${angle}, not ${wa}`, 1e-9);
         }
       });
     }
@@ -55,7 +55,7 @@ test('a hold comes at 0.40 s, not at 0.39 s, and stays a hold when it moves', ()
   const evs = events('hold at 0.40 s, not at 0.39 s');
   const hold = evs.find((e) => e.type === 'hold');
   assert.deepEqual(types(evs), ['press', 'hold', 'release']);
-  assert.ok(Math.abs(hold.t - 0.4) <= 1e-9, `the hold at ${hold.t}`);
+  near(hold.t, 0.4, `the hold at ${hold.t}`, 1e-9);
   assert.equal(evs.at(-1).state, 'holding');
   assert.deepEqual(types(events('a hold stays a hold when it moves')), ['press', 'hold', 'release']);
 });
@@ -192,7 +192,7 @@ test('a drag that stays still rests after 0.1 s, then moves again', () => {
   const evs = events('rest');
   const rest = evs.find((e) => e.type === 'rest');
   const last = evs.filter((e) => e.type === 'dragmove' && e.t < rest.t).at(-1);
-  assert.ok(Math.abs(rest.t - last.t - 0.1) < 0.025 + 1e-9, 'within a tick of 0.1 s after it last moved');
+  near(rest.t - last.t, 0.1, 'within a tick of 0.1 s after it last moved', 0.025 + 1e-9);
   assert.deepEqual(types(evs).slice(-3), ['rest', 'move', 'release']);
 });
 
@@ -286,7 +286,7 @@ test('a loop counts how long it has stayed still, as a drag does', () => {
   off();
   assert.ok(looped, 'it became a loop');
   clock.advance(0.15);
-  assert.ok(Math.abs(tracker.restingFor(7) - 0.15) < 1e-9, `still for 0.15 s, not ${tracker.restingFor(7)}`);
+  near(tracker.restingFor(7), 0.15, `still for 0.15 s, not ${tracker.restingFor(7)}`, 1e-9);
   tracker.move({ ...at(7, pts[0][0] + 20, pts[0][1]), t: t + 0.15 });
   assert.ok(Math.abs(tracker.restingFor(7)) < 1e-9, 'moving again');
   tracker.up({ ...at(7, pts[0][0] + 20, pts[0][1]), t: t + 0.15 });
@@ -310,14 +310,14 @@ test("a drag's hand speed: screen heights a second, smoothed; from the press or 
   drag(800, 0.016);
   assert.equal(tracker.speedOf(8), null, 'the first move comes from a press, not a move: not known yet');
   drag(800, 1);
-  assert.ok(Math.abs(tracker.speedOf(8) - 1) < 0.02, `a screen height a second: ${tracker.speedOf(8)}`);
+  near(tracker.speedOf(8), 1, `a screen height a second: ${tracker.speedOf(8)}`, 0.02);
   drag(2400, 0.08);
   assert.ok(
     tracker.speedOf(8) > 1.2 && tracker.speedOf(8) < 3,
     `faster, smoothed: on its way to 3, ${tracker.speedOf(8)}`,
   );
   drag(2400, 1);
-  assert.ok(Math.abs(tracker.speedOf(8) - 3) < 0.05, `there: ${tracker.speedOf(8)}`);
+  near(tracker.speedOf(8), 3, `there: ${tracker.speedOf(8)}`, 0.05);
   t += 0.5;
   clock.advance(0.5); // still for half a second, then slow moves: the first spans the rest, the next is the hand's own
   drag(400, 0.016);
@@ -327,7 +327,7 @@ test("a drag's hand speed: screen heights a second, smoothed; from the press or 
     'the move after a standstill spans it: not known yet, so a vine keeps its feel',
   );
   drag(400, 0.016);
-  assert.ok(Math.abs(tracker.speedOf(8) - 0.5) < 0.02, `from a standstill, the move's own: ${tracker.speedOf(8)}`);
+  near(tracker.speedOf(8), 0.5, `from a standstill, the move's own: ${tracker.speedOf(8)}`, 0.02);
   tracker.up({ id: 8, x, y: 400, t, g: null });
   assert.equal(tracker.speedOf(8), null, 'let go: none');
 });
@@ -354,7 +354,7 @@ test("moves at one time keep their distance: it counts in the next move with a t
   }
   const speed = tracker.speedOf(9);
   tracker.up({ id: 9, x, y: 400, t, g: null });
-  assert.ok(Math.abs(speed - 1) < 0.02, `a screen height a second: ${speed}`);
+  near(speed, 1, `a screen height a second: ${speed}`, 0.02);
 });
 
 test('an oval is round enough, and so is a circle the other way round after a straight start, with the loop at the circle', () => {

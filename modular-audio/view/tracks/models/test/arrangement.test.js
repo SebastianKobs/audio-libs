@@ -18,7 +18,7 @@ import { laneLine } from '../arrangement/lane-shapes.ts';
 import { playheadAt } from '../arrangement/playhead.ts';
 import { faderPosition, PAN, SEND_PARAM, STRIP_PARAMS, positionOf } from '../../../../../base/params/index.ts';
 import { BLOCKS, DELAY_TIME, LIMITER_SPECS } from '../../../../plan/blocks/index.ts';
-import { near } from '../../../../../base/util/test/near.js';
+import { near, isNear } from '../../../../../base/util/test/near.js';
 import { STUDIO } from '../../../desk/models/test/desk.js';
 
 // the tracks, as a control surface names them: your kinds' pools first, then each kind's group,
@@ -415,7 +415,7 @@ test("a glide: setTargetAtTime's curve toward its value from where the line was,
     { t: 1, value: 1, glide: 0.5 },
   ];
   const line = laneLine(points, { from: 0, to: 10, step: 0.25 });
-  const at = (t) => line.find((corner) => Math.abs(corner.t - t) < 1e-9).value;
+  const at = (t) => line.find((corner) => isNear(corner.t, t)).value;
   near(at(1), 0);
   near(at(1.5), 1 - Math.exp(-1), '', 1e-12); // a time constant on: 63 % of the way
   near(at(2), 1 - Math.exp(-2), '', 1e-12);

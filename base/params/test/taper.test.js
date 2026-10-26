@@ -8,14 +8,13 @@ import { near } from '../../util/test/near.js';
 // the fader law, as a console's and Ableton's: a fader's position to its gain by dB, not in a straight line, so unity sits two thirds of
 // the way up and the bottom of its travel is the long drop to silence
 test("the fader law: silence at the bottom, unity two thirds up, +6 dB at the top, the master's unity at its top; a position back from its gain", () => {
-  assert.deepEqual(
-    [faderGain(0), faderGain(2 / 3), faderGain(1)].map((g) => +g.toFixed(9)),
-    [0, 1, 2],
-  );
-  assert.equal(+faderGain(1, 1).toFixed(9), 1, 'the master, its top 1: unity at its top');
-  assert.ok(Math.abs(20 * Math.log10(faderGain(1 / 3)) + 10.3) < 0.1, 'a third of the way up: about -10 dB');
+  near(faderGain(0), 0, 'silence at the bottom');
+  near(faderGain(2 / 3), 1, 'unity two thirds up');
+  near(faderGain(1), 2, '+6 dB at the top');
+  near(faderGain(1, 1), 1, 'the master, its top 1: unity at its top');
+  near(20 * Math.log10(faderGain(1 / 3)), -10.3, 'a third of the way up: about -10 dB', 0.1);
   for (const p of [0.05, 0.3, 0.5, 2 / 3, 0.9, 1]) {
-    assert.ok(Math.abs(faderPosition(faderGain(p)) - p) < 1e-9, `${p}: back again`);
+    near(faderPosition(faderGain(p)), p, `${p}: back again`, 1e-9);
   }
   assert.equal(faderPosition(4), 1, 'past the top: at the top');
 });

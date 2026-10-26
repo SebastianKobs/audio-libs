@@ -524,8 +524,8 @@ test("a clock time's song time, the grid's holds taken out: before a hold as it 
   const grid = clock.grid;
   assert.equal(grid.songTime(held - 0.5) - grid.songTime(held - 1), 0.5, 'before it as it is');
   assert.equal(grid.songTime(held + 2), grid.songTime(stands), 'within it where it stood');
-  assert.ok(Math.abs(grid.songTime(held + 4) - grid.songTime(stands) - 1) < 1e-9, 'after it, less its length');
-  assert.ok(Math.abs(grid.timeOfSong(grid.songTime(stands) + 0.5) - (held + 3.5)) < 1e-9, 'and back, past it');
+  near(grid.songTime(held + 4) - grid.songTime(stands), 1, 'after it, less its length', 1e-9);
+  near(grid.timeOfSong(grid.songTime(stands) + 0.5), held + 3.5, 'and back, past it', 1e-9);
   const standsNow = grid.nextStepTime;
   grid.hold(clock.now());
   clock.advance(2);
@@ -547,9 +547,9 @@ test('stopped between two 16ths, the song stands from the 16th it is held at, th
   const released = clock.now();
   grid.release(released);
   const between = (stopped + stands) / 2;
-  assert.ok(Math.abs(grid.songTime(between) - between) < 1e-9, 'between the stop and its 16th: playing on');
-  assert.ok(Math.abs(grid.songTime(stands + 1) - stands) < 1e-9, 'from its 16th: standing');
-  assert.ok(Math.abs(grid.songTime(released + 0.5) - (stands + 0.5)) < 1e-9, 'released: going on from there');
+  near(grid.songTime(between), between, 'between the stop and its 16th: playing on', 1e-9);
+  near(grid.songTime(stands + 1), stands, 'from its 16th: standing', 1e-9);
+  near(grid.songTime(released + 0.5), stands + 0.5, 'released: going on from there', 1e-9);
 });
 
 test("a beat by the meter's unit: 16ths to a beat and its length, and to a bar; a quarter in 4/4, an 8th in 6/8", () => {

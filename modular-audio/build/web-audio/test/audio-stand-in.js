@@ -6,6 +6,8 @@
 // inputs sorted, numbers to 10 significant digits, times from `t0`, and how often a node was disconnected. A named node met on the way is
 // a ref to its name, written once under it, as itself, so a desk with every strip named is written strip by strip, not once for every path
 
+import { isNear } from '../../../../base/util/test/near.js';
+
 const NOISE = 1e-9; // s: a time this near the start written as the start, a float's noise, as a time added up step by step has
 const PARAMS = {
   gain: { gain: 1 },
@@ -280,7 +282,7 @@ function bufferInfo(b) {
 // which is only a ref to its name: written under its name as itself if it's in the recording, as what feeds it if it's an endpoint
 // outside it. A node fed back into itself, as a delay line's loop, is marked where it comes round again, so the tree ends
 export function canonical(rec, names, t0 = 0) {
-  const T = (v) => num(Math.abs(v - t0) < NOISE ? 0 : v - t0);
+  const T = (v) => num(isNear(v, t0, NOISE) ? 0 : v - t0);
   const inputs = new Map(); // node -> [{ from, into }], into: a param's name, or 'in'
   for (const e of rec.edges) {
     const to = e.to.node ? e.to.node : e.to;
