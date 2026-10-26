@@ -74,9 +74,21 @@ test("a pool's copy as a strip: its pool's channel, under its address, named by 
   );
 });
 
-test("a strip's level, its peak as the planReadout hears it; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
-  const { views } = mixerOn({ peaks: { you: 0.4 }, values: { 'tap/cut/gain': 0 } });
+test("a strip's level, its peak as the planReadout hears it, a block's at a point, what a limiter takes away by address; quiet where its cut is at 0, as a mute or another's solo leaves it", () => {
+  const { views } = mixerOn({
+    peaks: { you: 0.4, 'master/limiter in': 0.9 },
+    readings: { 'master/limiter reduction': 3 },
+    values: { 'tap/cut/gain': 0 },
+  });
   assert.equal(views.strip(['you']).level, 0.4);
+  assert.deepEqual(
+    [
+      views.peakOf(['you']),
+      views.peakOf(['master', 'limiter'], 'in'),
+      views.readingOf(['master', 'limiter'], 'reduction'),
+    ],
+    [0.4, 0.9, 3],
+  );
   assert.deepEqual(
     [views.strip(['tap']).quiet, views.strip(['you']).quiet, views.strip(['master']).quiet],
     [true, false, false],
@@ -156,19 +168,4 @@ test("what strips feed, for a view's lights: each through its way out, and the s
     "a pool's copy, by its pool's rule",
   );
   assert.deepEqual(sorted(mixer.reached(['clips tap'], () => true)), ['clips tap'], 'a clip track, not a strip');
-});
-
-test("a meter's level and a reading by address, as the implementation hears them: a strip's peak, a block's at a point, what a limiter takes away", () => {
-  const { views } = mixerOn({
-    peaks: { you: 0.4, 'master/limiter in': 0.9 },
-    readings: { 'master/limiter reduction': 3 },
-  });
-  assert.deepEqual(
-    [
-      views.peakOf(['you']),
-      views.peakOf(['master', 'limiter'], 'in'),
-      views.readingOf(['master', 'limiter'], 'reduction'),
-    ],
-    [0.4, 0.9, 3],
-  );
 });

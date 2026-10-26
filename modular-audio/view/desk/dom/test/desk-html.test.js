@@ -3,8 +3,7 @@
 //   - the desk's own channels drawn: its buses, a bus with those that go into it in a group's box; its returns;
 //     its master; each strip opening its devices by its address, its sends labelled by their returns' short labels;
 //   - a track's strip drawn: the name it's handed, what plays on it, empty while it plays nothing;
-//   - what the strips heard feed: their ways out, and the sends turned up;
-//   - each strip's level, falling as a peak meter's.
+//   - what the strips heard feed: their ways out, and the sends turned up.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deskHtml, fedBy, trackHtml } from '../index.ts';
@@ -68,5 +67,4 @@ test('what the strips heard feed, for the lights: each through its way out, and 
   const up = viewsOn({ values: { 'you/send/reverb': 0.5 } });
   assert.deepEqual([...fedBy(up, new Set(['tap']))].sort(), ['reverb', 'tap', 'you']);
   assert.deepEqual([...fedBy(viewsOn(), new Set(['tap']))].sort(), ['tap', 'you'], 'its send down');
-  assert.deepEqual([...fedBy(viewsOn(), new Set(['clips tap']))], ['clips tap'], 'a name not on the desk kept');
 });

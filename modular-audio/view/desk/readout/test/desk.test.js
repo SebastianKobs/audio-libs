@@ -4,8 +4,7 @@
 //   - how a param is set, worked out: a strip's own live, by its notes where they set it; an insert's own params and
 //     settings live on a live strip, by what sets it on a track; what a slot does there, its words where its plan has
 //     them;
-//   - a level and a reading once built, its channel there; 0 before;
-//   - a pool's copies;
+//   - a level and a reading once built, its channel there, a pool's copies; 0 before;
 //   - what's done sent as the desk's message, a param's value or a setting, by its address.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -69,7 +68,7 @@ test("how a param is set, worked out: a strip's own live, on a live track or whe
   assert.equal(planReadout.slotOf(['tap', 'nowhere']), undefined);
 });
 
-test("a level and a reading once the desk is built, its channel there, a copy's once added; 0 before", () => {
+test("a level and a reading once the desk is built, its channel there, a copy's once added and its pool's copies; 0 before", () => {
   const { desk, built, build, planReadout } = planReadoutOn();
   assert.equal(planReadout.peakOf(['tap']), 0, 'not built yet');
   build();
@@ -80,12 +79,6 @@ test("a level and a reading once the desk is built, its channel there, a copy's 
   assert.equal(planReadout.peakOf(['my tap', '3']), 0, 'a copy not added');
   desk.channelOf('my tap/3');
   assert.equal(planReadout.peakOf(['my tap', '3']), 0.2);
-});
-
-test("a pool's copies added", () => {
-  const { desk, build, planReadout } = planReadoutOn();
-  build();
-  desk.channelOf('my tap/3');
   assert.deepEqual(planReadout.copiesOf(['my tap']), [['my tap', '3']]);
 });
 

@@ -9,4 +9,4 @@ A desk drawn in the DOM, on a device's drawers (`libs/modular-audio/view/device/
 | `insert-devices.ts` | `InsertDevices`: a strip's inserts, the master's too, a chain of the device view's, opened by the strip's address: each insert its owner says something of a composite drawn flat, in the order its sound goes through them, its status its label, its job and what sets it, a reset for what's live on it |
 | `strip-view.ts` | `stripHtml()`: a strip drawn from its model, its name, where it goes and what plays on it as the view says (`StripLook`), its slots, its sends, pan, fader, level bar, value, mute and solo; quiet where it's silent; `slotsHtml()`, its inserts' slots, each its device and what sets it; `muteSoloHtml()`, its mute and solo by its key |
 
-Tested in node on HTML as text and on values, in its `test/` folder: `dom.test.js`, `desk-view.test.js`.
+Tested in node on HTML as text and on values, in its `test/` folder: `strip-view.test.js`, `desk-html.test.js`.

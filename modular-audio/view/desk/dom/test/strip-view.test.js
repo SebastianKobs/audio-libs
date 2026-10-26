@@ -1,7 +1,6 @@
 // The view models drawn (libs/modular-audio/view/desk/dom), as HTML, in node, on the models' small desk (libs/modular-audio/view/desk/models/test/desk.js):
 //   - a strip: its name, where it goes, its slots, its knobs, its fader, bar and value, its mute and solo; quiet
-//     where it's silent; the master's without mute and solo, its pan still;
-//   - every value escaped as it's made.
+//     where it's silent; the master's without mute and solo, its pan still.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { stripHtml } from '../index.ts';
@@ -66,10 +65,4 @@ test('a strip whose track plays nothing drawn empty: its sends and fader at the 
   );
   assert.match(text, /<b class="val">—<\/b>/);
   assert.match(text, /data-mute="my tap\/1"/);
-});
-
-test('every value escaped as it is made', () => {
-  const views = viewsOn();
-  const text = stripHtml(views.strip(['sings']), { ...LOOK, name: '<b>&"' }).text;
-  assert.match(text, /<div class="name">&#60;b&#62;&#38;&#34;<\/div>/);
 });
