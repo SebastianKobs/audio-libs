@@ -7,6 +7,6 @@ Music's time, its events, the MIDI sequencer, and the transport's view. Part of 
 - [`sequencer/`](sequencer/README.md): patterns of events on the grid, clips on tracks, pools of tracks.
 - [`midi-sequencer/`](midi-sequencer/README.md): the input, the stream, the recorder, the recording played back.
 - [`clip-player/`](clip-player/README.md): a session view's clips, launched into the input.
-- [`view/transport/`](view/transport/models/README.md): play, stop, where the music is, as `models/` and `dom/`.
+- [`view/transport/`](view/transport/models/README.md): play, stop, where the music is, as models and dom.
 
-Reads: `base/` (`util`, `params`, `automation`, `html`), `midi/protocol/`, the messages the sequencers carry. `clock/` is the time every other library here stands on.
+Reads: `libs/base/` (`util`, `params`, `automation`, `html`), `libs/midi/protocol/`, the messages the sequencers carry. `clock/` is the time every other library here stands on.

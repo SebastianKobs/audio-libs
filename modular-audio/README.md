@@ -23,3 +23,18 @@ One word for each thing, the same in the plan, the builders and the views.
 - **Voice card:** a fixed graph of modules, in the roles source, modulator, stage and one output. The note sets its params as CV does: pitch, velocity, gate. The instrument keeps one ready and copies it for each note.
 - **Patch:** a preset on an architecture. The architecture is the voice card's template; the preset holds its params' values and settings.
 - **Channel and desk:** a channel is a console's: inserts, cut, fader, pan, sends. A desk is channels and exactly one master, a template of the desk's form with the routing in it. An **effect** (Utility, Filter, Limiter, Delay, Tape delay, Reverb) is a composite from a template, an **insert** one on a channel; a **send** taps a channel, pre or post fader, into a **return**.
+
+## The sound's way through them
+
+A sound is data until it's built, and built only by a builder:
+
+1. **What a sound is** (`plan/format`, `plan/blocks`): a plan, a node, a block or a composite of others, its wires, params, macros and pools. Timeless: what to build, its values as it starts.
+2. **Planned** (`plan/planner`): templates, written short or in YAML, made into a plan, checked against their forms; a block alone by its kind.
+3. **What's planned** (`plan/effects`, `plan/desk`, `plan/instrument`): the effects, a desk and its channels, a synth's voice cards and instruments, as forms and templates; a preset is values on one, by address.
+4. **Built** (`build/contract`, `build/web-audio`): a builder handed a plan hands back what's built (`Built`), set and automated by address, built again, taken apart.
+5. **Powered** (`build/web-audio-engine`): the audio context started on a first touch, what's built built into an output that fades in, the clock on the audio's time.
+6. **Played by notes** (`build/instrument`): MIDI's notes played into an instrument on what's built, a voice a pool's copy, a sound module an instrument for each patch, any number of tracks playing into it by an input of its own. A patch's value is set on its bank at its time (`InstrumentAutomation`), and moved by hand as a controller on its own track (`InstrumentSurface`).
+7. **Mixed** (`build/desk/mixing`, `build/desk/automation`): a desk built, set by address, its mute and solo; a track's channel and its way in. The desk's automation is fitted to it: a strip's controllers set on time (`DeskAutomation`), a move by hand played in as a controller on the strip's track (`DeskSurface`).
+8. **Patched** (`app/`'s wiring): a track's notes into its role's instrument by an input of its own, each voice into the track's channel, its controllers onto its strip.
+
+Beside it, `spatial/hearing` hears a place from where you listen and hands on what it hears as values: a track's controllers, a strip's, a note's own. The notes come through `sequencing/midi-sequencer` (its input plays the instruments and records what's heard), from a control surface, a clip (`sequencing/clip-player`) or a recording played back.

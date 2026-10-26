@@ -1,6 +1,6 @@
 // ---------- libs/modular-audio/view/tracks/models: the session view's and the arrangement's view models, no DOM ----------
-// Handed a plan and its values through the plan's readout (libs/modular-audio/view/device/readout/), hands back
-// what a view shows and what it can do.
+// Handed what it reads through its readout (libs/modular-audio/view/tracks/readout/) and the desk's
+// view models (libs/modular-audio/view/desk/models/), hands back what a view shows and what it can do.
 // Its parts:
 //   - clip-tracks.ts: the clip tracks, each clip read from what holds it, a clip player or the
 //     control surface, its ▶, and its × asking first;
