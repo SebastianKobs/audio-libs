@@ -41,6 +41,8 @@ A clip's × is a deliberate, confirmed action:
 | `noteShape()`, `pitchRange()`, `NoteShape` | A region's notes as drawn: a note's pieces, glides and slide, a note kept whole past a hold; and a region's pitch range, its notes' lowest to highest (`arrangement/note-shapes.ts`). |
 | `laneLine()`, `Corner` | A lane's line, its points played as automation, a glide's curve sampled until it settles; a `Corner` is a value at a time (`arrangement/lane-shapes.ts`). |
 
+`placed.ts` works out where a play goes, its group of tracks and its track, for the session and the arrangement alike.
+
 The arrangement keeps each group folded to its first track until it's unfolded, and a track's lanes under it once they're opened. Each `frame()` moves the time in view, following the present or the playhead while it plays back, until it's scrolled back. A press in the ruler places the playhead on the nearest beat, and its release cues it.
 
 Tests: `test/clip-tracks.test.js`, `test/session.test.js`, `test/session-tracks.test.js`, `test/views.test.js` and `test/arrangement.test.js`.

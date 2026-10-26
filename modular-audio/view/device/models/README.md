@@ -33,4 +33,6 @@ if (level instanceof Knob) {
 | `Chosen` | What's chosen in the composites a view shows, as a synth's panel keeps the page you were on: each rack's pad and each group's tab, none until chosen (`chosen.ts`). |
 | `DevicePanel`, `Opened` | The device view: what's open in it, by a kind and what of it (`open()`, `close()`), its title and the slot marked, each kind's chain of devices handed in, and what's chosen in the composites it shows; whoever listens is told as it changes (`device-panel.ts`). |
 
+The plan and its values by address are read through the plan's readout in one place, `model.ts`, which every control and `ViewBuilder` read through.
+
 Tests: `test/chosen.test.js`, `test/device-panel.test.js`, `test/envelope.test.js`, `test/meters.test.js`, `test/models.test.js` and `test/moves.test.js`.
