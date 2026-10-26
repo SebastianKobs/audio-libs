@@ -12,7 +12,7 @@ import { Planner } from '../../planner/index.ts';
 import { EFFECT_FORM } from '../../effects/index.ts';
 import { EFFECT_TEMPLATES } from '../../effects/content.ts';
 
-export const REPLAY = {
+const REPLAY = {
   kind: 'Replay',
   pan: false,
   tap: 'pre',
@@ -60,7 +60,7 @@ export const STUDIO = {
   ],
 };
 
-export const PRESETS = { echo: { kind: 'Delay', values: { note: '1/8.', feedback: 0.5 } } };
+const PRESETS = { echo: { kind: 'Delay', values: { note: '1/8.', feedback: 0.5 } } };
 
 // a desk written short, planned with the effects, the forms and the presets; labels and short labels by name, a
 // channel's or a pool's
