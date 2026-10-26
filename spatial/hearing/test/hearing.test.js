@@ -1,43 +1,14 @@
-// The hearing's unit tests (libs/spatial/hearing/):
+// The hearing (mockup/src/libs/spatial/hearing/), through its space, with a listener of the test's own:
 //   - the model against its test vectors (shared/test-vectors/space/hearing.json);
-//   - the space and its emitters, with a listener of the test's own: what each hears, handed on as values.
+//   - an emitter: what it hears handed on as values, from a note's time, as the listener moves.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { hearing, hearMax, moved } from '../hearing.ts';
 import { heardAs, nothing, onFloor, r10, setup } from './listening.js';
 
 const vectors = JSON.parse(
   readFileSync(new URL('../../../../../../shared/test-vectors/space/hearing.json', import.meta.url), 'utf8'),
 );
-test('the model: level, cutoff and room at every distance as the vectors have them, for the defaults and with each setting moved', () => {
-  assert.equal(vectors.format, 1);
-  for (const c of vectors.cases) {
-    const s = { ...c.settings, limit: c.settings.limit ?? Infinity };
-    assert.equal(r10(hearMax(s)), c.hearMax, JSON.stringify(c.settings));
-    heardAs(c, (d) => hearing(d, s));
-  }
-});
-
-test('a change is worth sending once the level or room is 0.002 off, or the cutoff 1%: not before', () => {
-  const was = { level: 0.5, room: 0.2, cutoff: 1000 };
-  const by = (d) => ({ ...was, ...d });
-  for (const [d, want] of [
-    [{ level: 0.5019 }, false],
-    [{ level: 0.5021 }, true],
-    [{ level: 0.4979 }, true],
-    [{ room: 0.2019 }, false],
-    [{ room: 0.2021 }, true],
-    [{ cutoff: 1009.9 }, false],
-    [{ cutoff: 1010.1 }, true],
-    [{ cutoff: 990.1 }, false],
-    [{ cutoff: 989.9 }, true],
-  ]) {
-    assert.equal(moved(by(d), was), want, JSON.stringify(d));
-  }
-});
-
-const S = { range: 8, hearing: 40, falloff: 1, dull: 1, room: 1 }; // the hearing settings, as setup() has them
 // what an emitter hears, as the test sees it handed on: each value by its name, and when
 const heardSeen = () => {
   const calls = [];
@@ -48,13 +19,43 @@ const followerSeen = () => {
   const calls = [];
   return { calls, follower: (value, when) => calls.push([value, when]) };
 };
-test('the model, with its settings read live', () => {
-  const { space, hearingSettings } = setup();
+
+test('the model through the space: level, cutoff and room at every distance as the vectors have them, for the defaults and with each setting moved; its settings read live', () => {
+  assert.equal(vectors.format, 1);
+  for (const vectorCase of vectors.cases) {
+    const { space } = setup({ ...vectorCase.settings, limit: vectorCase.settings.limit ?? Infinity });
+    assert.equal(r10(space.hearMax()), vectorCase.hearMax, JSON.stringify(vectorCase.settings));
+    heardAs(vectorCase, (distance) => space.hearing(distance));
+  }
+  const { space, hearingSettings: live } = setup();
   assert.equal(space.hearMax(), 40);
-  assert.deepEqual(space.hearing(20), hearing(20, hearingSettings));
   assert.equal(space.hearing(20).level, 0.4, '6 dB down at 16 units, a doubling of the range');
-  hearingSettings.range = 16;
+  live.range = 16;
   assert.equal(space.hearing(16).level, 1, 'read live');
+});
+
+// a change is worth handing on once the level or room is 0.002 off, or the cutoff 1%: a listener who moves a little
+// changes what an emitter hears too little for that, one who moves more changes it enough
+test("an emitter hands on a change in what it hears only once it's worth it: the listener moved a little, nothing; moved more, a glide", () => {
+  const { at, space } = setup();
+  const seen = heardSeen();
+  space.emitter(onFloor(0, 20), { hears: seen.hears, keep: true });
+  const asMade = seen.calls.length;
+  at.z = 0.05;
+  space.update(1);
+  assert.equal(seen.calls.length, asMade, 'a little nearer: nothing handed on');
+  at.z = 1;
+  space.update(2);
+  const nearer = space.hearing(19);
+  assert.deepEqual(
+    seen.calls.slice(asMade),
+    [
+      ['cutoff', nearer.cutoff, { glide: 0.08 }],
+      ['level', nearer.level, { glide: 0.08 }],
+      ['room', nearer.room, { glide: 0.08 }],
+    ],
+    'a unit nearer: handed on, gliding',
+  );
 });
 
 // what an emitter hears, handed on as values: a track's strip maps them to its controllers
@@ -62,7 +63,7 @@ test("an emitter hands on what it hears as it's made, now: its cutoff, level and
   const { space } = setup();
   const seen = heardSeen();
   const e = space.emitter(onFloor(12, 16), { hears: seen.hears, keep: true });
-  const at20 = hearing(20, S);
+  const at20 = space.hearing(20);
   assert.deepEqual(
     seen.calls,
     [
@@ -74,7 +75,7 @@ test("an emitter hands on what it hears as it's made, now: its cutoff, level and
     'now, where it is: 20 units off, panned 12 units right, the width',
   );
   e.moveTo(onFloor(0, 8), 12);
-  const h = hearing(8, S);
+  const h = space.hearing(8);
   assert.deepEqual(
     seen.calls.slice(4),
     [
@@ -96,11 +97,11 @@ test('an emitter hands on each value it follows, by its law: on a note at its ti
   e.follow(delay.follower, law, 10);
   assert.deepEqual(delay.calls, [[0.5, { at: 10 }]], "from its time on, as it's heard now");
   e.moveTo(onFloor(0, 32), 12);
-  assert.deepEqual(delay.calls.at(-1), [law(hearing(32, S)), { at: 12 }], "a note's place, at its time");
+  assert.deepEqual(delay.calls.at(-1), [law(space.hearing(32)), { at: 12 }], "a note's place, at its time");
   space.update(12.5);
   Object.assign(at, { x: 0, z: 16 });
   space.update(13); // you move 16 units nearer
-  assert.deepEqual(delay.calls.at(-1), [law(hearing(16, S)), { glide: 0.08 }], 'as you move, a glide');
+  assert.deepEqual(delay.calls.at(-1), [law(space.hearing(16)), { glide: 0.08 }], 'as you move, a glide');
   e.follow(delay.follower, null, 14);
   assert.deepEqual(delay.calls.at(-1), [0, { at: 14 }], 'let go: 0');
   e.moveTo(onFloor(0, 8), 15);
@@ -128,9 +129,9 @@ test("a kept emitter, a track's: moved to each note's place at its time; followi
   const seen = heardSeen();
   const lets = [];
   const e = space.emitter(onFloor(12, 16), { hears: seen.hears, keep: true, onLetGo: () => lets.push('let go') });
-  const was = hearing(20, S);
+  const was = space.hearing(20);
   e.moveTo(onFloor(0, 8), 12, onFloor(-5, 8)); // a note at 12 s, 8 units off, panned from 5 units left
-  const h = hearing(8, S);
+  const h = space.hearing(8);
   assert.deepEqual(
     seen.calls.slice(4),
     [
@@ -148,7 +149,7 @@ test("a kept emitter, a track's: moved to each note's place at its time; followi
   assert.equal(seen.calls.length, 8, 'nothing more handed on: the place was set ahead');
   Object.assign(at, { x: 0, z: -20 });
   space.update(13); // 28 units off
-  const far = hearing(28, S);
+  const far = space.hearing(28);
   assert.deepEqual(
     seen.calls.slice(8),
     [

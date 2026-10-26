@@ -26,7 +26,7 @@ export interface Lifetime {
 
 export class Place<Perceived> {
   readonly keep: boolean;
-  readonly next = new DueQueue<Move<Perceived>>((move) => move.at); // the places moves take it to, each from its time
+  readonly #next = new DueQueue<Move<Perceived>>((move) => move.at); // the places moves take it to, each from its time
   readonly #perceiving: Perceiving<Perceived>;
   #position: Position;
   #until: number;
@@ -62,13 +62,13 @@ export class Place<Perceived> {
   // a move to a position from a time on; returns how it's perceived there
   moveTo(position: Position, at: number): Perceived {
     const perceived = this.#perceiving.perceive(position);
-    this.next.add({ at, position, perceived });
+    this.#next.add({ at, position, perceived });
     return perceived;
   }
   // on a tick: to the place a move took it to, once its time has come, perceived as it was then; then perceived from where it is now.
   // Returns what it's perceived as now if that has changed enough to matter, else null
   update(t: number): Perceived | null {
-    const arrived = this.next.takeDue(t).at(-1); // the last of those due, where it is now
+    const arrived = this.#next.takeDue(t).at(-1); // the last of those due, where it is now
     if (arrived) {
       this.#position = arrived.position;
       this.#perceived = arrived.perceived;
@@ -83,7 +83,7 @@ export class Place<Perceived> {
   // when its user moves its world under the listener: it, and its moves still to come, with it
   shift(offset: Position): void {
     this.#position = shifted(this.#position, offset);
-    for (const move of this.next.items) {
+    for (const move of this.#next.items) {
       move.position = shifted(move.position, offset);
     }
   }

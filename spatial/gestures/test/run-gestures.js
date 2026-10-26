@@ -3,8 +3,7 @@
 // A case: its settings, the screen's height, and its input, in order. Before each input, time runs on to its t in the clock's ticks: one
 // every 25 ms after the previous input, and one at the input's own time. Then the input is applied: down, move, up or cancel, or none, when
 // only time passes. A floor point carries its zone, zone, which stands in for what a user hands in (zoneAt())
-import * as tracker from './gesture-tracker.ts';
-import { clock, settings } from './gesture-tracker.ts';
+import { EVENTS, trackerOnItsOwnClock } from './gesture-tracker.ts';
 
 const r9 = (v) => +v.toFixed(9);
 export const r3 = (v) => +v.toFixed(3);
@@ -37,11 +36,12 @@ function brief(type, e) {
   return o;
 }
 export function run(c) {
+  const { tracker, clock, settings } = trackerOnItsOwnClock();
   Object.assign(settings, c.settings);
   tracker.configure({ height: c.screen.height, zoneAt: (g) => g.zone });
   clock.useFake(0);
   const got = [];
-  const offs = tracker.EVENTS.map((type) => tracker.on(type, (e) => got.push(brief(type, e))));
+  const offs = EVENTS.map((type) => tracker.on(type, (e) => got.push(brief(type, e))));
   for (const s of c.input) {
     clock.advance(s.t - clock.now());
     if (s.down) {

@@ -20,4 +20,4 @@ synth.receive([
 | `new NoteRotation()` (`rotation.ts`), `noteOn()`, `noteOff(index)` | a source's notes, each a fresh index, as MIDI 2.0's note rotation hands them out: in turn round the 128 note numbers, one still on passed over, so two notes of one pitch keep apart |
 | `Receiver` (`receiver.ts`), `receive(messages)` | what messages are played into, at once, each at its own clock time: an instrument, as a synth's MIDI in takes a keyboard's or a sequencer's, or a track, the sequencer's (`libs/sequencing/midi-sequencer/`, `Track`); Java Sound's name for it |
 
-Tested in node, in its `test/` folder (`midi.test.js`).
+Tested in node, in its `test/` folder (`protocol.test.js`).

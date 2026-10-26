@@ -39,4 +39,4 @@ onTick((t) => space.update(t));                            // the emitter follow
 - No lag with distance, and no Doppler: a lag would push far notes off the beat. Left and right only.
 - A change is handed on once the level or room is 0.002 off, or the cutoff 1% (`moved()`).
 
-Tested in node (`test/spatial-audio.test.js`): the model against `shared/test-vectors/space/hearing.json`, and the space and its emitters, what each hears handed on as values, with a listener of the test's own.
+Tested in node (`test/hearing.test.js`): the model against `shared/test-vectors/space/hearing.json`, and the space and its emitters, what each hears handed on as values, with a listener of the test's own.

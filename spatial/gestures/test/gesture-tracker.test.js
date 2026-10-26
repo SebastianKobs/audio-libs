@@ -1,11 +1,10 @@
-// The gesture tracker's unit tests (mockup/src/libs/spatial/gestures/, as one: gesture-tracker.ts, on a clock and settings of its own;
-// mockup/architecture/tests.md), in the clock's fake mode. They run the
-// cases of the shared test vectors (shared/test-vectors/gestures/): first that the tracker emits exactly what they say, then what that means
+// The gesture tracker (mockup/src/libs/spatial/gestures/), a tracker for each test on a clock and settings of its own, in the
+// clock's fake mode. The cases of the shared test vectors (shared/test-vectors/gestures/): first that the tracker emits exactly
+// what they say, then what that means; and what a case can't say, its input handed to the tracker directly
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import * as tracker from './gesture-tracker.ts';
-import { clock, settings } from './gesture-tracker.ts';
+import { EVENTS, trackerOnItsOwnClock } from './gesture-tracker.ts';
 import { at, run, stroke } from './run-gestures.js';
 import { circle, rub, scribble, shake } from './strokes.js';
 import { near } from '../../../base/util/test/near.js';
@@ -26,6 +25,7 @@ const types = (evs, id) =>
     .map((e) => e.type)
     .filter((t) => t !== 'dragmove');
 const turns = (evs, kind) => evs.filter((e) => e.type === 'turn' && e.kind === kind);
+const loops = (evs) => evs.filter((e) => e.type === 'loop');
 
 test('the tracker matches the shared test vectors', () => {
   for (const f of files) {
@@ -106,9 +106,10 @@ test('a second finger after the two-finger window is ignored: the first goes on'
 
 // directly: a third finger while two pan, and the one left after a pan
 test("while two fingers pan a third is ignored, and the one left after it does nothing until it's lifted", () => {
+  const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);
   const got = [];
-  const offs = tracker.EVENTS.map((type) => tracker.on(type, (e) => got.push([type, e.id])));
+  const offs = EVENTS.map((type) => tracker.on(type, (e) => got.push([type, e.id])));
   tracker.down({ ...at(1, 300, 300), button: 0, t: 0 });
   clock.advance(0.1);
   tracker.down({ ...at(2, 500, 300), button: 0, t: 0.1 });
@@ -198,6 +199,7 @@ test('a drag that stays still rests after 0.1 s, then moves again', () => {
 
 // directly, not from the vectors: their time always ticks just before an input, so a tick always sees the rest first
 test('a rest too short for a tick to see still comes, just before the move that ends it', () => {
+  const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);
   const got = [];
   const offs = ['rest', 'move'].map((type) => tracker.on(type, (e) => got.push([type, +e.t.toFixed(9)])));
@@ -213,45 +215,6 @@ test('a rest too short for a tick to see still comes, just before the move that 
     ['move', 0.11],
   ]);
 });
-
-// ---------- loops: the circle fix ----------
-const loops = (evs) => evs.filter((e) => e.type === 'loop');
-// today's circle check, before the fix: play.js's checkCircle, on the vine's points 0.12 units apart on the floor (vineAdd), from where it
-// was pressed. Their winding added up, and the vine's box at most circleSize. Kept here only to show the jitter cases are the bug it had
-function oldCircle(input) {
-  const down = input[0].down;
-  const pts = [down.g];
-  const wrapAngle = (a) => Math.atan2(Math.sin(a), Math.cos(a));
-  let dragging = false;
-  let turn = 0;
-  let dir = null;
-  for (const { move } of input.slice(1)) {
-    if (!move) {
-      continue;
-    }
-    if (!dragging && Math.hypot(move.x - down.x, move.y - down.y) <= settings.moveThreshold) {
-      continue;
-    }
-    dragging = true;
-    const q = pts[pts.length - 1];
-    const g = move.g;
-    if (Math.hypot(g.x - q.x, g.z - q.z) < 0.12) {
-      continue;
-    }
-    pts.push(g);
-    const d = Math.atan2(g.z - q.z, g.x - q.x);
-    if (dir !== null) {
-      turn += wrapAngle(d - dir);
-    }
-    dir = d;
-    const w = Math.max(...pts.map((p) => p.x)) - Math.min(...pts.map((p) => p.x));
-    const h = Math.max(...pts.map((p) => p.z)) - Math.min(...pts.map((p) => p.z));
-    if (Math.abs(turn) >= settings.circleTurn * 2 * Math.PI && Math.max(w, h) <= settings.circleSize) {
-      return true;
-    }
-  }
-  return false;
-}
 
 test('a circle becomes a loop, once, centred on it, and then only drags on', () => {
   const evs = events('circle');
@@ -270,6 +233,7 @@ test('a circle becomes a loop, once, centred on it, and then only drags on', () 
 
 // directly: a tower plays its rhythm only while you circle (mockup/architecture/sequencer.md, 10a), so it asks how long a loop has been still
 test('a loop counts how long it has stayed still, as a drag does', () => {
+  const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);
   let looped = false;
   let t = 0;
@@ -294,6 +258,7 @@ test('a loop counts how long it has stayed still, as a drag does', () => {
 
 // directly: a vine's energy (mockup/architecture/sequencer.md, 10a) is how fast the hand moves on the screen, in screen heights a second, smoothed
 test("a drag's hand speed: screen heights a second, smoothed; from the press or a standstill not known until a move gives it, then that move's own", () => {
+  const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);
   tracker.configure({ height: 800 });
   let t = 0;
@@ -335,6 +300,7 @@ test("a drag's hand speed: screen heights a second, smoothed; from the press or 
 // a mouse's moves come many a frame, coalesced by the browser, those of a frame often at one time stamp (playtest: "on a desktop
 // with a mouse it mostly stays in halftime even on moderately fast movement")
 test("moves at one time keep their distance: it counts in the next move with a time of its own, so a mouse's speed is a finger's", () => {
+  const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);
   tracker.configure({ height: 800 });
   let t = 0;
@@ -371,19 +337,15 @@ test('a loop too small or too big stays a vine, and so does a long vine that end
   }
 });
 
-test('jitter never loops, where the old circle check made a tower: rubbing to and fro, shaking on a spot, scribbling', () => {
+test('jitter never loops: rubbing to and fro, shaking on a spot, scribbling, in the vectors and over 240 seeded strokes', () => {
   for (const name of [
     'rubbing to and fro',
     'shaking on a spot',
     'scribbling in a small patch',
     'scribbling fast, turning back',
   ]) {
-    assert.ok(oldCircle(cases[name].input), `${name}: the old check made it a tower`);
     assert.deepEqual(loops(events(name)), [], name);
   }
-});
-
-test('jitter never loops, over many seeded strokes: 240 of them, of which the old check made nearly all towers', () => {
   const strokes = [];
   for (const amp of [10, 20, 35, 60]) {
     for (const per of [3, 5, 8]) {
@@ -409,6 +371,4 @@ test('jitter never loops, over many seeded strokes: 240 of them, of which the ol
   const looped = inputs.filter((input) => loops(run({ ...base, input })).length);
   assert.equal(inputs.length, 240);
   assert.equal(looped.length, 0, `${looped.length} looped`);
-  const old = inputs.filter(oldCircle).length;
-  assert.ok(old >= 0.9 * inputs.length, `the old check made towers of nearly all of them: ${old}`);
 });

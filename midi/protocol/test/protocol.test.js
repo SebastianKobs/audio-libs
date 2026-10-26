@@ -1,6 +1,6 @@
-// The MIDI protocol's unit tests (mockup/src/libs/midi/protocol/): a
-// control surface's messages, MIDI 2.0's channel voice messages as values, and the notes among them; a note's index, handed out by note
-// rotation. The sequencer's input, which passes them on, is tested in libs/sequencing/midi-sequencer/test/input.test.js
+// MIDI's protocol (mockup/src/libs/midi/protocol/): a note's index handed out by note rotation, and
+// MIDI 2.0's note messages as values, a note's messages and the note they read back as.
+// The sequencer's input, which passes them on, is tested in libs/sequencing/midi-sequencer/test/input.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { NoteRotation, noteMessages, notesIn, retimed } from '../index.ts';
@@ -8,12 +8,6 @@ import { NoteRotation, noteMessages, notesIn, retimed } from '../index.ts';
 const noteOn = (index, t, more = {}) => ({ type: 'note on', index, pitch: 60, velocity: 1, t, ...more });
 const noteOff = (index, t) => ({ type: 'note off', index, t });
 const perNote = (index, controller, value, t) => ({ type: 'per-note controller', index, controller, value, t });
-
-test('note rotation: each note a fresh index, in turn', () => {
-  const rotation = new NoteRotation();
-  const handed = [rotation.noteOn(), rotation.noteOn(), rotation.noteOn()];
-  assert.deepEqual(handed, [0, 1, 2]);
-});
 
 test('note rotation: an index let go is handed out again only once round the 128 note numbers', () => {
   const rotation = new NoteRotation();
@@ -24,6 +18,7 @@ test('note rotation: an index let go is handed out again only once round the 128
     rotation.noteOff(index);
     return index;
   });
+  assert.deepEqual([first, ...handed.slice(0, 2)], [0, 1, 2], 'each note a fresh index, in turn');
   assert.equal(handed[0], 1, 'the next in turn, not the one just let go');
   assert.equal(handed[127], 0, 'once round, the first again');
 });
