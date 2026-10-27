@@ -44,6 +44,23 @@ const DELAY = {
   },
 };
 
+// a delay whose line wobbles, a tape's: the delay's macros, then its own feedback and tone, and the wobble's rate and depth
+const WOBBLING_DELAY = {
+  version: 1,
+  node: {
+    ...DELAY.node,
+    kind: 'TapeDelay',
+    label: 'Tape delay',
+    macros: [
+      ...DELAY.node.macros,
+      { spec: { name: 'feedback', range: [0, 0.95, 0.01] }, value: 0.6, maps: [] },
+      { spec: { name: 'tone', unit: 'Hz', range: [200, 12000, 1], taper: 'octaves' }, value: 1600, maps: [] },
+      { spec: { name: 'rate', unit: 'Hz', range: [0.05, 5, 0.01], taper: 'octaves' }, value: 0.5, maps: [] },
+      { spec: { name: 'depth', unit: 's', range: [0, 0.02, 0.0005] }, value: 0.004, maps: [] },
+    ],
+  },
+};
+
 // A view builder on a plan's readout of the tests' own: values told by address, roles by address, every
 // one live unless said; what's sent kept.
 function builderOn(plan, { values = {}, roles = {}, slots = {} } = {}) {
@@ -140,6 +157,20 @@ test("a knob: its value as it plays, the plan's where none's told; where it lies
   const pans = [0, 0.5].map((pan) => builderOn(UTILITY, { values: { pan } }).views.control(['pan']).text);
   assert.deepEqual(pans, ['C', 'R25']);
   assert.deepEqual([utility.control(['pan']).isPan, level.isPan], [true, false], 'a pan drawn from its middle');
+});
+
+// baseline.spec.js, "Konstrukt's tape delay its own device: the Delay's, and its wobble's rate and depth, as small as it is"
+test("a delay with a wobble is a device of its own: the delay's controls, then its wobble's rate and depth, a small step's text to its decimals", () => {
+  const { views } = builderOn(WOBBLING_DELAY);
+  const device = views.device([]);
+  assert.deepEqual([device.kind, device.label], ['TapeDelay', 'Tape delay']);
+  assert.deepEqual(
+    device.controls.map(({ address }) => addressText(address)),
+    ['sync', 'note', 'ms', 'feedback', 'tone', 'rate', 'depth', 'line/longest'],
+  );
+  const [rate, depth] = ['rate', 'depth'].map((name) => views.control([name]));
+  assert.deepEqual([rate.unit, rate.text], ['Hz', '0.50']);
+  assert.deepEqual([depth.unit, depth.text], ['s', '0.0040'], 'as small as it is');
 });
 
 test('a knob turned: a command by its address, its value at that place by its taper, a gain to a hundredth, any other to its step; set; back to its start', () => {
