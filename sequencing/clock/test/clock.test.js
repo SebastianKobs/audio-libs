@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { barTicks, beatTicks, Clock, GRIDS, LOOKAHEAD, PPQ, startsBar, STEP } from '../index.ts';
+import { barTicks, beatTicks, Clock, GRIDS, HISTORY, LOOKAHEAD, PPQ, startsBar, STEP } from '../index.ts';
 import { fakeAudioOn } from './fake-audio.js';
 import { near } from '../../../base/util/test/near.js';
 
@@ -538,6 +538,114 @@ test('stopped between two 16ths, the song stands from the 16th it is held at, th
   near(grid.songTime(between), between, 'between the stop and its 16th: playing on', 1e-9);
   near(grid.songTime(stands + 1), stands, 'from its 16th: standing', 1e-9);
   near(grid.songTime(released + 0.5), stands + 0.5, 'released: going on from there', 1e-9);
+});
+
+// the song position set to a song time, its place on the arrangement's timeline: a locate. What it keeps of history: a clock time before it
+// has the song time it had, so what was recorded stays where it was heard
+test('located while running: the song time at that moment the one set, going on from it; a time before it as it was; and back, the latest clock time a song time is at', () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(10);
+  const grid = clock.grid;
+  const at = clock.now();
+  const before = grid.songTime(at - 1);
+  grid.locate(5, at);
+  assert.equal(grid.songTime(at), 5, 'the song time set, at that moment');
+  near(grid.songTime(at + 2), 7, 'going on from it', 1e-9);
+  assert.equal(grid.songTime(at - 1), before, 'a time before it as it was');
+  near(grid.timeOfSong(7), at + 2, 'and back', 1e-9);
+  near(
+    grid.timeOfSong(before + 1),
+    at + before + 1 - 5,
+    'a song time heard before, reached again ahead: the latest',
+    1e-9,
+  );
+  assert.equal(grid.timeOfSong(3), 3, 'one before the located line began: the time it was heard at');
+  assert.equal(grid.song.toTimeline(at + 2), grid.songTime(at + 2), 'the time map the same');
+  assert.equal(grid.song.fromTimeline(7), grid.timeOfSong(7));
+  assert.equal(grid.songTime(Infinity), Infinity, 'a time never reached, never');
+});
+
+test('located ahead, past what was heard: the song time skipped never heard, its time the moment it was located at; located again, from there', () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(10);
+  const grid = clock.grid;
+  const at = clock.now();
+  const heard = grid.songTime(at);
+  grid.locate(heard + 100, at);
+  near(grid.songTime(at + 1), heard + 101, 'going on from where it was set', 1e-9);
+  near(grid.timeOfSong(heard + 50), at, 'a song time in the skipped stretch: where it was located', 1e-9);
+  clock.advance(5);
+  grid.locate(0, clock.now());
+  assert.equal(grid.songTime(clock.now()), 0, 'located again');
+  near(grid.songTime(clock.now() + 1), 1, 'going on from it', 1e-9);
+  near(grid.songTime(at + 1), heard + 101, 'what the first locate set, as it was');
+});
+
+test('located while held: the position stands at the song time set, released it goes on from there; a stop between two 16ths located from the 16th it stands at', () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(1.01);
+  const grid = clock.grid;
+  const stopped = clock.now();
+  const stands = grid.nextStepTime;
+  assert.ok(stands > stopped, 'a 16th handed out ahead');
+  grid.hold(stopped);
+  grid.locate(20, stopped);
+  clock.advance(2);
+  near(grid.songTime(clock.now()), 20, 'standing at the song time set', 1e-9);
+  near(grid.songTime(stands + 0.5), 20, 'from the 16th it stands at', 1e-9);
+  near(grid.songTime(stopped), stopped, 'before it, playing on as it was', 1e-9);
+  grid.locate(30, clock.now());
+  near(grid.songTime(clock.now()), 30, 'located again while held', 1e-9);
+  const released = clock.now();
+  grid.release(released);
+  near(grid.songTime(released + 1), 31, 'released: going on from it', 1e-9);
+  near(grid.timeOfSong(31), released + 1, 'and back', 1e-9);
+  near(grid.timeOfSong(40), released + 10, 'a time to come', 1e-9);
+});
+
+test('located after a hold: the hold taken out as before, the located line going on past a later hold too', () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(1);
+  const grid = clock.grid;
+  grid.hold(clock.now());
+  clock.advance(3);
+  grid.release(clock.now());
+  clock.advance(1);
+  const at = clock.now();
+  grid.locate(10, at);
+  clock.advance(1);
+  const held = clock.now();
+  const stands = grid.nextStepTime;
+  grid.hold(held);
+  clock.advance(2);
+  grid.release(clock.now());
+  clock.advance(1);
+  near(grid.songTime(clock.now()), 10 + (stands - at) + 1, 'a later hold taken out of the located line', 1e-9);
+  near(grid.timeOfSong(10 + (stands - at) + 1), clock.now(), 'and back', 1e-9);
+});
+
+test('a hold and a locate let go with the history leave every recent time its song time', () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(1);
+  const grid = clock.grid;
+  grid.hold(clock.now());
+  clock.advance(2);
+  grid.release(clock.now());
+  const locatedAt = clock.now();
+  grid.locate(500, locatedAt);
+  clock.advance(HISTORY + 120);
+  const now = clock.now();
+  grid.hold(now);
+  clock.advance(1);
+  grid.release(clock.now()); // the first hold and the locate are let go as this one is kept
+  const recent = now - 1;
+  near(grid.songTime(recent), 500 + (recent - locatedAt), 'a recent time as it was', 1e-6);
+  near(grid.timeOfSong(500 + (recent - locatedAt)), recent, 'and back', 1e-6);
 });
 
 test("a beat by the meter's unit: 16ths to a beat and its length, and to a bar; a quarter in 4/4, an 8th in 6/8", () => {

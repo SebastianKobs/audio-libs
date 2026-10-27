@@ -17,7 +17,8 @@ const ROUNDING = 1e-9; // s: a 16th's time added up step by step and worked out 
 // the beat grid: 16ths at the settings' tempo, swung as they are now; it runs once the audio starts (start()), standing at its first 16th
 // until then, the next 16th to schedule its straight time on the clock (nextStepTime) and its number (nextStepNumber). Held, its place,
 // the song position, stays while the clock's time runs on, no 16th handed out, and released it goes on from there (hold(), release(), the
-// transport's stop); its holds kept, so a time's song time, the time the music played, takes them out (song-time.ts)
+// transport's stop); its holds kept, so a time's song time, the time the music played, takes them out, and the position set to a song time
+// (locate()) goes on from there (song-time.ts)
 export class BeatGrid {
   readonly #settings: GridSettings;
   #nextStepTime = 0;
@@ -26,7 +27,7 @@ export class BeatGrid {
   #held: number | null = null; // the place it's held at, while held
   #heldAt = 0; // and the time it was held at: a time before it lies where it did
   #holdFrom: number | null = null; // the time it's to be held from, the 16ths before it handed out first
-  readonly #songTime = new SongTime(); // the holds the music went through, and where it stands while held
+  readonly #songTime = new SongTime(); // the holds the music went through, its locates, and where it stands while held
   // song time as a time map, for what plays along a timeline
   readonly song: TimeMap = {
     toTimeline: (t) => this.songTime(t),
@@ -149,6 +150,11 @@ export class BeatGrid {
     this.#held = null;
     this.#songTime.goOn(t);
     this.#nextStepTime = t + (this.#nextStepNumber - held) * this.stepDuration();
+  }
+  // the song position set to a song time at a clock time, the arrangement's playhead put there: running, it goes on from there; held, it
+  // stands there (song-time.ts); a time before keeps the song time it had
+  locate(song: number, t: number): void {
+    this.#songTime.locate(song, t);
   }
   // a clock time's song time (song-time.ts)
   songTime(t: number): number {
