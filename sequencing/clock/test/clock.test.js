@@ -748,3 +748,16 @@ test("its tempo told as a tick finds the beat's length changed: none at the firs
   assert.equal(told.length, 1, 'the change only');
   near(told[0], 0.5, 'the change');
 });
+
+test('the time played, a locate not counted: a locate shifts song time, and the time played goes on as it was', () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(10);
+  const grid = clock.grid;
+  const at = clock.now();
+  const before = grid.playedTime(at);
+  grid.locate(before + 100, at);
+  assert.equal(grid.playedTime(at), before, 'the locate not in it');
+  near(grid.playedTime(at + 2), before + 2, 'going on', 1e-9);
+  near(grid.songTime(at + 2) - grid.playedTime(at + 2), 100, 'song time the locate further', 1e-9);
+});

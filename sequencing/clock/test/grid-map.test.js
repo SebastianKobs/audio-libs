@@ -1,15 +1,21 @@
 // Where each 16th fell (mockup/src/libs/sequencing/clock/grid-map.ts): a song time's place on the grid as it was
 // heard, the tempo as it was then, and back; a hold where no 16th fell taking no room, as song time has it out;
-// the 16ths skipped as the ticks lag counted; the grid held, the present standing still.
+// the 16ths skipped as the ticks lag counted; a locate, a jump in song time, kept apart: nothing stretched over it;
+// the grid held, the present standing still.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { GridMap } from '../index.ts';
+import { near } from '../../../base/util/test/near.js';
 
 // a clock as the arrangement hears it: the grid's 16ths handed on as they're scheduled, their straight times, and the tempo now
 function fakeClock() {
   let heard = () => {};
   const holds = /** @type {{ from: number, to: number }[]} */ ([]); // each hold it went through
-  const grid = { stepDuration: 0.25, at: 0, from: 0, heldAt: null, held: 0, holds };
+  const jumps = /** @type {{ at: number, by: number }[]} */ ([]); // each locate
+  const grid = { stepDuration: 0.25, at: 0, from: 0, heldAt: null, held: 0, holds, jumps };
+  const playedTime = (t) =>
+    grid.holds.reduce((song, { from, to }) => (t > from ? song - (Math.min(t, to) - from) : song), t);
+  const songTime = (t) => grid.jumps.reduce((song, { at, by }) => (t >= at ? song + by : song), playedTime(t));
   return {
     onStep: (listener) => {
       heard = listener;
@@ -21,11 +27,15 @@ function fakeClock() {
       get heldAt() {
         return grid.heldAt;
       },
-      songTime: (t) =>
-        grid.holds.reduce((song, { from, to }) => (t > from ? song - (Math.min(t, to) - from) : song), t),
+      playedTime,
+      songTime,
       timeOfSong: (song) => grid.holds.reduce((t, { from, to }) => (t > from ? t + to - from : t), song),
     },
     holdsSoFar: grid.holds, // each hold it went through, for song time
+    // the song position set to a song time at a clock time: from then on, song time is that much further
+    locate(song, t) {
+      grid.jumps.push({ at: t, by: song - songTime(t) });
+    },
     play(i, at, stepDuration) {
       Object.assign(grid, { at, from: i, stepDuration });
       heard(i, at);
@@ -97,4 +107,46 @@ test('the grid held, a time from the hold on lies at the place it was held at, t
   assert.equal(map.placeOf(1.6), 5.2, 'within the 16ths scheduled ahead: held');
   assert.equal(map.placeOf(9), 5.2, 'long after: held');
   assert.equal(map.placeOf(1), 4, 'before the hold: where it lay');
+});
+
+// a locate between two 16ths is a jump in song time: the 16ths before it keep their places, and the interval before it isn't stretched
+// over the jump
+test('a locate between two 16ths: those before it keep their places, the interval before it undistorted, a song time skipped placed from the 16th after it', () => {
+  const clock = fakeClock();
+  const map = new GridMap({ clock });
+  for (let i = 0; i < 4; i++) {
+    clock.play(i, i * 0.25, 0.25);
+  }
+  clock.locate(100, 0.9); // between the 16ths 3 (0.75 s) and 4 (1 s): song time 100.1 at 16th 4
+  for (let i = 4; i < 8; i++) {
+    clock.play(i, i * 0.25, 0.25);
+  }
+  assert.equal(map.placeOf(0.5), 2, 'before it, where it lay');
+  assert.equal(map.placeOf(0.6), 2.4, 'the interval before it, as far as ever');
+  assert.equal(map.placeOf(0.75), 3, 'the 16th before it');
+  near(map.placeOf(100.1), 4, 'the 16th after it, in song time');
+  near(map.placeOf(100.35), 5, 'and the next');
+  near(map.placeOf(100), 3.6, 'a song time before it in the located line, as far as it lies from that 16th');
+  near(map.placeOf(50), 4 - 50.1 / 0.25, 'skipped by the locate: counted back from the 16th after it at the tempo');
+  assert.equal(map.timeOf(2.4), 0.6, 'and back, the interval before it');
+  assert.equal(map.timeOf(3), 0.75);
+  near(map.timeOf(5), 100.35, 'after it');
+});
+
+test('a locate back: a song time heard twice lies where it was heard last; one only heard before it where it was', () => {
+  const clock = fakeClock();
+  const map = new GridMap({ clock });
+  for (let i = 0; i < 8; i++) {
+    clock.play(i, i * 0.25, 0.25);
+  }
+  clock.locate(0.5, 1.9); // song time 0.6 at the 16th 8, at 2 s
+  for (let i = 8; i < 12; i++) {
+    clock.play(i, i * 0.25, 0.25);
+  }
+  near(map.placeOf(0.85), 9, 'heard again: the later pass');
+  near(map.placeOf(1), 9.6, 'in the later pass');
+  assert.equal(map.placeOf(0.3), 1.2, 'heard only before the locate: where it was');
+  assert.equal(map.placeOf(1.5), 6, 'and one past the later pass');
+  near(map.timeOf(9), 0.85, 'and back');
+  assert.equal(map.timeOf(6), 1.5);
 });

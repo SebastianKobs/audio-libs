@@ -73,6 +73,7 @@ export function arrangementOf({ regions = [], lanes = [], instruments = [], midi
       stepsPerBar: () => 16,
       stepsPerBeat: () => 4,
       heldAt: null,
+      playedTime: (t) => t,
       songTime: (t) => t,
       timeOfSong: (time) => time,
     },

@@ -65,6 +65,10 @@ export class SongTime {
     }
     return this.#withoutHolds(t) + this.#locatedBy(t);
   }
+  // a clock time's time with the holds taken out and no locate: what song time is within one located line, the line's shift apart
+  playedTime(t: number): number {
+    return this.#withoutHolds(t);
+  }
   // and back: the latest clock time a song time was played at, past the holds; one in the stretch a locate skipped, the time it was located
   // at; where it's held now, there's none, never
   timeOfSong(song: number): number {

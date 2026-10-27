@@ -160,6 +160,10 @@ export class BeatGrid {
   songTime(t: number): number {
     return this.#songTime.songTime(t);
   }
+  // a clock time with the holds taken out and no locate counted (song-time.ts)
+  playedTime(t: number): number {
+    return this.#songTime.playedTime(t);
+  }
   // and back
   timeOfSong(song: number): number {
     return this.#songTime.timeOfSong(song);
