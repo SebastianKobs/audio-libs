@@ -59,7 +59,7 @@ export interface PerNoteController extends TimedValue {
   controller: PerNoteControllerName;
 }
 // one of a track's controllers: a parameter of the track's by its name, as a controller's knob is mapped to one in Ableton, in its units
-// (G0d), as the track's instrument maps it
+//, as the track's instrument maps it
 export interface Controller extends TimedValue {
   type: 'controller';
   controller: string;
@@ -74,7 +74,7 @@ export interface PerNoteManagement {
 }
 export type Message = NoteOn | NoteOff | PerNoteController | Controller | PerNoteManagement;
 // a note as its messages give it: its note on, its length where its note off came with it, its per-note controllers sent with it, its
-// values as it starts, and its #3 Pitch changes sent with it, its glides, each [when, pitch] (G0d2)
+// values as it starts, and its #3 Pitch changes sent with it, its glides, each [when, pitch]
 export interface SentNote {
   noteOn: NoteOn;
   duration: Seconds | undefined;

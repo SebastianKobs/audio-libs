@@ -1,8 +1,8 @@
 // ---------- view/tracks/models/arrangement/time-in-view: what the arrangement's time in view follows ----------
 //   - the time in view: following the present, or the playhead while it plays back, until
-//     it's scrolled back, and again once it's back at the present or a playback starts (P3b);
+//     it's scrolled back, and again once it's back at the present or a playback starts;
 //   - the playhead where a press in the ruler puts it, on the nearest beat, until it's let
-//     go and cued (P2).
+//     go and cued.
 // Its window's span and scroll: TimeWindow's; a press's beat: playheadAt().
 import { HISTORY, type GridMap } from '../../../../../sequencing/clock/index.ts';
 import type { Seconds } from '../../../../../base/util/index.ts';
@@ -18,9 +18,9 @@ export class TimeInView {
   readonly #window = new TimeWindow();
   #now: Seconds = 0; // the time of the last frame
   #earliest = 0; // the place it scrolls back to at most: the grid's first bar, or where the recording's 30 minutes start
-  #playhead: number | null = null; // its place where it's set back, or none, on the present (P2)
-  #placing = false; // a press in the ruler, held (P2)
-  #playingBack = false; // as the last frame found it: a playback that starts is followed again (P3b)
+  #playhead: number | null = null; // its place where it's set back, or none, on the present
+  #placing = false; // a press in the ruler, held
+  #playingBack = false; // as the last frame found it: a playback that starts is followed again
 
   constructor({
     transport,
@@ -38,7 +38,7 @@ export class TimeInView {
     this.#map = map;
     this.#cue = cue;
   }
-  // the playhead's place where it's set back, or none, on the present (P2)
+  // the playhead's place where it's set back, or none, on the present
   get playhead(): number | null {
     return this.#playhead;
   }
@@ -72,7 +72,7 @@ export class TimeInView {
     this.#placing = true;
     this.placeAt(place);
   }
-  // the playhead put at a place while the press holds, on the nearest beat; past the present, back on it (P2)
+  // the playhead put at a place while the press holds, on the nearest beat; past the present, back on it
   placeAt(place: number): void {
     if (!this.#placing) {
       return;
@@ -81,7 +81,7 @@ export class TimeInView {
     this.#playhead = playheadAt(place, { present, perBeat: this.#map.stepsPerBeat(), earliest: this.#earliest });
   }
   // The press let go, in order:
-  //   1. cued: the playhead's time, or none, on the present (P3b);
+  //   1. cued: the playhead's time, or none, on the present;
   //   2. a playback it starts or jumps followed again from there.
   // No press, nothing cued.
   release(): void {
@@ -96,7 +96,7 @@ export class TimeInView {
   scrollBy(places: number): void {
     this.#window.scrollBy(places, this.#map.placeOf(this.#clock.now()), this.#earliest);
   }
-  // the playhead as the transport has it, but while a press in the ruler places it: moving with the playback, or back on the present (P3b)
+  // the playhead as the transport has it, but while a press in the ruler places it: moving with the playback, or back on the present
   #followTransport(): void {
     if (this.#placing) {
       return;
@@ -108,7 +108,7 @@ export class TimeInView {
       this.#playhead = this.#map.placeOf(at);
     }
   }
-  // a playback that starts, by a click in the ruler or by Play, followed again from where its playhead is (P3b)
+  // a playback that starts, by a click in the ruler or by Play, followed again from where its playhead is
   #followPlaybackAgain(): void {
     const playingBack = this.#transport.playingBack;
     if (playingBack && !this.#playingBack && this.#playhead !== null) {
@@ -122,7 +122,7 @@ export class TimeInView {
       this.#window.followAgain(this.#playhead);
     }
   }
-  // what the time in view follows: the playhead while it plays back, else the present (P3b)
+  // what the time in view follows: the playhead while it plays back, else the present
   #followed(): number {
     if (this.#transport.playingBack && this.#playhead !== null) {
       return this.#playhead;

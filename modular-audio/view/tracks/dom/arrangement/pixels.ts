@@ -6,7 +6,7 @@ export const STEP_PX = 8; // px: a 16th's width, a bar 128 px, fixed for now, a 
 export function xOf(place: number, left: number): number {
   return (place - left) * STEP_PX;
 }
-// the place under an x, the other way, for a click in the ruler (P2)
+// the place under an x, the other way, for a click in the ruler
 export function placeAt(x: number, left: number): number {
   return left + x / STEP_PX;
 }

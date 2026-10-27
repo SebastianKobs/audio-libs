@@ -5,11 +5,11 @@
 //   - the rows: each group folded to its first track until it's unfolded, a track's lanes
 //     under it once they're opened;
 //   - the regions on their rows, each labelled with its clip, greyed once the clip is gone,
-//     kept whole past a hold it rang through (P3c1); the opened tracks' lanes;
+//     kept whole past a hold it rang through; the opened tracks' lanes;
 //   - the time in view: following the present, or the playhead while it plays back, until
-//     it's scrolled back, and again once it's back at the present or a playback starts (P3b);
+//     it's scrolled back, and again once it's back at the present or a playback starts;
 //   - the playhead where a press in the ruler puts it, on the nearest beat, until it's let
-//     go and cued (P2).
+//     go and cued.
 // Its parts, made here: folded-rows.ts, regions.ts, time-in-view.ts.
 // Looked at on every beat while it shows. Where each 16th fell kept from when it's made, so a
 // region long past lies in its bar.
@@ -93,7 +93,7 @@ export class Arrangement {
   get lanes(): readonly PlacedLane[] {
     return this.#lanes;
   }
-  // the playhead's place where it's set back, or none, on the present (P2)
+  // the playhead's place where it's set back, or none, on the present
   get playhead(): number | null {
     return this.#time.playhead;
   }
@@ -120,9 +120,9 @@ export class Arrangement {
     this.#time.frame(span);
   }
   // The recording looked at:
-  //   - the rows, the lanes under the opened tracks (G5a);
+  //   - the rows, the lanes under the opened tracks;
   //   - each region on its row, labelled with its clip, its notes, greyed once its clip is
-  //     gone (G4b), kept whole past a hold it rang through (P3c1).
+  //     gone, kept whole past a hold it rang through.
   look(): void {
     const now = this.#clock.now();
     const regions = this.#recording.regions(now);

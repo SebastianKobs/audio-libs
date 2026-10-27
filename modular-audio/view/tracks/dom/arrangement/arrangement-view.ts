@@ -1,4 +1,4 @@
-// ---------- view/tracks/dom/arrangement/arrangement-view: the arrangement on the page, what was heard laid out in time (G4a) ----------
+// ---------- view/tracks/dom/arrangement/arrangement-view: the arrangement on the page, what was heard laid out in time ----------
 // As Ableton's arrangement (mockup/architecture/views.md): the names in the page, the time on a
 // canvas, both from its model (libs/modular-audio/view/tracks/models/arrangement/), which keeps the rows, the regions,
 // the time in view and the playhead.
@@ -14,8 +14,8 @@ export type { ArrangementColors } from './time-drawing.ts';
 import type { DrawnLane } from './lane-drawing.ts';
 import { STEP_PX, placeAt } from './pixels.ts';
 
-// what's drawn, as the browser tests read it: the rows, the regions in view and their notes, the opened lanes' lines (G5b), whether it
-// follows the present, the place at its left edge, the present's x, and the playhead's place and x where it's set back (P2)
+// what's drawn, as the browser tests read it: the rows, the regions in view and their notes, the opened lanes' lines, whether it
+// follows the present, the place at its left edge, the present's x, and the playhead's place and x where it's set back
 export interface Drawn {
   rows: readonly Row[];
   regions: readonly DrawnRegion[];
@@ -29,9 +29,9 @@ export interface Drawn {
 // The arrangement on the page:
 //   - each group folded to its first track at first, its header unfolding it, a ▸ before its
 //     name, with shift every group as it goes;
-//   - a track's ▸ opening its lanes under it, with shift every track's as it goes (G5a);
+//   - a track's ▸ opening its lanes under it, with shift every track's as it goes;
 //   - a click or a drag in the ruler setting the playhead back, on the nearest beat, a click
-//     past the present putting it back on it (P2).
+//     past the present putting it back on it.
 export class ArrangementView {
   readonly element = document.createElement('div');
   readonly #arrangement: Arrangement;
@@ -75,7 +75,7 @@ export class ArrangementView {
       now: arrangement.now,
     });
   }
-  // the playhead's place where it's set back, or none, on the present (P2)
+  // the playhead's place where it's set back, or none, on the present
   get playhead(): number | null {
     return this.#arrangement.playhead;
   }
@@ -123,7 +123,7 @@ export class ArrangementView {
       this.drawFrame();
     });
     for (const ended of ['pointerup', 'pointercancel'] as const) {
-      ruler.addEventListener(ended, () => this.#arrangement.release()); // cued on release (P3b)
+      ruler.addEventListener(ended, () => this.#arrangement.release()); // cued on release
     }
   }
   // the place under a pointer in the ruler
@@ -185,7 +185,7 @@ export class ArrangementView {
 }
 
 // a row's name: a group's header, with its ▸ where it has tracks to fold, folding it; a track's, with its ▸ where it has lanes; a lane's,
-// its controller (G5a)
+// its controller
 function nameOf(row: Row): HTMLElement {
   const name = document.createElement('div');
   name.textContent = row.name;

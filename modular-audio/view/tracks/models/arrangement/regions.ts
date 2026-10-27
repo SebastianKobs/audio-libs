@@ -17,7 +17,7 @@ import type {
 } from '../../readout/index.ts';
 
 // A region on its row: its label, from when to when, clock times, an open one's end never;
-// whether it was played live, whether its clip is gone, and its notes (G4b).
+// whether it was played live, whether its clip is gone, and its notes.
 export interface PlacedRegion {
   row: string;
   label: string;
@@ -27,7 +27,7 @@ export interface PlacedRegion {
   gone: boolean;
   notes: readonly RecordedNote[];
 }
-// An opened lane on its row: its controller, its param's range and taper, its points (G5b);
+// An opened lane on its row: its controller, its param's range and taper, its points;
 // midi: a MIDI device's, drawn in its own colour.
 export interface PlacedLane {
   row: string;
@@ -54,7 +54,7 @@ export function placedRegions(
     return [{ row, label, from, to, live, gone: !tracks.hasClip(clip, group), notes }];
   });
 }
-// a lane on its row, if its track's lanes are opened (G5b), laid on its param's range as the
+// a lane on its row, if its track's lanes are opened, laid on its param's range as the
 // param's strip declares it; one nothing declares by the fader law, as a send
 export function placedLane(
   lane: RecordedLane,
@@ -79,7 +79,7 @@ export function placedLane(
   const midi = declared.isMidiDevice(strip, lane.controller);
   return [{ row: laneKeyOf(track, lane.controller), controller: lane.controller, spec, points: lane.points, midi }];
 }
-// a region's notes kept whole past the holds they rang through (P3c1), and its end with them, as far as its last
+// a region's notes kept whole past the holds they rang through, and its end with them, as far as its last
 function keptWholeIn(region: RecordedRegion, song: TimeMap): { notes: RecordedNote[]; to: Seconds } {
   const notes = region.notes.map((note) => keptWhole(note, song));
   const ends = notes.map((note) => (note.duration === undefined ? -Infinity : note.t + note.duration));

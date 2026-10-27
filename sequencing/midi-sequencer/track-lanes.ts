@@ -1,5 +1,5 @@
 // ---------- midi-sequencer/track-lanes: a track's controllers as heard, kept as its lanes ----------
-// And what moves as it's heard, as automation (G3b): a track's own controllers as its
+// And what moves as it's heard, as automation: a track's own controllers as its
 // lanes, a lane a controller, by the track's kind and number as its regions have them,
 // launched or not. Every change heard kept, in time order as Web Audio plays them, but
 // a point that changes nothing, thinned once it's a second past, as nothing comes that
@@ -19,7 +19,7 @@ interface LaneOf {
   trackName: string | undefined;
   controller: string;
 }
-// a track's lane (G3b): its kind, number and controller, and its points in time order
+// a track's lane: its kind, number and controller, and its points in time order
 export type Lane = LaneOf & { points: readonly LanePoint[] };
 
 export class TrackLanes {
@@ -29,7 +29,7 @@ export class TrackLanes {
   constructor(timeline: Pick<Timeline<TimedEvent, LanePoint>, 'hold' | 'held'>) {
     this.#timeline = timeline;
   }
-  // a track's controllers, as they come, each into its lane, a point holding until the next of its lane (G3b)
+  // a track's controllers, as they come, each into its lane, a point holding until the next of its lane
   heard(play: Play): void {
     for (const { controller, value, t, glide } of play.controls ?? []) {
       const of: LaneOf = { kind: play.kind, track: play.track ?? null, trackName: play.trackName, controller };

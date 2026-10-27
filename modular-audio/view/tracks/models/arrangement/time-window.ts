@@ -2,7 +2,7 @@
 
 const AHEAD = 16; // 16ths: following, the head a bar from the right edge
 
-// the time in view, in 16ths: following a head, the present, or the playhead while it plays back (P3b), as time goes on: the head running
+// the time in view, in 16ths: following a head, the present, or the playhead while it plays back, as time goes on: the head running
 // across the view until it's a bar from the right edge, then the view scrolling with it, never back by itself; a young recording from its
 // start at the left edge. Scrolled back, held where it was until it's scrolled back to the present, as Ableton's arrangement follows
 // (views.md), or a playback starts; never before the earliest kept

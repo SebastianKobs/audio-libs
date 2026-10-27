@@ -1,4 +1,4 @@
-// ---------- view/tracks/dom/arrangement/note-drawing: a region's notes drawn inside its block, each at its pitch (G4b) ----------
+// ---------- view/tracks/dom/arrangement/note-drawing: a region's notes drawn inside its block, each at its pitch ----------
 import { noteShape, pitchRange, type Arrangement, type NoteShape } from '../../models/index.ts';
 import type { RecordedNote } from '../../readout/index.ts';
 import { STEP_PX, xOf } from './pixels.ts';

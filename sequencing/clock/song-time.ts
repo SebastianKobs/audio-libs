@@ -16,7 +16,7 @@ export const HISTORY = 30 * 60;
 const KEEP_HOLDS = HISTORY + 60; // s: the holds kept for song time, the history and a minute more
 
 export class SongTime {
-  readonly #holds: Hold[] = []; // each hold it went through, from when to when, in time order (P3b)
+  readonly #holds: Hold[] = []; // each hold it went through, from when to when, in time order
   #stoodAt: number | null = null; // where the music stands while held: the time of the 16th it's held at
 
   // held: the music standing from a time on
@@ -39,7 +39,7 @@ export class SongTime {
   clear(): void {
     this.#holds.length = 0;
   }
-  // a clock time's song time, the time the music played up to it (P3b): the holds it
+  // a clock time's song time, the time the music played up to it: the holds it
   // went through taken out, a stop's, or live play's while the arrangement played back,
   // as the arrangement shows them, standing; within one, where it stood, at the 16th it
   // was held at, those handed out before it played on; held now, all from it at it

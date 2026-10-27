@@ -1,6 +1,6 @@
 // ---------- midi-sequencer/note-lanes: a note as recorded, its changes after it its own lanes ----------
 // A note's changes after it, on the note, its own lanes, as a DAW keeps poly aftertouch
-// with its note (G3b).
+// with its note.
 import type { PerNoteController, PerNoteControllerName, PerNoteValues } from '../../midi/protocol/index.ts';
 import { placeInOrder, type Seconds } from '../../base/util/index.ts';
 import { timedValue } from '../../base/automation/index.ts';
@@ -8,9 +8,8 @@ import { thinned } from '../timeline/index.ts';
 import { lastValueAt, samePoint, type LanePoint } from './lanes.ts';
 import type { PlayedNote } from './stream.ts';
 
-// a note as recorded: as the stream carried it, and its changes after it, its own lanes, a per-note controller's points each (G3b);
+// a note as recorded: as the stream carried it, and its changes after it, its own lanes, a per-note controller's points each;
 // held where it came with no length, its end told after it, at a time, as one sent with its length sounds that long whatever holds come
-// (P3c1)
 export interface RecordedNote extends PlayedNote {
   lanes?: Partial<Record<PerNoteControllerName, LanePoint[]>>;
   held?: true;

@@ -30,9 +30,9 @@ export interface Play {
   ends?: NoteOff[];
   changes?: PerNoteController[];
   controls?: Controller[];
-  playback?: boolean; // played back from the recording (P3a)
+  playback?: boolean; // played back from the recording
   launched?: boolean; // a clip launched from the session view, played in full
-  unrecorded?: boolean; // left out of the recording, as its sender says: a launched clip, what plays back, a hush (P3a, P3b)
+  unrecorded?: boolean; // left out of the recording, as its sender says: a launched clip, what plays back, a hush
   [more: string]: unknown;
 }
 // A note as the stream carries it, as MIDI's messages sent it (notesIn()):

@@ -1,4 +1,4 @@
-// ---------- timeline/timeline: events in time, each with its extent, kept for a window (L1c2) ----------
+// ---------- timeline/timeline: events in time, each with its extent, kept for a window ----------
 // Events of any kind, knowing nothing of what they are but when and how long: one with its own length; one open until its end is told
 // (endAt()); one that holds until the next of its key, as a value set holds until the next is (hold()). Kept for a window, the last 30
 // minutes unless told: an event that ended before it let go, one still in effect kept, of each key's the one in effect where the window

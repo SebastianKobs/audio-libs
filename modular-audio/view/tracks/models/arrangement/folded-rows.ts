@@ -11,7 +11,7 @@ export class FoldedRows {
   readonly #strips: readonly ArrangedStrip[];
   readonly #controllersOf: (strip: string) => readonly string[];
   readonly #unfolded = new Toggles(); // the groups unfolded, each folded until it is
-  readonly #opened = new Toggles(); // the tracks whose lanes are open, by their rows' keys (G5a)
+  readonly #opened = new Toggles(); // the tracks whose lanes are open, by their rows' keys
   #rows: Row[] = [];
 
   constructor({

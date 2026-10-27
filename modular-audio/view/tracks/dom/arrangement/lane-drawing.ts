@@ -1,4 +1,4 @@
-// ---------- view/tracks/dom/arrangement/lane-drawing: a lane's line drawn on its row, its value on its parameter's whole range (G5b) ----------
+// ---------- view/tracks/dom/arrangement/lane-drawing: a lane's line drawn on its row, its value on its parameter's whole range ----------
 import { positionOf } from '../../../../../base/params/index.ts';
 import { laneLine, type Arrangement, type PlacedLane } from '../../models/index.ts';
 import { STEP_PX, xOf } from './pixels.ts';

@@ -1,4 +1,4 @@
-// ---------- view/tracks/models/arrangement/note-shapes: a region's notes as the arrangement draws them, in clock time and pitch, up to now (G4b) ----------
+// ---------- view/tracks/models/arrangement/note-shapes: a region's notes as the arrangement draws them, in clock time and pitch, up to now ----------
 import type { TimeMap } from '../../../../../sequencing/clock/index.ts';
 import type { RecordedNote } from '../../readout/index.ts';
 

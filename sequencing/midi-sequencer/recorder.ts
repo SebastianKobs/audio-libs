@@ -1,12 +1,12 @@
-// ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes, for an arrangement to show (G1b) ----------
+// ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes, for an arrangement to show ----------
 // As Ableton records the session into its arrangement (mockup/architecture/views.md): every play the stream carries, live or not,
-// into the region it's of (play.region, G1a), told apart by its element and its number, a region's number its
-// source's; a play with none, a region of its own; a launched clip's plays left out (E2), as nothing a user launches is recorded. A region
+// into the region it's of (play.region), told apart by its element and its number, a region's number its
+// source's; a play with none, a region of its own; a launched clip's plays left out, as nothing a user launches is recorded. A region
 // runs from its first note to the end of its last; a held note open until its note off comes, a play of its own by the note's index, its
-// glides added to it (G2a); one still held as its element's next region begins, a held part's as its key changes, ends there and starts
+// glides added to it; one still held as its element's next region begins, a held part's as its key changes, ends there and starts
 // again in the new region, as it sounds on. Kept for the last 30 minutes, in memory: a note ended before then let go, and a region with none.
 // What moves as it's heard: a track's lanes (track-lanes.ts), a note's own (note-lanes.ts).
-// On the timeline since L1c2 (libs/sequencing/timeline/): each note an event with its own length or open until its note off, each lane's point one that
+// On the timeline (libs/sequencing/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import { endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
 import { samePoint, type LanePoint } from './lanes.ts';
@@ -63,7 +63,7 @@ export class Recorder {
     this.#changed(play.owner, play.changes ?? []);
     this.#trackLanes.heard(play);
     if (!play.notes.length) {
-      return; // only a held note's end, glides or changes, or a track's controllers, told above (G2a, G3b)
+      return; // only a held note's end, glides or changes, or a track's controllers, told above
     }
     const { kept, carried } = this.#regionOf(play);
     const notes = [...play.notes.map((note) => recorded(note)), ...carried];
@@ -80,13 +80,13 @@ export class Recorder {
     this.#settle(now);
     return this.#kept.map((kept) => regionOf(kept));
   }
-  // each track's lanes at now, in the order they began, their points before the last 30 minutes let go but each one's last (G3b)
+  // each track's lanes at now, in the order they began, their points before the last 30 minutes let go but each one's last
   lanes(now: Seconds): Lane[] {
     this.#settle(now);
     return this.#trackLanes.lanes();
   }
   // the timeline as of now, the notes let go and their regions with them; the points that change nothing, once they're settled, left
-  // out of every lane, a track's and a note's (G3b)
+  // out of every lane, a track's and a note's
   #settle(now: Seconds): void {
     this.#timeline.settle(now);
     for (const note of this.#kept.flatMap((kept) => kept.notes)) {
@@ -105,7 +105,7 @@ export class Recorder {
       }
     }
   }
-  // a note's changes after it, as they come, on its element's latest note of that index, its own lanes (G3b)
+  // a note's changes after it, as they come, on its element's latest note of that index, its own lanes
   #changed(owner: unknown, changes: readonly PerNoteController[]): void {
     for (const change of changes) {
       const note = this.#noteOf(owner, change.index);
@@ -206,7 +206,7 @@ function heldThrough(before: Kept, begins: Seconds): RecordedNote[] {
   return held.map((note) => carried(note, begins));
 }
 // a held note carried into its element's next region: from there, its values as they are then, its glides and changes before staying with
-// the old (G3b)
+// the old
 function carried(note: RecordedNote, begins: Seconds): RecordedNote {
   const { duration: _ended, lanes: _changed, ...held } = note;
   const copy: RecordedNote = { ...held, t: begins };

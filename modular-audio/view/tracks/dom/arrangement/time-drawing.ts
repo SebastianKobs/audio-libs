@@ -14,7 +14,7 @@ export interface DrawnRegion {
   gone: boolean;
   notes: DrawnNote[];
 }
-// what a look draws: the rows, the regions on them, the opened lanes (G5b), the playhead's place where it's set back (P2), the time in
+// what a look draws: the rows, the regions on them, the opened lanes, the playhead's place where it's set back, the time in
 // view, its places at its left and right edges, where a time lies on the grid, and now
 export interface Look {
   rows: readonly Row[];
@@ -39,20 +39,20 @@ export type ArrangementColors = Record<
 type Colors = ArrangementColors;
 
 const HEADER_HEIGHT = 16; // px: a group's header row, as the names' (index.html)
-const ROW_HEIGHT = 34; // px: a track's, as the names': its label above its notes (G4b, Default)
-const LANE_HEIGHT = 24; // px: a lane's, as the names' (G5a, Default)
+const ROW_HEIGHT = 34; // px: a track's, as the names': its label above its notes (Default)
+const LANE_HEIGHT = 24; // px: a lane's, as the names' (Default)
 const LABEL_HEIGHT = 12; // px: a region's label, its notes below it
 const RULER_HEIGHT = 18; // px
 const GONE_ALPHA = 0.35; // a region whose clip is gone, greyed
-const LANE_ALPHA = 0.12; // a lane's ground, under its track's (G5a)
-const LANE_PAD = 4; // px: a lane's line kept off its row's edges (G5b)
-const MARKER = 4; // px: half the playhead's triangle in the ruler (P2)
+const LANE_ALPHA = 0.12; // a lane's ground, under its track's
+const LANE_PAD = 4; // px: a lane's line kept off its row's edges
+const MARKER = 4; // px: half the playhead's triangle in the ruler
 
 // the time drawn, only what's in view: the bar ruler above, numbered from the grid's first bar; the rows, a header's a band, a lane's a
-// fainter one (G5a), its line on it (G5b); each region a
+// fainter one, its line on it; each region a
 // block on its row from its first note to the end of its last, an open one to the playhead, labelled with its clip, its notes below its
-// label, greyed once its clip is gone (G4b); the present, now, a line; the playhead where it's set back, a triangle in the ruler and a
-// dashed line (P2). What it drew kept for the browser tests
+// label, greyed once its clip is gone; the present, now, a line; the playhead where it's set back, a triangle in the ruler and a
+// dashed line. What it drew kept for the browser tests
 export class TimeDrawing {
   readonly #ruler: HTMLCanvasElement;
   readonly #rows: HTMLCanvasElement;
@@ -60,7 +60,7 @@ export class TimeDrawing {
   #drawn: DrawnRegion[] = [];
   #lanes: DrawnLane[] = [];
   #present = 0; // its x
-  #playhead: number | null = null; // its x, where it's set back (P2)
+  #playhead: number | null = null; // its x, where it's set back
 
   // colors: its owner's, read as it draws
   constructor({ ruler, rows, colors }: { ruler: HTMLCanvasElement; rows: HTMLCanvasElement; colors: () => Colors }) {
@@ -109,7 +109,7 @@ export class TimeDrawing {
       ruler.fillText(String(place / bar + 1), x + 3, RULER_HEIGHT - 5);
     }
   }
-  // a lane's line on its row, if its row shows (G5b)
+  // a lane's line on its row, if its row shows
   #drawLane(
     rows: CanvasRenderingContext2D,
     lane: PlacedLane,
@@ -170,7 +170,7 @@ function clear(context: CanvasRenderingContext2D, colors: Colors): void {
 function heightOf(rows: readonly Row[]): number {
   return rows.reduce((height, row) => height + rowHeight(row), 0);
 }
-// a row's height: a header's, a lane's (G5a) or a track's
+// a row's height: a header's, a lane's or a track's
 function rowHeight(row: Row): number {
   if (row.header) {
     return HEADER_HEIGHT;
@@ -189,7 +189,7 @@ function rowTops(rows: readonly Row[]): Map<string, number> {
   }
   return tops;
 }
-// the rows' ground: a header a band, a lane a fainter one (G5a), a track and a lane a line under it
+// the rows' ground: a header a band, a lane a fainter one, a track and a lane a line under it
 function drawRowBands(rows: CanvasRenderingContext2D, shown: readonly Row[], colors: Colors): void {
   clear(rows, colors);
   const width = rows.canvas.clientWidth;
@@ -215,7 +215,7 @@ function drawPresent(ruler: CanvasRenderingContext2D, rows: CanvasRenderingConte
     context.fillRect(Math.round(x), 0, 1, context.canvas.clientHeight);
   }
 }
-// the playhead set back (P2): a small triangle at the ruler's foot, pointing down, and a dashed line down the rows
+// the playhead set back: a small triangle at the ruler's foot, pointing down, and a dashed line down the rows
 function drawPlayhead(
   ruler: CanvasRenderingContext2D,
   rows: CanvasRenderingContext2D,

@@ -29,8 +29,8 @@ export class GridMap {
     clock.onStep((i) => this.#played(i, clock.grid.straightTime(i)));
   }
   // a time's place, in 16ths: between two 16ths heard as far as it lies between them in song time, a hold within where the grid stood,
-  // those skipped as the ticks lagged counted (G5b); past the last one heard, or before the first, at the tempo now; from the time the grid
-  // was held at, the place it's held at, the 16ths scheduled ahead of it not counted, so the present stands still (P2)
+  // those skipped as the ticks lagged counted; past the last one heard, or before the first, at the tempo now; from the time the grid
+  // was held at, the place it's held at, the 16ths scheduled ahead of it not counted, so the present stands still
   placeOf(t: number): number {
     const heldAt = this.#grid.heldAt;
     if (heldAt !== null && t >= heldAt) {
@@ -49,7 +49,7 @@ export class GridMap {
     const along = span > 0 ? (song(t) - from) / span : 1;
     return steps[before]! + along * (steps[after]! - steps[before]!);
   }
-  // a place's time, the other way (G5b): between two 16ths heard as far as it lies between them in song time, where the grid stood a hold's
+  // a place's time, the other way: between two 16ths heard as far as it lies between them in song time, where the grid stood a hold's
   // start; past the last one heard, or before the first, at the tempo now
   timeOf(place: number): number {
     const steps = this.#steps;
@@ -67,7 +67,7 @@ export class GridMap {
   stepsPerBar(): number {
     return this.#grid.stepsPerBar();
   }
-  // a beat's, a quarter in 4/4 (P2)
+  // a beat's, a quarter in 4/4
   stepsPerBeat(): number {
     return this.#grid.stepsPerBeat();
   }

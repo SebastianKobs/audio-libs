@@ -143,7 +143,7 @@ export function place(
   const placed = placeOn(base, start, grid, from, meter);
   return (at: number) => grid.timeAt(placed(at));
 }
-// and where they lie on the grid, in 16ths, as place() times them: for a phrase sent as its events come due, each timed then (P3c2)
+// and where they lie on the grid, in 16ths, as place() times them: for a phrase sent as its events come due, each timed then
 export function placeOn(
   base: number,
   start: number,

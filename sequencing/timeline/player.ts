@@ -1,4 +1,4 @@
-// ---------- timeline/player: the timeline played back from a time, in timeline time, each moment as it comes due (L1d) ----------
+// ---------- timeline/player: the timeline played back from a time, in timeline time, each moment as it comes due ----------
 // As a DAW plays its arrangement, knowing nothing of what its events are: an event with its own extent, its start, its points and its end
 // told to a performer as they come due on a tick, heard as far after where playback starts as they lie along the timeline, its holds taken
 // out, so a hold is played past at once; one under way where it starts chased, started at once from there, its points before passed over;

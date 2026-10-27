@@ -12,20 +12,20 @@ export interface GridSettings extends SwingSettings {
   meter?: Meter;
 }
 
-const ROUNDING = 1e-9; // s: a 16th's time added up step by step and worked out at once may differ by as much (P3b)
+const ROUNDING = 1e-9; // s: a 16th's time added up step by step and worked out at once may differ by as much
 
 // the beat grid: 16ths at the settings' tempo, swung as they are now; it runs once the audio starts (start()), standing at its first 16th
 // until then, the next 16th to schedule its straight time on the clock (nextStepTime) and its number (nextStepNumber). Held, its place,
 // the song position, stays while the clock's time runs on, no 16th handed out, and released it goes on from there (hold(), release(), the
-// transport's stop, P1); its holds kept, so a time's song time, the time the music played, takes them out (song-time.ts)
+// transport's stop); its holds kept, so a time's song time, the time the music played, takes them out (song-time.ts)
 export class BeatGrid {
   readonly #settings: GridSettings;
   #nextStepTime = 0;
   #nextStepNumber = 0;
   #running = false;
-  #held: number | null = null; // the place it's held at, while held (P1)
-  #heldAt = 0; // and the time it was held at: a time before it lies where it did (P2)
-  #holdFrom: number | null = null; // the time it's to be held from, the 16ths before it handed out first (P3b)
+  #held: number | null = null; // the place it's held at, while held
+  #heldAt = 0; // and the time it was held at: a time before it lies where it did
+  #holdFrom: number | null = null; // the time it's to be held from, the 16ths before it handed out first
   readonly #songTime = new SongTime(); // the holds the music went through, and where it stands while held
   // song time as a time map, for what plays along a timeline
   readonly song: TimeMap = {
@@ -48,7 +48,7 @@ export class BeatGrid {
   get held(): boolean {
     return this.#held !== null;
   }
-  // the time it was held at, while held; none while it runs (P2)
+  // the time it was held at, while held; none while it runs
   get heldAt(): number | null {
     return this.#held === null ? null : this.#heldAt;
   }
@@ -122,7 +122,7 @@ export class BeatGrid {
     return this.#nextStepTime + (place - this.#nextStepNumber) * this.stepDuration();
   }
   // held at a time: its place kept while the clock's time runs on, no 16th handed out; the place the first 16th not handed out yet, those
-  // before it scheduled ahead and played, so nothing jumps as it goes on (P2); past it, where the ticks lagged, the place then
+  // before it scheduled ahead and played, so nothing jumps as it goes on; past it, where the ticks lagged, the place then
   hold(t: number): void {
     if (this.#held !== null) {
       return;
@@ -131,7 +131,7 @@ export class BeatGrid {
     this.#heldAt = t;
     this.#songTime.stand(this.#running ? Math.max(t, this.straightTime(this.#held)) : t);
   }
-  // held from a time on, the beat the arrangement plays back from (P3b): the 16ths before it handed out, none from it, its place held there,
+  // held from a time on, the beat the arrangement plays back from: the 16ths before it handed out, none from it, its place held there,
   // so what played goes on up to it; held already, held as it is
   holdFrom(t: number): void {
     if (this.#held === null) {
@@ -169,11 +169,11 @@ export class BeatGrid {
   // ticks lagged, so the grid keeps its place
   schedule(missedBefore: number, dueBefore: number, due: (i: number, t: number) => void): void {
     if (this.#held !== null) {
-      return; // held: the music no longer listening (P1)
+      return; // held: the music no longer listening
     }
     const holdFrom = this.#holdFrom === null ? null : this.#holdFrom - ROUNDING;
     if (holdFrom !== null && holdFrom <= dueBefore) {
-      dueBefore = holdFrom; // the 16ths before it, then held there (P3b)
+      dueBefore = holdFrom; // the 16ths before it, then held there
     }
     while (this.#nextStepTime < missedBefore) {
       this.#nextStepTime += this.stepDuration();
