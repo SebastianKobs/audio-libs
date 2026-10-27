@@ -61,18 +61,11 @@ export function lane(kind, track, controller) {
 //   - clock: step(i) is 16th i, at i / 4 s; t set by hand for a time between 16ths;
 //   - transport: playingBack and playhead() set by hand, in seconds;
 //   - cued: the times its release asked the transport to play from.
-export function arrangementOf({
-  regions = [],
-  lanes = [],
-  instruments = [],
-  midiDevices = [],
-  desk = DESK,
-  song = { toTimeline: (t) => t, fromTimeline: (t) => t },
-} = {}) {
+export function arrangementOf({ regions = [], lanes = [], instruments = [], midiDevices = [], desk = DESK } = {}) {
   const steps = [];
   const clock = {
     t: 0,
-    now: () => clock.t,
+    songNow: () => clock.t, // no holds: song time is the clock's
     onStep: (listener) => steps.push(listener),
     grid: {
       straightAt: (t) => t * 4,
@@ -82,7 +75,6 @@ export function arrangementOf({
       heldAt: null,
       songTime: (t) => t,
       timeOfSong: (time) => time,
-      song,
     },
     step(i) {
       clock.t = i / 4;

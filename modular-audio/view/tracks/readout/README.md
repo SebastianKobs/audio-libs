@@ -19,11 +19,11 @@ const tracks: TracksReadout = {
 |---|---|
 | `ClipTrack` | A clip track as a view shows it: its `key`, its `name`, the `roles` whose instruments play its clips, whether it's `played` (its clips launched and deleted from the view), and where its clips are `held`, in the order shown (`clips.ts`). |
 | `ClipsReadout` | The control surface the clips were played on: its `clipTracks` in the order shown, `clipName()` and `notesIn()` for a clip on its clip track. A clip player answers it for its slots, a control surface for the clips it holds on no player (`clips.ts`). |
-| `RecordedNote`, `RecordedRegion`, `RecordedLane` | What the recording holds, as recorded: a note's time, length, pitch, bend and glides; a region's clip, kind, track, times and notes, an open one ending never; a lane's kind, track, strip, controller and points (`arrangement.ts`). |
-| `RecordingReadout` | The recording at a time, as a MIDI sequencer's recorder answers it: the `regions()` and `lanes()` of the last 30 minutes, each in the order they began (`arrangement.ts`). |
+| `RecordedNote`, `RecordedRegion`, `RecordedLane` | What the recording holds, as recorded, in song time: a note's time, length, pitch, bend and glides; a region's clip, kind, track, times and notes, an open one ending never; a lane's kind, track, strip, controller and points (`arrangement.ts`). |
+| `RecordingReadout` | The recording at a song time, as a MIDI sequencer's recorder answers it: the `regions()` and `lanes()` of the last 30 minutes of song time, each in the order they began (`arrangement.ts`). |
 | `TrackGroup`, `TracksReadout` | The tracks in groups, as the control surface that played them names them: a group's key, header name, kind and whether it's played live. `TracksReadout` has the `groups`, `groupOf()`, `clipName()` and `hasClip()`; the session's tracks read it too (`arrangement.ts`). |
 | `PlayheadReadout` | The transport, as the playhead reads it: `playingBack` and `playhead()`, where the playhead is while the recording plays back (`arrangement.ts`). |
 | `DeclaredReadout` | What the desk declares, by a strip's name: `specOf()` a controller's range and taper, `isMidiDevice()` and `controllersOf()`, the strip's controllers in the order the sound goes through it (`arrangement.ts`). |
-| `ArrangementClock` | The clock as the arrangement reads it: `now`, each 16th as it's scheduled (`onStep`) and the grid as it was heard, song time among it (`arrangement.ts`). |
+| `ArrangementClock` | The clock as the arrangement reads it: the song time now (`songNow`), each 16th as it's scheduled (`onStep`) and the grid as it was heard, which lays a song time on it (`arrangement.ts`). |
 
 Tests: none, as types only: what answers them is tested in `libs/modular-audio/view/tracks/models/test/`.

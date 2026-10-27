@@ -4,6 +4,6 @@
 // MIDI sequencer's regions, lanes and their playback are its own views of them (libs/sequencing/midi-sequencer/). What's asked of whatever plays
 // it back, play, stop and cue, as messages (messages.ts)
 export { endOf, LATEST, Timeline, thinned, type TimedEvent, type TimelineOptions } from './timeline.ts';
-export type { PlayedFrom } from './timeline-time.ts';
+export { ALONG_THE_CLOCK, type PlayedFrom } from './timeline-time.ts';
 export type { PlaybackMessage } from './messages.ts';
 export { Player, type EndOf, type Performer, type Played, type PlayerOptions } from './player.ts';

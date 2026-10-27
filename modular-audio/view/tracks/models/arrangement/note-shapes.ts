@@ -1,5 +1,4 @@
-// ---------- view/tracks/models/arrangement/note-shapes: a region's notes as the arrangement draws them, in clock time and pitch, up to now ----------
-import type { TimeMap } from '../../../../../sequencing/clock/index.ts';
+// ---------- view/tracks/models/arrangement/note-shapes: a region's notes as the arrangement draws them, in song time and pitch, up to now ----------
 import type { RecordedNote } from '../../readout/index.ts';
 
 // a piece of a note, held at a pitch from when to when
@@ -42,17 +41,6 @@ export function noteShape(note: RecordedNote, now: number): NoteShape | null {
   const bend = note.controllers?.bend ?? 0;
   const slide = bend ? { t: note.t, from: note.pitch + bend, to: note.pitch } : null;
   return { pieces, lines, slide, held };
-}
-// a note sent with its length kept whole past the holds it rang through,
-// a stop's, or live play's while the arrangement played back:
-// its end where song time gets to its length from its start; a held one,
-// its end where it was let go, and one held still as they are
-export function keptWhole<Note extends RecordedNote>(note: Note, song: TimeMap): Note {
-  if (note.duration === undefined || note.held) {
-    return note;
-  }
-  const end = song.fromTimeline(song.toTimeline(note.t) + note.duration);
-  return { ...note, duration: end - note.t };
 }
 // a region's pitch range: its notes' lowest to highest, what they slide in from and glide to among them; none without pitches
 export function pitchRange(notes: readonly RecordedNote[]): [low: number, high: number] | null {

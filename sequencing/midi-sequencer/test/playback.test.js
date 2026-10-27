@@ -185,29 +185,17 @@ test('a region on no track left out', () => {
   noTrack.due(10);
 });
 
-// The song wiring (the hold taken out itself is the timeline player's): a note sent with its length sounds that long
-// whatever holds come, kept whole in song time, not cut where the hold begins; a held note's end where its note off came.
+// The recording is in song time, a hold already out of it: a note sent with its length sounds that long, wherever it began;
+// a held note's end where its note off came, its length one in song time.
 // A note recorded as ending before it starts, let go before it sounded, ends as it starts: its end was once sent before its
 // start and passed over, so nothing ended it and the note was held until playback reached the present (KNOWN_BUGS.md, 2026-10-12)
-test('played in song time, a note sent with its length rings that long across a hold in the recording, kept whole; a held note ends where it was let go; one recorded as ending before it starts is let go as it starts', () => {
-  // the recording held from 5 s to 8 s
-  const songTime = (t) => {
-    if (t <= 5) {
-      return t;
-    }
-    return Math.max(5, t - 3);
-  };
-  const timeOfSong = (song) => (song <= 5 ? song : song + 3);
-  const sent = [];
-  const player = new RecordingPlayer({
-    input: { send: (to, messages) => sent.push({ to, messages }) },
-    song: { toTimeline: songTime, fromTimeline: timeOfSong },
-  });
+test('a note sent with its length rings that long; a held note ends where it was let go; one recorded as ending before it starts is let go as it starts', () => {
+  const { sent, player } = playerWith();
   player.play(
     [
       region([
-        { t: 4, pitch: 60, velocity: 1, duration: 2 }, // sent with its length, ringing into the hold
-        { t: 4.5, pitch: 62, velocity: 1, duration: 4.5, held: true }, // held, let go at 9, after the hold
+        { t: 4, pitch: 60, velocity: 1, duration: 2 }, // sent with its length
+        { t: 4.5, pitch: 62, velocity: 1, duration: 1.5, held: true }, // held, let go 1.5 s of song after
         { t: 5, pitch: 64, velocity: 1, duration: -0.1, held: true }, // let go before it sounded
       ]),
     ],
@@ -223,6 +211,6 @@ test('played in song time, a note sent with its length rings that long across a 
       [60, 103],
       [62, 103],
     ],
-    'its 2 s from 101, not cut at the hold; the held one where it was let go, 6 s of song; the early one as it starts, not held to the end',
+    'its 2 s from 101; the held one 1.5 s from 101.5; the early one as it starts, not held to the end',
   );
 });

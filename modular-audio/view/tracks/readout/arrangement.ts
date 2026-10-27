@@ -5,9 +5,9 @@
 //     the session's tracks read them too;
 //   - the playhead (PlayheadReadout): the transport, a cue sent on a bus;
 //   - the declarations (DeclaredReadout): the desk's view models (declaredBy());
-//   - the clock: the one clock (libs/sequencing/clock/), its time, its 16ths and its grid.
+//   - the clock: the one clock (libs/sequencing/clock/), its song time now, its 16ths and its grid.
 import type { TimedValue } from '../../../../base/automation/index.ts';
-import type { Clock, HeardGrid, TimeMap } from '../../../../sequencing/clock/index.ts';
+import type { Clock, HeardGrid } from '../../../../sequencing/clock/index.ts';
 import type { Seconds } from '../../../../base/util/index.ts';
 import type { ParamSpec } from '../../../../base/params/index.ts';
 
@@ -25,7 +25,7 @@ export interface RecordedNote {
   lanes?: { pitch?: readonly TimedValue[] | undefined } | undefined;
   held?: true | undefined;
 }
-// A region as recorded. Times are clock times; an open region ends never (Infinity).
+// A region as recorded. Times are song times, the recorder's; an open region ends never (Infinity).
 //   - clip: what it plays, as the tracks name it;
 //   - kind: what played it; live: played live, not played back;
 //   - track: the number of the track it was played on.
@@ -50,7 +50,7 @@ export interface RecordedLane {
   controller: string;
   points: readonly TimedValue[];
 }
-// The recording at a time: the regions of the last 30 minutes and the tracks' lanes,
+// The recording at a song time: the regions of the last 30 minutes of song time and the tracks' lanes,
 // each in the order they began.
 export interface RecordingReadout {
   regions(now: Seconds): readonly RecordedRegion[];
@@ -93,6 +93,6 @@ export interface DeclaredReadout {
   isMidiDevice(strip: string, controller: string): boolean;
   controllersOf(strip: string): readonly string[];
 }
-// The clock, as the arrangement reads it: now, each 16th as it's scheduled, and the grid as
-// it was heard, song time among it.
-export type ArrangementClock = Pick<Clock, 'now' | 'onStep'> & { grid: HeardGrid & { readonly song: TimeMap } };
+// The clock, as the arrangement reads it: the song time now, each 16th as it's scheduled, and the
+// grid as it was heard, which lays a song time on it.
+export type ArrangementClock = Pick<Clock, 'songNow' | 'onStep'> & { grid: HeardGrid };

@@ -8,9 +8,8 @@
 // overriding it until playback ends, as Ableton's override; and the strips back as they were when it started, but one moved by hand, once
 // it ends. On the timeline's player (libs/sequencing/timeline/), one for both: here only the music's mapping onto it, a note's start a note
 // on with its values then, its glides and changes per-note controllers, its end a note off, each note a fresh index, a region's address; a
-// lane's point a controller, its value where it's picked up by Web Audio's curve; the strips put back; in song time, the timeline time of
-// music, the clock's grid handed in as a TimeMap
-import type { TimeMap } from '../clock/index.ts';
+// lane's point a controller, its value where it's picked up by Web Audio's curve; the strips put back; the recording in song time, the
+// timeline time of music (recorder.ts), so a hold is already out of it
 import type { Seconds } from '../../base/util/index.ts';
 import { Player, type PlayedFrom } from '../timeline/index.ts';
 import type { SentTo, Input } from './input.ts';
@@ -50,11 +49,9 @@ export class RecordingPlayer<Track extends string> {
 
   constructor({
     input,
-    song,
     skip = () => false,
   }: {
     input: Pick<Input<Track>, 'send'>;
-    song?: TimeMap;
     skip?: (track: Track, controller: string) => boolean;
   }) {
     this.#input = input;
@@ -67,11 +64,9 @@ export class RecordingPlayer<Track extends string> {
         hold: (point, t, from) => this.#set(point, t, from),
       },
       pointsOf: (note) => pointsOf(note),
-      timeline: song,
-      endOf: (note, songTime) => songEndOf(note, songTime),
     });
   }
-  // the regions and lanes played from a recording time, heard at a clock time: each note that sounds from then until the end, one already
+  // the regions and lanes played from a song time, heard at a clock time: each note that sounds from then until the end, one already
   // sounding chased, started at once for what's left of it; each lane picked up there at its value then, each point after it until the
   // end at its time; a region or a lane on no track left out. What each lane is put back to once playback ends: its value at the end
   play(regions: readonly Region[], lanes: readonly Lane[], from: PlayedFrom): void {
@@ -114,11 +109,11 @@ export class RecordingPlayer<Track extends string> {
     this.#putLanesBack(t);
     this.#player.finish(t);
   }
-  // the recording's time it plays at a clock time, past a hold at once; none when it doesn't play
+  // the song time it plays at a clock time; none when it doesn't play
   position(now: Seconds): Seconds | null {
     return this.#player.position(now);
   }
-  // the clock time it plays to the end of what was recorded before it started, in song time; none when it doesn't play
+  // the clock time it plays to the end of what was recorded before it started; none when it doesn't play
   endsAt(): Seconds | null {
     return this.#player.endsAt();
   }
@@ -208,19 +203,6 @@ function pointsOf(note: RecordedNote): NotePoint[] {
   return (Object.entries(note.lanes ?? {}) as [PerNoteControllerName, LanePoint[]][]).flatMap(([controller, points]) =>
     points.map((point): NotePoint => ({ controller, ...point })),
   );
-}
-// where a note ends, in song time: one sent with its length that long from where it started, whatever holds came as it sounded, as it
-// rang on through them; a held one where its note off came; none for one still held. Never before it starts: one let go before it
-// sounded ends as it starts, so its end isn't passed over, leaving it held
-function songEndOf(note: RecordedNote, songTime: (t: Seconds) => Seconds): Seconds | undefined {
-  if (note.duration === undefined) {
-    return undefined;
-  }
-  const starts = songTime(note.t);
-  if (note.held) {
-    return Math.max(starts, songTime(note.t + note.duration));
-  }
-  return starts + Math.max(0, note.duration);
 }
 // a note's pitch at a time of the recording's: the last it had glided to by then, or its own
 function pitchAt(note: RecordedNote, t: Seconds): number {

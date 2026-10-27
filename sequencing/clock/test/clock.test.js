@@ -520,6 +520,22 @@ test("a clock time's song time, the grid's holds taken out: before a hold as it 
   grid.release(clock.now());
 });
 
+// the song time now, what the recorder lets go by and the arrangement draws its present at
+test("the song time now: the clock's now in song time, running with it, standing while the grid is held", () => {
+  const { clock, fakeAudio } = clockOf();
+  clock.useAudio(fakeAudio());
+  clock.advance(1);
+  assert.equal(clock.songNow(), clock.grid.songTime(clock.now()));
+  clock.grid.hold(clock.now());
+  clock.advance(0.5);
+  const stood = clock.songNow();
+  clock.advance(2);
+  assert.equal(clock.songNow(), stood, 'held: standing as the clock runs on');
+  clock.grid.release(clock.now());
+  clock.advance(1);
+  near(clock.songNow() - stood, 1, 'released: going on from it', 1e-9);
+});
+
 // stopped between two 16ths, the song stood from the moment Stop was pressed, though the 16ths handed out ahead of it played on: a playback
 // across it jumped, and its playhead with it
 test('stopped between two 16ths, the song stands from the 16th it is held at, those handed out before it played on: a time between as it is', () => {

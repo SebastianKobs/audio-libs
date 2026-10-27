@@ -1,16 +1,20 @@
-// ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes, for an arrangement to show ----------
+// ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes of song time, for an arrangement to show ----------
 // As Ableton records the session into its arrangement (mockup/architecture/views.md): every play the stream carries, live or not,
 // into the region it's of (play.region), told apart by its element and its number, a region's number its
 // source's; a play with none, a region of its own; a launched clip's plays left out, as nothing a user launches is recorded. A region
 // runs from its first note to the end of its last; a held note open until its note off comes, a play of its own by the note's index, its
 // glides added to it; one still held as its element's next region begins, a held part's as its key changes, ends there and starts
 // again in the new region, as it sounds on. Kept for the last 30 minutes, in memory: a note ended before then let go, and a region with none.
+// In song time: the plays carry clock times, as they're scheduled, and each is turned into song time as it's heard, through the TimeMap it's
+// handed (libs/sequencing/clock/); so a hold, a stop's, leaves no gap, and everything it hands out or is asked, its regions, lanes, data and
+// the now it lets go by, is song time. The 30 minutes are 30 minutes of the music, not of the clock: a long stop doesn't spend them.
 // What moves as it's heard: a track's lanes (track-lanes.ts), a note's own (note-lanes.ts).
 // On the timeline (libs/sequencing/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
-import { endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
+import { ALONG_THE_CLOCK, endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
+import type { TimeMap } from '../clock/index.ts';
 import { samePoint, type LanePoint } from './lanes.ts';
-import type { NoteOff, PerNoteController } from '../../midi/protocol/index.ts';
+import type { Controller, NoteOff, PerNoteController } from '../../midi/protocol/index.ts';
 import type { Play, PlayedNote } from './stream.ts';
 import { entryOf, type Seconds } from '../../base/util/index.ts';
 import { changedOn, thinNote, valuesAt, type RecordedNote } from './note-lanes.ts';
@@ -46,20 +50,24 @@ export class Recorder {
   readonly #numbered = new Map<unknown, Map<number, Kept>>(); // each element's regions, by their number
   readonly #trackLanes: TrackLanes; // each track's lanes, as heard
   #leftOut: (play: Play) => boolean = () => false; // what its owner says to leave out
+  readonly #song: TimeMap; // a clock time to song time, as a play is heard
 
-  constructor() {
+  // song: the clock's song time, to turn the plays' clock times into; none, the clock's time is song time
+  constructor({ song = ALONG_THE_CLOCK }: { song?: TimeMap } = {}) {
+    this.#song = song;
     this.#timeline = new Timeline<RecordedNote, LanePoint>({
       same: (before, after) => samePoint(before, after),
       onLetGo: (gone) => this.#forget(gone),
     });
     this.#trackLanes = new TrackLanes(this.#timeline);
   }
-  // a play the stream carries, into the region it's of; one its sender or its owner leaves out
+  // a play the stream carries, at its clock times, into the region it's of, at song time; one its sender or its owner leaves out
   // of the recording, left out
-  heard(play: Play): void {
-    if (play.unrecorded || this.#leftOut(play)) {
+  heard(clockPlay: Play): void {
+    if (clockPlay.unrecorded || this.#leftOut(clockPlay)) {
       return;
     }
+    const play = inSongTime(clockPlay, this.#song);
     this.#told(play.owner, play.ends ?? []);
     this.#changed(play.owner, play.changes ?? []);
     this.#trackLanes.heard(play);
@@ -76,17 +84,17 @@ export class Recorder {
   leaveOut(leftOut: (play: Play) => boolean): void {
     this.#leftOut = leftOut;
   }
-  // the regions kept at now, in the order they began, those wholly before the last 30 minutes let go
+  // the regions kept at a song time now, in the order they began, those wholly before the last 30 minutes of song time let go
   regions(now: Seconds): Region[] {
     this.#settle(now);
     return this.#kept.map((kept) => regionOf(kept));
   }
-  // each track's lanes at now, in the order they began, their points before the last 30 minutes let go but each one's last
+  // each track's lanes at a song time now, in the order they began, their points before the last 30 minutes let go but each one's last
   lanes(now: Seconds): Lane[] {
     this.#settle(now);
     return this.#trackLanes.lanes();
   }
-  // the recording at now as plain data, to save: the regions and lanes as `regions()` and `lanes()` hand them out, owners as ids, clips
+  // the recording at a song time now as plain data, to save: the regions and lanes as `regions()` and `lanes()` hand them out, owners as ids, clips
   // by the name nameOfClip gives each region's, ids where it's not handed
   toData(now: Seconds, nameOfClip?: (region: Region) => string): RecordingData {
     const regions = this.regions(now);
@@ -218,6 +226,38 @@ export class Recorder {
   }
 }
 
+// a play with its clock times turned into song time: its notes and their glides, a held note's end, the changes and a track's controllers;
+// a note's length, a glide's time constant and an open end stay as they are
+function inSongTime(play: Play, song: TimeMap): Play {
+  if (song === ALONG_THE_CLOCK) {
+    return play;
+  }
+  const at = (t: Seconds): Seconds => song.toTimeline(t);
+  const timed = <Timed extends { t: Seconds }>(point: Timed): Timed => ({ ...point, t: at(point.t) });
+  const converted: Play = { ...play, notes: play.notes.map((note) => noteInSongTime(note, at)) };
+  if (play.until !== undefined) {
+    converted.until = at(play.until);
+  }
+  if (play.ends) {
+    converted.ends = play.ends.map((end): NoteOff => timed(end));
+  }
+  if (play.changes) {
+    converted.changes = play.changes.map((change): PerNoteController => timed(change));
+  }
+  if (play.controls) {
+    converted.controls = play.controls.map((control): Controller => timed(control));
+  }
+  return converted;
+}
+// a note with its start and its glides' times in song time
+function noteInSongTime(note: PlayedNote, at: (t: Seconds) => Seconds): PlayedNote {
+  const { glides } = note;
+  return {
+    ...note,
+    t: at(note.t),
+    ...(glides ? { glides: glides.map(([when, pitch]): [number, number] => [at(when), pitch]) } : {}),
+  };
+}
 // a note as the recorder keeps it, its own copy: held where it came with no length
 // a note as it's kept: the glides sent with it its pitch's lane, as those sent after it are
 function recorded({ glides, ...note }: PlayedNote): RecordedNote {

@@ -16,7 +16,7 @@ export class TimeInView {
   readonly #map: Pick<GridMap, 'placeOf' | 'timeOf' | 'stepsPerBeat'>;
   readonly #cue: (t: Seconds | null) => void;
   readonly #window = new TimeWindow();
-  #now: Seconds = 0; // the time of the last frame
+  #now: Seconds = 0; // the song time of the last frame
   #earliest = 0; // the place it scrolls back to at most: the grid's first bar, or where the recording's 30 minutes start
   #playhead: number | null = null; // its place where it's set back, or none, on the present
   #placing = false; // a press in the ruler, held
@@ -60,7 +60,7 @@ export class TimeInView {
   //   3. a playback that starts followed again;
   //   4. the time in view following the present, or the playhead while it plays back.
   frame(span: number): void {
-    this.#now = this.#clock.now();
+    this.#now = this.#clock.songNow();
     this.#followTransport();
     this.#window.setSpan(span);
     this.#earliest = Math.max(0, this.#map.placeOf(this.#now - HISTORY));
@@ -77,7 +77,7 @@ export class TimeInView {
     if (!this.#placing) {
       return;
     }
-    const present = this.#map.placeOf(this.#clock.now());
+    const present = this.#map.placeOf(this.#clock.songNow());
     this.#playhead = playheadAt(place, { present, perBeat: this.#map.stepsPerBeat(), earliest: this.#earliest });
   }
   // The press let go, in order:
@@ -94,7 +94,7 @@ export class TimeInView {
   }
   // scrolled by 16ths, more showing what came before: no further than the present, playing back too
   scrollBy(places: number): void {
-    this.#window.scrollBy(places, this.#map.placeOf(this.#clock.now()), this.#earliest);
+    this.#window.scrollBy(places, this.#map.placeOf(this.#clock.songNow()), this.#earliest);
   }
   // the playhead as the transport has it, but while a press in the ruler places it: moving with the playback, or back on the present
   #followTransport(): void {

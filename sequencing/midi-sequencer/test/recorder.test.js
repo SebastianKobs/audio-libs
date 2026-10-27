@@ -279,3 +279,88 @@ test("a note's glides sent with it kept as its pitch's lane, a value at each tim
   const [note] = recorder.regions(5)[0].notes;
   assert.deepEqual([note.glides, note.lanes], [undefined, { pitch: [{ value: 62, t: 2.5 }] }]);
 });
+
+// a clock with a stop in it: held from 5 s to 8 s, so song time stands at 5 through it and a time after it is 3 s less
+const stopped = {
+  toTimeline: (t) => (t <= 5 ? t : Math.max(5, t - 3)),
+  fromTimeline: (along) => (along <= 5 ? along : along + 3),
+};
+
+test("what's heard kept at its song time: the plays carry clock times, a stop's hold taken out, so a stop leaves no gap in what's recorded", () => {
+  const recorder = new Recorder({ song: stopped });
+  recorder.heard(play(bass, 1, [4.5, 8.5], { track: 3, until: Infinity })); // a note a half second either side of the stop
+  recorder.heard(play(light, 2, [9]));
+  const [loop, single] = recorder.regions(7);
+  assert.deepEqual(
+    loop.notes.map((note) => [note.t, note.duration]),
+    [
+      [4.5, 0.2],
+      [5.5, 0.2],
+    ],
+    'the note after the stop a second after the one before: its length as it was sent',
+  );
+  assert.deepEqual([loop.from, loop.to, single.from, single.to], [4.5, 5.7, 6, 6.2]);
+  assert.equal(loop.until, Infinity, 'never stays never');
+});
+
+test("a held note's end, its glides, its changes and a track's controllers at song time too; the length of a note ended after a stop is its song time's", () => {
+  const recorder = new Recorder({ song: stopped });
+  const held = { t: 4, pitch: 50, index: 7, glides: [[9, 52]] };
+  recorder.heard(play(pad, 1, [held], { live: true }));
+  recorder.heard(play(pad, 1, [], { live: true, changes: [{ index: 7, controller: 'volume', value: 0.3, t: 10 }] }));
+  recorder.heard(play(pad, 1, [], { live: true, ends: [{ index: 7, t: 11 }] }));
+  recorder.heard(controls('lead', 0, [{ controller: 'air', value: 900, t: 12, glide: 0.08 }]));
+  const [region] = recorder.regions(9);
+  const [note] = region.notes;
+  assert.deepEqual([note.t, note.duration, region.to], [4, 4, 8], 'from 4 to 8 in song time, 7 s on the clock');
+  assert.deepEqual(note.lanes, { pitch: [point(6, 52)], volume: [point(7, 0.3)] });
+  assert.deepEqual(
+    pointsOf(recorder.lanes(9), 'lead', 0, 'air'),
+    [point(9, 900, 0.08)],
+    'the glide a time constant: as it was',
+  );
+});
+
+test("a held note carried into its element's next region begins there in song time", () => {
+  const recorder = new Recorder({ song: stopped });
+  recorder.heard(play(pad, 1, [{ t: 4, pitch: 50, index: 4 }], { live: true }));
+  recorder.heard(play(pad, 2, [{ t: 10, pitch: 52, index: 5 }], { live: true }));
+  const [before, after] = recorder.regions(9);
+  assert.deepEqual([before.from, before.to], [4, 7], 'ended where the next begins, 10 s on the clock, 7 on the song');
+  assert.deepEqual(
+    after.notes.map((note) => [note.index, note.t]),
+    [
+      [5, 7],
+      [4, 7],
+    ],
+    'the new note, then the carried one',
+  );
+});
+
+test("the last 30 minutes are song time's: an hour held is not an hour of history, what was heard before it kept while 30 minutes of music haven't passed", () => {
+  const hour = {
+    toTimeline: (t) => (t <= 100 ? t : Math.max(100, t - 3600)),
+    fromTimeline: (along) => (along <= 100 ? along : along + 3600),
+  };
+  const recorder = new Recorder({ song: hour });
+  recorder.heard(play(light, 1, [50]));
+  recorder.heard(play(light, 2, [3750])); // song time 150
+  assert.deepEqual(
+    spans(recorder.regions(200)).map(([, from]) => from),
+    [50, 150],
+    'at song time 200, 30 minutes of music not yet gone',
+  );
+  recorder.heard(play(light, 3, [3750 + 1700])); // song time 1850
+  assert.deepEqual(
+    spans(recorder.regions(1900)).map(([, from]) => from),
+    [150, 1850],
+    'at 1900, the one at 50 let go: more than 30 minutes of music before',
+  );
+});
+
+test("the recording's data at song time: where it begins and ends as the song time handed in", () => {
+  const recorder = new Recorder({ song: stopped });
+  recorder.heard(play(light, 1, [9]));
+  const data = recorder.toData(7);
+  assert.deepEqual([data.begins, data.ends, data.regions[0].notes[0].t], [6, 7, 6]);
+});

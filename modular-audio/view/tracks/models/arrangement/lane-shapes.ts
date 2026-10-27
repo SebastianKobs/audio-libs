@@ -1,5 +1,5 @@
 // ---------- view/tracks/models/arrangement/lane-shapes: a lane's line as the arrangement draws it ----------
-// In clock time and its controller's value.
+// In song time and its controller's value.
 import { automationOf, Levels, type TimedValue } from '../../../../../base/automation/index.ts';
 import { firstAfter, SETTLED } from '../../../../../base/util/index.ts';
 
@@ -8,7 +8,7 @@ export interface Corner {
   t: number;
   value: number;
 }
-// the time a line is drawn for, clock times, an earlier point worked out but not drawn; and how far apart a glide's curve is sampled
+// the time a line is drawn for, song times, an earlier point worked out but not drawn; and how far apart a glide's curve is sampled
 interface Span {
   from: number;
   to: number;

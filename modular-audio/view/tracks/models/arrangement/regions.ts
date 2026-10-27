@@ -1,11 +1,9 @@
 // ---------- view/tracks/models/arrangement/regions: the regions and the opened lanes on their rows ----------
-// Regions: labelled with their clips, greyed once gone, kept whole past a hold.
+// Regions: labelled with their clips, greyed once gone.
 // Lanes: an opened track's, on its param's range as its strip declares it.
 import { SEND_PARAM, type ParamSpec } from '../../../../../base/params/index.ts';
-import type { TimeMap } from '../../../../../sequencing/clock/index.ts';
 import type { Seconds } from '../../../../../base/util/index.ts';
 import type { TimedValue } from '../../../../../base/automation/index.ts';
-import { keptWhole } from './note-shapes.ts';
 import { laneRowOf, rowKeyOf, type ArrangedStrip } from './rows.ts';
 import { laneKeyOf, stripOf } from './lane-names.ts';
 import type {
@@ -16,7 +14,7 @@ import type {
   TracksReadout,
 } from '../../readout/index.ts';
 
-// A region on its row: its label, from when to when, clock times, an open one's end never;
+// A region on its row: its label, from when to when, song times, an open one's end never;
 // whether it was played live, whether its clip is gone, and its notes.
 export interface PlacedRegion {
   row: string;
@@ -40,7 +38,7 @@ export interface PlacedLane {
 // each region on its row; none for one with no row
 export function placedRegions(
   regions: readonly RecordedRegion[],
-  { tracks, song }: { tracks: TracksReadout; song: TimeMap },
+  { tracks }: { tracks: TracksReadout },
 ): PlacedRegion[] {
   return regions.flatMap((region): PlacedRegion[] => {
     const row = rowKeyOf(region, tracks);
@@ -48,8 +46,7 @@ export function placedRegions(
     if (row === null || group === null) {
       return [];
     }
-    const { clip, from, live } = region;
-    const { notes, to } = keptWholeIn(region, song);
+    const { clip, from, to, live, notes } = region;
     const label = tracks.clipName(clip, group);
     return [{ row, label, from, to, live, gone: !tracks.hasClip(clip, group), notes }];
   });
@@ -78,10 +75,4 @@ export function placedLane(
   const spec = declared.specOf(strip, lane.controller) ?? SEND_PARAM;
   const midi = declared.isMidiDevice(strip, lane.controller);
   return [{ row: laneKeyOf(track, lane.controller), controller: lane.controller, spec, points: lane.points, midi }];
-}
-// a region's notes kept whole past the holds they rang through, and its end with them, as far as its last
-function keptWholeIn(region: RecordedRegion, song: TimeMap): { notes: RecordedNote[]; to: Seconds } {
-  const notes = region.notes.map((note) => keptWhole(note, song));
-  const ends = notes.map((note) => (note.duration === undefined ? -Infinity : note.t + note.duration));
-  return { notes, to: Math.max(region.to, ...ends) };
 }

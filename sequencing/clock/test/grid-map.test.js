@@ -1,6 +1,6 @@
-// Where each 16th fell (mockup/src/libs/sequencing/clock/grid-map.ts): a time's place on the grid as it was
-// heard, the tempo as it was then, and back; a hold where no 16th fell taking no room; the 16ths
-// skipped as the ticks lag counted; the grid held, the present standing still.
+// Where each 16th fell (mockup/src/libs/sequencing/clock/grid-map.ts): a song time's place on the grid as it was
+// heard, the tempo as it was then, and back; a hold where no 16th fell taking no room, as song time has it out;
+// the 16ths skipped as the ticks lag counted; the grid held, the present standing still.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { GridMap } from '../index.ts';
@@ -57,8 +57,8 @@ test("a time's place on the grid as it was played: between two 16ths, as far as 
 });
 
 // a playback across a stop or an earlier playback jumped there, its playhead with it: the hold, where no 16th fell, took the room of the
-// 16th it came in
-test('a hold where no 16th fell takes no room: the 16ths either side of it a 16th apart, a time within it where the grid stood, and back', () => {
+// 16th it came in. Its times are song time, the hold already out of them
+test('a hold where no 16th fell takes no room: the 16ths either side of it a 16th apart in song time, and back', () => {
   const clock = fakeClock();
   const map = new GridMap({ clock });
   clock.play(0, 0, 0.25);
@@ -66,11 +66,14 @@ test('a hold where no 16th fell takes no room: the 16ths either side of it a 16t
   clock.holdsSoFar.push({ from: 0.5, to: 3.5 });
   clock.play(2, 3.5, 0.25);
   clock.play(3, 3.75, 0.25);
-  assert.equal(map.placeOf(0.375), 1.5, 'before it, between two 16ths as ever');
-  assert.equal(map.placeOf(0.45), 1.8, 'nearing it, as fast as ever, not stretched over it');
-  assert.equal(map.placeOf(2), 2, 'within it, where the grid stood');
-  assert.equal(map.placeOf(3.625), 2.5, 'after it');
-  assert.equal(map.timeOf(1.8), 0.45, 'and back');
+  const song = (t) => clock.grid.songTime(t);
+  assert.equal(map.placeOf(song(0.375)), 1.5, 'before it, between two 16ths as ever');
+  assert.equal(map.placeOf(song(0.45)), 1.8, 'nearing it, as fast as ever, not stretched over it');
+  assert.equal(map.placeOf(song(2)), 2, 'within it, where the grid stood');
+  assert.equal(map.placeOf(song(3.625)), 2.5, 'after it');
+  assert.equal(map.placeOf(0.625), 2.5, 'by its song time');
+  assert.equal(map.timeOf(1.8), 0.45, 'and back, a song time');
+  assert.equal(map.timeOf(2.5), 0.625, 'after it, its song time, not its clock time');
 });
 
 test('16ths skipped as the ticks lag: a time between those heard lies as far as it lies between them, the 16ths skipped counted, and back', () => {

@@ -23,7 +23,7 @@ How it runs:
 
 | Export | What it does |
 |---|---|
-| `new Clock({ settings })`: `now()`, `fromEvent()`, `faking()`, `start()`, `grid`, `audio` | The clock, reading its `ClockSettings` live. `fromEvent(ms)` puts a pointer event's `timeStamp` on the same timeline (`clock.ts`). |
+| `new Clock({ settings })`: `now()`, `songNow()`, `fromEvent()`, `faking()`, `start()`, `grid`, `audio` | The clock, reading its `ClockSettings` live. `songNow()` is `now()` in song time. `fromEvent(ms)` puts a pointer event's `timeStamp` on the same timeline (`clock.ts`). |
 | `ClockSettings`, `LOOKAHEAD` | The tempo `bpm`, `swing` (0 straight, 1 a triplet swing, 2 twice as late), `swingOn` (`'16ths'` or `'8ths'`), `meter` and `quantize`, the grid `snap()` uses unless told another (`clock.ts`). |
 | `Clock`'s listeners: `onTick()`, `onStep()`, `onTempo()` | Every tick; every 16th with its number and its swung time; the beat's length each time it changes, so what follows the tempo, the delays and the synced rates, follows it (`clock.ts`). |
 | `Clock`'s edges: `useAudio()`, `snap()`, `quantize()`, `useFake()`, `advance()` | The audio context handed over; where a time lands on a grid, `{ at, on }`, or only `at`; fake mode, where every tick and step of the time passed runs in order (`clock.ts`). |
@@ -36,6 +36,6 @@ How it runs:
 | `GRIDS`, `SnapGrid`, `SnapOptions` | The grids a time snaps to: off, 1/4, 1/4t, 1/8, 1/8t, 1/16, 1/16t, triplets always straight. The options are `straight`, `nearest`, `late` and `grid` (`quantizer.ts`). |
 | `new AudioClock(now, tick)`: `use()`, `sync()`, `started()`, `running()`, `settled()`, `toContext()`, `fromContext()`, `contextNow()`, `soonest()`, `latency()`; `AudioContextLike` | The edge to Web Audio: a clock time mapped to the audio context's time and back, from when the context is handed over. `AudioContextLike` is what it needs of an audio context, a browser's or a stand-in (`audio-clock.ts`). |
 | `new Cues({ timeOf, handOn, lead })`: `hold()`, `cue()`, `tick()` | Items held until a tick brings their time, less a `lead` where one's given, then handed on in their order, those at one time as they came. `cue()` hands one on at once if its time has come; the ticks are the owner's (`cues.ts`). |
-| `new GridMap({ clock })`: `placeOf()`, `timeOf()`, `stepsPerBar()`, `stepsPerBeat()`; `HeardGrid` | Where each 16th fell as the grid played it, heard from `onStep()`, so a time long past lies where it was played after the tempo has changed. It is straight, so a swung note lies where it sounded, and in song time, so a hold takes no room. `HeardGrid` is what it reads of the grid (`grid-map.ts`). |
+| `new GridMap({ clock })`: `placeOf()`, `timeOf()`, `stepsPerBar()`, `stepsPerBeat()`; `HeardGrid` | Where each 16th fell as the grid played it, heard from `onStep()`, so a time long past lies where it was played after the tempo has changed. It is straight, so a swung note lies where it sounded, and in song time, both the times it's asked and the ones it answers, so a hold takes no room. `HeardGrid` is what it reads of the grid (`grid-map.ts`). |
 
 Tests: `test/clock.test.js`, on a clock and settings of its own, with vectors in `shared/test-vectors/clock/`; `test/grid-map.test.js`, where each 16th fell; `test/cues.test.js`, items held and handed on. `test/fake-audio.js` is a stand-in audio context.

@@ -41,7 +41,7 @@ How the player tells the performer:
 | `LATEST`, `thinned()`, `endOf()` | The latest an event comes after its time, 1 s; events that change nothing left out once settled, by the caller's equality; where an event ends, never for an open one (`timeline.ts`). |
 | `new Player({ performer, pointsOf, timeline, endOf })`: `play()`, `due()`, `stop()`, `finish()`, `position()`, `endsAt()`, `ended()` | The timeline played back from its time `from`, heard at clock time `at`, until its `end` as it started. `due(until)` tells every moment due before a clock time; `position(now)` is where it plays, past a hold at once, never past the end (`player.ts`). |
 | `Performer`, `Played`, `PlayerOptions`, `EndOf` | Whom the player tells: `start(event, t, at)`, `point()`, `end()` and `hold(event, t, from?)`; what's played, events and each key's holding events; what it's told; where an event ends along the timeline (`player.ts`). |
-| `PlayedFrom` | Where playback starts: `{ from, at, end }`, the timeline's time it plays from, the clock time heard at, the timeline's end as it started (`timeline-time.ts`). |
+| `PlayedFrom`, `ALONG_THE_CLOCK` | Where playback starts: `{ from, at, end }`, the timeline's time it plays from, the clock time heard at, the timeline's end as it started. `ALONG_THE_CLOCK` is the `TimeMap` of a clock with no holds: timeline time the clock's, the default (`timeline-time.ts`). |
 | `PlaybackMessage` | What's asked of whatever plays a timeline back, as a transport's buttons ask it, on a bus: `play`, `stop`, and `cue`, the playhead set back to a time `t`, or none (`messages.ts`). |
 
 Tests: `test/timeline.test.js` and `test/player.test.js`, on events of their own, a hand's presses and a pointer's pressure, not notes.

@@ -20,7 +20,7 @@ type ClockEvents = {
 const TICK = 0.025; // s between ticks
 export const LOOKAHEAD = 0.12; // s: how far ahead the grid's 16ths are scheduled
 
-// the one clock: its time (now()), its ticks (start(), onTick()), its beat grid (grid) and its 16ths (onStep()), its edge to Web Audio
+// the one clock: its time (now(), songNow() in song time), its ticks (start(), onTick()), its beat grid (grid) and its 16ths (onStep()), its edge to Web Audio
 // (audio, from useAudio()), where a time snaps to (snap()); in fake mode (useFake()) time moves only when advance() says
 export class Clock {
   readonly grid: BeatGrid;
@@ -40,6 +40,10 @@ export class Clock {
   }
   now(): number {
     return this.#fake ?? performance.now() / 1000;
+  }
+  // the song time now: the clock's time with the grid's holds taken out, where the music is on the arrangement's timeline
+  songNow(): number {
+    return this.grid.songTime(this.now());
   }
   // a pointer event's timeStamp is on the same timeline, in ms
   fromEvent(ms: number): number {
