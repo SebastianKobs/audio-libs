@@ -17,6 +17,8 @@ planner.plan('Utility', { name: 'utility', settings: { 'pan/law': 'pan pot' } })
 
 Each effect's params are macros by the names a desk keys them (`utility/level`, `delay/note`), so the recorded lanes keep their names. A macro writes no spec where its target has one: it takes its first target's under its own name.
 
+An insert is an effect on a channel, a return or the master: the same device on any strip, as an Ableton audio effect is, exactly one kind of each. A device view draws every insert alike from its params, each in its own units, so an insert on any strip is the same module with its own values.
+
 An insert's macros carry their hints, written in its template, and an effect is named by its label where it isn't its kind: the Filter as `LP filter`, the Tape delay as `Tape delay`, its own over the Delay's none.
 
 | Effect | Inside | Its macros | Its settings |

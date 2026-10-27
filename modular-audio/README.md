@@ -45,7 +45,7 @@ One word for each thing, the same in the plan, the builders and the views.
 - **Pool and owner:** children that come and go, an instrument's voices, a drum rack's pads, a desk's pooled channels, are copies of a pool's child. A node and a composite are timeless: the owner of the copies makes them and lets them go, and has no audio of its own.
 - **Voice card:** a fixed graph of modules, in the roles source, modulator, stage and one output. The note sets its params as CV does: pitch, velocity, gate. The instrument keeps one ready and copies it for each note.
 - **Patch:** a preset on an architecture. The architecture is the voice card's template; the preset holds its params' values and settings.
-- **Channel and desk:** a channel is a console's: inserts, cut, fader, pan, sends. A desk is channels and exactly one master, a template of the desk's form with the routing in it. An **effect** (Utility, Filter, Limiter, Delay, Tape delay, Reverb) is a composite from a template, an **insert** one on a channel; a **send** taps a channel, pre or post fader, into a **return**.
+- **Channel and desk:** a channel is a console's: inserts, cut, fader, pan, sends. A desk is channels and exactly one master, a template of the desk's form with the routing in it. An **effect** is a composite from a template, an **insert** one on a channel; a **send** taps a channel, pre or post fader, into a **return**.
 
 ## The sound's way through them
 
@@ -66,23 +66,16 @@ Beside it, `spatial/hearing` hears a place from where you listen and hands on wh
 
 A plan is data, so planning, the formats, the readouts and the view models run in node with no Web Audio and no DOM, the one clock the only time they know. They are tested there and could be ported as they are.
 
-Only two kinds of library touch a platform, each an edge:
-
-- `build/web-audio` makes the Web Audio nodes, and `build/web-audio-engine` the browser's audio context and its power;
-- the `dom` libraries draw in the DOM.
-
-Planning an instrument from a patch is pure code too: only the last step, building the plan, touches Web Audio. The import test keeps it so: nothing but the builder makes a Web Audio node.
+Only two kinds of library touch a platform, each an edge: `build/web-audio` and `build/web-audio-engine` (Web Audio, the browser's audio context and its power), and the `dom` libraries (the DOM). That only the builder makes Web Audio nodes is a rule of `CLAUDE.md`'s, its import test checks it.
 
 ## Units at the edges
 
-Inside, a plan's values are in the units its params declare (`libs/base/params/`): seconds, hertz, cents, a pan from -1 to 1, a gain as a share, shown in dB by the fader law. The builder turns them into Web Audio's own, as a limiter's dB and dBFS are turned into a compressor's.
-
-MIDI's integer values, a velocity or a controller from 0 to 127, belong to the edges. The device view's test note takes its pitch and velocity as MIDI 1.0's and sends the velocity as 0 to 1. Inside, the messages (`libs/midi/protocol/`) carry a velocity and a controller's value from 0 to 1, and a note's pitch as its note number.
+Inside, a plan's values are in the units their params declare; MIDI's integers belong to the edges. The units and where each edge converts are in [`mockup/architecture/instruments.md`](../../../architecture/instruments.md)'s Units rows.
 
 ## Sends are taken after the pan
 
-A channel's parts run in one order and its sends come last, after the fader and the pan (`libs/modular-audio/plan/desk/`). A send is taken post to start, so what it sends keeps the source's panning and follows its fader; set pre, it is taken after the mute and before the fader, as a console's PRE button does.
+A channel's sends come last, after its fader and its pan: [`plan/desk`](plan/desk/README.md).
 
 ## An insert is one device on any strip
 
-An insert is an effect, the same device on a channel or on a return, as an Ableton audio effect is: a composite with an input and an output, data until it's built, and exactly one kind of each (Utility, Filter, Limiter, Delay, Tape delay, Reverb). The device view draws every insert alike from its params, each in its own units, so an insert on a channel, on a return and on the master is the same module with its own values.
+An insert is an effect, the same device on a channel, a return or the master: [`plan/effects`](plan/effects/README.md).

@@ -39,7 +39,7 @@ A send goes to a return:
 
 - A channel has one for each return before it on the desk, none that feeds it, as a desk's knobs. A return has one for every other, as Ableton's; a pool's channel has one for every return.
 - A return's send into one after it can close a loop, the desk's only loops. It has a delay of 3 ms after its amount, a block's length (128 samples at 44.1 kHz), since Web Audio mutes a loop without a delay in it. Sends into returns before it never close one.
-- Each send is a select between its two taps, then a gain, its amount a param by the return's name (`you/send/reverb`). Its tap is a setting of its select (`you/send/reverb tap/input`): post (`a`), after the fader and the pan, to start, or pre (`b`), after the mute and before the fader, as a console's PRE button.
+- Each send is a select between its two taps, then a gain, its amount a param by the return's name (`you/send/reverb`). Its tap is a setting of its select (`you/send/reverb tap/input`): post (`a`), after the fader and the pan, to start, so what it sends keeps the source's panning and follows its fader, or pre (`b`), after the mute and before the fader, as a console's PRE button.
 
 The master is the last bus: its inserts and its fader alone, its volume at `master/volume`; no pan, mute, solo or sends.
 
