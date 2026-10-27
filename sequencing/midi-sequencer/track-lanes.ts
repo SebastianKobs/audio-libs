@@ -38,6 +38,14 @@ export class TrackLanes {
       this.#timeline.hold(key, timedValue(value, t, glide));
     }
   }
+  // a lane as it was recorded, its points back on the timeline, holding until the next of their lane
+  restore({ points, ...of }: Lane): void {
+    const key = JSON.stringify([of.kind, of.track, of.controller]);
+    this.#lanes.set(key, { ...of, points: [] });
+    for (const point of points) {
+      this.#timeline.hold(key, point);
+    }
+  }
   // each track's lanes, in the order they began, their points as the timeline holds them now
   lanes(): Lane[] {
     for (const [key, lane] of this.#lanes) {

@@ -15,6 +15,7 @@ import type { Play, PlayedNote } from './stream.ts';
 import { entryOf, type Seconds } from '../../base/util/index.ts';
 import { changedOn, thinNote, valuesAt, type RecordedNote } from './note-lanes.ts';
 import { TrackLanes, type Lane } from './track-lanes.ts';
+import { plain, RECORDING_VERSION, recordingData, type RecordingData, type RegionData } from './recording-data.ts';
 
 // A region as recorded, as its first play had them: the element it's of and
 // its clip, its kind and role, whether it was played live, its track and until
@@ -85,6 +86,29 @@ export class Recorder {
     this.#settle(now);
     return this.#trackLanes.lanes();
   }
+  // the recording at now as plain data, to save: the regions and lanes as `regions()` and `lanes()` hand them out, owners and clips as ids
+  toData(now: Seconds): RecordingData {
+    const regions = this.regions(now);
+    const numbered = regions.map((region, at) => ({ region, number: this.#kept[at]!.first.region })); // regions() keeps their order
+    return recordingData(numbered, this.lanes(now), now);
+  }
+  // a recording's data loaded into this recorder, a copy of it, as if it had heard it; only into an empty one, as owners' ids are its own
+  load(data: RecordingData): void {
+    if (data.version !== RECORDING_VERSION) {
+      throw new Error(
+        `a recording in version ${String(data.version)} can't be loaded, only version ${String(RECORDING_VERSION)}`,
+      );
+    }
+    if (this.#kept.length || this.#trackLanes.lanes().length) {
+      throw new Error('a recording can only be loaded into an empty recorder');
+    }
+    for (const region of plain(data.regions)) {
+      this.#restore(region);
+    }
+    for (const lane of plain(data.lanes)) {
+      this.#trackLanes.restore(lane);
+    }
+  }
   // the timeline as of now, the notes let go and their regions with them; the points that change nothing, once they're settled, left
   // out of every lane, a track's and a note's
   #settle(now: Seconds): void {
@@ -147,6 +171,22 @@ export class Recorder {
     const kept = this.#begin(play);
     numbered.set(play.region, kept);
     return { kept, carried };
+  }
+  // a region from data: its first play as its owner's, its notes its own, on the timeline, its number its element's again
+  #restore({ notes, number, owner, clip, until, ...rest }: RegionData): void {
+    const first: Play = { ...rest, owner, clip, notes: [] };
+    if (number !== undefined) {
+      first.region = number;
+    }
+    if (until !== undefined) {
+      first.until = until === 'never' ? Infinity : until;
+    }
+    const kept: Kept = { first, notes };
+    this.#kept.push(kept);
+    if (number !== undefined) {
+      entryOf(this.#numbered, owner, () => new Map<number, Kept>()).set(number, kept);
+    }
+    this.#timeline.add(notes);
   }
   #begin(play: Play): Kept {
     const kept: Kept = { first: play, notes: [] };
