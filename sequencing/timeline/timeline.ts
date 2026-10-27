@@ -68,6 +68,12 @@ export class Timeline<Event extends TimedEvent, Held extends TimedEvent = Event>
       this.#held.set(key, thinned(held, now - LATEST, this.#same));
     }
   }
+  // every event gone, the window as at the start; nobody told, as the owner emptied it
+  clear(): void {
+    this.#events = [];
+    this.#held.clear();
+    this.#letGoBefore = -Infinity;
+  }
   // the events with their own length or open, in the order they came
   events(): readonly Event[] {
     return this.#events;

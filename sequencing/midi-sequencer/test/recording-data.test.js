@@ -177,3 +177,15 @@ test('a long session is data too: three knobs moved together on every frame for 
     knobs.map(() => moves),
   );
 });
+test('a recorder emptied holds nothing, its regions, lanes and numbers gone, and takes a recording again', () => {
+  const recorder = sessionRecorded();
+  const data = recorder.toData(5);
+  recorder.empty();
+  assert.deepEqual(recorder.regions(5), []);
+  assert.deepEqual(recorder.lanes(5), []);
+  assert.deepEqual(recorder.toData(5), new Recorder().toData(5));
+  recorder.load(data);
+  assert.deepEqual(recorder.toData(5), data);
+  recorder.heard(play(light, 1, [{ t: 6, pitch: 70, duration: 0.2, index: 9 }])); // a region number used before is free again
+  assert.equal(recorder.regions(7).length, 4);
+});

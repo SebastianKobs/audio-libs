@@ -46,6 +46,10 @@ export class TrackLanes {
       this.#timeline.hold(key, point);
     }
   }
+  // every lane forgotten, the timeline's points emptied by its owner
+  clear(): void {
+    this.#lanes.clear();
+  }
   // each track's lanes, in the order they began, their points as the timeline holds them now
   lanes(): Lane[] {
     for (const [key, lane] of this.#lanes) {

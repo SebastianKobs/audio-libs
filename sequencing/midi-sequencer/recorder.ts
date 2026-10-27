@@ -93,7 +93,14 @@ export class Recorder {
     const numbered = regions.map((region, at) => ({ region, number: this.#kept[at]!.first.region })); // regions() keeps their order
     return recordingData(numbered, this.lanes(now), now, nameOfClip);
   }
-  // a recording's data loaded into this recorder, a copy of it, as if it had heard it; only into an empty one, as owners' ids are its own
+  // everything forgotten, regions, lanes and region numbers: as new, ready to hear or load
+  empty(): void {
+    this.#timeline.clear();
+    this.#trackLanes.clear();
+    this.#kept = [];
+    this.#numbered.clear();
+  }
+  // a recording's data loaded into this recorder, a copy of it, as if it had heard it; only into an empty one (empty()), as owners' ids are its own
   load(data: RecordingData): void {
     if (data.version !== RECORDING_VERSION) {
       throw new Error(
