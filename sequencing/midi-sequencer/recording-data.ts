@@ -97,6 +97,33 @@ function regionData(
     notes,
   };
 }
+// a recording's data moved by an offset, a copy: every time later by it, earlier if it's less than none, so a recording made on one clock
+// lies on another's; a length, a glide's time constant and an open end stay as they are
+export function shiftedRecording(data: RecordingData, offset: Seconds): RecordingData {
+  const later = <Point extends { t: Seconds }>(point: Point): Point => ({ ...point, t: point.t + offset });
+  const note = (recorded: RecordedNote): RecordedNote => {
+    const { lanes, glides, ...rest } = recorded;
+    return {
+      ...rest,
+      t: recorded.t + offset,
+      ...(glides ? { glides: glides.map(([at, pitch]): [number, number] => [at + offset, pitch]) } : {}),
+      ...(lanes ?
+        { lanes: Object.fromEntries(Object.entries(lanes).map(([name, points]) => [name, points.map(later)])) }
+      : {}),
+    };
+  };
+  return plain({
+    ...data,
+    begins: data.begins + offset,
+    ends: data.ends + offset,
+    regions: data.regions.map((kept) => ({
+      ...kept,
+      ...(typeof kept.until === 'number' ? { until: kept.until + offset } : {}),
+      notes: kept.notes.map(note),
+    })),
+    lanes: data.lanes.map((lane) => ({ ...lane, points: lane.points.map(later) })),
+  });
+}
 // data as its own copy: undefined left out, as JSON leaves it, so what's loaded is what's saved
 export function plain<Data>(data: Data): Data {
   return JSON.parse(JSON.stringify(data)) as Data;

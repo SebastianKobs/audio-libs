@@ -2,7 +2,7 @@
 // plain data, JSON-safe, and loaded back into another recorder, which keeps what the first kept
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Recorder } from '../index.ts';
+import { Recorder, shiftedRecording } from '../index.ts';
 
 const light = { kind: 'light' };
 const bass = { kind: 'bass' };
@@ -188,4 +188,35 @@ test('a recorder emptied holds nothing, its regions, lanes and numbers gone, and
   assert.deepEqual(recorder.toData(5), data);
   recorder.heard(play(light, 1, [{ t: 6, pitch: 70, duration: 0.2, index: 9 }])); // a region number used before is free again
   assert.equal(recorder.regions(7).length, 4);
+});
+test('a recording shifted moves every time by the offset: begins, ends, notes, their glides and own lanes, until, lane points; open ends and glide time constants stay', () => {
+  const recorder = sessionRecorded();
+  recorder.heard({
+    owner: light,
+    kind: 'light',
+    notes: [],
+    track: 0,
+    trackName: 'track 1',
+    controls: [{ controller: 'level', value: 0.5, t: 2, glide: 0.3 }],
+  });
+  const data = recorder.toData(5);
+  const before = JSON.stringify(data);
+  const shifted = shiftedRecording(data, 100);
+  assert.equal(JSON.stringify(data), before, 'the data it was handed is left as it was');
+  assert.equal(shifted.begins, data.begins + 100);
+  assert.equal(shifted.ends, 105);
+  const [first, second, held] = shifted.regions;
+  assert.equal(first.until, 104);
+  assert.equal(first.notes[0].t, 101);
+  assert.equal(first.notes[0].duration, data.regions[0].notes[0].duration, 'a length stays');
+  assert.deepEqual(
+    second.notes[0].lanes.pitch,
+    [{ value: 66, t: data.regions[1].notes[0].lanes.pitch[0].t + 100 }],
+    'a glide',
+  );
+  assert.equal(held.until, 'never');
+  assert.equal(held.notes[0].duration, undefined, 'an open note stays open');
+  assert.equal(held.notes[0].t, 102);
+  const lane = shifted.lanes.find((one) => one.controller === 'level');
+  assert.deepEqual(lane.points, [{ value: 0.5, t: 102, glide: 0.3 }]);
 });
