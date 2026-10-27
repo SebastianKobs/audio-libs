@@ -1,6 +1,6 @@
 # modular-audio/view/instrument/models
 
-An instrument's view models, no DOM, on a device's: the cards an instrument's patches are edited on, and the racks the device view shows each role's instrument in.
+An instrument's view models, no DOM, on a device's: the cards an instrument's patches are edited on, and the racks the device view shows each role's instrument in. It holds the test note too.
 
 Depends on: `base/util`, `modular-audio/plan/format`, `modular-audio/plan/instrument`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/device/readout`, `modular-audio/view/instrument/readout`.
 

@@ -1,6 +1,6 @@
 # sequencing/clock
 
-The one clock: everything asks it what time it is, and nothing reads another time source. Music time for anything, a sound, an animation synced to the beat, an event quantized to the grid. One timeline, in seconds of page time, the browser's own steady clock, which pointer events and frames already arrive on.
+The one clock: everything asks it what time it is, and nothing reads another time source. Music time for anything, a sound, an animation synced to the beat, an event quantized to the grid. One timeline, in seconds of page time, the browser's own steady clock, which pointer events and frames already arrive on. Its beat grid (tempo, swing, meter) gives the ticks.
 
 Depends on: `base/params`, `base/util`.
 

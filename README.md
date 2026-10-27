@@ -4,12 +4,12 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 
 ## By role
 
-Eight groups, each a folder, read bottom up. A group reads only those before it. Each group's README says what it holds and what it reads, each library's what it offers.
+Eight groups, each a folder, read bottom up. A group reads only those before it. Each group's README names its libraries and what it reads, each library's what it offers.
 
-- [`base/`](base/README.md): words and helpers every library shares, `util`, `automation`, `params`, `html`.
-- [`generative/`](generative/README.md): the rules the visual ideas found, medium-free, from `randomness` to `trails`.
+- [`base/`](base/README.md): words and helpers every library shares.
+- [`generative/`](generative/README.md): the rules the visual ideas found, medium-free.
 - [`midi/`](midi/README.md): MIDI 2.0's channel voice messages as values, and what they're played into.
-- [`sequencing/`](sequencing/README.md): time, events and the MIDI sequencer, `clock`, `timeline`, `sequencer`, `midi-sequencer`, `clip-player` and the transport's view.
+- [`sequencing/`](sequencing/README.md): time, events, the MIDI sequencer and the transport's view.
 - [`music/`](music/README.md): notes, keys, scales and a play style, a phrase played as a player would.
 - [`midi-devices/`](midi-devices/README.md): inserts on a track's notes, as an audio effect is on its sound, the Scale device.
 - [`spatial/`](spatial/README.md): places perceived from where you are, hearing by distance, pointer input as gestures.

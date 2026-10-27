@@ -1,6 +1,6 @@
 # modular-audio/build/instrument
 
-MIDI's notes played into an instrument: its voices juggled on what's built. It's a `Receiver` handed the instrument's plan, what's built of it and the time now. It makes no sound: what's built makes the sound, the plan says what each note sets.
+MIDI's notes played into an instrument: its voices juggled on what's built. It's a `Receiver` handed the instrument's plan, what's built of it and the time now. It makes no sound: what's built makes the sound, the plan says what each note sets. Each note is a voice, a copy of its pool's voice card.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `midi/protocol`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/plan/instrument`, `modular-audio/plan/planner`, `music/music-theory`, `sequencing/clock`.
 

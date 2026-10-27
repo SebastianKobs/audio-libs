@@ -1,6 +1,6 @@
 # modular-audio/build/desk/mixing
 
-A desk built and set by address: what a desk does as it plays, on what any builder hands back, with no clock and no sequencer. Its owner plans it, makes it once and hands it a function that builds the plan where it wants it, a builder of its owner's choice. The desk's automation (`libs/modular-audio/build/desk/automation/`) is fitted to it, not part of it.
+A desk built and set by address: what a desk does as it plays, on what any builder hands back, with no clock and no sequencer. Its owner plans it, makes it once and hands it a function that builds the plan where it wants it, a builder of its owner's choice. The desk's automation (`libs/modular-audio/build/desk/automation/`) is fitted to it, not part of it. Mute and solo are part of it, and a way into each track's channel.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/build/contract`, `modular-audio/plan/desk`, `modular-audio/plan/format`.
 

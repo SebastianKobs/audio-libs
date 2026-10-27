@@ -2,30 +2,30 @@
 
 A sound as data (`plan/`), built (`build/`) and shown (`view/`), as a modular studio's parts. Part of [the libraries](../README.md).
 
-- [`plan/format`](plan/format/README.md): what a plan is: a node, a block or a composite of others, its jacks, params, settings, wires, macros and pools, found by address.
-- [`plan/blocks`](plan/blocks/README.md): the building blocks every builder makes, each its jacks, params and settings, and how an envelope moves.
-- [`plan/planner`](plan/planner/README.md): templates, written short or read from YAML, made into plans and checked against their forms.
-- [`plan/effects`](plan/effects/README.md): what every effect is, its form, and the effects as YAML templates.
-- [`plan/desk`](plan/desk/README.md): what a channel and a desk are, a desk written short made into templates, and which channels a mute or a solo silences.
-- [`plan/instrument`](plan/instrument/README.md): an instrument's forms and templates: a synth's modules as voice cards, a pool of voices, a drum rack, presets, a file of instruments.
-- [`build/contract`](build/contract/README.md): what every builder is and hands back (`Built`), set and automated by address.
-- [`build/web-audio`](build/web-audio/README.md): the builder for Web Audio: a plan built, set and automated by address, fed, metered and taken apart.
-- [`build/web-audio-engine`](build/web-audio-engine/README.md): the builder run in a browser on the one clock: the audio context, the audio's power, building in the engine's context.
-- [`build/instrument`](build/instrument/README.md): MIDI's notes played into an instrument on what's built, each note a voice, a copy of its pool's voice card.
-- [`build/desk/mixing`](build/desk/mixing/README.md): a desk built, set by address and mixed (mute, solo), on any builder, with a way into each track's channel; no clock and no sequencer.
-- [`build/desk/automation`](build/desk/automation/README.md): the desk's automation, fitted to a desk: a strip's controllers set on time, a move by hand sent out to be recorded.
-- [`view/device/readout`](view/device/readout/README.md): what a device view reads of a plan, and the commands it sends.
-- [`view/device/models`](view/device/models/README.md): a plan's devices as view models, no DOM: knobs, choices, a composite's groups, an envelope's curve, meters, the device view itself.
-- [`view/device/dom`](view/device/dom/README.md): a plan's devices drawn in the DOM from their models.
-- [`view/desk/readout`](view/desk/readout/README.md): what the desk view reads of a desk as it plays, and its edit as a message.
-- [`view/desk/models`](view/desk/models/README.md): a desk's view models: a channel as a strip, its groups of tracks, a solo click, what feeds what, what's folded.
-- [`view/desk/dom`](view/desk/dom/README.md): a desk drawn in the DOM: its strips in their sections, its groups of tracks, a strip's inserts as devices.
-- [`view/instrument/readout`](view/instrument/readout/README.md): what the instrument view reads: the instruments, the patch each role plays, a role's cards.
-- [`view/instrument/models`](view/instrument/models/README.md): an instrument's view models: its patches as cards the device view edits, the racks, the test note.
-- [`view/instrument/dom`](view/instrument/dom/README.md): each role's instrument drawn as a device, a rack of its cards, the test note's button.
-- [`view/tracks/readout`](view/tracks/readout/README.md): what the session view and the arrangement read: clip slots and tracks, the recording, the playhead, what the desk declares.
-- [`view/tracks/models`](view/tracks/models/README.md): the session view's and the arrangement's view models: rows, regions and lanes in time, the clip tracks, what each track plays now.
-- [`view/tracks/dom`](view/tracks/dom/README.md): the session view and the arrangement drawn: the arrangement on canvases, the clip tracks as chips, the strip along the bottom.
+- [`plan/format`](plan/format/README.md): what a plan is.
+- [`plan/blocks`](plan/blocks/README.md): the building blocks.
+- [`plan/planner`](plan/planner/README.md): templates made into plans.
+- [`plan/effects`](plan/effects/README.md): what an effect is, as templates.
+- [`plan/desk`](plan/desk/README.md): a channel, a desk, mute and solo.
+- [`plan/instrument`](plan/instrument/README.md): an instrument's forms and templates.
+- [`build/contract`](build/contract/README.md): what every builder hands back.
+- [`build/web-audio`](build/web-audio/README.md): the Web Audio builder.
+- [`build/web-audio-engine`](build/web-audio-engine/README.md): the builder run in a browser on the one clock.
+- [`build/instrument`](build/instrument/README.md): MIDI notes played into an instrument.
+- [`build/desk/mixing`](build/desk/mixing/README.md): a desk built and mixed.
+- [`build/desk/automation`](build/desk/automation/README.md): the desk's automation.
+- [`view/device/readout`](view/device/readout/README.md): what a device view reads.
+- [`view/device/models`](view/device/models/README.md): a plan's devices as view models.
+- [`view/device/dom`](view/device/dom/README.md): a plan's devices in the DOM.
+- [`view/desk/readout`](view/desk/readout/README.md): what the desk view reads.
+- [`view/desk/models`](view/desk/models/README.md): a desk's view models.
+- [`view/desk/dom`](view/desk/dom/README.md): a desk drawn in the DOM.
+- [`view/instrument/readout`](view/instrument/readout/README.md): what the instrument view reads.
+- [`view/instrument/models`](view/instrument/models/README.md): an instrument's view models.
+- [`view/instrument/dom`](view/instrument/dom/README.md): each role's instrument as a device.
+- [`view/tracks/readout`](view/tracks/readout/README.md): what the session view and the arrangement read.
+- [`view/tracks/models`](view/tracks/models/README.md): their view models.
+- [`view/tracks/dom`](view/tracks/dom/README.md): the session view and the arrangement drawn.
 
 `tracks` is here, not in `libs/sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
 

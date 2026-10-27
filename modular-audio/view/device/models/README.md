@@ -1,6 +1,6 @@
 # modular-audio/view/device/models
 
-A plan's devices as view models, with no DOM: handed a plan and its values through a plan's readout, they hand back what a view shows of it and what it can do, as MVVM's view models do. Tested in node.
+A plan's devices as view models, with no DOM: handed a plan and its values through a plan's readout, they hand back what a view shows of it and what it can do, as MVVM's view models do. Tested in node. Knobs, choices, a composite's groups, an envelope's curve and meters are among them, and the device view itself.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/view/device/readout`.
 

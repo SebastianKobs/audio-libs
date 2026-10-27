@@ -1,6 +1,6 @@
 # modular-audio/plan/planner
 
-Templates made into plans: a plan for whatever is asked, an instrument, a channel, a whole studio, once, before anything plays. Used by whoever plans, an editor among them, never by what runs a plan, which is handed the plan.
+Templates made into plans: a plan for whatever is asked, an instrument, a channel, a whole studio, once, before anything plays. Used by whoever plans, an editor among them, never by what runs a plan, which is handed the plan. Templates are written short or read from YAML, and checked against their forms.
 
 Depends on: `base/params`, `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
 

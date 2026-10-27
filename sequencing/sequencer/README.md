@@ -1,6 +1,6 @@
 # sequencing/sequencer
 
-Patterns played on the grid, after Ableton's session view, for events of any kind. A pattern is a clip: its time signature, its length in bars, whether it loops, and its events. Pure: no Web Audio. It's given the clock's grid as functions, so a pattern placed again is always the same. Why it's built so: `mockup/architecture/sequencer.md`.
+Patterns played on the grid, after Ableton's session view, for events of any kind. A pattern is a clip: its time signature, its length in bars, whether it loops, and its events. Pure: no Web Audio. It's given the clock's grid as functions, so a pattern placed again is always the same. Why it's built so: `mockup/architecture/sequencer.md`. Clips loop on tracks, and tracks come in pools.
 
 Depends on: `base/util`, `sequencing/clock`.
 

@@ -1,6 +1,6 @@
 # modular-audio/view/tracks/readout
 
-What the session view's, the clips' and the arrangement's models read, in the views' own words, so a model, its drawer and what answers it share one jack. Each is a readout, labeled by its kind, read when the model wants (the arrangement's clock, which tells each 16th too, is the one exception). What's done goes out on a bus. Whatever answers a readout fits it by its shape.
+What the session view's, the clips' and the arrangement's models read, in the views' own words, so a model, its drawer and what answers it share one jack. Each is a readout, labeled by its kind, read when the model wants (the arrangement's clock, which tells each 16th too, is the one exception). What's done goes out on a bus. Whatever answers a readout fits it by its shape. They read clip slots and tracks, the recording, the playhead and what the desk declares.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `sequencing/clock`.
 

@@ -1,6 +1,6 @@
 # music/music-theory
 
-Notes and keys as numbers: a note is a MIDI note number, a key its root, a note, and its scale, its steps in semitones from the root in one octave. Music, not sound: a synth, a sequencer or a game uses it alike. And a play style, music theory in the widest sense, as a player has one: its contours, a line's steps of the scale, and its rhythms, whatever its owner's rhythms are.
+Notes and keys as numbers: a note is a MIDI note number, a key its root, a note, and its scale, its steps in semitones from the root in one octave. Music, not sound: a synth, a sequencer or a game uses it alike. And a play style, music theory in the widest sense, as a player has one: its contours, a line's steps of the scale, and its rhythms, whatever its owner's rhythms are. Its scales and chords include the standard ones.
 
 Depends on: `base/util`.
 

@@ -1,6 +1,6 @@
 # modular-audio/view/tracks/models
 
-The session view's and the arrangement's view models, no DOM: handed what they read through the readouts and the desk's view models, they hand back what a view shows and what it can do, as MVVM's view models do.
+The session view's and the arrangement's view models, no DOM: handed what they read through the readouts and the desk's view models, they hand back what a view shows and what it can do, as MVVM's view models do. Rows, regions and lanes in time, the clip tracks and what each track plays now are among them.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/plan/desk`, `modular-audio/view/desk/models`, `modular-audio/view/tracks/readout`, `sequencing/clock`.
 

@@ -1,6 +1,6 @@
 # modular-audio/view/desk/models
 
-A desk's view models, no DOM, on a device's: a channel as a strip, a desk as its strips by role, the groups of tracks it shows, and what a view has folded or opened.
+A desk's view models, no DOM, on a device's: a channel as a strip, a desk as its strips by role, the groups of tracks it shows, and what a view has folded or opened. A solo click and what feeds what are here too.
 
 Depends on: `base/util`, `modular-audio/plan/format`, `modular-audio/view/device/models`.
 

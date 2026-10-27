@@ -1,6 +1,6 @@
 # modular-audio/plan/format
 
-What a plan is: the data a builder is handed, read without the planner. It is timeless, what to build with its values and settings as it starts, and it describes itself, so nothing else is needed to build it or show it. Stored as JSON.
+What a plan is: the data a builder is handed, read without the planner. It is timeless, what to build with its values and settings as it starts, and it describes itself, so nothing else is needed to build it or show it. Stored as JSON. Its jacks, params, settings, wires, macros and pools are found by address.
 
 Depends on: `base/params`, `base/util`.
 

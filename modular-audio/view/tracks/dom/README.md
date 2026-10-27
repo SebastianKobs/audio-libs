@@ -1,6 +1,6 @@
 # modular-audio/view/tracks/dom
 
-The session view's, the clips' and the arrangement's view models drawn in the DOM, on the desk's drawing and the device view's: one implementation of the views, as Web Audio is of the sound. The session view's strips are drawn on it too.
+The session view's, the clips' and the arrangement's view models drawn in the DOM, on the desk's drawing and the device view's: one implementation of the views, as Web Audio is of the sound. The session view's strips are drawn on it too. The arrangement is drawn on canvases, the clip tracks as chips, with a strip along the bottom.
 
 Depends on: `base/html`, `base/params`, `modular-audio/view/desk/dom`, `modular-audio/view/desk/models`, `modular-audio/view/device/dom`, `modular-audio/view/device/models`, `modular-audio/view/tracks/models`, `modular-audio/view/tracks/readout`.
 

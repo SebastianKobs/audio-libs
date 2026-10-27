@@ -1,6 +1,6 @@
 # modular-audio/plan/instrument
 
-An instrument's templates and forms, its modules a synth's: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons. A module is named as it is on a synth's panel and never as a block is; the note's sources are the voice card's macros. A patch is a preset on an architecture.
+An instrument's templates and forms, its modules a synth's: a voice card, an architecture, made of modules, each a YAML file, its comments the reasons. A module is named as it is on a synth's panel and never as a block is; the note's sources are the voice card's macros. A patch is a preset on an architecture. An instrument is a pool of voices or a drum rack, and a file of instruments holds them.
 
 Depends on: `base/params`, `base/util`, `modular-audio/plan/format`, `modular-audio/plan/planner`.
 

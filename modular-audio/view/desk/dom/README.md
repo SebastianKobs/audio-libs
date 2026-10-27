@@ -1,6 +1,6 @@
 # modular-audio/view/desk/dom
 
-A desk drawn in the DOM, on a device's drawers: its strips side by side in sections as the sound flows, the tracks, the buses, the FX buses and the master, with their level bars, lights and clicks.
+A desk drawn in the DOM, on a device's drawers: its strips side by side in sections as the sound flows, the tracks, the buses, the FX buses and the master, with their level bars, lights and clicks. A strip's inserts are drawn as devices.
 
 Depends on: `base/html`, `base/util`, `modular-audio/view/desk/models`, `modular-audio/view/device/dom`, `modular-audio/view/device/models`.
 

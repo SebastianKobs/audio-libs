@@ -1,6 +1,6 @@
 # modular-audio/view/instrument/dom
 
-Each role's instrument drawn in the DOM as a device, on a device's drawers, from the instruments' model.
+Each role's instrument drawn in the DOM as a device, on a device's drawers, from the instruments' model. The test note has its button here.
 
 Depends on: `base/html`, `modular-audio/view/device/dom`, `modular-audio/view/instrument/models`.
 

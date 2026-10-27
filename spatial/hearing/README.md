@@ -1,6 +1,6 @@
 # spatial/hearing
 
-Hearing by distance: how a sound is heard from where you listen, its level, its top, its room and its side, on the places of `libs/spatial/places/`. A voice is what sounds; an emitter is where it sounds from: a place, and how long it's needed. An emitter hands on what it hears there as values, and its caller sets them where it will: a track's controllers, a strip, a note's own stages.
+Hearing by distance: how a sound is heard from where you listen, its level, its top, its room and its side, on the places of `libs/spatial/places/`. A voice is what sounds; an emitter is where it sounds from: a place, and how long it's needed. An emitter hands on what it hears there as values, and its caller sets them where it will: a track's controllers, a strip, a note's own stages. Values only: no Web Audio.
 
 Depends on: `base/automation`, `base/util`, `spatial/places`.
 

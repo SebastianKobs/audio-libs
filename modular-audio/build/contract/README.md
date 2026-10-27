@@ -1,6 +1,6 @@
 # modular-audio/build/contract
 
-What every builder is and what it hands back, the same for every builder: a desk and the voices talk to it, whichever builder is behind it. The plan is the schematic, timeless; what's built is the thing, the desk in the room or the synth on the table, held as its front panel with its controls and slots by address and its parts inside, out of reach. Two builds of one plan are two machines, each told on its own.
+What every builder is and what it hands back, the same for every builder: a desk and the voices talk to it, whichever builder is behind it. The plan is the schematic, timeless; what's built is the thing, the desk in the room or the synth on the table, held as its front panel with its controls and slots by address and its parts inside, out of reach. Two builds of one plan are two machines, each told on its own. What's built is set and automated by address.
 
 Depends on: `base/automation`, `base/util`, `modular-audio/plan/format`.
 

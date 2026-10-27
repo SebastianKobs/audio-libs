@@ -1,6 +1,6 @@
 # modular-audio/plan/blocks
 
-The building blocks: nodes with no inside, declared. Every builder meets the same contract: each block is built, or a placeholder is put in, its audio passed straight through, a source silent. Kept small and fixed, beside `plan/format`.
+The building blocks: nodes with no inside, declared. Every builder meets the same contract: each block is built, or a placeholder is put in, its audio passed straight through, a source silent. Kept small and fixed, beside `plan/format`. It holds how an envelope moves.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/plan/format`.
 
