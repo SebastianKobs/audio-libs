@@ -27,4 +27,4 @@ views.tab('arrangement', true); // shown; arrangementView.drawFrame() on every f
 
 The arrangement is drawn on canvases in `arrangement/`: the bar ruler and the rows' bands (`arrangement/time-drawing.ts`), each region a block labeled with its clip with its notes inside it at their pitch (`arrangement/note-drawing.ts`), a lane's line on its param's range (`arrangement/lane-drawing.ts`), and the present and the playhead.
 
-Tests: `test/session-drawing.test.js`, when each beat and frame is drawn; `test/arrangement.test.js`, the arrangement's x in view, read from what the view drew on a canvas stand-in in `test/dom-stand-in.js`.
+Tests: `test/session-drawing.test.js`, when each beat and frame is drawn; `test/arrangement.test.js`, the arrangement's x in view and each note's y at its pitch, read from what the view drew on a canvas stand-in in `test/dom-stand-in.js`.

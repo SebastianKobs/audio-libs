@@ -1,8 +1,10 @@
-// libs/modular-audio/view/tracks/dom/arrangement/pixels.ts: the time in view in pixels, as the arrangement's
-// drawer lays it out, read from what ArrangementView drew on a canvas stand-in
+// libs/modular-audio/view/tracks/dom/arrangement/pixels.ts and note-drawing.ts: the time in view in pixels and
+// each note at its pitch, as the arrangement's drawer lays them out, read from what ArrangementView drew on a
+// canvas stand-in
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ArrangementView } from '../index.ts';
+import { near } from '../../../../../base/util/test/near.js';
 import { arrangementOf, region } from '../../models/test/arrangement.js';
 import { standInDocument } from './dom-stand-in.js';
 
@@ -31,6 +33,33 @@ test("a place's x in view, 8 px a 16th from the place at its left edge; a press 
       [76, { place: 76, x: 10 * 8 }],
       'the place 10 16ths in, and the x it was drawn at',
     );
+  } finally {
+    delete globalThis.document;
+  }
+});
+
+// the notes of a flower's region on its row, as the view drew them
+function drawnNotes(notes) {
+  const flower = region('tap', 0, { name: 'flower' }, { from: 20, to: 24, notes });
+  const { arrangement, clock } = arrangementOf({ regions: [flower] });
+  clock.step(100);
+  const view = new ArrangementView({ arrangement, colors: () => COLORS });
+  view.show(true);
+  return view.drawn().regions[0].notes;
+}
+
+test("a region's notes at their pitches: the higher drawn above the lower, a lone pitch in the middle of the room", () => {
+  const { document } = standInDocument();
+  globalThis.document = document;
+  try {
+    const [low, high, middle] = drawnNotes([
+      { t: 20, pitch: 60, duration: 1 },
+      { t: 21, pitch: 67, duration: 1 },
+      { t: 22, pitch: 64, duration: 1 },
+    ]);
+    assert.ok(high.y < middle.y && middle.y < low.y, `67 above 64 above 60: ${high.y}, ${middle.y}, ${low.y}`);
+    const [only] = drawnNotes([{ t: 20, pitch: 60, duration: 1 }]);
+    near(only.y, (low.y + high.y) / 2, 'alone: between the highest and the lowest of a region with room', 1e-9);
   } finally {
     delete globalThis.document;
   }
