@@ -85,6 +85,24 @@ test("the owners and clips are ids, one per element: a light's two regions share
   assert.equal(regions[0].clip, regions[0].owner, 'a clip that is its element');
 });
 
+test('handed how a clip is named, each clip is written by that name, its owner still an id; a loaded region keeps the name, and the round trip stays the same', () => {
+  const nameOf = ({ clip }) => `${clip.kind} clip`;
+  const data = sessionRecorded().toData(5, nameOf);
+  assert.deepEqual(
+    data.regions.map(({ clip }) => clip),
+    ['light clip', 'light clip', 'bass clip'],
+  );
+  assert.match(data.regions[0].owner, /^element-\d+$/);
+  const loaded = new Recorder();
+  loaded.load(JSON.parse(JSON.stringify(data)));
+  assert.equal(loaded.regions(5)[0].clip, 'light clip', 'a loaded region holds its clip as the name');
+  assert.deepEqual(
+    loaded.toData(5, ({ clip }) => String(clip)),
+    data,
+    'named by the name it holds',
+  );
+});
+
 test('the data is plain: it comes through JSON as it was, an open-ended until included', () => {
   const data = sessionRecorded().toData(5);
   assert.deepEqual(JSON.parse(JSON.stringify(data)), data);

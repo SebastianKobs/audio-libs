@@ -1,8 +1,9 @@
 // ---------- midi-sequencer/recording-data: the recording as plain data, its regions and lanes, to save and to load back ----------
 // What the recorder keeps, JSON-safe: each region with its notes (their own lanes, glides and a held one's open end included) and each
 // track's lane with its points, times as recorded, with where the recording begins and ends so a loader can shift them onto its clock.
-// A region's owner and clip are the sender's own objects, so they're written as ids, one per element: regions of one element stay
-// together, and one is told apart from another as the recorder tells them. A version from 1, so a later change is told apart.
+// A region's owner is the sender's own object, so it's written as an id, one per element: regions of one element stay together, and
+// one is told apart from another as the recorder tells them. Its clip is written by the name its asker gives it, an id where none does.
+// A version from 1, so a later change is told apart.
 import type { Seconds } from '../../base/util/index.ts';
 import type { Region } from './recorder.ts';
 import type { RecordedNote } from './note-lanes.ts';
@@ -38,11 +39,12 @@ interface NumberedRegion {
 
 export const RECORDING_VERSION = 1;
 
-// the recording as data at now: ids for the owners, each region, note and lane a copy of its own, nothing undefined, an open end 'never'
+// the recording as data at now: ids for the owners, the clips named as asked, each region, note and lane a copy of its own, nothing undefined, an open end 'never'
 export function recordingData(
   numbered: readonly NumberedRegion[],
   lanes: readonly Lane[],
   now: Seconds,
+  nameOfClip?: (region: Region) => string,
 ): RecordingData {
   const ids = new Map<unknown, string>();
   const idOf = (element: unknown): string => {
@@ -51,7 +53,7 @@ export function recordingData(
     }
     return ids.get(element)!; // set just above
   };
-  const regions = numbered.map(({ region, number }) => regionData(region, number, idOf));
+  const regions = numbered.map(({ region, number }) => regionData(region, number, { idOf, nameOfClip }));
   return plain({
     version: RECORDING_VERSION,
     begins: earliest(numbered, lanes, now),
@@ -75,12 +77,16 @@ function earliest(numbered: readonly NumberedRegion[], lanes: readonly Lane[], n
   return begins;
 }
 
-// a region as data, with ids for its element and its clip
-function regionData(region: Region, number: number | undefined, idOf: (element: unknown) => string): RegionData {
+// a region as data, with an id for its element and a name or an id for its clip
+function regionData(
+  region: Region,
+  number: number | undefined,
+  { idOf, nameOfClip }: { idOf: (element: unknown) => string; nameOfClip: ((region: Region) => string) | undefined },
+): RegionData {
   const { owner, clip, kind, role, live, track, trackName, until, notes } = region;
   return {
     owner: idOf(owner),
-    clip: idOf(clip),
+    clip: nameOfClip ? nameOfClip(region) : idOf(clip),
     ...(number === undefined ? {} : { number }),
     kind,
     ...(role === undefined ? {} : { role }),

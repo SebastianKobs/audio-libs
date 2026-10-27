@@ -86,11 +86,12 @@ export class Recorder {
     this.#settle(now);
     return this.#trackLanes.lanes();
   }
-  // the recording at now as plain data, to save: the regions and lanes as `regions()` and `lanes()` hand them out, owners and clips as ids
-  toData(now: Seconds): RecordingData {
+  // the recording at now as plain data, to save: the regions and lanes as `regions()` and `lanes()` hand them out, owners as ids, clips
+  // by the name nameOfClip gives each region's, ids where it's not handed
+  toData(now: Seconds, nameOfClip?: (region: Region) => string): RecordingData {
     const regions = this.regions(now);
     const numbered = regions.map((region, at) => ({ region, number: this.#kept[at]!.first.region })); // regions() keeps their order
-    return recordingData(numbered, this.lanes(now), now);
+    return recordingData(numbered, this.lanes(now), now, nameOfClip);
   }
   // a recording's data loaded into this recorder, a copy of it, as if it had heard it; only into an empty one, as owners' ids are its own
   load(data: RecordingData): void {
