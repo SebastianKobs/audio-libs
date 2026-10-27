@@ -1,44 +1,61 @@
-# plan/planner
+# modular-audio/plan/planner
 
-Templates made into plans: a plan for whatever is asked, an instrument, a channel, a whole studio, once, before anything plays. Used by whoever plans, an editor among them, never by what runs a plan, which is handed the plan (`libs/modular-audio/plan/format/`). It imports `libs/modular-audio/plan/blocks/`, `libs/modular-audio/plan/format/`, `libs/base/params/` and `libs/base/util/`.
+Templates made into plans: a plan for whatever is asked, an instrument, a channel, a whole studio, once, before anything plays. Used by whoever plans, an editor among them, never by what runs a plan, which is handed the plan.
 
-A template is written as a plan's node, short: a child by its kind, a block's (`libs/modular-audio/plan/blocks/`) or another template's, with only the values and settings it changes; its own inputs, outputs, wires, macros and pools as the plan writes them. The planner fills in the rest.
+Depends on: `base/params`, `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
+
+A template is written as a plan's node, short: a child by its kind, a block's or another template's, with only the values and settings it changes; its own inputs, outputs, wires, macros and pools as the plan writes them. The planner fills in the rest.
 
 ```ts
 import { Planner } from './index.ts';
+
 const planner = new Planner([
   {
     kind: 'Utility',
-    inputs: [{ name: 'in', channels: 2 }], outputs: [{ name: 'out', channels: 2 }],
-    children: [{ name: 'gain', kind: 'gain' }, { name: 'pan', kind: 'pan' }],
-    wires: [/* in → gain → pan → out, by names */],
+    inputs: [{ name: 'in', channels: 2 }],
+    outputs: [{ name: 'out', channels: 2 }],
+    children: [
+      { name: 'gain', kind: 'gain' },
+      { name: 'pan', kind: 'pan' },
+    ],
+    wires: [
+      { from: { input: 'in' }, to: { node: 'gain', input: 'in' } },
+      { from: { node: 'gain', output: 'out' }, to: { node: 'pan', input: 'in' } },
+      { from: { node: 'pan', output: 'out' }, to: { output: 'out' } },
+    ],
     macros: [{ name: 'level', maps: [{ to: ['gain', 'gain'], factor: 1, offset: 0 }] }], // its spec the gain's
   },
-]);                                                         // each template checked as it's handed in
+]); // each template checked as it's handed in
 planner.plan('Utility', { name: 'utility', values: { level: 0.5 }, settings: { 'pan/law': 'pan pot' } });
 ```
 
 How a plan is made:
-1. a block's params and settings its specs, each at its value: given by its address, written in the template, or its default; one with none refused, naming it;
-2. a child's template planned into it, its values by their addresses within it;
-3. a macro's spec its own, or its first target's under its name where it writes none; its value given, written, or its spec's default; onto its targets, a choice by its index, written there as the choice: a param a macro moves is the macro's, whatever else is given for it; a setting of the template's own the same, its spec the child's setting it stands for (`to`), its value given by its name or the child's address, or the child's as written, onto that one;
-4. a jack's channels as they come, where its block doesn't fix them: an input the most of what's wired into it, an output the most of its node's inputs, worked out again until a loop settles, mono where nothing comes;
-5. a pool's child ready, as each copy will be, its wires, its note's addresses and its key kept; a note's addresses checked under whatever names its sources have;
-6. planned at a beat where it's asked to (`beat`, a beat's length in seconds): a synced time's free value, a block's or a macro's, where its note is then, where none is given, so switching sync off there changes nothing heard; a plan has no tempo of its own.
 
-No note: a voice's note sets its params as it plays.
+1. A block's params and settings get their specs, each at its value: given by its address, written in the template, or its default. One with none is refused, naming it.
+2. A child's template is planned into it, its values given by their addresses within it.
+3. A macro's spec is its own, or its first target's under its name where it writes none. Its value is given, written, or its spec's default, onto its targets; a choice goes by its index and is written there as the choice. A param a macro moves is the macro's, whatever else is given for it.
+4. A jack's channels are as they come where its block doesn't fix them: an input the most of what's wired into it, an output the most of its node's inputs, worked out again until a loop settles, mono where nothing comes.
+5. A pool's child is made ready, as each copy will be: its wires, its note's addresses and its key kept. A note's addresses are checked under whatever names its sources have. A voice's note sets its params as it plays, so the plan has none.
+6. Planned at a beat where it's asked to (`beat`, a beat's length in seconds), a synced time's free value is where its note is then, so switching sync off there changes nothing heard. A plan has no tempo of its own.
 
-A template that names a form is held to it as it's handed in, once it's well-formed. A form is data: its own inputs and outputs by name, where it names them (an effect's one input and one output); its children by role, free of roles where it names none, each role's kind or form and how many, at least and at most; in the roles' order where it says; the wires it allows, from a role's main output or a tap, or the parent's own input, into a role's input or param, or the parent's own output; and rules by name, no loops, but through the wires from a role into a role it names (a desk's sends between returns), every way out ending in a role (the master). A channel's and a desk's forms are the desk's own; these tests have small ones.
+A template that names a form is held to it as it's handed in, once it's well-formed. A form is data:
 
-| | |
+- its own inputs and outputs by name, where it names them;
+- its children by role, each role's kind or form and how many, at least and at most, in the roles' order where it says;
+- the wires it allows, from a role's main output or a tap, or the parent's own input, into a role's input or param, or the parent's own output;
+- rules by name: no loops but through the wires from a role into a role it names, and every way out ending in a role (the master).
+
+A channel's and a desk's forms are the desk library's own; the tests have small ones.
+
+| Export | What it does |
 |---|---|
-| `Planner`, `Asked` | handed the templates once, the forms and the presets beside them, each child written with a preset given the preset's kind, values and settings, its own over them, a preset not handed in said (`presets.ts`), each built on another merged with it, each checked and held to its form, every failure said at once (`templates not well-formed:`, a line each); `plan(kind, { name, values, settings })`, a plan for a template, its top node named as asked, its kind's unless, its values and settings changed by address, a preset's; a block planned alone by its kind, as it is as a child; a template not handed in refused, and a value or a setting asked for at an address it hasn't, every one said (`planner.ts`) |
-| `Form`, `FormRole`, `FormWire`, `FormFrom`, `FormTo`, `FormRule` | a form, by its name: its jacks, any where it names none; its roles, none where it names none, ordered where it says, the wires it allows, any where it lists none, its rules (`form.ts`); a template held to it, each failure said: a child's role there, the form's, of its kind or form; how many, a pool one of its role; their order; each wire one it allows; no loops but through the wires it names; every way out, by main outputs, ending in the role, a pool's child and its wires among them (`form-check.ts`) |
-| `Template`, `TemplateChild`, `TemplateMacro`, `TemplatePool`, `Preset`, `PresetChild`, `WrittenTemplate` | a template, by its kind, its label where it's shown by another name (its node's, a child's own over it, an extension's base's where it writes none), the template it's built on where it names one (`extends`), the form it fulfils where it has one, its jacks, children, wires, macros and pools, a list it doesn't write none; a child by its name and kind, its role, its label (the name it's shown by, onto its node) and its short label (the name in little room), the values and settings it changes, by address (`libs/modular-audio/plan/format/`'s `ValuesByAddress`); a pool, its child, its copies' wires, a voice's note; a macro by its name and targets, its spec and value where it writes them; a preset on a template, its kind, its values and settings by address, as its owner's file is read; a child written with a preset, and a template as written, each child by its kind or a preset (`template.ts`) |
-| `extendedAll(templates)` | each template built on another merged with it before the checks: its base's jacks and form where it writes none, its base's children, wires, macros and pools first, then its own, a base on a base merged first; a base not handed in, or extensions in a loop, said (`extend.ts`) |
-| `templateOf(data, source)`, `presetsOf(data, source, on)`, `presetsShape(on)` | a template, or presets by name, read from data, YAML's, its shape checked before the planner's own check: a template's kind, form and base words, each list a list, each item an object with what it needs, a child its kind or a preset; a preset by a name of its own, what it's on by that thing's word (`effect: Reverb`, `desk: Studio`, `instrument: Rhodes`), made its kind, its values and settings by address, presets' shape for a file holding them among more; every failure said, naming its file; their shapes written as data beside their types, checked by `libs/base/util/`'s `fromData()` (`template.ts`) |
-| `problemsInAll(templates, catalog, forms)` | each template well-formed, then held to its form where it names one, its form not handed in said: its children's names one of a kind, none a number alone, a name only a pool's copy has, each child's kind known, none holding the template, the values and settings a child changes there, each wire's ends there, its macros' names one of a kind, each macro named, its targets params inside, one at least where it has no spec, a voice's note's addresses too; then, once every template is, each macro onto a choice holding that choice's own choices, in order, as it moves it by position, and each sound wired into a macro with no map on its way holding it to a range, followed down through a macro onto a macro, as a range holds a value, not a sound (`check.ts`) |
-| `Catalog` | every kind the planner knows, blocks and templates, by name: a block's or a template's jacks, params and settings as seen from outside, a template's macros its params; whether an address within a kind reaches a param or a setting; a param's spec by its address, a macro's its own or its first target's; within a template, a child by its name, a pool's among them, its wires, a node's kind by a path, whether an address reaches a child's param or setting (`catalog.ts`) |
-| `monoOrStereo()` | whether a loose jack carries mono or stereo, as it comes (`mono-stereo.ts`) |
+| `new Planner(templates, forms?, presets?)`: `plan()` | Handed the templates once, each built on another merged with it, each checked and held to its form, every failure said at once (`templates not well-formed:`, a line each). `plan(kind, { name, values, settings })` makes a plan for a template, or for a block alone by its kind (`planner.ts`). |
+| `Asked` | What `plan()` is asked: the plan's top node's `name`, the `values` and `settings` changed by address, and the `beat` it's planned at (`planner.ts`). |
+| `Form`, `FormRole`, `FormWire`, `FormFrom`, `FormTo`, `FormRule` | A form, by its name: its jacks, its roles, the wires it allows and its rules. A template held to it gets each failure said (`form.ts`). |
+| `Template`, `TemplateChild`, `TemplateMacro`, `TemplatePool` | A template, by its kind: its label, the template it's built on (`extends`), the form it fulfills, its jacks, children, wires, macros and pools. A child has a name and a kind, a role and the values and settings it changes (`template.ts`). |
+| `Preset`, `PresetChild`, `WrittenTemplate` | A preset on a template: its kind, its values and settings by address. A child written with a preset, and a template as written, each child by its kind or a preset (`template.ts`). |
+| `templateOf()`, `presetsOf()`, `presetsShape()` | A template, or presets by name, read from data such as YAML, its shape checked before the planner's own check. Every failure is said, naming its file (`template.ts`). |
 
-Tested in node, in its `test/` folder, on small templates (`test/templates.js`): the Utility planned as `libs/modular-audio/plan/format/`'s tests wrote it out by hand, so the two are held to each other; values and settings by address, a macro onto its targets; a template of templates; a pool's child; channels through a loop; a value with no default refused; every failure of a broken template said; channels fulfilling their forms planned, and every failure of a template held to a small form said; a one-in, one-out form's jacks; a macro's spec its target's; a macro onto a choice with other choices refused; a sound into a macro held to a range on its way refused, through a macro onto a macro too; a template's shape; a template built on another, a base not handed in, a loop; what's asked at an address the template hasn't refused; presets' shape, what each is on by that thing's word; a child written with a preset; a form's counts and rules over its pools too (`test/planner.test.js`).
+The planner's checks are internal, not exported: templates built on others are merged first (`extend.ts`); each template is checked well-formed (`check.ts`); every kind it knows, blocks and templates, is looked up as seen from outside (`catalog.ts`); a loose jack's channels come from `mono-stereo.ts`.
+
+Tests: `test/planner.test.js`, on small templates in `test/templates.js`: the Utility planned as `libs/modular-audio/plan/format/`'s tests wrote it out by hand, so the two are held to each other.

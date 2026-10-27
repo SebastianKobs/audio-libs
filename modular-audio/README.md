@@ -2,8 +2,87 @@
 
 A sound as data (`plan/`), built (`build/`) and shown (`view/`), as a modular studio's parts. Part of [the libraries](../README.md).
 
-- `plan/`: [`format`](plan/format/README.md), [`blocks`](plan/blocks/README.md), [`planner`](plan/planner/README.md), [`effects`](plan/effects/README.md), [`desk`](plan/desk/README.md), [`instrument`](plan/instrument/README.md): what a plan is, its blocks, templates made into plans, and the forms and templates of effects, a desk and instruments.
-- `build/`: [`contract`](build/contract/README.md), [`web-audio`](build/web-audio/README.md), [`web-audio-engine`](build/web-audio-engine/README.md), [`instrument`](build/instrument/README.md), [`desk/mixing`](build/desk/mixing/README.md), [`desk/automation`](build/desk/automation/README.md): a plan built, powered, played by notes and mixed.
-- `view/`: `device`, `desk`, `instrument` and `tracks`, each in `readout/`, `models/` and `dom/`: a plan's devices, a desk's strips, an instrument's patches, the session view and the arrangement. `tracks` is here, not in `sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
+- [`plan/format`](plan/format/README.md): what a plan is: a node, a block or a composite of others, its jacks, params, settings, wires, macros and pools, found by address.
+- [`plan/blocks`](plan/blocks/README.md): the building blocks every builder makes, each its jacks, params and settings, and how an envelope moves.
+- [`plan/planner`](plan/planner/README.md): templates, written short or read from YAML, made into plans and checked against their forms.
+- [`plan/effects`](plan/effects/README.md): what every effect is, its form, and the effects as YAML templates.
+- [`plan/desk`](plan/desk/README.md): what a channel and a desk are, a desk written short made into templates, and which channels a mute or a solo silences.
+- [`plan/instrument`](plan/instrument/README.md): an instrument's forms and templates: a synth's modules as voice cards, a pool of voices, a drum rack, presets, a file of instruments.
+- [`build/contract`](build/contract/README.md): what every builder is and hands back (`Built`), set and automated by address.
+- [`build/web-audio`](build/web-audio/README.md): the builder for Web Audio: a plan built, set and automated by address, fed, metered and taken apart.
+- [`build/web-audio-engine`](build/web-audio-engine/README.md): the builder run in a browser on the one clock: the audio context, the audio's power, building in the engine's context.
+- [`build/instrument`](build/instrument/README.md): MIDI's notes played into an instrument on what's built, each note a voice, a copy of its pool's voice card.
+- [`build/desk/mixing`](build/desk/mixing/README.md): a desk built, set by address and mixed (mute, solo), on any builder, with a way into each track's channel; no clock and no sequencer.
+- [`build/desk/automation`](build/desk/automation/README.md): the desk's automation, fitted to a desk: a strip's controllers set on time, a move by hand sent out to be recorded.
+- [`view/device/readout`](view/device/readout/README.md): what a device view reads of a plan, and the commands it sends.
+- [`view/device/models`](view/device/models/README.md): a plan's devices as view models, no DOM: knobs, choices, a composite's groups, an envelope's curve, meters, the device view itself.
+- [`view/device/dom`](view/device/dom/README.md): a plan's devices drawn in the DOM from their models.
+- [`view/desk/readout`](view/desk/readout/README.md): what the desk view reads of a desk as it plays, and its edit as a message.
+- [`view/desk/models`](view/desk/models/README.md): a desk's view models: a channel as a strip, its groups of tracks, a solo click, what feeds what, what's folded.
+- [`view/desk/dom`](view/desk/dom/README.md): a desk drawn in the DOM: its strips in their sections, its groups of tracks, a strip's inserts as devices.
+- [`view/instrument/readout`](view/instrument/readout/README.md): what the instrument view reads: the instruments, the patch each role plays, a role's cards.
+- [`view/instrument/models`](view/instrument/models/README.md): an instrument's view models: its patches as cards the device view edits, the racks, the test note.
+- [`view/instrument/dom`](view/instrument/dom/README.md): each role's instrument drawn as a device, a rack of its cards, the test note's button.
+- [`view/tracks/readout`](view/tracks/readout/README.md): what the session view and the arrangement read: clip slots and tracks, the recording, the playhead, what the desk declares.
+- [`view/tracks/models`](view/tracks/models/README.md): the session view's and the arrangement's view models: rows, regions and lanes in time, the clip tracks, what each track plays now.
+- [`view/tracks/dom`](view/tracks/dom/README.md): the session view and the arrangement drawn: the arrangement on canvases, the clip tracks as chips, the strip along the bottom.
 
-Reads: `base/` (`util`, `params`, `automation`, `html`); of `sequencing/` only `clock/`, and `midi/protocol/` (the engine, `build/instrument`, `desk/automation`, `view/tracks`); `music/music-theory/` (`build/instrument`). Nothing of `spatial/`.
+`tracks` is here, not in `libs/sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
+
+Reads: `libs/base/` (`util`, `params`, `automation`, `html`); of `libs/sequencing/` only `clock` (`build/web-audio-engine`, `build/instrument`, `build/desk/automation`, `view/tracks`); `libs/midi/protocol/` (`build/instrument`, `build/desk/automation`); `libs/music/music-theory/` (`build/instrument`). Nothing of `libs/spatial/`.
+
+## The words
+
+One word for each thing, the same in the plan, the builders and the views.
+
+- **Node:** inputs and outputs, any number, none included; params, edited or automated as it plays; settings, chosen as it's built, a change a rebuild. One kind of node, so a plan is one tree.
+- **Block:** a node with nothing inside, small and fixed, what every builder knows: oscillator, gain, filter, pan, delay, reverb, noise, limiter, envelope, select.
+- **Composite:** a node with an inside: children wired together, its inputs and outputs wired to theirs, its own params, macros, mapped onto theirs. An effect, a channel, a desk and a synth's module are composites.
+- **Module:** a synth's, named as on a synth's panel (`VCO`, `VCF`, `Envelope generator`), never called a block.
+- **Template:** a composite described short, its values, settings and children resolved as it's built. A **form** is what a template has to fulfill, a kind's: a channel's, a desk's, a voice card's. The planner declares it and checks a template against it as the template is made.
+- **Two layers:** the planner makes plans from templates and forms, with no audio. A builder makes a plan sound and knows no channel or desk. A plan describes itself, so builders and views read only `plan/format/` and `plan/blocks/`, never the planner. Plans are JSON, templates YAML, each checked against its form as it's loaded.
+- **Address:** a param's path from the plan's top, by its children's names, with slashes (`desk/channel 3/utility/level`). The one name for editing, automating and modulating; a setting's address edits only. A pool's copy is named by its pool and its number (`my tone/3`).
+- **Pool and owner:** children that come and go, an instrument's voices, a drum rack's pads, a desk's pooled channels, are copies of a pool's child. A node and a composite are timeless: the owner of the copies makes them and lets them go, and has no audio of its own.
+- **Voice card:** a fixed graph of modules, in the roles source, modulator, stage and one output. The note sets its params as CV does: pitch, velocity, gate. The instrument keeps one ready and copies it for each note.
+- **Patch:** a preset on an architecture. The architecture is the voice card's template; the preset holds its params' values and settings.
+- **Channel and desk:** a channel is a console's: inserts, cut, fader, pan, sends. A desk is channels and exactly one master, a template of the desk's form with the routing in it. An **effect** (Utility, Filter, Limiter, Delay, Tape delay, Reverb) is a composite from a template, an **insert** one on a channel; a **send** taps a channel, pre or post fader, into a **return**.
+
+## The sound's way through them
+
+A sound is data until it's built, and built only by a builder:
+
+1. **What a sound is** (`plan/format`, `plan/blocks`): a plan, a node, a block or a composite of others, its wires, params, macros and pools. Timeless: what to build, its values as it starts.
+2. **Planned** (`plan/planner`): templates, written short or in YAML, made into a plan, checked against their forms; a block alone by its kind.
+3. **What's planned** (`plan/effects`, `plan/desk`, `plan/instrument`): the effects, a desk and its channels, a synth's voice cards and instruments, as forms and templates; a preset is values on one, by address.
+4. **Built** (`build/contract`, `build/web-audio`): a builder handed a plan hands back what's built (`Built`), set and automated by address, built again, taken apart.
+5. **Powered** (`build/web-audio-engine`): the audio context started on a first touch, what's built built into an output that fades in, the clock on the audio's time.
+6. **Played by notes** (`build/instrument`): MIDI's notes played into an instrument on what's built, a voice a pool's copy, a sound module an instrument for each patch, any number of tracks playing into it by an input of its own. A patch's value is set on its bank at its time (`InstrumentAutomation`), and moved by hand as a controller on its own track (`InstrumentSurface`).
+7. **Mixed** (`build/desk/mixing`, `build/desk/automation`): a desk built, set by address, its mute and solo; a track's channel and its way in. The desk's automation is fitted to it: a strip's controllers set on time (`DeskAutomation`), a move by hand played in as a controller on the strip's track (`DeskSurface`).
+8. **Patched** (`app/`'s wiring): a track's notes into its role's instrument by an input of its own, each voice into the track's channel, its controllers onto its strip.
+
+Beside it, `spatial/hearing` hears a place from where you listen and hands on what it hears as values: a track's controllers, a strip's, a note's own. The notes come through `sequencing/midi-sequencer` (its input plays the instruments and records what's heard), from a control surface, a clip (`sequencing/clip-player`) or a recording played back.
+
+## Why the libraries are pure and apart from the edges
+
+A plan is data, so planning, the formats, the readouts and the view models run in node with no Web Audio and no DOM, the one clock the only time they know. They are tested there and could be ported as they are.
+
+Only two kinds of library touch a platform, each an edge:
+
+- `build/web-audio` makes the Web Audio nodes, and `build/web-audio-engine` the browser's audio context and its power;
+- the `dom` libraries draw in the DOM.
+
+Planning an instrument from a patch is pure code too: only the last step, building the plan, touches Web Audio. The import test keeps it so: nothing but the builder makes a Web Audio node.
+
+## Units at the edges
+
+Inside, a plan's values are in the units its params declare (`libs/base/params/`): seconds, hertz, cents, a pan from -1 to 1, a gain as a share, shown in dB by the fader law. The builder turns them into Web Audio's own, as a limiter's dB and dBFS are turned into a compressor's.
+
+MIDI's integer values, a velocity or a controller from 0 to 127, belong to the edges. The device view's test note takes its pitch and velocity as MIDI 1.0's and sends the velocity as 0 to 1. Inside, the messages (`libs/midi/protocol/`) carry a velocity and a controller's value from 0 to 1, and a note's pitch as its note number.
+
+## Sends are taken after the pan
+
+A channel's parts run in one order and its sends come last, after the fader and the pan (`libs/modular-audio/plan/desk/`). A send is taken post to start, so what it sends keeps the source's panning and follows its fader; set pre, it is taken after the mute and before the fader, as a console's PRE button does.
+
+## An insert is one device on any strip
+
+An insert is an effect, the same device on a channel or on a return, as an Ableton audio effect is: a composite with an input and an output, data until it's built, and exactly one kind of each (Utility, Filter, Limiter, Delay, Tape delay, Reverb). The device view draws every insert alike from its params, each in its own units, so an insert on a channel, on a return and on the master is the same module with its own values.

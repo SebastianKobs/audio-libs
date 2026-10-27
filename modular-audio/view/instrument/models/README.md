@@ -1,10 +1,33 @@
-# libs/modular-audio/view/instrument/models
+# modular-audio/view/instrument/models
 
-An instrument's view models, no DOM, on a device's (`libs/modular-audio/view/device/models/`): the cards an instrument's patches are edited on, the racks the device view shows each role's instrument in. It imports `libs/modular-audio/plan/format/`, `libs/modular-audio/plan/planner/`, `libs/modular-audio/plan/instrument/`, `libs/base/util/`, `libs/modular-audio/view/device/models/`, `libs/modular-audio/view/device/readout/` and its readout (`libs/modular-audio/view/instrument/readout/`).
+An instrument's view models, no DOM, on a device's: the cards an instrument's patches are edited on, and the racks the device view shows each role's instrument in.
 
-| Part | Holds |
+Depends on: `base/util`, `modular-audio/plan/format`, `modular-audio/plan/instrument`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/device/readout`, `modular-audio/view/instrument/readout`.
+
+```ts
+import type { InstrumentsReadout } from '../readout/index.ts';
+import { InstrumentRacks } from './index.ts';
+
+declare const instrumentsReadout: InstrumentsReadout;
+declare const clock: { now(): number };
+const racks = new InstrumentRacks({
+  instrumentsReadout, // the patch each role plays, its cards
+  clock,
+  send: (message) => console.log(message.type), // a reset and the test note go out on a bus
+  starts: {}, // the test note's own values as it starts, over their defaults
+});
+racks.rackOf('tap')?.status; // 'tap: pluck', the role and the patch it plays
+racks.press('tap'); // sends 'test note', held until its button is let go
+racks.lift(); // sends 'test note released'
+```
+
+| Export | What it does |
 |---|---|
-| `cards.ts` | `InstrumentCards`: an instrument's patches as the device view edits them, a card for each, its own or a drum rack's pads by their keys, each a preset's readout (`PresetReadout`) on its voice card planned at its preset, its edits sent as the bank's messages (`send`), values from outside over its own (`CardValues`, values set from outside, as a knob sets them), the note's sources set by the note; the patch edited in the bank, not an instrument playing it |
-| `instrument-racks.ts` | `InstrumentRacks`: the instruments as the device view shows them, read through their readout (`InstrumentsReadout`, `libs/modular-audio/view/instrument/readout/instruments.ts`: the patch each role plays, a role's cards): a role's instrument a rack of its cards, a pad each by its key and its patch, its status the patch it plays, none with no cards (`InstrumentRack`); its reset, every card of its patches put back as messages on a bus; the test note, its pitch and velocity MIDI 1.0's at the edge, the note's own values from their defaults, the starts handed in over them, held from a little after now until it's lifted, pressed and let go as messages on a bus (`libs/modular-audio/plan/instrument/`'s `TestNoteMessage`); which of the note's own values a role's instrument reads, and which instruments read one, for its row to grey the others |
+| `new InstrumentCards({ instruments, bank, send })`: `of()` | An instrument's patches as the device view edits them. `of(patch, over?)` gives a card for the patch, or for each pad of a drum rack by its key, a preset's readout on its voice card whose edits go out as the bank's messages (`cards.ts`). |
+| `CardValues` | Values from outside over a card's own, as a knob sets them, and what sets them: `values()` and `source` (`cards.ts`). |
+| `new InstrumentRacks({ instrumentsReadout, clock, send, starts })`: `rackOf()`, `reset()`, `press()`, `lift()`, `reads()`, `readersOf()`, `note`, `values` | The instruments as the device view shows them. `rackOf(role)` is a role's instrument as a rack of its cards, a pad each by its key and its patch, none with no cards; `reset()` puts every card of its patches back, as messages on a bus (`instrument-racks.ts`). |
+| `InstrumentRack` | A role's instrument as a rack: its `key`, its `status`, the patch it plays, and its `pads`, each with its models (`instrument-racks.ts`). |
 
-Tested in node, in its `test/` folder: `cards.test.js`, a card for each patch, its values and their sends; `instrument-racks.test.js`, the racks, the reset, the test note and which values each instrument reads.
+A card edits the patch in the bank, not an instrument playing it. The test note's pitch and velocity (`note`) are MIDI 1.0's at the edge. Its own values (`values`) start from their defaults with `starts` handed in over them. `press()` holds it from a little after now until `lift()`, both sent as messages on a bus. `reads()` says whether a role's instrument reads one of the note's own values, and `readersOf()` which instruments do, so its row can gray the others.
+
+Tests: `test/cards.test.js` and `test/instrument-racks.test.js`: a card for each patch with its values and their sends; the racks, the reset, the test note and which values each instrument reads.
