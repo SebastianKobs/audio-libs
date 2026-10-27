@@ -144,3 +144,18 @@ test('an empty recording is data too, loaded back empty; one in a version not kn
   assert.throws(() => new Recorder().load({ ...empty, version: 2 }), /version 2/);
   assert.throws(() => sessionRecorded().load(empty), /empty/);
 });
+test('a long session is data too: three knobs moved together on every frame for half an hour, each move a lane point, begins where the first is', () => {
+  const recorder = new Recorder();
+  const moves = 30 * 60 * 60; // a frame's move, 60 a second, for 30 minutes, on each knob: together more points than a call takes as its arguments
+  const knobs = ['level', 'side', 'wet'];
+  const controls = knobs.flatMap((controller) =>
+    Array.from({ length: moves }, (_, at) => ({ controller, value: at % 2, t: 1 + at / 60 })),
+  );
+  recorder.heard({ owner: light, kind: 'light', live: false, notes: [], track: 0, trackName: 'track 1', controls });
+  const data = recorder.toData(1 + moves / 60);
+  assert.equal(data.begins, 1);
+  assert.deepEqual(
+    data.lanes.map((lane) => lane.points.length),
+    knobs.map(() => moves),
+  );
+});

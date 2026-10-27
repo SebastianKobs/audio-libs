@@ -52,11 +52,27 @@ export function recordingData(
     return ids.get(element)!; // set just above
   };
   const regions = numbered.map(({ region, number }) => regionData(region, number, idOf));
-  const times = [
-    ...numbered.map(({ region }) => region.from),
-    ...lanes.flatMap((lane) => lane.points.map((point) => point.t)),
-  ];
-  return plain({ version: RECORDING_VERSION, begins: Math.min(now, ...times), ends: now, regions, lanes: [...lanes] });
+  return plain({
+    version: RECORDING_VERSION,
+    begins: earliest(numbered, lanes, now),
+    ends: now,
+    regions,
+    lanes: [...lanes],
+  });
+}
+// where the recording begins: its first region's start or lane point, now if it holds none; a loop, as a long session's points are more
+// than a call takes as its arguments
+function earliest(numbered: readonly NumberedRegion[], lanes: readonly Lane[], now: Seconds): Seconds {
+  let begins = now;
+  for (const { region } of numbered) {
+    begins = Math.min(begins, region.from);
+  }
+  for (const lane of lanes) {
+    for (const point of lane.points) {
+      begins = Math.min(begins, point.t);
+    }
+  }
+  return begins;
 }
 
 // a region as data, with ids for its element and its clip
