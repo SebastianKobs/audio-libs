@@ -159,7 +159,7 @@ test("a knob: its value as it plays, the plan's where none's told; where it lies
   assert.deepEqual([utility.control(['pan']).isPan, level.isPan], [true, false], 'a pan drawn from its middle');
 });
 
-// baseline.spec.js, "Konstrukt's tape delay its own device: the Delay's, and its wobble's rate and depth, as small as it is"
+// mockup/test/e2e/device-view.spec.js, "Konstrukt's tape delay its own device: the Delay's, and its wobble's rate and depth, as small as it is"
 test("a delay with a wobble is a device of its own: the delay's controls, then its wobble's rate and depth, a small step's text to its decimals", () => {
   const { views } = builderOn(WOBBLING_DELAY);
   const device = views.device([]);
