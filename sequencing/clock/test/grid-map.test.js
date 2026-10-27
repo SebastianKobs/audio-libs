@@ -30,11 +30,14 @@ function fakeClock() {
       playedTime,
       songTime,
       timeOfSong: (song) => grid.holds.reduce((t, { from, to }) => (t > from ? t + to - from : t), song),
+      locate: (song, t) => {
+        grid.jumps.push({ at: t, by: song - songTime(t) });
+      },
     },
     holdsSoFar: grid.holds, // each hold it went through, for song time
     // the song position set to a song time at a clock time: from then on, song time is that much further
     locate(song, t) {
-      grid.jumps.push({ at: t, by: song - songTime(t) });
+      this.grid.locate(song, t);
     },
     play(i, at, stepDuration) {
       Object.assign(grid, { at, from: i, stepDuration });
@@ -149,4 +152,27 @@ test('a locate back: a song time heard twice lies where it was heard last; one o
   assert.equal(map.placeOf(1.5), 6, 'and one past the later pass');
   near(map.timeOf(9), 0.85, 'and back');
   assert.equal(map.timeOf(6), 1.5);
+});
+
+// a recording loaded: its song time 0 at place 0, whatever the page's age, so a file longer than the page's age isn't mostly before the
+// grid's first 16th
+test('started over at a song time: the runs from before let go, song time 0 at place 0, the present at the song time, the tempo now', () => {
+  const clock = fakeClock();
+  const map = new GridMap({ clock });
+  for (let i = 0; i < 8; i++) {
+    clock.play(i, i * 0.25, 0.25); // the page's 2 s, 16ths of a quarter second
+  }
+  clock.play(8, 2, 0.5); // the tempo now: a 16th of half a second
+  map.startOver(10, 2.5); // a 10 s recording loaded, the grid at its place 9
+  assert.equal(map.placeOf(0), 0, 'the file begins at the place 0');
+  assert.equal(map.placeOf(10), 20, 'the present at its end');
+  assert.equal(map.placeOf(3), 6, 'a song time before it, counted back at the tempo now, not from the runs before');
+  assert.equal(map.timeOf(6), 3, 'and back');
+  assert.equal(map.timeOf(0), 0);
+  clock.play(9, 2.5, 0.5); // song time 10 at the grid's 16th 9, a place 20
+  clock.play(10, 3, 0.5);
+  assert.equal(map.placeOf(10), 20, 'live play after it: the 16ths laid out as heard');
+  assert.equal(map.placeOf(10.25), 20.5, 'between them');
+  assert.equal(map.timeOf(21), 10.5, 'and back');
+  assert.equal(map.placeOf(3), 6, 'what lay before it where it was');
 });

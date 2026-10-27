@@ -76,6 +76,10 @@ export class ArrangementView {
     });
   }
   // the playhead's place where it's set back, or none, on the present
+  // where a song time lies on the grid as it was heard; the song position's locate on a load
+  get map(): Arrangement['map'] {
+    return this.#arrangement.map;
+  }
   get playhead(): number | null {
     return this.#arrangement.playhead;
   }
