@@ -10,7 +10,7 @@
 //   - a track's channel added from its pool the first time it's asked for, by the track's key:
 //     its pool's copy, by its address (my tap/3);
 //   - every value set by its address, and kept: the one owner of the desk's values as
-//     they play, what's built told each, the views reading copies;
+//     they play, what's built told each, the views reading copies, kept() all of them;
 //   - the tempo followed; a setting changed by a preset, what's built built again.
 import type { When } from '../../../../base/automation/index.ts';
 import { choiceAt, type ParamSpec } from '../../../../base/params/index.ts';
@@ -124,6 +124,10 @@ export class DeskState<B extends DeskBuilt> {
   settings(changed: ValuesByAddress): void {
     Object.assign(this.#settings, changed);
     this.#built?.preset({}, changed);
+  }
+  // every value set and every setting changed so far, by address as text, copies
+  kept(): { values: Record<string, number | string>; settings: Record<string, number | string> } {
+    return { values: Object.fromEntries(this.#values), settings: { ...this.#settings } };
   }
   // whether a strip is one of the desk's own channels, not a track's
   isOwn(strip: string): boolean {

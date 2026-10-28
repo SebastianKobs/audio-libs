@@ -11,6 +11,7 @@ desk.set(['tap', 'volume'], 0.5); // kept, told what's built once it is
 desk.build((planned) => builder.build(planned, { into: output.node })); // the settings changed before in it, the mix applied
 desk.mute('tap', true); // the live mix's, a mute taking along what feeds the strip
 desk.mixState(); // { muted: Set {'tap'}, soloed: Set {} }
+desk.kept(); // { values: { 'tap/volume': 0.5 }, settings: {} }, copies
 ```
 
 The live mix works as Ableton's, on every track by its key:
@@ -21,7 +22,7 @@ The live mix works as Ableton's, on every track by its key:
 
 | Export | What it does |
 |---|---|
-| `new MixingDesk({ plan })`: `build()`, `channelOf()`, `inputOf()`, `mute()`, `solo()`, `mixState()`, `set()`, `valueOf()`, `specOf()`, `startOf()`, `settings()`, `tempo()`, `isOwn()`, `added()`, `copiesOf()`, `wiring()`, `plan`, `bus`, `built` | The desk built, set by address and mixed. `build()` applies the mix; `channelOf()` adds a track's channel from its pool the first time it's asked for, once built; `inputOf()` is where a track's instrument plugs in (`mixing-desk.ts`, its state `desk-state.ts`). |
+| `new MixingDesk({ plan })`: `build()`, `channelOf()`, `inputOf()`, `mute()`, `solo()`, `mixState()`, `set()`, `valueOf()`, `kept()`, `specOf()`, `startOf()`, `settings()`, `tempo()`, `isOwn()`, `added()`, `copiesOf()`, `wiring()`, `plan`, `bus`, `built` | The desk built, set by address and mixed. `build()` applies the mix; `channelOf()` adds a track's channel from its pool the first time it's asked for, once built; `inputOf()` is where a track's instrument plugs in (`mixing-desk.ts`, its state `desk-state.ts`). |
 | `ChannelInput` | Where a track's instrument plugs into the desk: its channel's way in, from `inputOf()`, made once (`mixing-desk.ts`). |
 | `DeskBuilt`, `WayIn` | What the desk asks of what's built beyond a `Built`: a way into a channel or into one of the desk's own inputs, by address; that way in as the builder hands it out (`desk-state.ts`). |
 | `DeskSetup` | What a setup hands in: `isLive()`, whether a track is set live or by its notes, and `setBy()`, what sets a param on a track by its notes in words a view shows, none where its notes don't (`setup.ts`). |

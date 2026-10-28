@@ -5,7 +5,8 @@
 //   - a track's channel, its pool's copy, added the first time it's asked for once built, what was set on it before told;
 //   - a track's instrument's way into its channel, the channel added as its first note comes, once;
 //   - a value set by its address, kept, told where it plays; a choice by its index kept as its choice; read back;
-//   - settings changed as a preset; a new beat, one unchanged passed over; whether a strip is one of its own channels.
+//   - settings changed as a preset; a new beat, one unchanged passed over; whether a strip is one of its own channels;
+//   - what's kept, read as copies.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MixingDesk } from '../index.ts';
@@ -84,4 +85,21 @@ test("settings changed: kept, what's built built again with them; a new beat tol
   desk.tempo(0.6);
   assert.deepEqual(built.tempi, [0.5, 0.6]);
   assert.deepEqual([desk.isOwn('tap'), desk.isOwn('my tap/3')], [true, false]);
+});
+
+test("what's kept as it plays is read as copies: each value set and each setting changed, by its address as text", () => {
+  const { desk, build } = deskOn(MixingDesk, PLAN);
+  build();
+  assert.deepEqual(desk.kept(), { values: {}, settings: {} });
+  desk.set(['tap', 'volume'], 0.3);
+  desk.set(['delay 1', 'delay', 'note'], 1);
+  desk.set(['my tap', '5', 'volume'], 0.2);
+  desk.settings({ [ROOM]: 1.5 });
+  const kept = desk.kept();
+  assert.deepEqual(kept, {
+    values: { 'tap/volume': 0.3, 'delay 1/delay/note': '1/16', 'my tap/5/volume': 0.2 },
+    settings: { [ROOM]: 1.5 },
+  });
+  kept.values['tap/volume'] = 9;
+  assert.equal(desk.valueOf(['tap', 'volume']), 0.3, 'a copy');
 });
