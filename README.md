@@ -4,7 +4,7 @@ The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder
 
 ## By role
 
-Nine groups, each a folder, read bottom up. A group reads only those before it. Each group's README names its libraries and what it reads, each library's what it offers.
+Ten groups, each a folder, read bottom up. A group reads only those before it. Each group's README names its libraries and what it reads, each library's what it offers.
 
 - [`base/`](base/README.md): words and helpers every library shares.
 - [`generative/`](generative/README.md): the rules the visual ideas found, medium-free.
@@ -14,6 +14,7 @@ Nine groups, each a folder, read bottom up. A group reads only those before it. 
 - [`midi-devices/`](midi-devices/README.md): inserts on a track's notes, as an audio effect is on its sound, the Scale device.
 - [`spatial/`](spatial/README.md): places perceived from where you are, hearing by distance, pointer input as gestures.
 - [`modular-audio/`](modular-audio/README.md): a sound as data (`libs/modular-audio/plan/`), built (`libs/modular-audio/build/`) and shown (`libs/modular-audio/view/`), and its way through them.
+- [`dsp/`](dsp/README.md): signal processing on sample arrays, free of any audio API, a true-peak meter and limiter.
 - [`formats/`](formats/README.md): files other programs read, written from what the groups before it make, a WAV file.
 
 ## By layer
@@ -22,7 +23,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 
 | Layer | Libraries |
 |---|---|
-| 0 | `base/html`, `base/util`, `formats/wav`, `generative/randomness` |
+| 0 | `base/html`, `base/util`, `dsp/true-peak`, `formats/wav`, `generative/randomness` |
 | 1 | `base/automation`, `base/params`, `generative/articulation`, `generative/automata`, `generative/genetics`, `generative/rewriting`, `generative/sync`, `generative/trails`, `music/music-theory`, `spatial/places` |
 | 2 | `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
