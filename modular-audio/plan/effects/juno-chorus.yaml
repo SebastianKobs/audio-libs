@@ -1,0 +1,64 @@
+# The Juno chorus, a Juno-60's: two short delay lines, one LFO sweeping them against each other, the wet added to the dry.
+#   1. its sound into the dry and, highpassed and lowpassed, into both lines;
+#   2. the LFO through a depth into each line's time, the right line's depth negative: its sweep the left's inverted;
+#   3. the left line panned hard left, the right hard right, both into the wet, the wet and the dry summed, out.
+# 3.505 ms ± 1.845 ms is 1.66 to 5.35 ms, a triangle at 0.513 Hz (I) or 0.863 Hz (II), the Juno-60
+# measured. A sound into a delay's ms moves it in seconds. The wet 1.6 dB under the dry is 0.832;
+# a pan hard over sums both sides of what it's fed, so the wet's gain is half of it. The wet's 9 kHz and the input's 175 Hz are
+# estimates within 8 to 10 kHz and 150 to 200 Hz; the dry is not cut, the lows stay in the middle. Not built: I and II together.
+kind: JunoChorus
+label: Juno chorus
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: lows, kind: filter, values: { frequency: 175, resonance: 0.707 }, settings: { type: highpass } }
+  - { name: highs, kind: filter, values: { frequency: 9000, resonance: 0.707 }, settings: { type: lowpass } }
+  - { name: lfo, kind: oscillator, values: { sync: 0, frequency: 0.513 }, settings: { wave: triangle, phase: free } }
+  - { name: depth left, kind: gain, values: { gain: 0.001845 } }
+  - { name: depth right, kind: gain, values: { gain: -0.001845 } }
+  - { name: line left, kind: delay, values: { sync: 0, ms: 3.505 }, settings: { longest: 0.1 } }
+  - { name: line right, kind: delay, values: { sync: 0, ms: 3.505 }, settings: { longest: 0.1 } }
+  - { name: pan left, kind: pan, values: { pan: -1 } }
+  - { name: pan right, kind: pan, values: { pan: 1 } }
+  - { name: wet, kind: gain, values: { gain: 0.416 } }
+  - { name: dry, kind: gain }
+  - { name: sum, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: dry, input: in } }
+  - { from: { input: in }, to: { node: lows, input: in } }
+  - { from: { node: lows, output: out }, to: { node: highs, input: in } }
+  - { from: { node: highs, output: out }, to: { node: line left, input: in } }
+  - { from: { node: highs, output: out }, to: { node: line right, input: in } }
+  - { from: { node: lfo, output: out }, to: { node: depth left, input: in } }
+  - { from: { node: lfo, output: out }, to: { node: depth right, input: in } }
+  - { from: { node: depth left, output: out }, to: { node: line left, param: ms } }
+  - { from: { node: depth right, output: out }, to: { node: line right, param: ms } }
+  - { from: { node: line left, output: out }, to: { node: pan left, input: in } }
+  - { from: { node: line right, output: out }, to: { node: pan right, input: in } }
+  - { from: { node: pan left, output: out }, to: { node: wet, input: in } }
+  - { from: { node: pan right, output: out }, to: { node: wet, input: in } }
+  - { from: { node: wet, output: out }, to: { node: sum, input: in } }
+  - { from: { node: dry, output: out }, to: { node: sum, input: in } }
+  - { from: { node: sum, output: out }, to: { output: out } }
+macros:
+  - name: rate
+    hint: "The LFO's rate, in hertz: 0.513 is the Juno's I, 0.863 its II."
+    spec: { unit: Hz, range: [0.1, 12, 0.001], default: 0.513, taper: octaves }
+    maps: [{ to: [lfo, frequency], factor: 1, offset: 0 }]
+  - name: depth
+    hint: "How far each line's time sweeps either way, in seconds; the right line's the left's inverted."
+    spec: { unit: s, range: [0, 0.003, 0.00001], default: 0.001845 }
+    maps: [{ to: [depth left, gain], factor: 1, offset: 0 }, { to: [depth right, gain], factor: -1, offset: 0 }]
+  - name: center
+    hint: "Where each line's time sweeps about, in milliseconds."
+    spec: { unit: ms, range: [1, 20, 0.001], default: 3.505 }
+    maps: [{ to: [line left, ms], factor: 1, offset: 0 }, { to: [line right, ms], factor: 1, offset: 0 }]
+  - name: wet
+    hint: "The chorus's level, a share: 0.832 is 1.6 dB under the dry, 0 silent."
+    spec: { range: [0, 1, 0.001], default: 0.832 }
+    maps: [{ to: [wet, gain], factor: 0.5, offset: 0 }]
+  - name: dry
+    hint: 'The sound as it came, a share: 1 as it comes.'
+    spec: { range: [0, 1, 0.001], default: 1 }
+    maps: [{ to: [dry, gain], factor: 1, offset: 0 }]

@@ -1,0 +1,33 @@
+# The Hiss, a tape's: noise out of nothing, on a channel of its own, its input passed on as it came.
+# A channel's insert is an effect, so the source sits in one that passes its input on, as the Chorus holds its LFO.
+#   1. two sources of the noise block, looped, each started somewhere else in its buffer (offset 2, drawn from the builder's random),
+#      so the two are unrelated: a tape's hiss is wide;
+#   2. one pan hard left, one hard right, by a pan pot's law (Web Audio's own for a mono sound), both into a level;
+#   3. the input through a gain of 1 and the level into one sum, out.
+# The noise's rms is 0.577, so a side at a level of 0.000548 reads -70 dBFS (an estimate).
+kind: Hiss
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: left, kind: noise, values: { offset: 2 }, settings: { color: noise, loop: on } }
+  - { name: right, kind: noise, values: { offset: 2 }, settings: { color: noise, loop: on } }
+  - { name: pan left, kind: pan, values: { pan: -1 }, settings: { law: pan pot } }
+  - { name: pan right, kind: pan, values: { pan: 1 }, settings: { law: pan pot } }
+  - { name: level, kind: gain, values: { gain: 0.000548 } }
+  - { name: through, kind: gain }
+  - { name: sum, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: through, input: in } }
+  - { from: { node: through, output: out }, to: { node: sum, input: in } }
+  - { from: { node: left, output: out }, to: { node: pan left, input: in } }
+  - { from: { node: right, output: out }, to: { node: pan right, input: in } }
+  - { from: { node: pan left, output: out }, to: { node: level, input: in } }
+  - { from: { node: pan right, output: out }, to: { node: level, input: in } }
+  - { from: { node: level, output: out }, to: { node: sum, input: in } }
+  - { from: { node: sum, output: out }, to: { output: out } }
+macros:
+  - name: level
+    hint: "How loud each side's hiss is, a share of full scale: the noise's rms is 0.577, so 0.000548 reads -70 dBFS a side."
+    spec: { range: [0, 0.01, 0.00001], default: 0.000548 }
+    maps: [{ to: [level, gain], factor: 1, offset: 0 }]

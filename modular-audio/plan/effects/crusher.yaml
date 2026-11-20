@@ -1,0 +1,33 @@
+# The Crusher, a bit and sample-rate reducer, mixed with the dry: a sampler's grit.
+#   1. its sound into the crusher, and dry into the mix;
+#   2. the crusher wet into the mix; both summed, out.
+# Its bits and rate the crusher's; its mix dry to wet, the dry the rest. At its defaults a 12-bit sampler's, half wet.
+kind: Crusher
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: crusher, kind: crusher }
+  - { name: wet, kind: gain }
+  - { name: dry, kind: gain }
+  - { name: sum, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: crusher, input: in } }
+  - { from: { input: in }, to: { node: dry, input: in } }
+  - { from: { node: crusher, output: out }, to: { node: wet, input: in } }
+  - { from: { node: wet, output: out }, to: { node: sum, input: in } }
+  - { from: { node: dry, output: out }, to: { node: sum, input: in } }
+  - { from: { node: sum, output: out }, to: { output: out } }
+macros:
+  - name: bits
+    hint: 'The steps a sample is rounded to, as bits; 16 near clean, 4 a grit.'
+    value: 12
+    maps: [{ to: [crusher, bits], factor: 1, offset: 0 }]
+  - name: rate
+    hint: "How often a sample is taken and held, in hertz; below the music's, its aliasing."
+    value: 24000
+    maps: [{ to: [crusher, rate], factor: 1, offset: 0 }]
+  - name: mix
+    hint: 'Dry 0 to wet 1, the dry the rest.'
+    spec: { range: [0, 1, 0.01], default: 0.5 }
+    maps: [{ to: [wet, gain], factor: 1, offset: 0 }, { to: [dry, gain], factor: -1, offset: 1 }]

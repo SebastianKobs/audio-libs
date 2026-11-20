@@ -1,0 +1,43 @@
+# The Room, a PCM-60's: a designed impulse through a convolver, the sound summed to one channel first, then a level.
+# Beside the library's Reverb (noise that holds and then drops, as (1 - t)^2.5), which stays as the noise halls: this one's tail dies evenly
+# from its start, highs twice as fast, nothing over 10 kHz, an onset of a pre-delay and early taps.
+#   1. its sound into the room block, which sums left and right to one channel (the PCM-60's mono input) and plays the impulse in stereo;
+#   2. the room into a level out.
+# The impulse has energy 1 a side with the browser's own normalizing off, so a click comes back with energy `level` squared a side: the level
+# is the room's loudness against its input. The decay is the middle band down 60 dB, 0.2 s to 8 s; the PCM-60's own are 0.2 to 4.5 s (PCM60_DECAY).
+# A new decay or design is a new buffer, which cuts the tail that was ringing.
+kind: Room
+label: Room
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: room, kind: room }
+  - { name: level, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: room, input: in } }
+  - { from: { node: room, output: out }, to: { node: level, input: in } }
+  - { from: { node: level, output: out }, to: { output: out } }
+macros:
+  - name: decay
+    hint: 'How long the room rings, in seconds: the middle band down 60 dB.'
+    maps: [{ to: [room, decay], factor: 1, offset: 0 }]
+  - name: pre delay
+    hint: 'Silence before the first echo, in seconds.'
+    maps: [{ to: [room, pre delay], factor: 1, offset: 0 }]
+  - name: taps
+    hint: 'How many early echoes a side, 0 for none.'
+    maps: [{ to: [room, taps], factor: 1, offset: 0 }]
+  - name: dense
+    hint: 'How soon the echoes are dense, in seconds after the pre-delay.'
+    maps: [{ to: [room, dense], factor: 1, offset: 0 }]
+  - name: low decay
+    hint: "The lows' time as a share of the decay."
+    maps: [{ to: [room, low decay], factor: 1, offset: 0 }]
+  - name: high decay
+    hint: "The highs' time as a share of the decay: 0.5 is twice as fast."
+    maps: [{ to: [room, high decay], factor: 1, offset: 0 }]
+  - name: level
+    hint: "The room's level, a share: 1 returns a click with the energy it went in with."
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [level, gain], factor: 1, offset: 0 }]

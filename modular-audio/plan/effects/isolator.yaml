@@ -1,0 +1,73 @@
+# The Isolator, a DJ mixer's three-band kill: low, mid and high, each with its own level, 0 a kill.
+#   1. its sound into the low band, a lowpass at the low split, and into the rest, a highpass there;
+#   2. the rest into the mid band, a lowpass at the high split, and into the high band, a highpass there;
+#   3. each band through its level, the three summed, out.
+# Each crossover is Linkwitz-Riley: two 12 dB filters in a row at a resonance of 0.707 (a 4th-order Butterworth made of halves, not the
+# filter block's slope 24, which is one stage at another Q). Its two sides sum flat in level, within 0.05 dB at all three at 1; the sum's
+# phase is turned by two allpasses, so it is not the sound as it came sample for sample. The splits, 200 and 2500 Hz, are estimates.
+kind: Isolator
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: low 1, kind: filter, values: { frequency: 200, resonance: 0.707 }, settings: { type: lowpass } }
+  - { name: low 2, kind: filter, values: { frequency: 200, resonance: 0.707 }, settings: { type: lowpass } }
+  - { name: rest 1, kind: filter, values: { frequency: 200, resonance: 0.707 }, settings: { type: highpass } }
+  - { name: rest 2, kind: filter, values: { frequency: 200, resonance: 0.707 }, settings: { type: highpass } }
+  - { name: mid 1, kind: filter, values: { frequency: 2500, resonance: 0.707 }, settings: { type: lowpass } }
+  - { name: mid 2, kind: filter, values: { frequency: 2500, resonance: 0.707 }, settings: { type: lowpass } }
+  - { name: high 1, kind: filter, values: { frequency: 2500, resonance: 0.707 }, settings: { type: highpass } }
+  - { name: high 2, kind: filter, values: { frequency: 2500, resonance: 0.707 }, settings: { type: highpass } }
+  - { name: low, kind: gain }
+  - { name: mid, kind: gain }
+  - { name: high, kind: gain }
+  - { name: sum, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: low 1, input: in } }
+  - { from: { node: low 1, output: out }, to: { node: low 2, input: in } }
+  - { from: { node: low 2, output: out }, to: { node: low, input: in } }
+  - { from: { node: low, output: out }, to: { node: sum, input: in } }
+  - { from: { input: in }, to: { node: rest 1, input: in } }
+  - { from: { node: rest 1, output: out }, to: { node: rest 2, input: in } }
+  - { from: { node: rest 2, output: out }, to: { node: mid 1, input: in } }
+  - { from: { node: mid 1, output: out }, to: { node: mid 2, input: in } }
+  - { from: { node: mid 2, output: out }, to: { node: mid, input: in } }
+  - { from: { node: mid, output: out }, to: { node: sum, input: in } }
+  - { from: { node: rest 2, output: out }, to: { node: high 1, input: in } }
+  - { from: { node: high 1, output: out }, to: { node: high 2, input: in } }
+  - { from: { node: high 2, output: out }, to: { node: high, input: in } }
+  - { from: { node: high, output: out }, to: { node: sum, input: in } }
+  - { from: { node: sum, output: out }, to: { output: out } }
+macros:
+  - name: low
+    hint: "The low band's level, a share: 1 as it comes, 0 a kill."
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [low, gain], factor: 1, offset: 0 }]
+  - name: mid
+    hint: "The mid band's level, a share: 1 as it comes, 0 a kill."
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [mid, gain], factor: 1, offset: 0 }]
+  - name: high
+    hint: "The high band's level, a share: 1 as it comes, 0 a kill."
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [high, gain], factor: 1, offset: 0 }]
+  - name: low split
+    hint: 'Where the low band ends, in hertz.'
+    spec: { unit: Hz, range: [60, 600, 1], default: 200, taper: octaves }
+    maps:
+      [
+        { to: [low 1, frequency], factor: 1, offset: 0 },
+        { to: [low 2, frequency], factor: 1, offset: 0 },
+        { to: [rest 1, frequency], factor: 1, offset: 0 },
+        { to: [rest 2, frequency], factor: 1, offset: 0 },
+      ]
+  - name: high split
+    hint: 'Where the high band begins, in hertz.'
+    spec: { unit: Hz, range: [1000, 8000, 1], default: 2500, taper: octaves }
+    maps:
+      [
+        { to: [mid 1, frequency], factor: 1, offset: 0 },
+        { to: [mid 2, frequency], factor: 1, offset: 0 },
+        { to: [high 1, frequency], factor: 1, offset: 0 },
+        { to: [high 2, frequency], factor: 1, offset: 0 },
+      ]

@@ -1,0 +1,73 @@
+# The Chorus, a three-line ensemble, as a string machine's: three short delay lines, their times moved by one slow LFO,
+# each a third of its turn after the last, spread left, middle and right, mixed with the dry.
+#   1. its sound into each line, and dry into the mix;
+#   2. the LFO through a depth into the first line's time; delayed by a lag, a third of its period, into the second's,
+#      by two thirds into the third's: 120 degrees apart, so the three never move together;
+#   3. each line through its pan, wet into the mix; both summed, out.
+# A sound into a delay's ms moves it in seconds: a depth of 0.0015 moves a line 1.5 ms either way.
+# Its lags are a third of the LFO's period at its rate as planned: a macro maps a value straight, not 1 / rate, so a rate
+# changed alone leaves them, the lines drifting off 120 degrees. Planned with chorusValues() (chorus.ts) they hold.
+kind: Chorus
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: lfo, kind: oscillator, values: { sync: 0, frequency: 0.8 }, settings: { wave: triangle, phase: free } }
+  - { name: lag 2, kind: delay, values: { sync: 0, ms: 416.667 }, settings: { longest: 4 } }
+  - { name: lag 3, kind: delay, values: { sync: 0, ms: 833.333 }, settings: { longest: 4 } }
+  - { name: depth 1, kind: gain, values: { gain: 0.0015 } }
+  - { name: depth 2, kind: gain, values: { gain: 0.0015 } }
+  - { name: depth 3, kind: gain, values: { gain: 0.0015 } }
+  - { name: line 1, kind: delay, values: { sync: 0, ms: 9 }, settings: { longest: 0.1 } }
+  - { name: line 2, kind: delay, values: { sync: 0, ms: 13 }, settings: { longest: 0.1 } }
+  - { name: line 3, kind: delay, values: { sync: 0, ms: 18 }, settings: { longest: 0.1 } }
+  - { name: pan 1, kind: pan, values: { pan: -0.7 } }
+  - { name: pan 2, kind: pan, values: { pan: 0 } }
+  - { name: pan 3, kind: pan, values: { pan: 0.7 } }
+  - { name: wet, kind: gain }
+  - { name: dry, kind: gain }
+  - { name: sum, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: line 1, input: in } }
+  - { from: { input: in }, to: { node: line 2, input: in } }
+  - { from: { input: in }, to: { node: line 3, input: in } }
+  - { from: { input: in }, to: { node: dry, input: in } }
+  - { from: { node: lfo, output: out }, to: { node: depth 1, input: in } }
+  - { from: { node: lfo, output: out }, to: { node: lag 2, input: in } }
+  - { from: { node: lfo, output: out }, to: { node: lag 3, input: in } }
+  - { from: { node: lag 2, output: out }, to: { node: depth 2, input: in } }
+  - { from: { node: lag 3, output: out }, to: { node: depth 3, input: in } }
+  - { from: { node: depth 1, output: out }, to: { node: line 1, param: ms } }
+  - { from: { node: depth 2, output: out }, to: { node: line 2, param: ms } }
+  - { from: { node: depth 3, output: out }, to: { node: line 3, param: ms } }
+  - { from: { node: line 1, output: out }, to: { node: pan 1, input: in } }
+  - { from: { node: line 2, output: out }, to: { node: pan 2, input: in } }
+  - { from: { node: line 3, output: out }, to: { node: pan 3, input: in } }
+  - { from: { node: pan 1, output: out }, to: { node: wet, input: in } }
+  - { from: { node: pan 2, output: out }, to: { node: wet, input: in } }
+  - { from: { node: pan 3, output: out }, to: { node: wet, input: in } }
+  - { from: { node: wet, output: out }, to: { node: sum, input: in } }
+  - { from: { node: dry, output: out }, to: { node: sum, input: in } }
+  - { from: { node: sum, output: out }, to: { output: out } }
+macros:
+  - name: rate
+    hint: "The LFO's rate, in hertz; planned with its lags (chorusValues()), so the lines stay a third of a turn apart."
+    spec: { unit: Hz, range: [0.3, 6, 0.01], default: 0.8, taper: octaves }
+    maps: [{ to: [lfo, frequency], factor: 1, offset: 0 }]
+  - name: depth
+    hint: "How far each line's time moves either way, in seconds."
+    spec: { unit: s, range: [0, 0.005, 0.0001], default: 0.0015 }
+    maps:
+      [
+        { to: [depth 1, gain], factor: 1, offset: 0 },
+        { to: [depth 2, gain], factor: 1, offset: 0 },
+        { to: [depth 3, gain], factor: 1, offset: 0 },
+      ]
+  - name: spread
+    hint: 'How far the outer lines sit to either side, 0 all in the middle.'
+    spec: { range: [0, 1, 0.01], default: 0.7 }
+    maps: [{ to: [pan 1, pan], factor: -1, offset: 0 }, { to: [pan 3, pan], factor: 1, offset: 0 }]
+  - name: mix
+    hint: "Dry 0 to wet 1, the dry the rest; an ensemble's even at 0.5."
+    spec: { range: [0, 1, 0.01], default: 0.5 }
+    maps: [{ to: [wet, gain], factor: 1, offset: 0 }, { to: [dry, gain], factor: -1, offset: 1 }]

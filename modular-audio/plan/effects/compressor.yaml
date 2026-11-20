@@ -1,0 +1,42 @@
+# The Compressor, glue: the browser's compressor node with its knee set, its make-up taken back, then a gain of its own.
+#   1. its sound into the compressor block, then the make-up gain, out.
+# The block takes the node's own make-up back (a quiet sound passes at its level, whatever the knee); `makeup` is yours, in dB, at 1 nothing.
+# The node looks ahead 6 ms (288 samples at 48 kHz): the sound comes out that much late, so it belongs on the master, not on a bus beside
+# strips that aren't held back. Ratio 2, attack 10 to 30 ms, release 0.1 to 0.3 s.
+# The threshold and the knee are estimates.
+kind: Compressor
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: compressor, kind: compressor }
+  - { name: makeup, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: compressor, input: in } }
+  - { from: { node: compressor, output: out }, to: { node: makeup, input: in } }
+  - { from: { node: makeup, output: out }, to: { output: out } }
+macros:
+  - name: threshold
+    hint: 'Where it starts to act, in dBFS.'
+    spec: { unit: dBFS, range: [-60, 0, 0.1], default: -18 }
+    maps: [{ to: [compressor, threshold], factor: 1, offset: 0 }]
+  - name: knee
+    hint: 'How far above the threshold it takes to reach its full ratio, in dB; 0 a hard knee.'
+    spec: { unit: dB, range: [0, 40, 0.1], default: 6 }
+    maps: [{ to: [compressor, knee], factor: 1, offset: 0 }]
+  - name: ratio
+    hint: 'dB in for each dB out, past the knee.'
+    spec: { range: [1, 20, 0.1], default: 2 }
+    maps: [{ to: [compressor, ratio], factor: 1, offset: 0 }]
+  - name: attack
+    hint: 'How fast it takes hold, in seconds.'
+    spec: { unit: s, range: [0.001, 1, 0.001], default: 0.02 }
+    maps: [{ to: [compressor, attack], factor: 1, offset: 0 }]
+  - name: release
+    hint: 'How fast it lets go, in seconds.'
+    spec: { unit: s, range: [0.01, 1, 0.01], default: 0.2 }
+    maps: [{ to: [compressor, release], factor: 1, offset: 0 }]
+  - name: makeup
+    hint: 'A gain after it, a share shown in dB, -12 to +24; 1 nothing.'
+    spec: { range: [-12, 24, 0.1], dB: true, default: 1 }
+    maps: [{ to: [makeup, gain], factor: 1, offset: 0 }]

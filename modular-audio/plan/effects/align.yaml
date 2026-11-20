@@ -1,0 +1,17 @@
+# The Align, a strip held back as long as an oversampled Drive holds its own: the sounds with no Drive, or a Drive not oversampled,
+# land with the ones whose Drive is (a Drive at 4x comes out 4 ms late in Chromium: the shaper's resampling filters).
+#   1. its sound into the lag, a DelayNode at the lag of a WaveShaper oversampling as told, out.
+# Its oversample the oversampling of the Drives it waits for, 4x as a Drive's default; at none it holds nothing back.
+kind: Align
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: lag, kind: shaper lag }
+wires:
+  - { from: { input: in }, to: { node: lag, input: in } }
+  - { from: { node: lag, output: out }, to: { output: out } }
+macros:
+  - name: oversample
+    hint: 'The oversampling of the Drives it waits for: 4x, 2x or none.'
+    maps: [{ to: [lag, oversample], factor: 1, offset: 0 }]

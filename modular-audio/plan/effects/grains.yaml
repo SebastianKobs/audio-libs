@@ -1,0 +1,43 @@
+# The Grains, a granular freeze and smear, mixed with the dry: mostly dry as it comes.
+#   1. its sound into the grains, and dry into the mix;
+#   2. the grains wet into the mix; both summed, out.
+# Its freeze, position, size, density, pitch and spray the grains'; its mix dry to wet, the dry the rest.
+kind: Grains
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: grains, kind: grains }
+  - { name: wet, kind: gain }
+  - { name: dry, kind: gain }
+  - { name: sum, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: grains, input: in } }
+  - { from: { input: in }, to: { node: dry, input: in } }
+  - { from: { node: grains, output: out }, to: { node: wet, input: in } }
+  - { from: { node: wet, output: out }, to: { node: sum, input: in } }
+  - { from: { node: dry, output: out }, to: { node: sum, input: in } }
+  - { from: { node: sum, output: out }, to: { output: out } }
+macros:
+  - name: freeze
+    hint: 'On, it stops listening, its grains playing what it held.'
+    maps: [{ to: [grains, freeze], factor: 1, offset: 0 }]
+  - name: position
+    hint: 'How far back from now a grain starts, in seconds.'
+    maps: [{ to: [grains, position], factor: 1, offset: 0 }]
+  - name: size
+    hint: "A grain's length, in seconds."
+    maps: [{ to: [grains, size], factor: 1, offset: 0 }]
+  - name: density
+    hint: 'Grains a second.'
+    maps: [{ to: [grains, density], factor: 1, offset: 0 }]
+  - name: pitch
+    hint: "A grain's playback, in semitones."
+    maps: [{ to: [grains, pitch], factor: 1, offset: 0 }]
+  - name: spray
+    hint: "How far a grain's start strays from its position, in seconds: a smear."
+    maps: [{ to: [grains, spray], factor: 1, offset: 0 }]
+  - name: mix
+    hint: 'Dry 0 to wet 1, the dry the rest; a little by default.'
+    spec: { range: [0, 1, 0.01], default: 0.15 }
+    maps: [{ to: [wet, gain], factor: 1, offset: 0 }, { to: [dry, gain], factor: -1, offset: 1 }]

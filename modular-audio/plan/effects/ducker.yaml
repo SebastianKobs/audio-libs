@@ -1,0 +1,17 @@
+# The Ducker, a sidechain's pump made by the clock: a gain the kicks' times dip and let back, scheduled ahead as the notes
+# are (ducking.ts), so it's on time where a follower would be late by its attack.
+# Its level the gain: 1 untouched, as it rests.
+kind: Ducker
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: duck, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: duck, input: in } }
+  - { from: { node: duck, output: out }, to: { output: out } }
+macros:
+  - name: level
+    hint: 'The gain each kick dips and lets back, 1 untouched.'
+    spec: { range: [0, 1, 0.001], default: 1 }
+    maps: [{ to: [duck, gain], factor: 1, offset: 0 }]

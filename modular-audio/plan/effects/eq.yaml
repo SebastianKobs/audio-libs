@@ -1,0 +1,53 @@
+# The EQ, four bands in a row: a low cut, a low shelf, a peak, a high shelf, each an eq band (one biquad).
+#   1. its sound into the low cut, a highpass, then the low shelf, the mid peak and the high shelf, out.
+# At its defaults flat: three bands at a gain of 1 are exact, the low cut at 10 Hz takes 0.02 dB at 40 Hz. Every gain a share shown
+# in dB, -24 to +24. The bands' frequencies are estimates, tuned by ear: what they're for is
+# 2 to 4 dB off at 250 to 400 Hz on pads, 2 to 5 kHz tamed on hats, a Bozak's shelves at 50 Hz and 10 kHz.
+kind: EQ
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: low cut, kind: eq band, values: { type: highpass, frequency: 10 } }
+  - { name: low, kind: eq band, values: { type: low shelf, frequency: 100 } }
+  - { name: mid, kind: eq band, values: { type: peak, frequency: 1000 } }
+  - { name: high, kind: eq band, values: { type: high shelf, frequency: 8000 } }
+wires:
+  - { from: { input: in }, to: { node: low cut, input: in } }
+  - { from: { node: low cut, output: out }, to: { node: low, input: in } }
+  - { from: { node: low, output: out }, to: { node: mid, input: in } }
+  - { from: { node: mid, output: out }, to: { node: high, input: in } }
+  - { from: { node: high, output: out }, to: { output: out } }
+macros:
+  - name: low cut
+    hint: 'A highpass, in hertz: 12 dB an octave, flat at its cutoff, 3 dB down there.'
+    spec: { unit: Hz, range: [10, 1000, 1], default: 10, taper: octaves }
+    maps: [{ to: [low cut, frequency], factor: 1, offset: 0 }]
+  - name: low
+    hint: "The low shelf's level, a share shown in dB, -24 to +24."
+    spec: { range: [-24, 24, 0.1], dB: true, default: 1 }
+    maps: [{ to: [low, gain], factor: 1, offset: 0 }]
+  - name: mid
+    hint: "The mid peak's level, a share shown in dB, -24 to +24."
+    spec: { range: [-24, 24, 0.1], dB: true, default: 1 }
+    maps: [{ to: [mid, gain], factor: 1, offset: 0 }]
+  - name: high
+    hint: "The high shelf's level, a share shown in dB, -24 to +24."
+    spec: { range: [-24, 24, 0.1], dB: true, default: 1 }
+    maps: [{ to: [high, gain], factor: 1, offset: 0 }]
+  - name: low frequency
+    hint: 'Where the low shelf turns, in hertz.'
+    spec: { unit: Hz, range: [30, 500, 1], default: 100, taper: octaves }
+    maps: [{ to: [low, frequency], factor: 1, offset: 0 }]
+  - name: mid frequency
+    hint: 'Where the mid peak sits, in hertz.'
+    spec: { unit: Hz, range: [100, 8000, 1], default: 1000, taper: octaves }
+    maps: [{ to: [mid, frequency], factor: 1, offset: 0 }]
+  - name: mid q
+    hint: 'How narrow the mid peak is: 0.707 broad, 10 a needle.'
+    spec: { range: [0.1, 10, 0.01], default: 0.707 }
+    maps: [{ to: [mid, resonance], factor: 1, offset: 0 }]
+  - name: high frequency
+    hint: 'Where the high shelf turns, in hertz.'
+    spec: { unit: Hz, range: [1000, 16000, 1], default: 8000, taper: octaves }
+    maps: [{ to: [high, frequency], factor: 1, offset: 0 }]

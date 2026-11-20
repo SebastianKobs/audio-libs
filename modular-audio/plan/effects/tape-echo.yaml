@@ -1,0 +1,73 @@
+# The Tape echo, a tape machine's: a delay line whose loop runs through a highpass, a lowpass and a soft clip, its time wandering with wow.
+# Beside the library's TapeDelay (the Delay and a sine wobble, nothing in its loop but a lowpass with a bump), which stays on `delay`.
+# Written whole, not on the Delay: its loop is rewired.
+#   1. its sound into the line, the line into the highpass, the lowpass and the soft clip, out;
+#   2. the clip back into the line through the loop's gain, its feedback;
+#   3. the wow, drift at about 1 Hz scaled by its depth, and the wobble, a sine, into the line's time, by its ms.
+# Every echo has been through the tape once more: the highpass takes the lows each pass (100 Hz), the lowpass darkens it, and the clip passes a
+# quiet echo as it comes and holds the loop under half of full scale (a drive of 2), so a feedback over 1 sings and doesn't run away.
+# The clip is not oversampled: its lag would lengthen the loop. 100 Hz to 3 kHz in the loop, a soft clip, noise at about 1 Hz.
+# The wow's 0.5 ms rms (a pitch off by about 0.3 % rms) and the drive are estimates:
+# no source gives the RE-201's depth. A signal into a delay's time moves its line in seconds: a depth of 0.0005 moves it 0.5 ms rms.
+kind: TapeEcho
+label: Tape echo
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: line, kind: delay }
+  - { name: lows, kind: filter, values: { frequency: 100, resonance: 0.707 }, settings: { type: highpass } }
+  - { name: lowpass, kind: filter, values: { resonance: 0.707 } }
+  - { name: clip, kind: shaper, values: { drive: 2, shape: 0, oversample: none } }
+  - { name: loop, kind: gain }
+  - { name: wow, kind: wow }
+  - { name: wow depth, kind: gain, values: { gain: 0.0005 } }
+  - { name: wobble, kind: oscillator }
+  - { name: depth, kind: gain, values: { gain: 0 } }
+wires:
+  - { from: { input: in }, to: { node: line, input: in } }
+  - { from: { node: line, output: out }, to: { node: lows, input: in } }
+  - { from: { node: lows, output: out }, to: { node: lowpass, input: in } }
+  - { from: { node: lowpass, output: out }, to: { node: clip, input: in } }
+  - { from: { node: clip, output: out }, to: { output: out } }
+  - { from: { node: clip, output: out }, to: { node: loop, input: in } }
+  - { from: { node: loop, output: out }, to: { node: line, input: in } }
+  - { from: { node: wow, output: out }, to: { node: wow depth, input: in } }
+  - { from: { node: wow depth, output: out }, to: { node: line, param: ms } }
+  - { from: { node: wobble, output: out }, to: { node: depth, input: in } }
+  - { from: { node: depth, output: out }, to: { node: line, param: ms } }
+macros:
+  - { name: sync, maps: [{ to: [line, sync], factor: 1, offset: 0 }] }
+  - { name: note, maps: [{ to: [line, note], factor: 1, offset: 0 }] }
+  - { name: ms, maps: [{ to: [line, ms], factor: 1, offset: 0 }] }
+  - name: feedback
+    hint: 'How much of each echo comes round again, a share: over 1 it sings, held under half of full scale by the clip.'
+    spec: { range: [0, 1.2, 0.01], default: 0.45 }
+    maps: [{ to: [loop, gain], factor: 1, offset: 0 }]
+  - name: tone
+    hint: "The loop's lowpass, in hertz: each repeat is darker."
+    spec: { unit: Hz, range: [100, 12000, 10], default: 2400 }
+    maps: [{ to: [lowpass, frequency], factor: 1, offset: 0 }]
+  - name: low cut
+    hint: "The loop's highpass, in hertz: each repeat thinner."
+    spec: { unit: Hz, range: [20, 1000, 1], default: 100, taper: octaves }
+    maps: [{ to: [lows, frequency], factor: 1, offset: 0 }]
+  - name: drive
+    hint: "How hard the loop's soft clip is driven, a share shown in dB: it holds the loop under 1 / drive of full scale."
+    spec: { range: [0, 36, 0.1], dB: true, default: 2 }
+    maps: [{ to: [clip, drive], factor: 1, offset: 0 }]
+  - name: wow
+    hint: "How far the wow moves the line's time, in seconds rms."
+    spec: { unit: s, range: [0, 0.005, 0.0001], default: 0.0005 }
+    maps: [{ to: [wow depth, gain], factor: 1, offset: 0 }]
+  - name: wow rate
+    hint: 'How fast the wow wanders, in hertz.'
+    maps: [{ to: [wow, frequency], factor: 1, offset: 0 }]
+  - name: rate
+    hint: "The wobble's rate, in hertz: a tape's speed, regular."
+    spec: { unit: Hz, range: [0.05, 5, 0.01], default: 0.5, taper: octaves }
+    maps: [{ to: [wobble, frequency], factor: 1, offset: 0 }]
+  - name: depth
+    hint: "How far the wobble moves the line's time, in seconds either way."
+    spec: { unit: s, range: [0, 0.02, 0.0005], default: 0 }
+    maps: [{ to: [depth, gain], factor: 1, offset: 0 }]
