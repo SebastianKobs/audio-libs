@@ -27,7 +27,7 @@ export { automate } from './automation.ts';
 export { Buffers, impulse, noise } from './buffers.ts';
 export { biquadOf } from './blocks/filter.ts';
 export { SourceTimes } from './blocks/source-times.ts';
-export { limiterNodes, makeupOf } from './blocks/limiter.ts';
+export { limiterNodes } from './blocks/limiter.ts';
 export { panOf, type PanLaw } from './blocks/pan.ts';
 export { meterOn, type PeakMeter } from './meters.ts';
 export { FADE_IN, FADE_OUT, Output } from './output.ts';

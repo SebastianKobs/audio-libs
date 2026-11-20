@@ -19,7 +19,7 @@ import { SATURATION_SPECS } from '../../../plan/blocks/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
 import { BuiltNode } from '../built-node.ts';
 import { numberOf, valueOf, type Making } from '../making.ts';
-import { ParamInUnits, toldParam, type Automatable } from '../param-units.ts';
+import { heldBy, ParamInUnits, toldParam } from '../param-units.ts';
 import { OnePoleBetween } from './one-pole.ts';
 
 const BUTTERWORTH_Q = -3.01; // dB, as Web Audio reads a lowpass's or a highpass's Q: flat to the cutoff
@@ -130,33 +130,4 @@ function peakAt(filter: BiquadFilterNode, peak: Peak | undefined): void {
   if (peak) {
     filter.Q.value = peak.q;
   }
-}
-// a param that keeps what it's told, every way it's told it, then passes it on
-function heldBy(param: Automatable, hold: (value: number) => void): Automatable {
-  return {
-    get value() {
-      return param.value;
-    },
-    set value(value: number) {
-      hold(value);
-      param.value = value;
-    },
-    setValueAtTime(value, at) {
-      hold(value);
-      return param.setValueAtTime(value, at);
-    },
-    linearRampToValueAtTime(value, at) {
-      hold(value);
-      return param.linearRampToValueAtTime(value, at);
-    },
-    exponentialRampToValueAtTime(value, at) {
-      hold(value);
-      return param.exponentialRampToValueAtTime(value, at);
-    },
-    setTargetAtTime(value, at, timeConstant) {
-      hold(value);
-      return param.setTargetAtTime(value, at, timeConstant);
-    },
-    cancelScheduledValues: (at) => param.cancelScheduledValues(at),
-  };
 }

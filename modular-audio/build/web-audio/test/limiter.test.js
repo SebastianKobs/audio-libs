@@ -7,11 +7,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
-import { makeupOf, WebAudioBuilder } from '../index.ts';
+import { WebAudioBuilder } from '../index.ts';
 import { blockNode, builtOn, last, oneBlockPlan } from './blocks.js';
 import { near } from '../../../../base/util/test/near.js';
+import { compressorMakeup } from '../../../../dsp/dynamics/index.ts';
 
 const dB = (gain) => 20 * Math.log10(gain);
+// Web Audio's make-up at a hard knee, as the limiter takes it back
+const makeupOf = (threshold, ratio) => compressorMakeup({ threshold, knee: 0, ratio });
 
 // a limiter built on a stand-in context at 12 s, into its output; its drive, its compressor and its makeup taken back, in the
 // order the sound goes through them

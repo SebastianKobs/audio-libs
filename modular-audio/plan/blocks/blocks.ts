@@ -1,7 +1,9 @@
 // ---------- plan/blocks/blocks: every block, by its kind ----------
 // The list each builder checks itself against: each one built, or a placeholder put in.
+import compressor from './compressor.ts';
 import crusher from './crusher.ts';
 import delay from './delay.ts';
+import eqBand from './eq-band.ts';
 import envelope from './envelope.ts';
 import filter from './filter.ts';
 import gain from './gain.ts';
@@ -15,12 +17,15 @@ import oscillator from './oscillator.ts';
 import pan from './pan.ts';
 import phaseDistortion from './phase-distortion.ts';
 import reverb from './reverb.ts';
+import room from './room.ts';
 import saturatingFilter from './saturating-filter.ts';
 import saturation from './saturation.ts';
 import select from './select.ts';
+import shaper from './shaper.ts';
 import shaperLag from './shaper-lag.ts';
 import syncOscillator from './sync-oscillator.ts';
 import tilt from './tilt.ts';
+import wow from './wow.ts';
 import { frozen } from '../../../base/util/index.ts';
 import type { Block } from './block.ts';
 
@@ -50,4 +55,9 @@ export const BLOCKS = frozen({
   crusher,
   grains,
   'saturating filter': saturatingFilter,
+  shaper,
+  'eq band': eqBand,
+  compressor,
+  wow,
+  room,
 }) satisfies Readonly<Record<string, Block>>;

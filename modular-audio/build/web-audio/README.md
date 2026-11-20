@@ -2,7 +2,7 @@
 
 The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds the plan and hands back what's built, a `Built`. It knows no planner, channel, desk, effect or instrument, and is the only code that makes Web Audio nodes. What's built is fed, metered and taken apart.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `dsp/crusher`, `dsp/filters`, `dsp/grains`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/grains`, `dsp/impulse`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `dsp/wow`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
 
 ```ts
 import { WebAudioBuilder } from './index.ts';
@@ -46,6 +46,11 @@ How a block is made:
 | `crusher` | A worklet node of its processor, one input and one output, its bits and rate its AudioParams; a placeholder where the worklet hasn't loaded. |
 | `grains` | A worklet node of its processor, one input and one output, its six params its AudioParams, handed what it keeps (2 s) and a seed drawn once from the builder's random; a placeholder where the worklet hasn't loaded. |
 | `saturating filter` | A worklet node of its processor, one input and one output, a filter a channel, its six params its AudioParams (its mode by its index), a seed drawn once from the builder's random, told `{ stop }` by message as a source is; the library's `filter` at the mode's type and slope where the worklet hasn't loaded, its resonance a Q by octaves from flat to 30, its drive, compensation and mode held and heard nowhere. |
+| `shaper` | A waveshaper of the curve its drive and shape make, made again each time either is told; its oversampling Web Audio's own. |
+| `eq band` | One biquad, its type Web Audio's own for each choice, its gain in dB; a highpass's Q told again in dB as the type changes. |
+| `compressor` | The browser's compressor into a gain that takes its make-up back, worked out from the threshold, the knee and the ratio (`dsp/dynamics`), each held and told to both, so a quiet sound passes at its level. |
+| `wow` | A looping buffer source of 64 s of drift (`dsp/wow`), one draw of the builder's random its seed, its frequency the playback rate; started with the rest. |
+| `room` | A convolver of a designed impulse (`dsp/impulse`), normalizing off and one channel in, its six params the design: the buffer of a design comes from the builder's `Buffers`, so a design asked again draws nothing. |
 | `envelope` | A constant source following the curve from its gate, added to the params it's wired into. |
 | `select` | A gain at 1 on the input its setting names. |
 
@@ -59,8 +64,8 @@ How a block is made:
 | `BuiltNode`, `WebAudioNode` | One built node, a Web Audio node or several in one shape, its params found by the plan's names; `WebAudioNode` is one of Web Audio's (`built-node.ts`). |
 | `ParamInUnits`, `Automatable` | A param in the plan's units (dB, dBFS) that moves each Web Audio param behind it in its own; `Automatable` is what a plan's automation moves (`param-units.ts`). |
 | `automate()` | A param told its automation from a time, each event as Web Audio schedules it (`automation.ts`). |
-| `Buffers`, `noise()`, `impulse()` | The buffers a noise or a reverb plays, each made once by what it is and how long; `noise()` and `impulse()` make their samples (`buffers.ts`). |
-| `biquadOf()`, `panOf()`, `PanLaw`, `limiterNodes()`, `makeupOf()` | A biquad with its Q a plain ratio, a pan by its law (stereo or pan pot), a limiter built of several nodes, and the makeup Web Audio's compressor adds, taken back (`blocks/`). |
+| `Buffers`, `noise()`, `impulse()` | The buffers a noise, a reverb or a room plays, each made once by what it is and how long, a room's by its design (`room()`); `noise()` and `impulse()` make their samples (`buffers.ts`). |
+| `biquadOf()`, `panOf()`, `PanLaw`, `limiterNodes()` | A biquad with its Q a plain ratio, a pan by its law (stereo or pan pot), and a limiter built of several nodes, the makeup Web Audio's compressor adds taken back (`blocks/`). |
 | `SourceTimes`, `ScheduledSource` | A source's start and stop as a maker keeps them: `new SourceTimes(source, { stop, now })` starts it at its time and stops it its `stop` after, or by a time sooner, as what it plays into has gone silent. A `ScheduledSource` is any with `start()` and `stop()`: a node's, or one a processor is told of by message, which is no node (`blocks/source-times.ts`, `making.ts`). |
 | `meterOn()`, `PeakMeter` | A meter on a node, a splitter and an analyser for each side; its `peak()` is the loudest sample of its last 1,024 (`meters.ts`). |
 | `Output`, `FADE_IN`, `FADE_OUT` | The output after what's built, a gain of its own into where the sound goes: faded in from silence so no sound starts at full volume, faded out to pause, kept awake by a silent source (`output.ts`). |
@@ -76,4 +81,4 @@ What a studio needs of what's built, beyond the contract, is Web Audio's own, no
 - A meter on a node's main output by its address, or at a point inside a block (a limiter's `in` and `out`), made at its first read.
 - What a block says of itself by name (a limiter's `reduction`, an envelope's `faded`), and the nodes under an address.
 
-Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js`, `test/drive-blocks.test.js`, `test/worklet-sources.test.js`, `test/worklet-effects.test.js`, `test/shaper-lags.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.
+Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js`, `test/drive-blocks.test.js`, `test/worklet-sources.test.js`, `test/worklet-effects.test.js`, `test/plain-blocks.test.js`, `test/shaper-lags.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.

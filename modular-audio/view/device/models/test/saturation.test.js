@@ -6,22 +6,7 @@ import assert from 'node:assert/strict';
 import { Choice, Knob, saturationDrawing, ViewBuilder } from '../index.ts';
 import { BLOCKS } from '../../../../plan/blocks/index.ts';
 import { planReadoutOf } from '../../readout/test/plan-readout.js';
-
-// a block alone as a plan, its params at their defaults
-function lone(kind) {
-  const { inputs, outputs, params, settings } = BLOCKS[kind];
-  return {
-    version: 1,
-    node: {
-      name: kind,
-      kind,
-      inputs: [...inputs],
-      outputs: [...outputs],
-      params: params.map((spec) => ({ spec, value: spec.default })),
-      settings: settings.map((spec) => ({ spec, value: spec.default })),
-    },
-  };
-}
+import { lone } from './lone-block.js';
 
 test("each of the Drive's blocks a device: a knob for each ranged param, a choice for each with choices, in its block's order", () => {
   for (const kind of ['saturation', 'one pole', 'tilt', 'shaper lag']) {

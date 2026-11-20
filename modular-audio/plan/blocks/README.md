@@ -39,6 +39,11 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `crusher` | bits (16 near clean, 4 a grit), rate (Hz, by octaves, the sampler's: how often a sample is taken and held) | | in; out |
 | `grains` | freeze (a switch), position (s back from now), size (s), density (grains a second), pitch (semitones), spray (s a grain's start strays); a tail: the grains ring on past the input | | in; out |
 | `saturating filter` | frequency (Hz, by octaves), detune (cents, eight octaves either way), resonance (0 to 1, singing past 0.909), drive (by octaves), compensation (the ladder's thinned lows given back), mode (ladder, lowpass, bandpass, highpass, changed as it plays) | | in; out |
+| `shaper` | drive (a share shown in dB, 0 to +36: where the knee sits, at 1 / drive of full scale), shape (0 a soft knee, 1 a hard one), oversample (none, 2x, 4x, 2x to start): a waveshaper that never comes out louder than it went in | | in; out |
+| `eq band` | type (highpass, low shelf, peak, high shelf, changed as it plays), frequency (Hz, by octaves), gain (a share shown in dB, -24 to +24), resonance (Q, a plain ratio, 0.707 flat) | | in; out |
+| `compressor` | threshold (dBFS), knee (dB), ratio, attack (s), release (s): at a gentle ratio and a soft knee, for glue | | in; out |
+| `wow` | frequency (Hz, by octaves, 0.1 to 10): drift that wanders at about it, never repeating inside 64 s, an rms of 1 | | none; out, mono |
+| `room` | decay (s, the middle band down 60 dB), pre delay (s), taps (early echoes a side), dense (s until the echoes are dense), low decay and high decay (each band's time as a share of decay); a tail: the room rings on past the input | | in; out, stereo |
 
 How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a resistor and a capacitor charging) done at its time, on numbers its caller resolved.
 
@@ -62,7 +67,8 @@ How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a
 | `SYNC_OSCILLATOR_SPECS`, `OPERATORS_SPECS`, `PHASE_DISTORTION_SPECS` | The params of the worklet sources by name, a builder reading a choice's index from them (`sync-oscillator.ts`, `operators.ts`, `phase-distortion.ts`). |
 | `CRUSHER_SPECS`, `GRAINS_SPECS`, `GRAINS_MEMORY`, `SATURATING_FILTER_SPECS` | The params of the worklet effects by name, and the seconds of its input the grains keep; a processor reads its defaults and ranges from them (`crusher.ts`, `grains.ts`, `saturating-filter.ts`). |
 | `REVERB_LENGTH` | How long a reverb's tail is (`reverb.ts`). |
-| `SATURATION_SPECS`, `OVERSAMPLE` | A saturation's drive, punish, style, auto and oversample; the oversampling a saturation and a shaper lag share, named as Web Audio names it, 4x to start (`saturation.ts`). |
+| `SATURATION_SPECS`, `OVERSAMPLE` | A saturation's drive, punish, style, auto and oversample; the oversampling a saturation, a shaper lag and a shaper share, named as Web Audio names it, 4x to start (`saturation.ts`). |
+| `SHAPER_SPECS`, `EQ_BAND_SPECS` | The params of the shaper and the eq band by name, a builder reading a choice's index from them (`shaper.ts`, `eq-band.ts`). |
 | `envelopeStages()`, `envelopeRelease()`, `envelopeCurve()`, `EnvelopeTimes` | An envelope's stages from its gate opening, its release from its gate closing and when it has faded, and its whole curve from a gate opening at a time, released where the gate has closed (`envelope-curve.ts`). |
 | `CHARGED`, `DONE` | The time constants an attack takes to charge and a decay or a release takes to be done, for a test of any builder's curve (`envelope-curve.ts`). |
 

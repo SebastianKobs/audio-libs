@@ -84,3 +84,33 @@ export function toldParam(read: () => number, told: (value: number, at?: number)
     cancelScheduledValues: () => undefined,
   };
 }
+// A param that keeps what it's told, every way it's told it, then passes it on: a block's own value (a drive, a ratio)
+// that other params are worked out from.
+export function heldBy(param: Automatable, hold: (value: number) => void): Automatable {
+  return {
+    get value() {
+      return param.value;
+    },
+    set value(value: number) {
+      hold(value);
+      param.value = value;
+    },
+    setValueAtTime(value, at) {
+      hold(value);
+      return param.setValueAtTime(value, at);
+    },
+    linearRampToValueAtTime(value, at) {
+      hold(value);
+      return param.linearRampToValueAtTime(value, at);
+    },
+    exponentialRampToValueAtTime(value, at) {
+      hold(value);
+      return param.exponentialRampToValueAtTime(value, at);
+    },
+    setTargetAtTime(value, at, timeConstant) {
+      hold(value);
+      return param.setTargetAtTime(value, at, timeConstant);
+    },
+    cancelScheduledValues: (at) => param.cancelScheduledValues(at),
+  };
+}

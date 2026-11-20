@@ -1,5 +1,5 @@
 // The blocks' unit tests (mockup/src/libs/modular-audio/plan/blocks): the contract every builder meets.
-//   - the twenty-one blocks, each declared by its kind;
+//   - the twenty-six blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its choices, units and defaults;
@@ -13,8 +13,10 @@ import {
   CRUSHER_SPECS,
   GRAINS_MEMORY,
   GRAINS_SPECS,
+  EQ_BAND_SPECS,
   OVERSAMPLE,
   SATURATING_FILTER_SPECS,
+  SHAPER_SPECS,
 } from '../index.ts';
 import { near } from '../../../../base/util/test/near.js';
 import { onControl } from '../../../../base/params/test/on-control.js';
@@ -42,6 +44,11 @@ const KINDS = [
   'crusher',
   'grains',
   'saturating filter',
+  'shaper',
+  'eq band',
+  'compressor',
+  'wow',
+  'room',
 ];
 const WAVES = 'W1|W2|W3|W4|W5|W6|W7|W8';
 const MONO = 1;
@@ -73,7 +80,7 @@ function declared({ params, settings, inputs, outputs }) {
   };
 }
 
-test('the twenty-one blocks, each declared by its kind, the contract every builder meets', () => {
+test('the twenty-six blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -237,6 +244,31 @@ test("what each block declares, in short standard terms: its params and settings
       inputs: ['in'],
       outputs: ['out'],
     },
+    shaper: {
+      params: ['drive =1', 'shape =0', 'oversample none|2x|4x =2x'],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
+    'eq band': {
+      params: ['type highpass|low shelf|peak|high shelf =peak', 'frequency Hz =1000', 'gain =1', 'resonance =0.707'],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
+    compressor: {
+      params: ['threshold dBFS =-18', 'knee dB =6', 'ratio =2', 'attack s =0.02', 'release s =0.2'],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
+    wow: { params: ['frequency Hz =1'], settings: [], inputs: [], outputs: [`out ${MONO}`] },
+    room: {
+      params: ['decay s =1', 'pre delay s =0.02', 'taps =8', 'dense s =0.08', 'low decay =1', 'high decay =0.5'],
+      settings: [],
+      inputs: ['in'],
+      outputs: [`out ${STEREO}`],
+    },
   });
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   for (const [kind, name] of [
@@ -330,4 +362,22 @@ test("the grains' memory and the three blocks' specs are read by their builders 
     ['ladder', 'lowpass', 'bandpass', 'highpass'],
     "the processor's indexes",
   );
+});
+
+test("the plain blocks' choices are params, changed as they play: no settings; a wow a source, a room a tail", () => {
+  for (const kind of ['shaper', 'eq band', 'compressor', 'wow', 'room']) {
+    assert.deepEqual(BLOCKS[kind].settings, [], `${kind}: no settings`);
+  }
+  assert.deepEqual(BLOCKS.wow.inputs, [], 'a source');
+  assert.equal(BLOCKS.room.tail, true, "its room rings on past its input, so Silence doesn't cut it off");
+  for (const kind of ['shaper', 'eq band', 'compressor', 'wow']) {
+    assert.equal(BLOCKS[kind].tail, undefined, kind);
+  }
+  assert.deepEqual([BLOCKS.wow.params[0].taper, BLOCKS['eq band'].params[1].taper], ['octaves', 'octaves']);
+});
+
+test("a shaper's oversampling is the saturation's choices at 2x to start, an eq band's type read by its builder by name", () => {
+  assert.deepEqual(SHAPER_SPECS.oversample.choices, OVERSAMPLE.choices, "Web Audio's own names");
+  assert.equal(SHAPER_SPECS.oversample.default, '2x');
+  assert.deepEqual(EQ_BAND_SPECS.type.choices, ['highpass', 'low shelf', 'peak', 'high shelf']);
 });
