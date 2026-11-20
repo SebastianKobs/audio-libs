@@ -1,5 +1,5 @@
 // The blocks' unit tests (mockup/src/libs/modular-audio/plan/blocks): the contract every builder meets.
-//   - the eleven blocks, each declared by its kind;
+//   - the fifteen blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its choices, units and defaults;
@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { isDeepStrictEqual } from 'node:util';
-import { BLOCKS, biquadQs } from '../index.ts';
+import { BLOCKS, biquadQs, OVERSAMPLE } from '../index.ts';
 import { near } from '../../../../base/util/test/near.js';
 import { onControl } from '../../../../base/params/test/on-control.js';
 import { FADER_GAIN, isSwitch, NOTE_VALUES, timeParamsIn } from '../../../../base/params/index.ts';
@@ -24,6 +24,10 @@ const KINDS = [
   'lookahead limiter',
   'envelope',
   'select',
+  'saturation',
+  'one pole',
+  'tilt',
+  'shaper lag',
 ];
 const MONO = 1;
 const STEREO = 2;
@@ -54,7 +58,7 @@ function declared({ params, settings, inputs, outputs }) {
   };
 }
 
-test('the eleven blocks, each declared by its kind, the contract every builder meets', () => {
+test('the fifteen blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -132,6 +136,21 @@ test("what each block declares, in short standard terms: its params and settings
       outputs: [`out ${MONO}`],
     },
     select: { params: [], settings: ['input a|b =a'], inputs: ['a', 'b'], outputs: ['out'] },
+    saturation: {
+      params: [
+        'drive =1',
+        'punish =0',
+        'style smooth|console|germanium|triode|pentode =smooth',
+        'auto =1',
+        'oversample none|2x|4x =4x',
+      ],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
+    'one pole': { params: ['frequency Hz =24000'], settings: [], inputs: ['in'], outputs: ['out'] },
+    tilt: { params: ['tilt =1', 'frequency Hz =800'], settings: [], inputs: ['in'], outputs: ['out'] },
+    'shaper lag': { params: ['oversample none|2x|4x =4x'], settings: [], inputs: ['in'], outputs: ['out'] },
   });
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   for (const [kind, name] of [
@@ -171,4 +190,12 @@ test("a filter's stages, for a builder that builds it from biquads: at 12 dB one
     1e-4,
   );
   assert.deepEqual(biquadQs({ type: 'bandpass', resonance: 3, slope: '24' }), [3, 3]);
+});
+
+test("a saturation's oversampling and a shaper lag's the one spec, so the dry is held back as long as the wet at the same choice, 4x to start", () => {
+  const oversample = (kind) => BLOCKS[kind].params.find(({ name }) => name === 'oversample');
+  assert.deepEqual(oversample('saturation'), OVERSAMPLE);
+  assert.deepEqual(oversample('shaper lag'), OVERSAMPLE);
+  assert.deepEqual(OVERSAMPLE.choices, ['none', '2x', '4x'], "Web Audio's own names");
+  assert.equal(OVERSAMPLE.default, '4x');
 });

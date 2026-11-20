@@ -9,7 +9,7 @@
 import { BLOCKS } from '../../../plan/blocks/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
 import { BuiltNode } from '../built-node.ts';
-import { valueOf, type Making } from '../making.ts';
+import { numberOf, type Making } from '../making.ts';
 import { toldParam } from '../param-units.ts';
 import { limiter } from './limiter.ts';
 
@@ -72,8 +72,4 @@ function limiterInstead(node: Node, making: Making): BuiltNode {
     readings: { ...library.readings },
     kind: 'a limiter, for a lookahead limiter',
   });
-}
-// a param's value as it starts, a number: its block's default where the plan leaves it out
-function numberOf(node: Node, name: string): number {
-  return Number(valueOf(node, name));
 }

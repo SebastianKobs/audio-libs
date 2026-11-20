@@ -3,9 +3,10 @@
 //   - the Web Audio builder in the engine's audio context, into where it's told;
 //   - the time now the context's, a clock's time put on it;
 //   - the noise's buffers made with the first builder, shared by every one in that context;
-//   - its own draws, where it's kept apart from the others.
+//   - its own draws, where it's kept apart from the others;
+//   - the processors loaded into the context and the shapers' lags measured in it, as far as they have been.
 import type { EngineOnceStarted } from './power.ts';
-import { Buffers, WebAudioBuilder, type Worklets } from '../web-audio/index.ts';
+import { Buffers, WebAudioBuilder, type Lags, type Worklets } from '../web-audio/index.ts';
 
 // a builder in a context, into where it's told; the time now, a clock's time on it
 export interface BuildingIn {
@@ -15,7 +16,7 @@ export interface BuildingIn {
   readonly at: (t: number) => number;
 }
 // What building in a context of its own is handed: its context, where its sound goes, a clock's
-// time on it, a beat's length now, the buffers, its own draws, the worklets loaded into the context where there are any.
+// time on it, a beat's length now, the buffers, its own draws, the worklets loaded into the context and its shapers' lags where there are any.
 interface InContext {
   readonly context: BaseAudioContext;
   readonly into: AudioNode;
@@ -24,6 +25,7 @@ interface InContext {
   readonly buffers: Buffers;
   readonly draws?: (() => number) | undefined;
   readonly worklets?: Worklets | undefined;
+  readonly shaperLags?: Lags | undefined;
 }
 
 export class EngineBuilding {
@@ -51,14 +53,22 @@ export class EngineBuilding {
       buffers: this.#buffers,
       draws,
       worklets: engine.worklets,
+      shaperLags: engine.shaperLags,
     });
   }
 }
 
 // Building in a context of its own, as an offline render asks.
-export function buildingIn({ context, into, at, beat, buffers, draws, worklets }: InContext): BuildingIn {
+export function buildingIn({ context, into, at, beat, buffers, draws, worklets, shaperLags }: InContext): BuildingIn {
   return {
-    builder: new WebAudioBuilder({ context, beat, buffers, ...(draws && { draws }), ...(worklets && { worklets }) }),
+    builder: new WebAudioBuilder({
+      context,
+      beat,
+      buffers,
+      ...(draws && { draws }),
+      ...(worklets && { worklets }),
+      ...(shaperLags && { shaperLags }),
+    }),
     into,
     now: () => context.currentTime,
     at,

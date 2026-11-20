@@ -2,7 +2,7 @@
 
 The building blocks: nodes with no inside, declared. Every builder meets the same contract: each block is built, or a placeholder is put in, its audio passed straight through, a source silent. Kept small and fixed, beside `plan/format`. It holds how an envelope moves.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/plan/format`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/saturation`, `modular-audio/plan/format`.
 
 ```ts
 import { BLOCKS, biquadQs, envelopeCurve } from './index.ts';
@@ -29,6 +29,10 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `lookahead limiter` | gain (dB), ceiling (dBTP: the true peak, between the samples too), release (s), clip (dB the soft clip lets a peak over the ceiling, before the gain takes the rest); its lookahead each builder's own, 5 ms | | in; out |
 | `envelope` | gate, a switch; delay, attack, hold, decay (s, 0 to start); sustain (a share of the amount, 1 to start); release (s, 0.1 to start); amount (1 to start) | mode: the gate's, or a trigger's running on past the note-off, as Ableton's | none; out, mono |
 | `select` | | input: a, b, the one passed on, the other going nowhere, as a console's PRE button picks where a send is taken | a, b; out |
+| `saturation` | drive (a share shown in dB, 0 to +36), punish (+20 dB on top, for a quiet sound to get past the knee), style (smooth, console, germanium, triode, pentode: a curve and its colors, from `dsp/saturation`), auto (how much of the level the drive adds is taken back, 1 all), oversample (none, 2x, 4x) | | in; out |
+| `one pole` | frequency (Hz, by octaves, wide open to start): a lowpass at 6 dB an octave, gentler than any filter | | in; out |
+| `tilt` | tilt (a share shown in dB, -12 to +12: the highs up by half of it, the lows down by half), frequency (the pivot, 800 Hz to start) | | in; out |
+| `shaper lag` | oversample (none, 2x, 4x), the saturation's, so a dry is held back as long as the oversampled wet | | in; out |
 
 How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a resistor and a capacitor charging) done at its time, on numbers its caller resolved.
 
@@ -50,6 +54,7 @@ How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a
 | `WAVE`, `DETUNE` | An oscillator's wave and its detune (`oscillator.ts`). |
 | `FILTER_SLOPE`, `RESONANCE`, `biquadQs()`, `FilterStages` | A filter's slope and its resonance, Q as a plain ratio, 0.707 flat. `biquadQs({ type, resonance, slope })` gives the Qs of the biquads in series that build it: one at 12 dB an octave, two at 24, a 4th-order Butterworth's for a lowpass or a highpass (`filter.ts`). |
 | `REVERB_LENGTH` | How long a reverb's tail is (`reverb.ts`). |
+| `SATURATION_SPECS`, `OVERSAMPLE` | A saturation's drive, punish, style, auto and oversample; the oversampling a saturation and a shaper lag share, named as Web Audio names it, 4x to start (`saturation.ts`). |
 | `envelopeStages()`, `envelopeRelease()`, `envelopeCurve()`, `EnvelopeTimes` | An envelope's stages from its gate opening, its release from its gate closing and when it has faded, and its whole curve from a gate opening at a time, released where the gate has closed (`envelope-curve.ts`). |
 | `CHARGED`, `DONE` | The time constants an attack takes to charge and a decay or a release takes to be done, for a test of any builder's curve (`envelope-curve.ts`). |
 

@@ -1,5 +1,5 @@
 // ---------- build/web-audio/making: what a block's maker is handed ----------
-// The context and its buffers, the beat, whether it can pan, the random a noise draws from, the worklets; and
+// The context and its buffers, the beat, whether it can pan, the random a noise draws from, the worklets, the shapers' lags; and
 // hands for what it makes:
 //   - kept(): a node made, taken apart with the rest;
 //   - started(): a source, started at its time with the rest, by its own way where it has one,
@@ -12,6 +12,7 @@ import { BLOCKS, type BlockKind } from '../../plan/blocks/index.ts';
 import type { Node } from '../../plan/format/index.ts';
 import type { Buffers } from './buffers.ts';
 import type { BuiltNode } from './built-node.ts';
+import type { Lags } from './shaper-lags.ts';
 import type { Worklets } from './worklets.ts';
 
 // what a maker is handed
@@ -22,6 +23,7 @@ export interface Making {
   readonly canPan: boolean;
   readonly random: () => number;
   readonly worklets: Worklets;
+  readonly shaperLags: Lags;
   kept<Made extends AudioNode>(node: Made): Made;
   started<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source;
   followsTempo(follower: TempoFollower): void;
@@ -39,6 +41,10 @@ export type Maker = (node: Node, making: Making) => BuiltNode;
 // a block's param's value as it starts, by its name; its block's default where a plan leaves it out
 export function valueOf(node: Node, name: string): number | string | undefined {
   return node.params.find((param) => param.spec.name === name)?.value ?? declaredOf(node, 'params', name);
+}
+// a block's param's value as it starts, a number
+export function numberOf(node: Node, name: string): number {
+  return Number(valueOf(node, name));
 }
 // a block's setting, by its name; its block's default where a plan leaves it out
 export function settingOf(node: Node, name: string): number | string | undefined {

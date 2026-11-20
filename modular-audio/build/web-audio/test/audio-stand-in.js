@@ -19,6 +19,8 @@ const PARAMS = {
   delay: { delayTime: 0 },
   compressor: { threshold: -24, knee: 30, ratio: 12, attack: 0.003, release: 0.25 },
   convolver: {},
+  waveshaper: {},
+  iir: {},
   destination: {},
   analyser: {},
   splitter: {},
@@ -29,6 +31,7 @@ const PROPS = {
   biquad: { type: 'lowpass' },
   buffer: { buffer: null, loop: false },
   convolver: { buffer: null, normalize: true },
+  waveshaper: { curve: null, oversample: 'none' },
 };
 
 // The links back, a param's node and a node's context, are private, read by a getter.
@@ -213,6 +216,13 @@ export class StandInContext {
     c.reduction = 0;
     return c;
   } // reduction: what it takes away now, in dB, as a test sets it
+  createWaveShaper() {
+    return new StandInNode(this, 'waveshaper');
+  }
+  // an IIR filter, its coefficients kept as it's made with them: they can't change
+  createIIRFilter(feedforward, feedback) {
+    return new StandInNode(this, 'iir', { feedforward: [...feedforward], feedback: [...feedback] });
+  }
   createDelay(max = 1) {
     return new StandInNode(this, 'delay', { max });
   }
@@ -283,6 +293,16 @@ function num(value) {
   }
   return String(value);
 }
+// a node's prop as recorded: a buffer or a shaper's curve by its size, not every sample, which a failing assertion would print in full
+function propInfo(name, value) {
+  if (name === 'buffer') {
+    return bufferInfo(value);
+  }
+  if (name === 'curve') {
+    return value && { length: value.length };
+  }
+  return num(value);
+}
 function bufferInfo(b) {
   if (!b) {
     return null;
@@ -325,7 +345,7 @@ export function canonical(rec, names, t0 = 0) {
       d.max = num(n.extra.max);
     }
     for (const [k, v] of Object.entries(n.props)) {
-      d[k] = k === 'buffer' ? bufferInfo(v) : num(v);
+      d[k] = propInfo(k, v);
     }
     const params = {};
     for (const name of Object.keys(PARAMS[n.kind])) {

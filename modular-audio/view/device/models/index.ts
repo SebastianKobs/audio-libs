@@ -10,5 +10,6 @@ export { LimiterHistory, type Peaks } from './limiter-history.ts';
 export { CustomViews } from './custom-views.ts';
 export { Control, type Device } from './device.ts';
 export { envelopeDrawing, type EnvelopeDrawing } from './envelope.ts';
+export { saturationDrawing, type SaturationDrawing } from './saturation.ts';
 export { Knob, textOf, type Ring } from './knob.ts';
 export { ViewBuilder, type MatrixRow } from './view-builder.ts';

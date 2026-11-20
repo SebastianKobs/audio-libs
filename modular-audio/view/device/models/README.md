@@ -1,8 +1,8 @@
 # modular-audio/view/device/models
 
-A plan's devices as view models, with no DOM: handed a plan and its values through a plan's readout, they hand back what a view shows of it and what it can do, as MVVM's view models do. Tested in node. Knobs, choices, a composite's groups, an envelope's curve and meters are among them, and the device view itself.
+A plan's devices as view models, with no DOM: handed a plan and its values through a plan's readout, they hand back what a view shows of it and what it can do, as MVVM's view models do. Tested in node. Knobs, choices, a composite's groups, an envelope's curve, a saturation's curve and meters are among them, and the device view itself.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/view/device/readout`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/saturation`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/view/device/readout`.
 
 ```ts
 import type { PlanReadout } from '../readout/index.ts';
@@ -27,6 +27,7 @@ if (level instanceof Knob) {
 | `Ring`, `textOf()` | A ring is the range a source moves a knob through. `textOf(spec, value)` is a value's text as a view shows it: a gain in dB, a pan by its side, any other to its step (`knob.ts`). |
 | `Choice` | A param or a setting with choices: its `options` and its `value`; `choose()` and `reset()` send a command where it's live (`choice.ts`). |
 | `envelopeDrawing()`, `EnvelopeDrawing` | An envelope's curve from its device's knobs, as the instrument plays it: a level a step, where its delay ends and the note's end marked. Where no length is asked, it's drawn held until it has settled onto its sustain, then its release (`envelope.ts`). |
+| `saturationDrawing()`, `SaturationDrawing` | A saturation's curve from its device's knobs and its style: what the sound comes out at a step across its input, -1 to 1, its curve driven and its level taken back, the colors aside (`saturation.ts`). |
 | `CustomViews` | A view of its own, registered by a node's kind (`register()`, `of()`), where a view is more than its params: a meter, the limiter's reduction, an envelope's curve (`custom-views.ts`). |
 | `meterFall()`, `Meters` | A level bar's fall as a DIN peak meter's, up at once to its peak and back down 20 dB in 1.5 s; `Meters` keeps each bar's level by its key, falling (`meters.ts`). |
 | `LimiterHistory`, `Peaks` | The limiter's history, oldest first, a column each interval holding the loudest in, out and taken away of its frames, the oldest let go (`limiter-history.ts`). |
@@ -35,4 +36,4 @@ if (level instanceof Knob) {
 
 The plan and its values by address are read through the plan's readout in one place, `model.ts`, which every control and `ViewBuilder` read through.
 
-Tests: `test/chosen.test.js`, `test/device-panel.test.js`, `test/envelope.test.js`, `test/meters.test.js`, `test/models.test.js` and `test/moves.test.js`.
+Tests: `test/chosen.test.js`, `test/device-panel.test.js`, `test/envelope.test.js`, `test/meters.test.js`, `test/models.test.js`, `test/moves.test.js` and `test/saturation.test.js`.

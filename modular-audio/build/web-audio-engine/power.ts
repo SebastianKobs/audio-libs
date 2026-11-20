@@ -1,12 +1,12 @@
 // ---------- build/web-audio-engine/power: the audio's power, started, paused and resumed ----------
-// Warm-up: at the page's load, before any touch. The engine made, as a start makes it (1 below), and the
-// processors' modules loaded into its context. Nothing built, the clock not on its time, nothing told, not
-// started: the context waits, suspended where the browser asks, for the first touch.
+// Warm-up: at the page's load, before any touch. The engine made, as a start makes it (1 below), the
+// processors' modules loaded into its context and its shapers' lags measured. Nothing built, the clock not on its
+// time, nothing told, not started: the context waits, suspended where the browser asks, for the first touch.
 // Start: on the first touch, as browsers ask.
 //   1. The engine made in the browser's audio, handed in: iOS's audio session set first, the
 //      audio context on the clock's time; the warmed-up one where there is one.
-//      An offline render's build() makes an engine of its own instead, and leaves that one.
-//   2. What's built built in it by the Web Audio builder, with the processors loaded by then, into
+//      An offline render's build() makes an engine of its own instead, and leaves that one; it measures no lags.
+//   2. What's built built in it by the Web Audio builder, with the processors loaded and the lags measured by then, into
 //      the output after it, faded in from silence; the context resumed.
 //   3. The clock's beat grid on the audio's time.
 //   4. Told to whoever listens: a background struck then.
@@ -22,10 +22,11 @@ import { Events } from '../../../base/util/index.ts';
 import { Output, WebAudioBuilder, type ProcessorModules, type WebAudioBuilt } from '../web-audio/index.ts';
 import { ClockedContext, type ClockedContextOptions } from './context.ts';
 
-// The browser's audio, as the page hands it in: its AudioContext class, and iOS's audio
-// session where there is one.
+// The browser's audio, as the page hands it in: its AudioContext class, its OfflineAudioContext
+// class where it has one, and iOS's audio session where there is one.
 export interface BrowserAudio {
   readonly AudioContext: ClockedContextOptions['AudioContext'];
+  readonly OfflineAudioContext?: ClockedContextOptions['OfflineAudioContext'];
   readonly audioSession?: { type: string } | undefined;
 }
 // What the power is made with:
@@ -71,15 +72,16 @@ export class AudioPower {
   get output(): Output | null {
     return this.#output;
   }
-  // The engine made ahead of the first touch, its processors loading: kept until the audio starts.
-  // Once the processors have loaded, or failed, as a promise; none to make where it's been warmed up or started.
-  warmUp(modules: ProcessorModules): Promise<void> {
+  // The engine made ahead of the first touch, its processors loading and its lags measured: kept until the audio starts.
+  // Once both are done, or failed, as a promise; none to make where it's been warmed up or started.
+  async warmUp(modules: ProcessorModules): Promise<void> {
     if (this.#engine || this.#warm) {
-      return Promise.resolve();
+      return;
     }
-    this.#warm = this.#makeEngine();
+    const engine = this.#makeEngine();
+    this.#warm = engine;
     this.#modules = modules;
-    return this.#warm.loadProcessors(modules);
+    await Promise.all([engine.loadProcessors(modules), engine.measureShaperLags()]);
   }
   // The audio started, once, then told; back on once started. Neither while paused.
   start(): void {
@@ -130,17 +132,18 @@ export class AudioPower {
     const context = engine.audioContext;
     this.#engine = engine;
     this.#output = new Output(context);
-    const builder = new WebAudioBuilder({ context, beat: this.#making.beat, worklets: engine.worklets });
+    const { worklets, shaperLags } = engine;
+    const builder = new WebAudioBuilder({ context, beat: this.#making.beat, worklets, shaperLags });
     const into = this.#output.node;
     this.#making.build((plan) => builder.build(plan, { into }));
     return engine;
   }
   // The engine: the audio context on the clock's time, iOS's audio session set first.
   #makeEngine(): ClockedContext {
-    const { AudioContext, audioSession } = this.#making.browser();
+    const { AudioContext, OfflineAudioContext, audioSession } = this.#making.browser();
     playThroughSilentSwitch(audioSession);
     const clock = this.#making.clock;
-    return new ClockedContext({ AudioContext, toContext: (t) => clock.audio.toContext(t) });
+    return new ClockedContext({ AudioContext, OfflineAudioContext, toContext: (t) => clock.audio.toContext(t) });
   }
   // Faded out, then suspended once quiet. Nothing while the context isn't running.
   #off(): void {

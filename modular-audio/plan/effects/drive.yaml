@@ -1,0 +1,94 @@
+# The Drive, a saturator after Decapitator's design: what distorts set before the curve, the fizz
+# taken off after it, mixed with the dry, trimmed.
+#   1. its sound into the wet chain, and dry into its lag, held back as long as the oversampled curve holds the wet;
+#   2. the low cut, a highpass, its thump a bump at the cut; the tone, a tilt about 800 Hz;
+#   3. the saturation: its style's color, the drive into a knee fixed at full scale, the curve, a DC block, its color
+#      after, its level taken back (auto);
+#   4. the high cut, a one pole, 6 dB an octave; steep, two biquads after it at a 5th-order Butterworth's Qs, 30 dB an
+#      octave, faded in for the gentle one;
+#   5. wet and dry summed into its trim, out.
+# Its drive a gain, not a bend at 1 / drive: a quiet sound driven gets dirty, its level taken back against a sine at
+# -18 dBFS, so it comes out louder and denser than it went in, a loud one about as loud. Every level a share shown in dB.
+# At its defaults near as it came: no drive, smooth, auto on, open, all wet, at unity.
+kind: Drive
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: lows, kind: filter, values: { frequency: 20 }, settings: { type: highpass } }
+  - { name: tilt, kind: tilt }
+  - { name: saturation, kind: saturation }
+  - { name: highs, kind: one pole, values: { frequency: 20000 } }
+  - { name: steep 1, kind: filter, values: { frequency: 20000, resonance: 0.618 } }
+  - { name: steep 2, kind: filter, values: { frequency: 20000, resonance: 1.618 } }
+  - { name: gentle, kind: gain }
+  - { name: steeper, kind: gain, values: { gain: 0 } }
+  - { name: wet, kind: gain }
+  - { name: lag, kind: shaper lag }
+  - { name: dry, kind: gain }
+  - { name: trim, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: lows, input: in } }
+  - { from: { input: in }, to: { node: lag, input: in } }
+  - { from: { node: lows, output: out }, to: { node: tilt, input: in } }
+  - { from: { node: tilt, output: out }, to: { node: saturation, input: in } }
+  - { from: { node: saturation, output: out }, to: { node: highs, input: in } }
+  - { from: { node: highs, output: out }, to: { node: gentle, input: in } }
+  - { from: { node: highs, output: out }, to: { node: steep 1, input: in } }
+  - { from: { node: steep 1, output: out }, to: { node: steep 2, input: in } }
+  - { from: { node: steep 2, output: out }, to: { node: steeper, input: in } }
+  - { from: { node: gentle, output: out }, to: { node: wet, input: in } }
+  - { from: { node: steeper, output: out }, to: { node: wet, input: in } }
+  - { from: { node: wet, output: out }, to: { node: trim, input: in } }
+  - { from: { node: lag, output: out }, to: { node: dry, input: in } }
+  - { from: { node: dry, output: out }, to: { node: trim, input: in } }
+  - { from: { node: trim, output: out }, to: { output: out } }
+macros:
+  - name: drive
+    hint: >-
+      How hard it's driven, in dB, 0 to +36: a gain into a knee at full scale, so a quieter sound needs more to break up.
+    maps: [{ to: [saturation, drive], factor: 1, offset: 0 }]
+  - name: punish
+    hint: '+20 dB more drive: for a quiet sound, a hat at -30 dBFS, to go past the knee.'
+    maps: [{ to: [saturation, punish], factor: 1, offset: 0 }]
+  - name: style
+    hint: "The curve and its color: smooth tape, a console, germanium, a triode's 2nd, a pentode's crunch."
+    maps: [{ to: [saturation, style], factor: 1, offset: 0 }]
+  - name: low cut
+    hint: "A highpass before the curve, in hertz, so the lows don't swamp it."
+    spec: { unit: Hz, range: [20, 1000, 1], default: 20, taper: octaves }
+    maps: [{ to: [lows, frequency], factor: 1, offset: 0 }]
+  - name: thump
+    hint: "A bump of about +3.5 dB at the low cut, a tape's head bump: the fundamental into the curve harder."
+    spec: { range: [0, 1, 1], default: 0 }
+    maps: [{ to: [lows, resonance], factor: 0.7071, offset: 0.7071 }]
+  - name: tone
+    hint: 'A tilt before the curve, in dB: bright pushes the highs into the knee, dark the lows.'
+    maps: [{ to: [tilt, tilt], factor: 1, offset: 0 }]
+  - name: high cut
+    hint: 'A lowpass after the curve, in hertz, taking off its fizz: 6 dB an octave.'
+    spec: { unit: Hz, range: [1000, 20000, 10], default: 20000, taper: octaves }
+    maps:
+      [
+        { to: [highs, frequency], factor: 1, offset: 0 },
+        { to: [steep 1, frequency], factor: 1, offset: 0 },
+        { to: [steep 2, frequency], factor: 1, offset: 0 },
+      ]
+  - name: steep
+    hint: 'The high cut at 30 dB an octave: at 4 to 5 kHz a guitar cabinet.'
+    spec: { range: [0, 1, 1], default: 0 }
+    maps: [{ to: [gentle, gain], factor: -1, offset: 1 }, { to: [steeper, gain], factor: 1, offset: 0 }]
+  - name: auto
+    hint: 'How much of the level the drive adds is taken back: 1 all, against a sine at -18 dBFS; 0 none.'
+    maps: [{ to: [saturation, auto], factor: 1, offset: 0 }]
+  - name: mix
+    hint: 'Dry 0 to wet 1, the dry the rest: the transients the curve chops off back under it.'
+    spec: { range: [0, 1, 0.01], default: 1 }
+    maps: [{ to: [wet, gain], factor: 1, offset: 0 }, { to: [dry, gain], factor: -1, offset: 1 }]
+  - name: output
+    hint: 'Its level out, a share shown in dB: up to +18, as auto takes back up to 18 dB.'
+    spec: { range: [-24, 18, 0.1], dB: true, default: 1 }
+    maps: [{ to: [trim, gain], factor: 1, offset: 0 }]
+  - name: oversample
+    hint: '4x clean, 2x, or none: the harmonics folding back below the band, a digital grit.'
+    maps: [{ to: [saturation, oversample], factor: 1, offset: 0 }, { to: [lag, oversample], factor: 1, offset: 0 }]

@@ -5,8 +5,8 @@
 //   - block.ts: a block, its inputs and outputs, its params' and settings' specs;
 //   - blocks.ts: every block by its kind;
 //   - one file each: oscillator, gain, filter, pan, delay, reverb, noise, limiter, lookahead limiter,
-//     envelope, select, with the specs other code shares (a delay's time, a limiter's, an envelope's, a
-//     source's stop);
+//     envelope, select, saturation, one pole, tilt, shaper lag, with the specs other code shares (a delay's
+//     time, a limiter's, an envelope's, a source's stop, a saturation's and its oversampling);
 //   - envelope-curve.ts: how an envelope moves, stage by stage from its gate, as automation, as
 //     an ARP's.
 export { STOP, type Block, type Jack } from './block.ts';
@@ -20,3 +20,4 @@ export { LOOKAHEAD_LIMITER_SPECS } from './lookahead-limiter.ts';
 export { NOISE_SECONDS } from './noise.ts';
 export { DETUNE, WAVE } from './oscillator.ts';
 export { REVERB_LENGTH } from './reverb.ts';
+export { OVERSAMPLE, SATURATION_SPECS } from './saturation.ts';

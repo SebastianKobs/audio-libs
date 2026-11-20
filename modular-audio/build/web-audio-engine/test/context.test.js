@@ -3,8 +3,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext } from '../../web-audio/test/audio-stand-in.js';
+import { FIREFOX_LAGS, offlineShaperWith } from '../../web-audio/test/offline-shaper.js';
 import { ClockedContext } from '../index.ts';
-import { NO_WORKLETS } from '../../web-audio/index.ts';
+import { CHROMIUM_LAGS, NO_WORKLETS } from '../../web-audio/index.ts';
 
 test("a context made at a low latency; a clock's time put on its time, never into its past: a sound due now starts with the next chunk", () => {
   let asked;
@@ -48,4 +49,29 @@ test('processors loaded into the context: its worklets none until they have, the
   } finally {
     delete globalThis.AudioWorkletNode;
   }
+});
+
+test("the shapers' lags: Chromium's until the context has measured them offline, then the browser's own", async () => {
+  class Context extends StandInContext {
+    constructor() {
+      super(() => 0);
+    }
+  }
+  const clocked = new ClockedContext({ AudioContext: Context, OfflineAudioContext: offlineShaperWith(FIREFOX_LAGS) });
+  assert.equal(clocked.shaperLags, CHROMIUM_LAGS, "Chromium's until measured");
+  const measuring = clocked.measureShaperLags();
+  assert.equal(clocked.shaperLags, CHROMIUM_LAGS, "still Chromium's while measuring");
+  await measuring;
+  assert.deepEqual(clocked.shaperLags, FIREFOX_LAGS, "the browser's own");
+});
+
+test("no offline context handed in: nothing to measure with, Chromium's lags kept", async () => {
+  class Context extends StandInContext {
+    constructor() {
+      super(() => 0);
+    }
+  }
+  const clocked = new ClockedContext({ AudioContext: Context });
+  await clocked.measureShaperLags();
+  assert.equal(clocked.shaperLags, CHROMIUM_LAGS);
 });

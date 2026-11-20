@@ -8,10 +8,14 @@ import { gain } from './gain.ts';
 import { limiter } from './limiter.ts';
 import { lookaheadLimiter } from './lookahead-limiter.ts';
 import { noise } from './noise.ts';
+import { onePole } from './one-pole.ts';
 import { oscillator } from './oscillator.ts';
 import { pan } from './pan.ts';
 import { reverb } from './reverb.ts';
+import { saturation } from './saturation.ts';
 import { select } from './select.ts';
+import { shaperLag } from './shaper-lag.ts';
+import { tilt } from './tilt.ts';
 
 // each block's maker by its kind
 export const MAKERS: Readonly<Partial<Record<BlockKind, Maker>>> = Object.freeze({
@@ -26,4 +30,8 @@ export const MAKERS: Readonly<Partial<Record<BlockKind, Maker>>> = Object.freeze
   'lookahead limiter': lookaheadLimiter,
   select,
   envelope,
+  saturation,
+  'one pole': onePole,
+  tilt,
+  'shaper lag': shaperLag,
 });

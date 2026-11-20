@@ -1,10 +1,10 @@
 # modular-audio/plan/effects
 
-The effects as templates: Utility, Filter, Limiter, Lookahead limiter, Delay, Tape delay and Reverb, each a YAML file, its comments the reasons. The Tape delay is built on the Delay (`extends: Delay`), only its wobble written. Handed to the planner with their form; an owner's or a desk's presets are values and settings on them, by address.
+The effects as templates: Utility, Filter, Limiter, Lookahead limiter, Delay, Tape delay, Reverb and Drive, each a YAML file, its comments the reasons. The Tape delay is built on the Delay (`extends: Delay`), only its wobble written. Handed to the planner with their form; an owner's or a desk's presets are values and settings on them, by address.
 
 Depends on: `base/util`, `modular-audio/plan/blocks`, `modular-audio/plan/format`, `modular-audio/plan/planner`.
 
-Its face, `index.ts`, is the form alone; the seven templates are its content, `content.ts`, imported apart, so a desk's forms load no YAML.
+Its face, `index.ts`, is the form alone; the eight templates are its content, `content.ts`, imported apart, so a desk's forms load no YAML.
 
 ```ts
 import { EFFECT_FORM } from './index.ts';
@@ -30,10 +30,11 @@ An insert's macros carry their hints, written in its template, and an effect is 
 | `Delay` | a delay line into a lowpass, the lowpass back into the line through a gain | sync, note, ms, the line's; feedback and tone, their specs its own, feedback 0.45, tone 2400 Hz to start | `line/longest` |
 | `TapeDelay` | the Delay's, and its wobble: a slow oscillator, its depth a gain, into the line's time by its ms, moving it in seconds | the Delay's; rate 0.5 Hz, depth 0.004 s, 4 ms either way | the Delay's |
 | `Reverb` | a room | | `length`, its own, the room's (`room/length`) |
+| `Drive` | a saturator after Decapitator's design: a low cut and a tilt before the curve, a saturation, a one pole (and two filters for a steeper cut) after it, the dry held back by a shaper lag as long as the oversampled curve holds the wet, mixed and trimmed | drive and punish into the knee, style, low cut, thump, tone, high cut, steep, auto, mix, output, oversample; at its start near as it came: no drive, smooth, open, all wet, at unity | |
 
 | Export | What it does |
 |---|---|
-| `EFFECT_TEMPLATES` | The seven, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`) and frozen (`content.ts`). |
+| `EFFECT_TEMPLATES` | The eight, read from their YAML as `content.ts` loads, each checked for its shape as it loads (`templateOf()`) and frozen (`content.ts`). |
 | `EFFECT_FORM` | What every effect is: one input and one output, its children free of roles (`form.ts`). |
 
-Tests: `test/effects.test.js`: the seven planned, their macros by the names a desk keys them, each at its default, the Utility's level the fader's in dB, each effect's label and its macros' hints, and the settings.
+Tests: `test/effects.test.js`: the eight planned, their macros by the names a desk keys them, each at its default, the Utility's level the fader's in dB, each effect's label and its macros' hints, and the settings; the Drive's chain made of blocks, its controls onto it and its steep high cut's Qs.

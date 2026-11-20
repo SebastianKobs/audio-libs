@@ -15,13 +15,14 @@ import { AudioPower, STOP_AFTER } from '../index.ts';
 import { FADE_IN, FADE_OUT, NO_WORKLETS } from '../../web-audio/index.ts';
 import { into, StandInContext } from '../../web-audio/test/audio-stand-in.js';
 import { oneBlockPlan } from '../../web-audio/test/blocks.js';
+import { FIREFOX_LAGS, offlineShaperWith } from '../../web-audio/test/offline-shaper.js';
 import { installWorkletNodes } from '../../web-audio/test/worklet-nodes.js';
 
 // The power on the stand-in's audio, the browser's as it's handed in; the contexts made, what's built, the clock's audio and
 // what's told kept. session: iOS's audio session, where the browser has one. suspended: contexts made suspended, as a browser makes
 // them before a touch. behave: how a module is added to the contexts' worklets, as the stand-in's `behave` has it. building: a plan
-// built as the desk is, where there is one.
-function powerOn(session, { suspended = false, behave, building } = {}) {
+// built as the desk is, where there is one. offline: the browser's OfflineAudioContext class, where it has one.
+function powerOn(session, { suspended = false, behave, building, offline } = {}) {
   const kept = { engines: [], builds: [], clocks: [], told: [] };
   const AudioContext = class extends StandInContext {
     constructor() {
@@ -35,7 +36,7 @@ function powerOn(session, { suspended = false, behave, building } = {}) {
       kept.engines.push({ context: this, session: session?.type });
     }
   };
-  const browser = () => ({ AudioContext, audioSession: session });
+  const browser = () => ({ AudioContext, audioSession: session, ...(offline && { OfflineAudioContext: offline }) });
   const build = (make) => {
     kept.builds.push(make);
     if (building) {
@@ -261,4 +262,33 @@ test('built alone with no warm-up: nothing to load, built with none', async () =
   const { power } = powerOn();
   const own = await power.build();
   assert.equal(own.worklets, NO_WORKLETS);
+});
+
+test("warmed up: the shapers' lags measured offline beside the processors loading, what's built after it held back by them; Chromium's where nothing could be measured or the start came first", async () => {
+  const lagOfBuilt = (kept) => kept.engines[0].context.rec.nodes.find((node) => node.kind === 'delay').delayTime.value;
+  const building = oneBlockPlan('shaper lag');
+  const measured = powerOn(undefined, { suspended: true, building, offline: offlineShaperWith(FIREFOX_LAGS) });
+  await measured.power.warmUp(MODULES);
+  measured.power.start();
+  assert.equal(lagOfBuilt(measured.kept), 8 / 48000, "Firefox's, measured");
+  const unmeasured = powerOn(undefined, { suspended: true, building });
+  await unmeasured.power.warmUp(MODULES);
+  unmeasured.power.start();
+  assert.equal(lagOfBuilt(unmeasured.kept), 192 / 48000, "no offline context: Chromium's");
+  const early = powerOn(undefined, { suspended: true, building, offline: offlineShaperWith(FIREFOX_LAGS) });
+  const measuring = early.power.warmUp(MODULES);
+  early.power.start();
+  assert.equal(lagOfBuilt(early.kept), 192 / 48000, "the start before the measuring ended: Chromium's");
+  await measuring;
+});
+
+test("built alone after a warm-up: its own engine not measured, Chromium's lags, as an offline render has them", async () => {
+  const { power } = powerOn(undefined, {
+    suspended: true,
+    building: oneBlockPlan('shaper lag'),
+    offline: offlineShaperWith(FIREFOX_LAGS),
+  });
+  await power.warmUp(MODULES);
+  const own = await power.build();
+  assert.equal(own.audioContext.rec.nodes.find((node) => node.kind === 'delay').delayTime.value, 192 / 48000);
 });

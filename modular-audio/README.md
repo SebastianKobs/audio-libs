@@ -29,7 +29,7 @@ A sound as data (`plan/`), built (`build/`) and shown (`view/`), as a modular st
 
 `tracks` is here, not in `libs/sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
 
-Reads: `libs/base/` (`util`, `params`, `automation`, `html`); of `libs/sequencing/` only `clock` (`build/web-audio-engine`, `build/instrument`, `build/desk/automation`, `view/tracks`); `libs/midi/protocol/` (`build/instrument`, `build/desk/automation`); `libs/music/music-theory/` (`build/instrument`). Nothing of `libs/spatial/`.
+Reads: `libs/base/` (`util`, `params`, `automation`, `html`); of `libs/dsp/`, `saturation` (`plan/blocks`, `build/web-audio`, `view/device/models`), `filters` and `measures` (`build/web-audio`) and `true-peak` (`build/web-audio`); of `libs/sequencing/` only `clock` (`build/web-audio-engine`, `build/instrument`, `build/desk/automation`, `view/tracks`); `libs/midi/protocol/` (`build/instrument`, `build/desk/automation`); `libs/music/music-theory/` (`build/instrument`). Nothing of `libs/spatial/`.
 
 ## The words
 
