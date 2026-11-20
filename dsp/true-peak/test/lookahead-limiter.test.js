@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LookaheadLimiter, measureTruePeak, softClipped } from '../index.ts';
 import { isNear } from '../../../base/util/test/near.js';
+import { integratedLoudness } from '../../loudness/index.ts';
 
 const RATE = 48000;
 const BLOCK = 128;
@@ -234,6 +235,34 @@ test("the clip's share: a 997 Hz sine at 4 is taken down 3.0 dB by the limiter a
     atMost('dBTP at clip 3', three.truePeak, -1.0),
     atMost('dBTP at clip 0', zero.truePeak, -1.0),
     atMost('dBTP at clip 24', twentyFour.truePeak, -1.0),
+  ]);
+});
+
+// ----- the loudness
+const SECONDS = 8;
+test('loudness: gain is make-up. A 1 kHz sine at -10 dBFS with gain 6 reads 6.0 LU louder, reduced() 0', (t) => {
+  const input = sine(1000, 10 ** (-10 / 20), SECONDS * RATE);
+  const { outputs, limiter } = limited([input, input], { params: { gain: 6 } });
+  const before = integratedLoudness([input, input], RATE);
+  const after = integratedLoudness(outputs, RATE);
+  expectAll(t, [within('LU louder', after - before, 6.0, 0.05), within('reduced()', limiter.reduced(), 0, 0)]);
+});
+
+test('loudness: a kick and a bed with gain 6 reads 4.2 to 5.2 LU louder, its true peak under -1.0, reduced() 2.9', (t) => {
+  const draw = seeded(31);
+  const input = Float32Array.from({ length: SECONDS * RATE }, (_, i) => {
+    const seconds = (i % 24000) / RATE;
+    return 0.63 * Math.sin(2 * Math.PI * 55 * seconds) * Math.exp(-seconds / 0.08) + 0.0868 * (draw() * 2 - 1);
+  });
+  const { outputs, limiter } = limited([input, input], { params: { gain: 6 } });
+  const before = integratedLoudness([input, input], RATE);
+  const after = integratedLoudness(outputs, RATE);
+  expectAll(t, [
+    between("the input's loudness, LUFS", before, -17.5, -15.5),
+    between("the input's true peak, dBTP", truePeakDb([input]), -3.5, -2.5),
+    between('LU louder', after - before, 4.2, 5.2),
+    atMost('dBTP', truePeakDb(outputs), -1.0),
+    within('reduced()', limiter.reduced(), 2.9, 0.3),
   ]);
 });
 

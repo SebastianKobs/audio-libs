@@ -14,7 +14,7 @@ Ten groups, each a folder, read bottom up. A group reads only those before it. E
 - [`midi-devices/`](midi-devices/README.md): inserts on a track's notes, as an audio effect is on its sound, the Scale device.
 - [`spatial/`](spatial/README.md): places perceived from where you are, hearing by distance, pointer input as gestures.
 - [`modular-audio/`](modular-audio/README.md): a sound as data (`libs/modular-audio/plan/`), built (`libs/modular-audio/build/`) and shown (`libs/modular-audio/view/`), and its way through them.
-- [`dsp/`](dsp/README.md): signal processing on sample arrays, free of any audio API, a true-peak meter and limiter.
+- [`dsp/`](dsp/README.md): signal processing on sample arrays, free of any audio API: measuring, saturating, filtering, a designed impulse, a true-peak limiter.
 - [`formats/`](formats/README.md): files other programs read, written from what the groups before it make, a WAV file.
 
 ## By layer
@@ -23,9 +23,9 @@ A library's layer is one more than the highest of those it uses; it can be taken
 
 | Layer | Libraries |
 |---|---|
-| 0 | `base/html`, `base/util`, `dsp/true-peak`, `formats/wav`, `generative/randomness` |
-| 1 | `base/automation`, `base/params`, `generative/articulation`, `generative/automata`, `generative/genetics`, `generative/rewriting`, `generative/sync`, `generative/trails`, `music/music-theory`, `spatial/places` |
-| 2 | `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
+| 0 | `base/html`, `base/util`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/saturation`, `dsp/wow`, `formats/wav`, `generative/randomness` |
+| 1 | `base/automation`, `base/params`, `dsp/impulse`, `dsp/loudness`, `generative/articulation`, `generative/automata`, `generative/genetics`, `generative/rewriting`, `generative/sync`, `generative/trails`, `music/music-theory`, `spatial/places` |
+| 2 | `dsp/true-peak`, `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
 | 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
 | 5 | `modular-audio/build/web-audio-engine`, `modular-audio/plan/effects`, `modular-audio/plan/instrument`, `modular-audio/view/desk/models`, `modular-audio/view/device/dom`, `music/phrasing`, `sequencing/clip-player` |
