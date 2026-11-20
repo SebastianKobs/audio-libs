@@ -1,5 +1,5 @@
 // ---------- build/web-audio/making: what a block's maker is handed ----------
-// The context and its buffers, the beat, whether it can pan, the random a noise draws from; and
+// The context and its buffers, the beat, whether it can pan, the random a noise draws from, the worklets; and
 // hands for what it makes:
 //   - kept(): a node made, taken apart with the rest;
 //   - started(): a source, started at its time with the rest, by its own way where it has one,
@@ -12,6 +12,7 @@ import { BLOCKS, type BlockKind } from '../../plan/blocks/index.ts';
 import type { Node } from '../../plan/format/index.ts';
 import type { Buffers } from './buffers.ts';
 import type { BuiltNode } from './built-node.ts';
+import type { Worklets } from './worklets.ts';
 
 // what a maker is handed
 export interface Making {
@@ -20,6 +21,7 @@ export interface Making {
   readonly beat: () => number;
   readonly canPan: boolean;
   readonly random: () => number;
+  readonly worklets: Worklets;
   kept<Made extends AudioNode>(node: Made): Made;
   started<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source;
   followsTempo(follower: TempoFollower): void;

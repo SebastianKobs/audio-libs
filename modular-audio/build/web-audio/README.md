@@ -41,7 +41,7 @@ How a block is made:
 | Export | What it does |
 |---|---|
 | `new WebAudioBuilder(options)`: `build()` | The builder: `build(plan, { into, from })` hands back a `WebAudioBuilt` (`builder.ts`). |
-| `WebAudioOptions`, `WebAudioWhere` | What it's made with, the `context`, the `beat` now and optionally the `random` its noise draws from, shared `buffers` and the `draws` its sources make as they start. Where a build's sound goes (`into`) and what feeds its inputs (`from`) (`builder.ts`). |
+| `WebAudioOptions`, `WebAudioWhere` | What it's made with, the `context`, the `beat` now and optionally the `random` its noise draws from, shared `buffers`, the `draws` its sources make as they start and the `worklets` its blocks make nodes of (`NO_WORKLETS` where none are handed). Where a build's sound goes (`into`) and what feeds its inputs (`from`) (`builder.ts`). |
 | `WebAudioBuilt`: `set()`, `automate()`, `preset()`, `tempo()`, `add()`, `stopBy()`, `letGo()`, `rebuild()`, `dispose()`, `placeholders`, `feed()`, `wayInto()`, `peak()`, `faded()`, `reading()`, `jacksOf()`, `nodesUnder()` | What it hands back. A param is set or automated by its address, a preset's values set together, a pool's copy added, stopped by a time and let go, a plan built again, everything taken apart (`built.ts`). |
 | `Building` | What what's built is made with: the context, where its sound goes and where its inputs come from, and how a plan and a copy's node are built into parts (`built.ts`). |
 | `CROSSFADE`, `RING_OUT` | A rebuild builds the new beside the old, fades the old out and the new in over `CROSSFADE` (0.1 s) where the old makes sound of its own, and lets the old go after `RING_OUT` (8 s) (`rebuild.ts`). |
@@ -52,6 +52,7 @@ How a block is made:
 | `biquadOf()`, `panOf()`, `PanLaw`, `limiterNodes()`, `makeupOf()` | A biquad with its Q a plain ratio, a pan by its law (stereo or pan pot), a limiter built of several nodes, and the makeup Web Audio's compressor adds, taken back (`blocks/`). |
 | `meterOn()`, `PeakMeter` | A meter on a node, a splitter and an analyser for each side; its `peak()` is the loudest sample of its last 1,024 (`meters.ts`). |
 | `Output`, `FADE_IN`, `FADE_OUT` | The output after what's built, a gain of its own into where the sound goes: faded in from silence so no sound starts at full volume, faded out to pause, kept awake by a silent source (`output.ts`). |
+| `loadWorklets()`, `Worklets`, `NO_WORKLETS`, `ProcessorModules` | `loadWorklets(context, modules)` adds each processor's module, by the URL it's handed under the name it registers (`ProcessorModules`), to a context's audio worklet, and hands back the `Worklets` that loaded: `node(context, processor, options)` is a worklet node or `null`. A module that fails or takes over 4 s, a context with no audio worklet and a node that fails to be made are said once, the node `null`; `NO_WORKLETS` is none loaded (`worklets.ts`). |
 | `Copies`, `Editable` | Every built copy of one template, an edit reaching each: a value at its address under each copy, settings changed in one change so what's built is built again once (`copies.ts`). |
 
 What a studio needs of what's built, beyond the contract, is Web Audio's own, not every builder's:
@@ -60,4 +61,4 @@ What a studio needs of what's built, beyond the contract, is Web Audio's own, no
 - A meter on a node's main output by its address, or at a point inside a block (a limiter's `in` and `out`), made at its first read.
 - What a block says of itself by name (a limiter's `reduction`, an envelope's `faded`), and the nodes under an address.
 
-Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.
+Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.

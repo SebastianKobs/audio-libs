@@ -22,6 +22,7 @@ const PARAMS = {
   destination: {},
   analyser: {},
   splitter: {},
+  worklet: {},
 };
 const PROPS = {
   oscillator: { type: 'sine' },
@@ -152,6 +153,18 @@ class StandInNode {
     this.stops.push(args);
   }
 }
+// An audio worklet: each module added is kept by its URL, and loads, fails or never ends as a test's `behave` says
+// (it resolves by default).
+class StandInWorklet {
+  constructor() {
+    this.added = [];
+    this.behave = () => Promise.resolve();
+  }
+  addModule(url) {
+    this.added.push(String(url));
+    return this.behave(String(url));
+  }
+}
 // an audio context whose time is now(), on the clock's timeline, so the clock's offset to it is 0 and a clock time is its own time
 export class StandInContext {
   constructor(now) {
@@ -162,6 +175,7 @@ export class StandInContext {
     this.outputLatency = 0;
     this.rec = { nodes: [], edges: [], disconnects: [] };
     this.destination = new StandInNode(this, 'destination');
+    this.audioWorklet = new StandInWorklet();
   }
   get currentTime() {
     return this.now();
@@ -201,6 +215,10 @@ export class StandInContext {
   } // reduction: what it takes away now, in dB, as a test sets it
   createDelay(max = 1) {
     return new StandInNode(this, 'delay', { max });
+  }
+  // an AudioWorkletNode of a processor, its options as it's made with them
+  createWorkletNode(processor, options) {
+    return new StandInNode(this, 'worklet', { processor, options });
   }
   createBuffer(channels, length, sampleRate) {
     return new StandInBuffer(channels, length, sampleRate);

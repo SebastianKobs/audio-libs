@@ -5,7 +5,7 @@
 //   - the noise's buffers made with the first builder, shared by every one in that context;
 //   - its own draws, where it's kept apart from the others.
 import type { EngineOnceStarted } from './power.ts';
-import { Buffers, WebAudioBuilder } from '../web-audio/index.ts';
+import { Buffers, WebAudioBuilder, type Worklets } from '../web-audio/index.ts';
 
 // a builder in a context, into where it's told; the time now, a clock's time on it
 export interface BuildingIn {
@@ -15,7 +15,7 @@ export interface BuildingIn {
   readonly at: (t: number) => number;
 }
 // What building in a context of its own is handed: its context, where its sound goes, a clock's
-// time on it, a beat's length now, the buffers, its own draws.
+// time on it, a beat's length now, the buffers, its own draws, the worklets loaded into the context where there are any.
 interface InContext {
   readonly context: BaseAudioContext;
   readonly into: AudioNode;
@@ -23,6 +23,7 @@ interface InContext {
   readonly beat: () => number;
   readonly buffers: Buffers;
   readonly draws?: (() => number) | undefined;
+  readonly worklets?: Worklets | undefined;
 }
 
 export class EngineBuilding {
@@ -42,14 +43,22 @@ export class EngineBuilding {
     const context = engine.audioContext;
     this.#buffers ??= new Buffers(context, Math.random);
     const at = (t: number): number => engine.at(t);
-    return buildingIn({ context, into, at, beat: this.#beat, buffers: this.#buffers, draws });
+    return buildingIn({
+      context,
+      into,
+      at,
+      beat: this.#beat,
+      buffers: this.#buffers,
+      draws,
+      worklets: engine.worklets,
+    });
   }
 }
 
 // Building in a context of its own, as an offline render asks.
-export function buildingIn({ context, into, at, beat, buffers, draws }: InContext): BuildingIn {
+export function buildingIn({ context, into, at, beat, buffers, draws, worklets }: InContext): BuildingIn {
   return {
-    builder: new WebAudioBuilder({ context, beat, buffers, ...(draws && { draws }) }),
+    builder: new WebAudioBuilder({ context, beat, buffers, ...(draws && { draws }), ...(worklets && { worklets }) }),
     into,
     now: () => context.currentTime,
     at,

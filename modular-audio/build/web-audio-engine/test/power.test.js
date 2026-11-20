@@ -6,19 +6,28 @@
 // Resume: faded in again, never at full volume: from where the fade got to if the context hadn't stopped yet, else
 // from silence, the context resumed; started if it hadn't.
 // Woken: back on after the browser stopped the sound, the audio never started by it.
+// Warmed up, before the first touch: the engine made and its processors loading, nothing built, the clock not on its time, nothing
+// told; the first start builds in it and resumes it, faded in from silence, whether the processors have loaded or not.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { AudioPower, STOP_AFTER } from '../index.ts';
-import { FADE_IN, FADE_OUT } from '../../web-audio/index.ts';
+import { FADE_IN, FADE_OUT, NO_WORKLETS } from '../../web-audio/index.ts';
 import { into, StandInContext } from '../../web-audio/test/audio-stand-in.js';
 
 // The power on the stand-in's audio, the browser's as it's handed in; the contexts made, what's built, the clock's audio and
-// what's told kept. session: iOS's audio session, where the browser has one.
-function powerOn(session) {
+// what's told kept. session: iOS's audio session, where the browser has one. suspended: contexts made suspended, as a browser makes
+// them before a touch. behave: how a module is added to the contexts' worklets, as the stand-in's `behave` has it.
+function powerOn(session, { suspended = false, behave } = {}) {
   const kept = { engines: [], builds: [], clocks: [], told: [] };
   const AudioContext = class extends StandInContext {
     constructor() {
       super(() => 4);
+      if (suspended) {
+        this.state = 'suspended';
+      }
+      if (behave) {
+        this.audioWorklet.behave = behave; // how a module loads
+      }
       kept.engines.push({ context: this, session: session?.type });
     }
   };
@@ -124,4 +133,74 @@ test('woken: back on after the browser stopped the sound, from silence; never st
   power.wake();
   assert.equal(context.state, 'running');
   assert.deepEqual(lastFade(power), ['target', 1, 4, FADE_IN]);
+});
+
+const MODULES = { crusher: 'crusher.js' };
+
+test('warmed up: the engine made, iOS session set, its processors loaded; nothing built, the clock not on it, nothing told, not started', async () => {
+  const session = {};
+  const { power, kept } = powerOn(session, { suspended: true });
+  const loading = power.warmUp(MODULES);
+  assert.equal(kept.engines.length, 1, 'the engine made now');
+  assert.equal(kept.engines[0].session, 'playback', 'set before the context is made');
+  await loading;
+  assert.deepEqual(kept.engines[0].context.audioWorklet.added, ['crusher.js']);
+  assert.deepEqual([power.started, power.engine, power.output], [false, null, null]);
+  assert.deepEqual([kept.builds.length, kept.clocks, kept.told], [0, [], []]);
+  assert.equal(kept.engines[0].context.state, 'suspended', 'not resumed before a touch');
+});
+
+test('started after a warm-up: built in that engine with its processors, the clock on it, told once, the context resumed, faded in from silence', async () => {
+  const { power, kept } = powerOn(undefined, { suspended: true });
+  await power.warmUp(MODULES);
+  power.start();
+  power.start();
+  const context = kept.engines[0].context;
+  assert.equal(kept.engines.length, 1, 'no second engine');
+  assert.equal(power.engine.audioContext, context, 'built in the warmed-up one');
+  assert.notEqual(power.engine.worklets, NO_WORKLETS, 'the processors that loaded');
+  assert.deepEqual(into(context, context.destination), [power.output.node]);
+  assert.deepEqual([kept.builds.length, kept.clocks, kept.told], [1, [context], [1]]);
+  assert.equal(context.state, 'running', 'resumed');
+  assert.deepEqual(
+    power.output.node.gain.events,
+    [
+      ['value', 0],
+      ['target', 1, 4, FADE_IN],
+    ],
+    'from silence',
+  );
+});
+
+test('started while its processors are still loading: built at once with none, the loading going on; they join the engine once loaded', async () => {
+  let release;
+  const held = new Promise((resolve) => (release = resolve));
+  const { power, kept } = powerOn(undefined, { suspended: true, behave: () => held });
+  const loading = power.warmUp(MODULES);
+  power.start();
+  assert.equal(power.started, true, 'not waiting for the processors');
+  assert.equal(kept.builds.length, 1);
+  assert.equal(power.engine.worklets, NO_WORKLETS, 'none yet');
+  release();
+  await loading;
+  assert.equal(power.engine.audioContext, kept.engines[0].context);
+  assert.notEqual(power.engine.worklets, NO_WORKLETS, 'those loaded by then');
+});
+
+test('warmed up once: another warm-up, or one after the start, makes no engine', async () => {
+  const { power, kept } = powerOn();
+  await power.warmUp(MODULES);
+  await power.warmUp(MODULES);
+  power.start();
+  await power.warmUp(MODULES);
+  assert.equal(kept.engines.length, 1);
+});
+
+test('built alone after a warm-up: in an engine of its own, as an offline render asks; the warmed-up one left for the first start', async () => {
+  const { power, kept } = powerOn(undefined, { suspended: true });
+  await power.warmUp(MODULES);
+  const own = power.build();
+  assert.equal(kept.engines.length, 2, 'its own engine made');
+  assert.equal(own.audioContext, kept.engines[1].context);
+  assert.notEqual(own.audioContext, kept.engines[0].context, 'not the warmed-up one');
 });

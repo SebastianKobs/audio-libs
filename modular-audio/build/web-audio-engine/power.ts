@@ -1,8 +1,13 @@
 // ---------- build/web-audio-engine/power: the audio's power, started, paused and resumed ----------
+// Warm-up: at the page's load, before any touch. The engine made, as a start makes it (1 below), and the
+// processors' modules loaded into its context. Nothing built, the clock not on its time, nothing told, not
+// started: the context waits, suspended where the browser asks, for the first touch.
 // Start: on the first touch, as browsers ask.
 //   1. The engine made in the browser's audio, handed in: iOS's audio session set first, the
-//      audio context on the clock's time.
-//   2. What's built built in it by the Web Audio builder, into the output after it, faded in.
+//      audio context on the clock's time; the warmed-up one where there is one.
+//      An offline render's build() makes an engine of its own instead, and leaves that one.
+//   2. What's built built in it by the Web Audio builder, with the processors loaded by then, into
+//      the output after it, faded in from silence; the context resumed.
 //   3. The clock's beat grid on the audio's time.
 //   4. Told to whoever listens: a background struck then.
 // Once started, a start turns it back on; none while paused.
@@ -14,7 +19,7 @@
 import type { Clock } from '../../../sequencing/clock/index.ts';
 import type { Plan } from '../../plan/format/index.ts';
 import { Events } from '../../../base/util/index.ts';
-import { Output, WebAudioBuilder, type WebAudioBuilt } from '../web-audio/index.ts';
+import { Output, WebAudioBuilder, type ProcessorModules, type WebAudioBuilt } from '../web-audio/index.ts';
 import { ClockedContext, type ClockedContextOptions } from './context.ts';
 
 // The browser's audio, as the page hands it in: its AudioContext class, and iOS's audio
@@ -42,6 +47,7 @@ export class AudioPower {
   readonly #making: AudioPowerMaking;
   readonly #events = new Events<{ start: [] }>();
   #engine: ClockedContext | null = null; // made at the first start
+  #warm: ClockedContext | null = null; // made by warmUp(), the first start's
   #output: Output | null = null; // after what's built, faded in as the audio starts
   #paused = false; // a transport's stop
   // suspends the context once the output has faded
@@ -64,6 +70,15 @@ export class AudioPower {
   get output(): Output | null {
     return this.#output;
   }
+  // The engine made ahead of the first touch, its processors loading: kept until the audio starts.
+  // Once the processors have loaded, or failed, as a promise; none to make where it's been warmed up or started.
+  warmUp(modules: ProcessorModules): Promise<void> {
+    if (this.#engine || this.#warm) {
+      return Promise.resolve();
+    }
+    this.#warm = this.#makeEngine();
+    return this.#warm.loadProcessors(modules);
+  }
   // The audio started, once, then told; back on once started. Neither while paused.
   start(): void {
     if (this.#paused) {
@@ -73,22 +88,17 @@ export class AudioPower {
       this.#on();
       return;
     }
-    const engine = this.build();
+    const engine = this.#buildIn(this.#warm ?? this.#makeEngine());
+    this.#warm = null;
+    void engine.audioContext.resume(); // fire and forget; a warmed-up context waits for the touch, a new one may still be starting
     // the beat grid on the audio's time from now, before a background's notes
     this.#making.clock.useAudio(engine.audioContext);
     this.#events.emit('start');
   }
-  // The engine made and what's built built in it, into the output, with no clock on it and
-  // nothing told, as a desk's offline render asks.
+  // An engine of its own made and what's built built in it, into the output, with no clock on it and
+  // nothing told, as a desk's offline render asks; the warmed-up engine is left for the first start.
   build(): ClockedContext {
-    const engine = this.#makeEngine();
-    const context = engine.audioContext;
-    this.#engine = engine;
-    this.#output = new Output(context);
-    const builder = new WebAudioBuilder({ context, beat: this.#making.beat });
-    const into = this.#output.node;
-    this.#making.build((plan) => builder.build(plan, { into }));
-    return engine;
+    return this.#buildIn(this.#makeEngine());
   }
   pause(): void {
     this.#paused = true;
@@ -108,6 +118,16 @@ export class AudioPower {
     this.#events.on('start', listener);
   }
 
+  // What's built built in an engine, into the output after it, with the processors loaded into it by now.
+  #buildIn(engine: ClockedContext): ClockedContext {
+    const context = engine.audioContext;
+    this.#engine = engine;
+    this.#output = new Output(context);
+    const builder = new WebAudioBuilder({ context, beat: this.#making.beat, worklets: engine.worklets });
+    const into = this.#output.node;
+    this.#making.build((plan) => builder.build(plan, { into }));
+    return engine;
+  }
   // The engine: the audio context on the clock's time, iOS's audio session set first.
   #makeEngine(): ClockedContext {
     const { AudioContext, audioSession } = this.#making.browser();

@@ -13,6 +13,7 @@ import type { Builder } from '../contract/index.ts';
 import { MAKERS } from './blocks/makers.ts';
 import { Buffers } from './buffers.ts';
 import { WebAudioBuilt } from './built.ts';
+import { NO_WORKLETS, type Worklets } from './worklets.ts';
 import type { Making } from './making.ts';
 import { BuiltParts } from './parts.ts';
 import { placeholder } from './placeholder.ts';
@@ -23,13 +24,15 @@ import { blockJacks, compositeJacks, type Jacks, type OwnJacks } from './wiring.
 //   - the random its noise is drawn from;
 //   - the buffers its noise and reverbs play: its own, drawn from that random, unless handed ones
 //     shared with other builders in the context;
-//   - the draws its sources make as they start (a noise's offset), the random unless given.
+//   - the draws its sources make as they start (a noise's offset), the random unless given;
+//   - the worklets its blocks make nodes of, none where none are handed.
 export interface WebAudioOptions {
   readonly context: BaseAudioContext;
   readonly beat: () => number;
   readonly random?: () => number;
   readonly buffers?: Buffers;
   readonly draws?: () => number;
+  readonly worklets?: Worklets;
 }
 // where a plan's sound goes, and where each of its inputs comes from, by name
 export interface WebAudioWhere {
@@ -42,12 +45,21 @@ export class WebAudioBuilder implements Builder<AudioNode> {
   readonly #beat: () => number;
   readonly #buffers: Buffers;
   readonly #draws: () => number;
+  readonly #worklets: Worklets;
 
-  constructor({ context, beat, random = Math.random, buffers, draws = random }: WebAudioOptions) {
+  constructor({
+    context,
+    beat,
+    random = Math.random,
+    buffers,
+    draws = random,
+    worklets = NO_WORKLETS,
+  }: WebAudioOptions) {
     this.#context = context;
     this.#beat = beat;
     this.#buffers = buffers ?? new Buffers(context, random);
     this.#draws = draws;
+    this.#worklets = worklets;
   }
   // a plan built, fed from where its inputs come from, its output into where it goes
   build(plan: Plan, { into, from = {} }: WebAudioWhere): WebAudioBuilt {
@@ -105,6 +117,7 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       beat: this.#beat,
       canPan: typeof this.#context.createStereoPanner === 'function',
       random: this.#draws,
+      worklets: this.#worklets,
       kept: (made) => parts.keep(made),
       started: (source, startAt, stopBy) => parts.keepSource(source, startAt, stopBy),
       followsTempo: (follower) => parts.tempoFollowers.push(follower),
