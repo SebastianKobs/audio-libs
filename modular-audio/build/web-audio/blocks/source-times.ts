@@ -3,17 +3,18 @@
 // Stopped its stop after it starts, where it has one; at 0 none, playing until it's let go.
 // A stop changed once it's started moves it, never taking one back.
 // Stopped by a time, as what it plays into has gone silent: its own stop kept where it's sooner.
+import type { ScheduledSource } from '../making.ts';
 import type { Automatable } from '../param-units.ts';
 import { toldParam } from '../param-units.ts';
 
 export class SourceTimes {
-  readonly #source: AudioScheduledSourceNode;
+  readonly #source: ScheduledSource;
   readonly #now: () => number;
   #stop: number;
   #by = Infinity; // the time it's stopped by, as what it plays into has gone silent
   #started: number | undefined;
 
-  constructor(source: AudioScheduledSourceNode, { stop, now }: { stop: number; now: () => number }) {
+  constructor(source: ScheduledSource, { stop, now }: { stop: number; now: () => number }) {
     this.#source = source;
     this.#stop = stop;
     this.#now = now;

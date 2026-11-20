@@ -30,7 +30,7 @@ export function instrumentOf(
   return {
     kind,
     form: INSTRUMENT_FORM.name,
-    outputs: [{ name: 'out', channels: 1 }], // mono, as its voices are
+    outputs: [{ name: 'out', channels: 2 }], // stereo, as a panned voice is
     pools: chains.map((chain) => poolOf(kind, chain, architectures)),
   };
 }

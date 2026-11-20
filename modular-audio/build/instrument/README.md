@@ -23,7 +23,7 @@ How it plays a note, in order:
 
 1. A note on adds a copy of its pool's voice card at its time (`Built.add()`), a drum rack's pad's by its key, none where no pool plays it.
 2. Its note's sources are set by the pool's addresses as it's added, before it sounds: its frequency, its velocity and the per-note controllers sent with it, its gate opened last.
-3. Its glides are glided by the voice card's `glide`, a jump with none. A note is held until its note off, closed at the card's `longest` only where the card has one.
+3. Its glides are glided by the voice card's `glide`, a jump with none: by a time constant on the frequency, or, where the card's `glide curve` is `ramp`, as an exponential ramp three time constants long from where the last one got to, linear in pitch (`glide.ts`). A note is held until its note off, closed at the card's `longest` only where the card has one.
 4. A note off closes its gate at its time, no sooner than the card's `shortest`, and stops its sources by when it's silent, where that's known then (`Built.stopBy()`).
 5. A voice is let go once it has rung out, as the next messages come, or at once where its sender detaches its note.
 

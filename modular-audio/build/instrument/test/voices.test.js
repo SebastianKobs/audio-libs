@@ -2,7 +2,8 @@
 //   - a note on: a voice added at its time from its pool, its note's sources set by the pool's addresses, its gate last;
 //   - a note off: its gate closed, no sooner than its shortest; a note held until its note off, closed at its longest
 //     only where its voice card writes one;
-//   - per-note controllers: set as it starts, changed later; its pitch glided by its voice card's glide;
+//   - per-note controllers: set as it starts, changed later; its pitch glided by its voice card's glide, a time constant
+//     on its frequency or, as its card's glide curve says, a ramp, linear in pitch, from where the last one got to;
 //   - a drum rack: a note on the pad its key names;
 //   - a voice let go once it has rung out: a source silent once a gain on its way out, resting at nothing and opened only
 //     by envelopes, has closed; one nothing closes as its note's last release fades; at once where its note is detached;
@@ -14,6 +15,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Voices } from '../index.ts';
+import { near } from '../../../../base/util/test/near.js';
 import { BuiltStandIn } from './built.js';
 import { noteMessages } from '../../../../midi/protocol/index.ts';
 import { mtof } from '../../../../music/music-theory/index.ts';
@@ -45,6 +47,8 @@ function rackOf(keys) {
 }
 // a note setting of a voice card, as a macro with no targets
 const setting = (name, value) => ({ spec: { name, unit: 's', range: [0, 10, 0.001] }, value, maps: [] });
+// its glide curve, a choice of a voice card with no targets
+const curve = (value) => ({ spec: { name: 'glide curve', choices: ['target', 'ramp'] }, value, maps: [] });
 // voices played into the stand-in, the time now as the test sets it
 function voicesOn(plan = SYNTH, own, polyphony) {
   const built = new BuiltStandIn();
@@ -105,6 +109,71 @@ test("per-note controllers: those sent with its note set as it starts, by the po
   const jumps = voicesOn();
   played(jumps.voices, { pitch: 69, velocity: 1, t: 5, glides: [[5.5, 81]] });
   assert.deepEqual(jumps.built.told[2], ['voice/1/oscillator/frequency', mtof(81), { at: 5.5 }], 'no glide: a jump');
+});
+
+test("a glide curve of target, as a voice card says it and as it's without: the pitch glided by a time constant on its frequency, as set; nothing automated", () => {
+  for (const macros of [[setting('glide', 0.03), curve('target')], [setting('glide', 0.03)]]) {
+    const { built, voices } = voicesOn(synthWith({ macros }));
+    played(voices, { pitch: 69, velocity: 1, t: 5, glides: [[5.5, 81]] });
+    voices.receive([{ type: 'per-note controller', index: 1, controller: 'pitch', value: 57, t: 6 }]);
+    assert.deepEqual(built.told.slice(-2), [
+      ['voice/1/oscillator/frequency', mtof(81), { at: 5.5, glide: 0.03 }],
+      ['voice/1/oscillator/frequency', mtof(57), { at: 6, glide: 0.03 }],
+    ]);
+    assert.deepEqual(built.automated, []);
+  }
+});
+
+test("a glide curve of ramp: a glide an exponential ramp three time constants long, from the pitch it's at then, a straight line in pitch; the card's glide the time constant", () => {
+  const { built, voices } = voicesOn(synthWith({ macros: [setting('glide', 0.03), curve('ramp')] }));
+  played(voices, { pitch: 69, velocity: 1, t: 5, glides: [[5.5, 81]] });
+  assert.deepEqual(
+    built.told.map(([address]) => address),
+    ['voice/1/oscillator/frequency', 'voice/1/envelope/gate'],
+    'its first pitch set as the note starts, no glide told as a time constant',
+  );
+  assert.equal(built.automated.length, 1);
+  const [address, events, from] = built.automated[0];
+  assert.equal(address, 'voice/1/oscillator/frequency');
+  assert.deepEqual(events, [
+    ['cancel', 5.5],
+    ['set', 440, 5.5],
+    ['exp', mtof(81), 5.5 + 3 * 0.03],
+  ]);
+  assert.equal(from, 0, 'its times absolute');
+});
+
+test('a glide of ramp coming before the last has landed starts from where that one has got to, in pitch; one that came after it has landed starts from its pitch', () => {
+  const { built, voices } = voicesOn(synthWith({ macros: [setting('glide', 0.1), curve('ramp')] }));
+  played(voices, { pitch: 69, velocity: 1, t: 5, glides: [[6, 81]] });
+  voices.receive([{ type: 'per-note controller', index: 1, controller: 'pitch', value: 57, t: 6.15 }]);
+  voices.receive([{ type: 'per-note controller', index: 1, controller: 'pitch', value: 69, t: 7 }]);
+  const [, second, third] = built.automated.map(([, events]) => events);
+  const halfway = 440 * 2 ** 0.5; // 0.15 s into a ramp 0.3 s long, an octave up: half an octave
+  assert.deepEqual([second[1][0], second[1][2]], ['set', 6.15]);
+  near(second[1][1], halfway, 'half an octave up');
+  assert.deepEqual(second[2], ['exp', mtof(57), 6.15 + 0.3]);
+  assert.deepEqual(third[1], ['set', mtof(57), 7], 'landed by then');
+});
+
+test('a glide of ramp with no glide in the card: a jump at its time, the next glide from there', () => {
+  const { built, voices } = voicesOn(synthWith({ macros: [curve('ramp')] }));
+  played(voices, { pitch: 69, velocity: 1, t: 5, glides: [[5.5, 81]] });
+  assert.deepEqual(built.told[2], ['voice/1/oscillator/frequency', mtof(81), { at: 5.5 }]);
+  assert.deepEqual(built.automated, []);
+});
+
+test("a voice's ramp its own: a second voice's glide starts from its own pitch", () => {
+  const { built, voices } = voicesOn(synthWith({ macros: [setting('glide', 0.1), curve('ramp')] }));
+  played(voices, { pitch: 69, velocity: 1, t: 5, glides: [[5.5, 81]] });
+  played(voices, { pitch: 57, velocity: 1, t: 5, glides: [[5.5, 45]] }, 2);
+  assert.deepEqual(
+    built.automated.map(([address, events]) => [address, events[1]]),
+    [
+      ['voice/1/oscillator/frequency', ['set', 440, 5.5]],
+      ['voice/2/oscillator/frequency', ['set', mtof(57), 5.5]],
+    ],
+  );
 });
 
 test('a drum rack: a note on the pad its key names, each pad its own voices; none where no pad has its key', () => {

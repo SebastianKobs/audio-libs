@@ -1,6 +1,6 @@
 // A file of instruments read (mockup/src/libs/modular-audio/plan/instrument/instruments-file.ts), in node, on a small file of the tests' own, its
 // instrument the tests' voice card (pluck.js):
-//   - each instrument a template of a voice card's form, its name its kind, one mono output;
+//   - each instrument a template of a voice card's form, its name its kind, one stereo output;
 //   - each patch a preset, by a name of its own, the instrument it plays its kind; each rack its pads;
 //   - refused where it isn't of its shape, every failure said under the file's name, its message whole; a pad naming no patch.
 import { test } from 'node:test';
@@ -9,11 +9,11 @@ import { instrumentsOf } from '../index.ts';
 import { MODULE_TEMPLATES } from '../content.ts';
 import { PLUCK_CARD as voiceCard, PLUCK_FILE as FILE } from './pluck.js';
 
-test("each instrument a template of a voice card's form, its name its kind, one mono output; each patch a preset by a name of its own, the instrument it plays its kind; each rack its pads", () => {
+test("each instrument a template of a voice card's form, its name its kind, one stereo output, a voice's pan heard; each patch a preset by a name of its own, the instrument it plays its kind; each rack its pads", () => {
   const { templates, patches, racks } = instrumentsOf(FILE, 'test.yaml', MODULE_TEMPLATES);
   assert.deepEqual(
     templates.map(({ kind, form, outputs }) => [kind, form, outputs]),
-    [['Pluck', 'architecture', [{ name: 'out', channels: 1 }]]],
+    [['Pluck', 'architecture', [{ name: 'out', channels: 2 }]]],
   );
   assert.deepEqual(patches, {
     bright: { kind: 'Pluck', values: { 'osc 1/tune': 12 } },

@@ -61,7 +61,7 @@ export function instrumentsOf(data: unknown, source: string, modules: readonly W
     modules,
     templates: Object.entries(file.instruments ?? {}).map(([name, voiceCard]) =>
       templateOf(
-        { kind: name, form: ARCHITECTURE_FORM.name, outputs: [{ name: 'out', channels: 1 }], ...voiceCard },
+        { kind: name, form: ARCHITECTURE_FORM.name, outputs: [{ name: 'out', channels: 2 }], ...voiceCard },
         `${source}: ${name}`,
       ),
     ),

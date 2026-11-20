@@ -22,12 +22,13 @@ function paramsOf(kind) {
   return Object.fromEntries(planner.plan(kind).node.macros.map(({ spec, value }) => [spec.name, value]));
 }
 
-test("the note's sources, as a voice card's CV: its frequency, gate and velocity, its volume, its bend, the per-note controllers; each on a control, starting at its default; by MIDI's names where it has them", () => {
+test("the note's sources, as a voice card's CV: its frequency, gate and velocity, its volume, its pan, its bend, the per-note controllers; each on a control, starting at its default; by MIDI's names where it has them", () => {
   assert.deepEqual(Object.keys(NOTE_SOURCES), [
     'frequency',
     'gate',
     'velocity',
     'volume',
+    'pan',
     'bend',
     'vibrato depth',
     'vibrato rate',
@@ -49,7 +50,17 @@ test("the note's sources, as a voice card's CV: its frequency, gate and velocity
     [0, 0, 0, 1],
     'nothing moved where a note sends none, its volume at unity',
   );
-  assert.deepEqual(Object.keys(NOTE_SETTINGS), ['glide', 'shortest', 'longest']);
+  assert.deepEqual(
+    [NOTE_SOURCES.pan.range, NOTE_SOURCES.pan.default],
+    [[-1, 1, 0.01], 0],
+    "MIDI 2.0's per-note pan: left to right, centered where a note sends none",
+  );
+  assert.deepEqual(Object.keys(NOTE_SETTINGS), ['glide', 'glide curve', 'shortest', 'longest']);
+  assert.deepEqual(
+    [NOTE_SETTINGS['glide curve'].choices, NOTE_SETTINGS['glide curve'].default],
+    [['target', 'ramp'], 'target'],
+    'a glide by a time constant, as a voice card has it, unless it says a ramp',
+  );
 });
 
 test('the modules, a YAML template each, of its form: the sources, the modulators, the stages, the output; each planned with no failure', () => {

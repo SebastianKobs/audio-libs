@@ -12,7 +12,7 @@ import { Planner, type WrittenTemplate } from '../planner/index.ts';
 const sine: WrittenTemplate = {
   kind: 'Sine',
   form: 'architecture',
-  outputs: [{ name: 'out', channels: 1 }],
+  outputs: [{ name: 'out', channels: 2 }],
   children: [
     { name: 'osc 1', kind: 'VCO', role: 'source' },
     { name: 'out', kind: 'Out', role: 'out' },
@@ -44,8 +44,8 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 
 | Export | What it does |
 |---|---|
-| `NOTE_SOURCES`, `NoteSource`, `OWN_NOTE_VALUES` | A note's sources into a voice, as a voice card's CV, each a param's spec: frequency, gate, velocity, volume, bend and the per-note controllers by MIDI's names, at their default where a note sends none. `OWN_NOTE_VALUES` are the note's own values, as a test note sets them (`note.ts`). |
-| `NOTE_SETTINGS` | The note's settings: the time constant a later pitch glides by, its shortest, and its longest, 0 for none (`note.ts`). |
+| `NOTE_SOURCES`, `NoteSource`, `OWN_NOTE_VALUES` | A note's sources into a voice, as a voice card's CV, each a param's spec: frequency, gate, velocity, volume, pan, bend and the per-note controllers by MIDI's names, at their default where a note sends none. `OWN_NOTE_VALUES` are the note's own values, as a test note sets them (`note.ts`). |
+| `NOTE_SETTINGS`, `GlideCurve` | The note's settings: the time constant a later pitch glides by, the curve it glides on (`target`, bending into its pitch, or `ramp`, a straight line in pitch), its shortest, and its longest, 0 for none (`note.ts`). |
 | `ARCHITECTURE_FORM`, `INSTRUMENT_FORM` | What a voice card is: sources, modulators, stages and its one output, by role, no loops, every way out ending in its output. An instrument's form is its voices, each of the architecture's form, each into its one output (`architecture-form.ts`). |
 | `SOURCE_FORM`, `MODULATOR_FORM`, `STAGE_FORM`, `OUTPUT_FORM`, `SYNTH_FORMS` | A module's form by its job, its jacks. `SYNTH_FORMS` are the synth's forms, the architecture's then its modules' (`architecture-form.ts`). |
 | `instrumentOf(kind, chains, architectures)`, `Chain` | An instrument's template: one chain with no key makes a pool of voices, each a copy of its voice card. Chains with keys make a drum rack, a pool for each pad, played by its key (`instrument.ts`). |

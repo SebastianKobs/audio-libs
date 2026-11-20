@@ -4,6 +4,7 @@
 import { BuiltStandIn as RecordingBuilt } from '../../contract/test/built.js';
 
 export class BuiltStandIn extends RecordingBuilt {
+  automated = [];
   letGone = [];
   stoppedBy = [];
   rebuilt = [];
@@ -12,6 +13,10 @@ export class BuiltStandIn extends RecordingBuilt {
   // where a copy's outputs go is recorded as a third item, only where it's told
   add(copy, at, into) {
     this.added.push(into === undefined ? [copy.join('/'), at] : [copy.join('/'), at, into]);
+  }
+  // an automation as it's told, its times from where it says
+  automate(address, automation, from) {
+    this.automated.push([address.join('/'), automation, from]);
   }
   stopBy(copy, at) {
     this.stoppedBy.push([copy.join('/'), at]);

@@ -45,6 +45,21 @@ test("an instrument of one patch: a pool of voices, each a copy of its voice car
   assert.equal(paramAt(plan, ['voice', '3', 'osc 1', 'tune']).value, 12, 'a copy, its voice card');
 });
 
+test("an instrument's output stereo, as a panned voice is; the note's pan its card's pan macro, where the card has one", () => {
+  const panned = {
+    ...PLUCK,
+    macros: [...PLUCK.macros, { name: 'pan', maps: [{ to: ['out', 'pan'], factor: 1, offset: 0 }] }],
+  };
+  const template = instrumentOf('Panned pluck', [{ patch: BRIGHT }], [panned]);
+  assert.deepEqual(template.outputs, [{ name: 'out', channels: 2 }]);
+  assert.deepEqual(template.pools[0].note.pan, [['pan']]);
+  assert.equal(
+    instrumentOf('Bright pluck', [{ patch: BRIGHT }], [PLUCK]).pools[0].note.pan,
+    undefined,
+    'none: no macro',
+  );
+});
+
 test('a drum rack: a pool for each pad, played by its key, each its own patch', () => {
   const tap = { kind: 'Pluck', values: { 'amp/decay': 0.2 } };
   const plan = planned(

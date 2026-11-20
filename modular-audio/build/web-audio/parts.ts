@@ -5,7 +5,7 @@
 import type { Node } from '../../plan/format/index.ts';
 import type { Address } from '../../../base/util/index.ts';
 import type { BuiltNode } from './built-node.ts';
-import type { StartAt, StopBy, TempoFollower } from './making.ts';
+import type { ScheduledSource, StartAt, StopBy, TempoFollower } from './making.ts';
 import type { Jacks, OwnJacks } from './wiring.ts';
 
 // a composite holding a pool, as built: its node, its children's jacks by name, copies among them as they come, a node at each of its own jacks
@@ -17,7 +17,7 @@ export interface PoolHolder {
 
 export class BuiltParts {
   readonly nodes: AudioNode[] = [];
-  readonly sources: AudioScheduledSourceNode[] = [];
+  readonly sources: ScheduledSource[] = [];
   readonly blocks = new Map<string, BuiltNode>(); // by its address as text
   readonly placeholders: Address[] = [];
   readonly tempoFollowers: TempoFollower[] = [];
@@ -60,7 +60,7 @@ export class BuiltParts {
   }
   // A source kept, to start with the rest at its time and to be stopped by one, each by its own
   // way where it has one; and to stop as it's taken apart.
-  keepSource<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source {
+  keepSource<Source extends ScheduledSource>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source {
     this.sources.push(source);
     this.#starts.push(startAt ?? ((at) => source.start(at)));
     this.#stopsBy.push(stopBy ?? ((at) => source.stop(at)));

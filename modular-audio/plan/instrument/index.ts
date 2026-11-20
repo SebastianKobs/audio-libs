@@ -18,7 +18,7 @@
 //     VCA, VCF, Tremolo, Ring, Out; none named as a block is; imported apart.
 // Its content read as it loads, its shape checked, every failure said, naming its file.
 // Handed to the planner, with the forms.
-export { NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, type NoteSource } from './note.ts';
+export { NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, type GlideCurve, type NoteSource } from './note.ts';
 export { LiveBank } from './live-bank.ts';
 export { instrumentOf, type Chain } from './instrument.ts';
 export { instrumentsOf, type Instruments, type RackPad } from './instruments-file.ts';

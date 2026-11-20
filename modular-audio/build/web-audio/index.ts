@@ -19,12 +19,14 @@ export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './bui
 export { loadWorklets, NO_WORKLETS, type ProcessorModules, type ProcessorName, type Worklets } from './worklets.ts';
 export { CHROMIUM_LAGS, measuredLags, type Lags, type OfflineContexts } from './shaper-lags.ts';
 export { WebAudioBuilt, type Building } from './built.ts';
+export type { ScheduledSource } from './making.ts';
 export { CROSSFADE, RING_OUT } from './rebuild.ts';
 export { BuiltNode, type WebAudioNode } from './built-node.ts';
 export { ParamInUnits, type Automatable } from './param-units.ts';
 export { automate } from './automation.ts';
 export { Buffers, impulse, noise } from './buffers.ts';
 export { biquadOf } from './blocks/filter.ts';
+export { SourceTimes } from './blocks/source-times.ts';
 export { limiterNodes, makeupOf } from './blocks/limiter.ts';
 export { panOf, type PanLaw } from './blocks/pan.ts';
 export { meterOn, type PeakMeter } from './meters.ts';

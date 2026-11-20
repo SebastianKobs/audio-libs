@@ -3,7 +3,8 @@
 //   1. A note on: a copy of its pool's voice card added at its time, a drum rack's pad's by its key;
 //      its note's sources set by the pool's addresses as it's added, before it sounds, as a voice is
 //      built at them: its frequency, its velocity, the per-note controllers sent with it; its gate
-//      opened last, at its time; its glides by its voice card's glide.
+//      opened last, at its time; its glides by its voice card's glide, a time constant on its
+//      frequency, or a ramp, linear in pitch, as its glide curve says (glide.ts).
 //   2. A note off: its gate closed, no sooner than its shortest; a note held until its note off,
 //      closed at its longest only where its voice card has one.
 //   3. A per-note controller sent later: a change at its time; its pitch glided.
@@ -38,12 +39,15 @@ import {
   type ValuesByAddress,
 } from '../../plan/format/index.ts';
 import { addressOf, SETTLED, type Address } from '../../../base/util/index.ts';
-import { NOTE_SETTINGS } from '../../plan/instrument/index.ts';
+import { NOTE_SETTINGS, type GlideCurve } from '../../plan/instrument/index.ts';
 import type { Built } from '../contract/index.ts';
+import { glidedTo, heldAt, jumpedTo, type Ramp } from './glide.ts';
 import { Silence } from './silence.ts';
 
-// a note's settings, its voice card's or their defaults
-type NoteSettings = Record<keyof typeof NOTE_SETTINGS, number>;
+// a note's numbers, its voice card's or their defaults
+type NoteNumbers = Record<'glide' | 'shortest' | 'longest', number>;
+// a note's settings: its numbers and how its pitch glides
+type NoteSettings = NoteNumbers & { readonly curve: GlideCurve };
 // an instrument's pool as its voices play it: its voice card's silence and note settings
 interface Played {
   readonly pool: Pool;
@@ -51,7 +55,7 @@ interface Played {
   readonly settings: NoteSettings;
 }
 // a note's voice: its input, its copy's address, its pool, when it started, when its gate closes,
-// once known, and when it's silent, once taken over
+// once known, where its pitch is going, and when it's silent, once taken over
 interface Voice {
   readonly input: Input;
   readonly index: number;
@@ -59,6 +63,7 @@ interface Voice {
   played: Played;
   readonly start: number;
   end: number | undefined;
+  pitch: Ramp;
   stolen?: number;
 }
 // where notes come in: where each voice's copy goes, and its voices by their notes' indexes
@@ -170,6 +175,7 @@ export class Voices implements Receiver {
       played,
       start: noteOn.t,
       end: undefined,
+      pitch: heldAt(mtof(noteOn.pitch), -Infinity), // set below, from before anything later
     };
     this.#built.add(voice.copy, noteOn.t, input.into?.());
     this.#owned(voice, this.#own(), {}); // now: a fresh copy, silent until its time
@@ -266,10 +272,24 @@ export class Voices implements Receiver {
     }
     this.#set(voice, controller, value, glide === undefined ? { at: t } : { at: t, glide });
   }
-  // its frequency to a pitch at a time, glided by its voice card's glide; with none, at once
+  // its frequency to a pitch at a time, glided by its voice card's glide, as its curve says; with none, at once
   #pitched(voice: Voice, pitch: number, at: number): void {
-    const { glide } = voice.played.settings;
-    this.#set(voice, 'frequency', mtof(pitch), glide > 0 ? { at, glide } : { at });
+    const { glide, curve } = voice.played.settings;
+    const frequency = mtof(pitch);
+    if (curve === 'target') {
+      this.#set(voice, 'frequency', frequency, glide > 0 ? { at, glide } : { at });
+      return;
+    }
+    if (glide <= 0) {
+      voice.pitch = jumpedTo(voice.pitch, frequency, at);
+      this.#set(voice, 'frequency', frequency, { at });
+      return;
+    }
+    const { ramp, events } = glidedTo(voice.pitch, frequency, at, glide);
+    voice.pitch = ramp;
+    for (const address of voice.played.pool.note?.frequency ?? []) {
+      this.#built.automate([...voice.copy, ...address], events, 0);
+    }
   }
   // one of its note's sources set, by each of its pool's addresses for it; none where it has none
   #set(voice: Voice, source: string, value: number, when: When): void {
@@ -317,9 +337,15 @@ function playedOf(plan: Plan): Played[] {
 }
 // a voice card's note settings: its own, macros with no targets, or their defaults
 function settingsOf(card: Composite): NoteSettings {
-  const entries = Object.entries(NOTE_SETTINGS).map(([name, spec]) => {
+  const numberOf = (name: keyof NoteNumbers): number => {
     const own = macroIn(card, [name])?.value;
-    return [name, typeof own === 'number' ? own : spec.default];
-  });
-  return Object.fromEntries(entries) as NoteSettings;
+    return typeof own === 'number' ? own : NOTE_SETTINGS[name].default;
+  };
+  const curve = macroIn(card, ['glide curve'])?.value;
+  return {
+    glide: numberOf('glide'),
+    shortest: numberOf('shortest'),
+    longest: numberOf('longest'),
+    curve: curve === 'ramp' ? 'ramp' : NOTE_SETTINGS['glide curve'].default,
+  };
 }

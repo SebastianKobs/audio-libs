@@ -1,6 +1,7 @@
 // Sources in Web Audio, started and stopped at their times (mockup/src/libs/modular-audio/build/web-audio), on the stand-in:
 //   - a plan's sources started as it's built; a pool's copy's at the time it's added, a free
 //     oscillator's as it's built, running free;
+//   - a source that isn't a node, one a processor is told of by message: started and stopped by its times as a node is;
 //   - a source's stop, its stop after it starts, 0 none; changed once started, moved;
 //   - a copy stopped by a time, as it's gone silent: each of its sources then, none later than its own stop;
 //   - a noise looped where it says, its buffer by its color, started drawn into it up to its offset;
@@ -9,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StandInContext, into } from './audio-stand-in.js';
-import { Buffers, WebAudioBuilder } from '../index.ts';
+import { Buffers, SourceTimes, WebAudioBuilder } from '../index.ts';
 import { blockNode, builtOn, instrumentOf, oneBlockPlan } from './blocks.js';
 
 test("a plan's sources started as it's built; a pool's copy's at the time it's added, a free oscillator's as it's built", () => {
@@ -24,6 +25,31 @@ test("a plan's sources started as it's built; a pool's copy's at the time it's a
     made('oscillator').map((oscillator) => oscillator.starts),
     [[[6]], [[]], [[]], [[]]],
     "the tone at its voice's time, now where none; the LFO as it's built",
+  );
+});
+
+// a source told by message, as a worklet's: it records its starts and stops, as it's told them, and is no node
+function toldSource() {
+  const starts = [];
+  const stops = [];
+  return { starts, stops, start: (...at) => starts.push(at), stop: (...at) => stops.push(at) };
+}
+
+test("a source that isn't a node: started at its time, stopped its stop after, then by a time sooner than that, a stop moved after it's started moved", () => {
+  const source = toldSource();
+  const times = new SourceTimes(source, { stop: 0.5, now: () => 3 });
+  times.start(6);
+  assert.deepEqual([source.starts, source.stops], [[[6]], [[6.5]]], 'at its time, its stop after');
+  times.stopBy(6.25);
+  assert.deepEqual(source.stops.at(-1), [6.25], 'by a time, sooner than its own stop');
+  times.stopParam().value = 1;
+  assert.deepEqual(source.stops.at(-1), [6.25], 'its own stop moved, still no later');
+  const now = toldSource();
+  new SourceTimes(now, { stop: 0, now: () => 3 }).start(undefined);
+  assert.deepEqual(
+    [now.starts, now.stops],
+    [[[]], []],
+    'now: told no time, as Web Audio starts a source told none; no stop',
   );
 });
 

@@ -25,8 +25,14 @@ export interface Making {
   readonly worklets: Worklets;
   readonly shaperLags: Lags;
   kept<Made extends AudioNode>(node: Made): Made;
-  started<Source extends AudioScheduledSourceNode>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source;
+  started<Source extends ScheduledSource>(source: Source, startAt?: StartAt, stopBy?: StopBy): Source;
   followsTempo(follower: TempoFollower): void;
+}
+// A source as a block's maker starts it: an oscillator's or a buffer's, which are nodes, or one whose
+// processor is told by message, which isn't.
+export interface ScheduledSource {
+  start(when?: number): void;
+  stop(when?: number): void;
 }
 // a source's own way of starting at its time, now where none
 export type StartAt = (at: number | undefined) => void;

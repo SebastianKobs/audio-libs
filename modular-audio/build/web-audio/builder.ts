@@ -14,7 +14,7 @@ import { MAKERS } from './blocks/makers.ts';
 import { Buffers } from './buffers.ts';
 import { WebAudioBuilt } from './built.ts';
 import { NO_WORKLETS, type Worklets } from './worklets.ts';
-import type { Making } from './making.ts';
+import type { Making, ScheduledSource } from './making.ts';
 import { BuiltParts } from './parts.ts';
 import { placeholder } from './placeholder.ts';
 import { CHROMIUM_LAGS, type Lags } from './shaper-lags.ts';
@@ -112,7 +112,8 @@ export class WebAudioBuilder implements Builder<AudioNode> {
     const before = { nodes: parts.nodes.length, sources: parts.sources.length };
     const built = make ? make(node, making) : placeholder(making);
     parts.blocks.set(addressText(at), built);
-    parts.made.set(addressText(at), [...parts.nodes.slice(before.nodes), ...parts.sources.slice(before.sources)]);
+    const sources = parts.sources.slice(before.sources).filter(isNode); // one told by message isn't
+    parts.made.set(addressText(at), [...parts.nodes.slice(before.nodes), ...sources]);
     return blockJacks(node, built);
   }
   // what a block's maker is handed, what it makes kept among these parts
@@ -130,6 +131,11 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       followsTempo: (follower) => parts.tempoFollowers.push(follower),
     };
   }
+}
+
+// whether a source is a Web Audio node: it connects
+function isNode(source: ScheduledSource): source is AudioScheduledSourceNode {
+  return 'connect' in source;
 }
 
 // a node at each of a composite's own jacks, a gain at 1, where its pool's copies come and go
