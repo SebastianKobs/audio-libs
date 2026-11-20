@@ -1,5 +1,5 @@
 // The blocks' unit tests (mockup/src/libs/modular-audio/plan/blocks): the contract every builder meets.
-//   - the eighteen blocks, each declared by its kind;
+//   - the twenty-one blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its choices, units and defaults;
@@ -7,7 +7,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { isDeepStrictEqual } from 'node:util';
-import { BLOCKS, biquadQs, OVERSAMPLE } from '../index.ts';
+import {
+  BLOCKS,
+  biquadQs,
+  CRUSHER_SPECS,
+  GRAINS_MEMORY,
+  GRAINS_SPECS,
+  OVERSAMPLE,
+  SATURATING_FILTER_SPECS,
+} from '../index.ts';
 import { near } from '../../../../base/util/test/near.js';
 import { onControl } from '../../../../base/params/test/on-control.js';
 import { FADER_GAIN, isSwitch, NOTE_VALUES, timeParamsIn } from '../../../../base/params/index.ts';
@@ -31,6 +39,9 @@ const KINDS = [
   'sync oscillator',
   'operators',
   'phase distortion',
+  'crusher',
+  'grains',
+  'saturating filter',
 ];
 const WAVES = 'W1|W2|W3|W4|W5|W6|W7|W8';
 const MONO = 1;
@@ -62,7 +73,7 @@ function declared({ params, settings, inputs, outputs }) {
   };
 }
 
-test('the eighteen blocks, each declared by its kind, the contract every builder meets', () => {
+test('the twenty-one blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -199,6 +210,33 @@ test("what each block declares, in short standard terms: its params and settings
       inputs: [],
       outputs: [`out ${MONO}`],
     },
+    crusher: { params: ['bits =16', 'rate Hz =48000'], settings: [], inputs: ['in'], outputs: ['out'] },
+    grains: {
+      params: [
+        'freeze =0',
+        'position s =0.25',
+        'size s =0.08',
+        'density Hz =12',
+        'pitch semitones =0',
+        'spray s =0.02',
+      ],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
+    'saturating filter': {
+      params: [
+        'frequency Hz =24000',
+        'detune cents =0',
+        'resonance =0',
+        'drive =1',
+        'compensation =0',
+        'mode ladder|lowpass|bandpass|highpass =ladder',
+      ],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
   });
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   for (const [kind, name] of [
@@ -260,4 +298,36 @@ test("the worklet sources' choices are params, changed as they play or read once
     const [low, high] = param(kind, 'detune').range;
     assert.ok(low <= -4800 && high >= 4800, `${kind}: a tune of four octaves either way`);
   }
+});
+
+test("the worklet effects' choices are params, changed as they play: no settings; each a processor of one input and one output, grains a tail", () => {
+  for (const kind of ['crusher', 'grains', 'saturating filter']) {
+    assert.deepEqual(BLOCKS[kind].settings, [], `${kind}: no settings`);
+    assert.deepEqual(
+      [BLOCKS[kind].inputs, BLOCKS[kind].outputs].map((jacks) => jacks.map(({ name }) => name)),
+      [['in'], ['out']],
+      `${kind}: an effect`,
+    );
+  }
+  assert.equal(BLOCKS.grains.tail, true, "its grains ring on past its input, so Silence doesn't cut them off");
+  assert.equal(BLOCKS.crusher.tail, undefined);
+  const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
+  assert.deepEqual(
+    [param('crusher', 'rate').taper, param('saturating filter', 'frequency').taper],
+    ['octaves', 'octaves'],
+  );
+  assert.ok(isSwitch(param('grains', 'freeze')), 'a freeze is a switch');
+  const [low, high] = param('saturating filter', 'detune').range;
+  assert.ok(low <= -4800 && high >= 4800, 'a tune of four octaves either way');
+});
+
+test("the grains' memory and the three blocks' specs are read by their builders by name", () => {
+  assert.equal(GRAINS_MEMORY, 2, 'seconds of its input a grains block keeps');
+  assert.deepEqual(CRUSHER_SPECS.bits.range, [1, 16, 0.1]);
+  assert.deepEqual(Object.keys(GRAINS_SPECS), ['freeze', 'position', 'size', 'density', 'pitch', 'spray']);
+  assert.deepEqual(
+    SATURATING_FILTER_SPECS.mode.choices,
+    ['ladder', 'lowpass', 'bandpass', 'highpass'],
+    "the processor's indexes",
+  );
 });

@@ -70,7 +70,7 @@ export function numericOf(node: Node, spec: ParamSpec): number {
 }
 
 // A source told by message: each start and stop posted to its processor, now as 0.
-function messaged(port: MessagePort): ScheduledSource {
+export function messaged(port: MessagePort): ScheduledSource {
   return {
     start: (at) => port.postMessage({ start: at ?? 0 }),
     stop: (at) => port.postMessage({ stop: at ?? 0 }),

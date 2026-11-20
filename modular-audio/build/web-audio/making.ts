@@ -8,7 +8,7 @@
 // And a block's values and settings read from its node, what a plan leaves out at its block's
 // declared default; its values set on what's built.
 import type { When } from '../../../base/automation/index.ts';
-import { BLOCKS, type BlockKind } from '../../plan/blocks/index.ts';
+import { BLOCKS, type Block, type BlockKind } from '../../plan/blocks/index.ts';
 import type { Node } from '../../plan/format/index.ts';
 import type { Buffers } from './buffers.ts';
 import type { BuiltNode } from './built-node.ts';
@@ -41,8 +41,9 @@ export type StartAt = (at: number | undefined) => void;
 export type StopBy = (at: number) => void;
 // what follows a new beat: told it, when it lands, and the context's time now
 export type TempoFollower = (beat: number, when: When, now: number) => void;
-// a block's maker: its node as planned, made in Web Audio
-export type Maker = (node: Node, making: Making) => BuiltNode;
+// a block's maker: its node as planned, made in Web Audio; none where it can't be made, a worklet's that hasn't
+// loaded, and a placeholder is put in its place
+export type Maker = (node: Node, making: Making) => BuiltNode | null;
 
 // a block's param's value as it starts, by its name; its block's default where a plan leaves it out
 export function valueOf(node: Node, name: string): number | string | undefined {
@@ -71,4 +72,18 @@ export function atValues(built: BuiltNode, node: Node): BuiltNode {
     }
   }
   return built;
+}
+// A node as a block it stands in for plans it: that block's kind, its params at the values given and the block's defaults
+// where none is, its settings at the choices given and the block's defaults where none is.
+export function standingIn(
+  node: Node,
+  plan: Block,
+  { values, choices }: { values: Readonly<Record<string, number>>; choices: Readonly<Record<string, string>> },
+): Node {
+  return {
+    ...node,
+    kind: plan.kind,
+    params: plan.params.map((spec) => ({ spec, value: values[spec.name] ?? spec.default ?? 0 })),
+    settings: plan.settings.map((spec) => ({ spec, value: choices[spec.name] ?? spec.default ?? '' })),
+  };
 }

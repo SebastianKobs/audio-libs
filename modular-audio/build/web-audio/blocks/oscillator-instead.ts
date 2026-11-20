@@ -5,7 +5,7 @@ import { choiceAt, choiceIndex, type ParamSpec } from '../../../../base/params/i
 import { BLOCKS } from '../../../plan/blocks/index.ts';
 import type { Node } from '../../../plan/format/index.ts';
 import { BuiltNode } from '../built-node.ts';
-import { numberOf, valueOf, type Making } from '../making.ts';
+import { numberOf, standingIn, valueOf, type Making } from '../making.ts';
 import { toldParam, type Automatable } from '../param-units.ts';
 import { oscillator } from './oscillator.ts';
 import { numericOf } from './worklet-source.ts';
@@ -26,18 +26,12 @@ interface InsteadOf {
 
 // The library's oscillator made of the node's frequency, detune and stop, its wave given.
 export function libraryOscillator(node: Node, making: Making, wave: OscillatorType): BuiltNode {
-  const plan = BLOCKS.oscillator;
-  const values: Record<string, number> = {
+  const values = {
     frequency: numberOf(node, 'frequency'),
     detune: numberOf(node, 'detune'),
     stop: numberOf(node, 'stop'),
   };
-  const stood: Node = {
-    ...node,
-    kind: plan.kind,
-    params: plan.params.map((spec) => ({ spec, value: values[spec.name] ?? spec.default ?? 0 })),
-    settings: plan.settings.map((spec) => ({ spec, value: spec.name === 'wave' ? wave : spec.default })),
-  };
+  const stood = standingIn(node, BLOCKS.oscillator, { values, choices: { wave } });
   return oscillator(stood, making);
 }
 

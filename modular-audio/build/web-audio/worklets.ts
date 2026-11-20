@@ -8,7 +8,14 @@
 
 // The name each processor registers under, one literal for the app's key, the maker's and the processor's, so none can differ.
 // A processor file checks its own by a type-only import of this, as a worklet scope imports no code of the library's own.
-export type ProcessorName = 'lookahead limiter' | 'sync oscillator' | 'operators' | 'phase distortion';
+export type ProcessorName =
+  | 'lookahead limiter'
+  | 'sync oscillator'
+  | 'operators'
+  | 'phase distortion'
+  | 'crusher'
+  | 'grains'
+  | 'saturating filter';
 // each processor's module URL, by the name it registers; those a caller has
 export type ProcessorModules = Readonly<Partial<Record<ProcessorName, string>>>;
 // a worklet node of a loaded processor, made in a context; none where it can't be

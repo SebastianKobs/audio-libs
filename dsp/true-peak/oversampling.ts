@@ -1,8 +1,8 @@
 // ---------- libs/dsp/true-peak: the points between a channel's samples, as a DAC rebuilds the wave ----------
+import { windowedSinc } from '../filters/index.ts';
 
 // samples each side of a point that are read to compute it
 export const INTERPOLATION_REACH = 12;
-const KAISER_BETA = 8; // a stopband near -70 dB: the error of a point stays far under a hundredth of a dB
 
 /**
  * For each sample, the loudest of it and the points between it and the next sample,
@@ -50,7 +50,7 @@ function interpolationKernel(fraction: number): Float64Array {
   let total = 0;
   for (let tap = 0; tap < kernel.length; tap++) {
     const distance = fraction - (tap - (INTERPOLATION_REACH - 1));
-    const weight = sinc(distance) * kaiser(distance / INTERPOLATION_REACH);
+    const weight = windowedSinc(distance, INTERPOLATION_REACH);
     kernel[tap] = weight;
     total += weight;
   }
@@ -63,27 +63,4 @@ function pointOf(samples: ArrayLike<number>, start: number, kernel: Float64Array
     point += (samples[start + tap] ?? 0) * (kernel[tap] ?? 0);
   }
   return point;
-}
-
-function sinc(distance: number): number {
-  if (distance === 0) {
-    return 1;
-  }
-  return Math.sin(Math.PI * distance) / (Math.PI * distance);
-}
-
-// a window that is 1 at 0 and falls to nearly 0 at ±1
-function kaiser(position: number): number {
-  return besselI0(KAISER_BETA * Math.sqrt(Math.max(0, 1 - position * position))) / besselI0(KAISER_BETA);
-}
-
-// the series Σ ((x/2)^k / k!)² → a loop that adds terms until they stop mattering
-function besselI0(value: number): number {
-  let sum = 1;
-  let term = 1;
-  for (let k = 1; term > 1e-12 * sum; k++) {
-    term *= (value / (2 * k)) ** 2;
-    sum += term;
-  }
-  return sum;
 }

@@ -2,7 +2,7 @@
 
 A true-peak meter and limiter on float channels. The true peak is the loudest point of the wave a DAC rebuilds, which can sit between two samples and over both: the meter finds it on a copy upsampled 8 times (a windowed-sinc filter computes the points between the samples; BS.1770 asks for 4 at least, which can under-read by a fraction of a dB). The limiter is one kernel run in the stream, a sample in and a sample out (`LookaheadLimiter`): a soft clip, then the gain at each sample from the loudest upsampled point within its lookahead (a sliding-window minimum of the gain each point needs, ramped down by a moving average so it lands as the peak arrives, and let go by a release), a delay of `latency` samples. On whole channels, `limitTruePeak()` runs the kernel once with the clip off, then measures the result and pulls the gain down further wherever a point is still over, until none is. One gain serves every channel, so the stereo image holds. The samples past either end of the channels count as silence, so a hard start rings over its level, as it would on a DAC.
 
-Depends on: `dsp/loudness`, in its tests alone.
+Depends on: `dsp/filters`, and `dsp/loudness` in its tests alone.
 
 ```ts
 import { limitTruePeak, LookaheadLimiter, measureTruePeak } from './index.ts';

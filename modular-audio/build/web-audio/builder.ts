@@ -106,11 +106,12 @@ export class WebAudioBuilder implements Builder<AudioNode> {
       return compositeJacks(node, children, attenuator, own);
     }
     const make = MAKERS[node.kind as BlockKind]; // a block's kind, or one it can't make
-    if (!make) {
+    const before = { nodes: parts.nodes.length, sources: parts.sources.length };
+    const made = make?.(node, making) ?? null; // none: no maker, or one whose worklet isn't loaded
+    if (!made) {
       parts.placeholders.push(at);
     }
-    const before = { nodes: parts.nodes.length, sources: parts.sources.length };
-    const built = make ? make(node, making) : placeholder(making);
+    const built = made ?? placeholder(making);
     parts.blocks.set(addressText(at), built);
     const sources = parts.sources.slice(before.sources).filter(isNode); // one told by message isn't
     parts.made.set(addressText(at), [...parts.nodes.slice(before.nodes), ...sources]);

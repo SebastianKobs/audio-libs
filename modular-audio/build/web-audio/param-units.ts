@@ -11,8 +11,8 @@ export interface Automatable {
   setTargetAtTime(value: number, at: number, timeConstant: number): unknown;
   cancelScheduledValues(at: number): unknown;
 }
-// a Web Audio param behind it, and how a value in the plan's units becomes its
-type Behind = [param: AudioParam, from: (value: number) => number];
+// a Web Audio param behind it (or another in units of its own), and how a value in the plan's units becomes its
+type Behind = [param: Automatable, from: (value: number) => number];
 
 // a param in the plan's units: each change made to every param behind it, in its own. A ramp is made in their units, from the converted
 // ends: a glide in dB, made in gain, follows the gain's curve, as the mixer's own glides do

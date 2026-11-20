@@ -2,7 +2,7 @@
 
 The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds the plan and hands back what's built, a `Built`. It knows no planner, channel, desk, effect or instrument, and is the only code that makes Web Audio nodes. What's built is fed, metered and taken apart.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `dsp/filters`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/crusher`, `dsp/filters`, `dsp/grains`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
 
 ```ts
 import { WebAudioBuilder } from './index.ts';
@@ -18,7 +18,7 @@ built.dispose(); // its sources stopped, its nodes disconnected
 How a plan is built:
 
 1. Each block is made by its kind at its values and settings as they start. A block with several inputs gives each its own way in; an input taken in nowhere gets none (a select's other).
-2. A block it can't make becomes a placeholder: a gain at 1, its sound passed straight through, a source with nothing coming in silent, said by its address.
+2. A block it can't make becomes a placeholder: a gain at 1, its sound passed straight through, a source with nothing coming in silent, said by its address. So does one whose maker answers none, a worklet's that hasn't loaded and has no fallback.
 3. Each composite is opened and its wires made by names. With no pool it has no node of its own: its inputs are the children's inputs, its outputs the children's outputs. With a pool it has a gain at 1 at each of its own jacks, where the pool's copies come and go.
 4. A sound into a macro goes through a gain at each map's factor into what the map moves, as CV through attenuators.
 5. Its inputs are fed from where they come from, its main output into where it goes.
@@ -43,6 +43,9 @@ How a block is made:
 | `sync oscillator` | A worklet source of its processor, no input, one mono output, its frequency, detune, sync and wave its AudioParams, started and stopped by message; the library's `oscillator` at the note, its wave the slave's, where the worklet hasn't loaded, its sync held and heard nowhere. |
 | `operators` | A worklet source of its processor, its nineteen params its AudioParams, its algorithm's routes and carriers and its four start phases (four draws of the builder's random at `free`) handed over as it's made, started and stopped by message; the library's `oscillator`, a sine at the note, into a gain that is the first carrier's level where the worklet hasn't loaded, every other param held and heard nowhere. |
 | `phase distortion` | A worklet source of its processor, its frequency, detune, dcw and wave its AudioParams, its start phase (one draw of the builder's random at `free`) handed over as it's made, started and stopped by message; the library's `oscillator`, a triangle for the saw and a square for the square, where the worklet hasn't loaded, its dcw held and heard nowhere. |
+| `crusher` | A worklet node of its processor, one input and one output, its bits and rate its AudioParams; a placeholder where the worklet hasn't loaded. |
+| `grains` | A worklet node of its processor, one input and one output, its six params its AudioParams, handed what it keeps (2 s) and a seed drawn once from the builder's random; a placeholder where the worklet hasn't loaded. |
+| `saturating filter` | A worklet node of its processor, one input and one output, a filter a channel, its six params its AudioParams (its mode by its index), a seed drawn once from the builder's random, told `{ stop }` by message as a source is; the library's `filter` at the mode's type and slope where the worklet hasn't loaded, its resonance a Q by octaves from flat to 30, its drive, compensation and mode held and heard nowhere. |
 | `envelope` | A constant source following the curve from its gate, added to the params it's wired into. |
 | `select` | A gain at 1 on the input its setting names. |
 
@@ -65,7 +68,7 @@ How a block is made:
 | `measuredLags()`, `CHROMIUM_LAGS`, `Lags`, `OfflineContexts` | How late a waveshaper comes out at each oversampling, in samples, as the browser's own: `measuredLags(sampleRate, Offline)` renders a click through one offline, once for each oversampling, and gives Chromium's `CHROMIUM_LAGS` where a render fails. Nothing is kept between calls: the context that asks keeps what it found (`shaper-lags.ts`). |
 | `Copies`, `Editable` | Every built copy of one template, an edit reaching each: a value at its address under each copy, settings changed in one change so what's built is built again once (`copies.ts`). |
 
-A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports: the `dsp/true-peak` kernel for the lookahead limiter's, the `dsp/oscillators` kernels for the three sources', each a `ScheduledVoice` told `{ start }` and `{ stop }`.
+A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports: the `dsp/true-peak` kernel for the lookahead limiter's, the `dsp/oscillators` kernels for the three sources', each a `ScheduledVoice` told `{ start }` and `{ stop }`; the `dsp/crusher`, `dsp/grains` and `dsp/filters` kernels for the three effects', each handed a random of its own made of `seeded()` from its options.
 
 What a studio needs of what's built, beyond the contract, is Web Audio's own, not every builder's:
 
@@ -73,4 +76,4 @@ What a studio needs of what's built, beyond the contract, is Web Audio's own, no
 - A meter on a node's main output by its address, or at a point inside a block (a limiter's `in` and `out`), made at its first read.
 - What a block says of itself by name (a limiter's `reduction`, an envelope's `faded`), and the nodes under an address.
 
-Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js`, `test/drive-blocks.test.js`, `test/worklet-sources.test.js`, `test/shaper-lags.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.
+Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js`, `test/drive-blocks.test.js`, `test/worklet-sources.test.js`, `test/worklet-effects.test.js`, `test/shaper-lags.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.
