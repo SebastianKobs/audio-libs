@@ -14,18 +14,34 @@ export function betweenSamplePeaks(channel: Float32Array, factor: number): Float
   padded.set(channel, INTERPOLATION_REACH);
   const peaks = new Float32Array(channel.length);
   for (let i = 0; i < channel.length; i++) {
-    peaks[i] = Math.max(Math.abs(channel[i] ?? 0), loudestPointAfter(padded, i, kernels));
+    // padded puts sample i at i + reach, so the window for the points after it starts at i + 1
+    peaks[i] = Math.max(Math.abs(channel[i] ?? 0), loudestPointIn(padded, i + 1, kernels));
   }
   return peaks;
 }
 
-// the points at 1/factor ... (factor-1)/factor of the way to the next sample, as a filter each
-function interpolationKernels(factor: number): Float64Array[] {
+/**
+ * The points at 1/factor ... (factor-1)/factor of the way to the next sample, as a filter each,
+ * each as long as the window of samples it reads: 2 * INTERPOLATION_REACH.
+ */
+export function interpolationKernels(factor: number): Float64Array[] {
   const kernels: Float64Array[] = [];
   for (let phase = 1; phase < factor; phase++) {
     kernels.push(interpolationKernel(phase / factor));
   }
   return kernels;
+}
+
+/**
+ * The loudest of the points between two samples, read from the window of samples that makes them:
+ * `start` is where the window begins, at sample i - (reach - 1) for the points after sample i.
+ */
+export function loudestPointIn(samples: ArrayLike<number>, start: number, kernels: readonly Float64Array[]): number {
+  let loudest = 0;
+  for (const kernel of kernels) {
+    loudest = Math.max(loudest, Math.abs(pointOf(samples, start, kernel)));
+  }
+  return loudest;
 }
 
 // taps for the samples i-(reach-1) ... i+reach, a point `fraction` of the way from i to i+1; they add up to 1
@@ -41,20 +57,10 @@ function interpolationKernel(fraction: number): Float64Array {
   return kernel.map((weight) => weight / total);
 }
 
-function loudestPointAfter(padded: Float32Array, sample: number, kernels: readonly Float64Array[]): number {
-  let loudest = 0;
-  for (const kernel of kernels) {
-    loudest = Math.max(loudest, Math.abs(pointOf(padded, sample, kernel)));
-  }
-  return loudest;
-}
-
-// padded holds the channel after INTERPOLATION_REACH zeros, so sample i sits at i + reach
-function pointOf(padded: Float32Array, sample: number, kernel: Float64Array): number {
-  const first = sample + 1; // sample i - (reach - 1), shifted by the padding
+function pointOf(samples: ArrayLike<number>, start: number, kernel: Float64Array): number {
   let point = 0;
   for (let tap = 0; tap < kernel.length; tap++) {
-    point += (padded[first + tap] ?? 0) * (kernel[tap] ?? 0);
+    point += (samples[start + tap] ?? 0) * (kernel[tap] ?? 0);
   }
   return point;
 }

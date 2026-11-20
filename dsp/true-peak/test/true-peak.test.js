@@ -2,10 +2,11 @@
 // counted on an upsampled copy, and a limiter that leaves none of them over its ceiling
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { limitTruePeak, measureTruePeak } from '../index.ts';
+import { limitTruePeak, LookaheadLimiter, measureTruePeak } from '../index.ts';
 import { near } from '../../../base/util/test/near.js';
 
 const RATE = 44100;
+const INTERPOLATION_REACH = 12; // samples each side of a point the detector reads
 const CEILING_DB = -0.3;
 const CEILING = 10 ** (CEILING_DB / 20);
 
@@ -149,10 +150,28 @@ test('the limiter: a loud burst in silence is met ahead of it by the lookahead a
   input.set(tone(0.2 * RATE, 1.8, 0, 2000), burstAt);
   const lookahead = Math.round(0.005 * RATE);
   const { gain } = limitTruePeak({ channels: [input], sampleRate: RATE, lookaheadMs: 5, releaseMs: 100 });
-  assert.equal(gain[burstAt - lookahead - 2], 1, 'untouched before the lookahead');
+  // the detector reads 12 samples ahead of a point, so the gain starts that much before the lookahead
+  assert.equal(gain[burstAt - lookahead - INTERPOLATION_REACH - 2], 1, 'untouched before the lookahead');
   assert.ok(gain[burstAt - 2] < 1, 'already falling just before the burst');
   assert.ok(gain[burstAt + 50] < 0.6, 'down for the burst');
   assert.ok(gain[frames - 1] > 0.999, 'let go again after it');
+});
+
+test("the limiter: its channels are the lookahead limiter's output, latency samples on, at its ceiling with the clip off", () => {
+  const input = [hiddenCrest(1.5), seededNoise(3, 1.2, RATE)];
+  const limiter = new LookaheadLimiter({ sampleRate: RATE, lookahead: 0.005 });
+  const length = RATE + limiter.latency;
+  const fed = input.map((channel) => Float32Array.from({ length }, (_, i) => channel[i] ?? 0));
+  const heard = input.map(() => new Float32Array(length));
+  limiter.render(fed, heard, length, { gain: 0, ceiling: CEILING_DB, release: 0.1, clip: Infinity });
+  const { channels } = limitTruePeak({ channels: input, sampleRate: RATE });
+  let most = 0;
+  for (let channel = 0; channel < 2; channel++) {
+    for (let i = 0; i < RATE; i++) {
+      most = Math.max(most, Math.abs(channels[channel][i] - heard[channel][i + limiter.latency]));
+    }
+  }
+  assert.equal(most, 0, `the most difference ${most}`);
 });
 
 test('the limiter: the same input gives the same output', () => {
@@ -166,12 +185,14 @@ test('the limiter: the file keeps its length, and an empty channel passes', () =
   assert.equal(gain.length, 0);
 });
 
-test('the limiter refuses no channels, channels of different lengths, a rate that is not a positive whole number, a negative time', () => {
+test('the limiter refuses no channels, channels of different lengths, a rate that is not a positive whole number, a negative time, a lookahead over 20 ms', () => {
   const ok = { channels: [new Float32Array(10)], sampleRate: RATE };
   assert.throws(() => limitTruePeak({ ...ok, channels: [] }), /channel/);
   assert.throws(() => limitTruePeak({ ...ok, channels: [new Float32Array(10), new Float32Array(9)] }), /same length/);
   assert.throws(() => limitTruePeak({ ...ok, sampleRate: 44100.5 }), /sample rate/);
   assert.throws(() => limitTruePeak({ ...ok, sampleRate: 0 }), /sample rate/);
   assert.throws(() => limitTruePeak({ ...ok, lookaheadMs: -1 }), /lookahead/);
+  assert.throws(() => limitTruePeak({ ...ok, lookaheadMs: 20.5 }), /lookahead is 0 to 20 ms/);
+  assert.doesNotThrow(() => limitTruePeak({ ...ok, lookaheadMs: 20 }));
   assert.throws(() => limitTruePeak({ ...ok, releaseMs: -1 }), /release/);
 });
