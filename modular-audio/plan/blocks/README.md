@@ -26,6 +26,7 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `reverb` | | length (s) | in; out, stereo |
 | `noise` | offset (s, the furthest into its buffer it starts, drawn as its voice starts), stop | color: noise, breath; loop: off, on | none; out, mono |
 | `limiter` | gain (dB), ceiling (dBFS), release (s) | | in; out |
+| `lookahead limiter` | gain (dB), ceiling (dBTP: the true peak, between the samples too), release (s), clip (dB the soft clip lets a peak over the ceiling, before the gain takes the rest); its lookahead each builder's own, 5 ms | | in; out |
 | `envelope` | gate, a switch; delay, attack, hold, decay (s, 0 to start); sustain (a share of the amount, 1 to start); release (s, 0.1 to start); amount (1 to start) | mode: the gate's, or a trigger's running on past the note-off, as Ableton's | none; out, mono |
 | `select` | | input: a, b, the one passed on, the other going nowhere, as a console's PRE button picks where a send is taken | a, b; out |
 
@@ -44,6 +45,7 @@ How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a
 | `DELAY_TIME` | A delay's time, its three params: synced to an 8th to start, free up to 4 s, its free time never glided, as its pitch would bend (`delay.ts`). |
 | `ENVELOPE_SPECS` | An envelope's knobs by name: its amount in its target's units, its stages' times, its sustain (`envelope.ts`). |
 | `LIMITER_SPECS` | A limiter's gain, ceiling and release (`limiter.ts`). |
+| `LOOKAHEAD_LIMITER_SPECS` | A lookahead limiter's gain, ceiling, release and clip, the processor's params and the Lookahead limiter effect's macros (`lookahead-limiter.ts`). |
 | `NOISE_SECONDS` | Each noise color's buffer length for a builder that plays it from a looping buffer: noise 2 s, breath 0.2 s (`noise.ts`). |
 | `WAVE`, `DETUNE` | An oscillator's wave and its detune (`oscillator.ts`). |
 | `FILTER_SLOPE`, `RESONANCE`, `biquadQs()`, `FilterStages` | A filter's slope and its resonance, Q as a plain ratio, 0.707 flat. `biquadQs({ type, resonance, slope })` gives the Qs of the biquads in series that build it: one at 12 dB an octave, two at 24, a 4th-order Butterworth's for a lowpass or a highpass (`filter.ts`). |

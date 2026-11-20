@@ -1,5 +1,5 @@
 // The effects' unit tests (mockup/src/libs/modular-audio/plan/effects): each a template, as its YAML writes it.
-//   - the six, each of the effect's form, one input and one output, its label where it has one, planned with no failure;
+//   - the seven, each of the effect's form, one input and one output, its label where it has one, planned with no failure;
 //     the Tape delay the Delay's;
 //   - their params macros by the names a desk keys them, the Utility's level the fader's;
 //   - the Delay's note a choice through its macro; the Utility's pan pot a setting; the Reverb's length one;
@@ -20,7 +20,7 @@ function macrosOf(kind, asked) {
   return Object.fromEntries(macros.map((macro) => [macro.spec.name, macro.value]));
 }
 
-test("the six effects, each of the effect's form, one input and one output, each planned, its label the name a device shows it by where it isn't its kind; the Tape delay the Delay's, its own label", () => {
+test("the seven effects, each of the effect's form, one input and one output, each planned, its label the name a device shows it by where it isn't its kind; the Tape delay the Delay's, its own label", () => {
   assert.deepEqual(
     EFFECT_TEMPLATES.map(({ kind }) => {
       const { form, label } = planner.plan(kind).node;
@@ -30,6 +30,7 @@ test("the six effects, each of the effect's form, one input and one output, each
       ['Utility', 'effect', undefined],
       ['Filter', 'effect', 'LP filter'],
       ['Limiter', 'effect', undefined],
+      ['Lookahead limiter', 'effect', undefined],
       ['Delay', 'effect', undefined],
       ['TapeDelay', 'effect', 'Tape delay'],
       ['Reverb', 'effect', undefined],
@@ -48,6 +49,7 @@ test("their params macros by the names a desk keys them, each at its default as 
   assert.deepEqual(macrosOf('Utility'), { level: 1, pan: 0 });
   assert.deepEqual(macrosOf('Filter'), { cutoff: 24000, q: 0.707 });
   assert.deepEqual(macrosOf('Limiter'), { gain: 0, ceiling: -0.3, release: 0.3 });
+  assert.deepEqual(macrosOf('Lookahead limiter'), { gain: 0, ceiling: -1, release: 0.3, clip: 3 });
   assert.deepEqual(macrosOf('Delay'), { sync: 1, note: '1/8', ms: 417, feedback: 0.45, tone: 2400 });
   assert.deepEqual(macrosOf('TapeDelay'), { ...macrosOf('Delay'), rate: 0.5, depth: 0.004 }, '0.5 Hz, 4 ms either way');
   assert.deepEqual(macrosOf('Reverb'), {}, 'its length a setting');
@@ -89,4 +91,5 @@ test("every effect's macros hinted, the words a device shows beside their knobs,
     }
   }
   assert.match(planner.plan('Limiter').node.macros[1].hint, /^The limiter: where it acts, in dBFS/);
+  assert.match(planner.plan('Lookahead limiter').node.macros[1].hint, /^The limiter: the true peak it holds/);
 });

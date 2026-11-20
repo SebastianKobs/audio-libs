@@ -2,7 +2,7 @@
 
 The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds the plan and hands back what's built, a `Built`. It knows no planner, channel, desk, effect or instrument, and is the only code that makes Web Audio nodes. What's built is fed, metered and taken apart.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/true-peak`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
 
 ```ts
 import { WebAudioBuilder } from './index.ts';
@@ -35,6 +35,7 @@ How a block is made:
 | `delay` | One delay line made for its longest time, its time three params (sync, note, ms) moving it, a signal into its ms in seconds, a glide of 0.3 s on a change. |
 | `reverb` | A convolver, its impulse made once by its length. |
 | `limiter` | Drive into a compressor held as hard as Web Audio goes, then back by the makeup the compressor adds. |
+| `lookahead limiter` | A worklet node of its processor, its four params its own and its reduction as the processor posts it; the `limiter` at the same gain, ceiling and release where the worklet hasn't loaded, its clip held. |
 | `envelope` | A constant source following the curve from its gate, added to the params it's wired into. |
 | `select` | A gain at 1 on the input its setting names. |
 
@@ -52,8 +53,10 @@ How a block is made:
 | `biquadOf()`, `panOf()`, `PanLaw`, `limiterNodes()`, `makeupOf()` | A biquad with its Q a plain ratio, a pan by its law (stereo or pan pot), a limiter built of several nodes, and the makeup Web Audio's compressor adds, taken back (`blocks/`). |
 | `meterOn()`, `PeakMeter` | A meter on a node, a splitter and an analyser for each side; its `peak()` is the loudest sample of its last 1,024 (`meters.ts`). |
 | `Output`, `FADE_IN`, `FADE_OUT` | The output after what's built, a gain of its own into where the sound goes: faded in from silence so no sound starts at full volume, faded out to pause, kept awake by a silent source (`output.ts`). |
-| `loadWorklets()`, `Worklets`, `NO_WORKLETS`, `ProcessorModules` | `loadWorklets(context, modules)` adds each processor's module, by the URL it's handed under the name it registers (`ProcessorModules`), to a context's audio worklet, and hands back the `Worklets` that loaded: `node(context, processor, options)` is a worklet node or `null`. A module that fails or takes over 4 s, a context with no audio worklet and a node that fails to be made are said once, the node `null`; `NO_WORKLETS` is none loaded (`worklets.ts`). |
+| `loadWorklets()`, `Worklets`, `NO_WORKLETS`, `ProcessorModules`, `ProcessorName` | `loadWorklets(context, modules)` adds each processor's module, by the URL it's handed under the name it registers (`ProcessorModules`, keyed by the literal `ProcessorName`, so the app's key, the maker's and the processor's can't differ), to a context's audio worklet, and hands back the `Worklets` that loaded: `node(context, processor, options)` is a worklet node or `null`. A module that fails or takes over 4 s, a context with no audio worklet and a node that fails to be made are said once, the node `null`; `NO_WORKLETS` is none loaded (`worklets.ts`). |
 | `Copies`, `Editable` | Every built copy of one template, an edit reaching each: a value at its address under each copy, settings changed in one change so what's built is built again once (`copies.ts`). |
+
+A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports, the `dsp/true-peak` kernel for the lookahead limiter's.
 
 What a studio needs of what's built, beyond the contract, is Web Audio's own, not every builder's:
 
@@ -61,4 +64,4 @@ What a studio needs of what's built, beyond the contract, is Web Audio's own, no
 - A meter on a node's main output by its address, or at a point inside a block (a limiter's `in` and `out`), made at its first read.
 - What a block says of itself by name (a limiter's `reduction`, an envelope's `faded`), and the nodes under an address.
 
-Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.
+Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.

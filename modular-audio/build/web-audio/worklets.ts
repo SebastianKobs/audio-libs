@@ -6,11 +6,14 @@
 // fails to be made is said once, and its node is none; the block that wanted it passes through or falls back.
 // A module that hasn't loaded after PATIENCE is given up on, so the sound never waits on it.
 
-// each processor's module URL, by the name it registers
-export type ProcessorModules = Readonly<Record<string, string>>;
+// The name each processor registers under, one literal for the app's key, the maker's and the processor's, so none can differ.
+// A processor file checks its own by a type-only import of this, as a worklet scope imports no code of the library's own.
+export type ProcessorName = 'lookahead limiter';
+// each processor's module URL, by the name it registers; those a caller has
+export type ProcessorModules = Readonly<Partial<Record<ProcessorName, string>>>;
 // a worklet node of a loaded processor, made in a context; none where it can't be
 export interface Worklets {
-  node(context: BaseAudioContext, processor: string, options: AudioWorkletNodeOptions): AudioWorkletNode | null;
+  node(context: BaseAudioContext, processor: ProcessorName, options: AudioWorkletNodeOptions): AudioWorkletNode | null;
 }
 // What loading is handed, for its tests: how a failure is said, how a node is made, how long a module is waited for.
 interface Loading {
@@ -18,7 +21,7 @@ interface Loading {
   readonly warn?: (...said: unknown[]) => void;
   readonly construct?: (
     context: BaseAudioContext,
-    processor: string,
+    processor: ProcessorName,
     options: AudioWorkletNodeOptions,
   ) => AudioWorkletNode;
 }
@@ -42,10 +45,10 @@ export async function loadWorklets(
     );
     return NO_WORKLETS;
   }
-  const loaded = new Set<string>();
-  const failed: string[] = [];
+  const loaded = new Set<ProcessorName>();
+  const failed: ProcessorName[] = [];
   await Promise.all(
-    Object.entries(modules).map(async ([processor, url]) => {
+    processorsOf(modules).map(async ([processor, url]) => {
       try {
         await withPatience(worklet.addModule(url), patience);
         loaded.add(processor);
@@ -60,6 +63,12 @@ export async function loadWorklets(
   return madeFrom(loaded, { warn, construct });
 }
 
+// the processors a caller has a module for, each by its name
+function processorsOf(modules: ProcessorModules): [ProcessorName, string][] {
+  return (Object.entries(modules) as [ProcessorName, string | undefined][]).flatMap(([processor, url]) =>
+    url === undefined ? [] : [[processor, url]],
+  );
+}
 // a promise kept, or refused once it's taken longer than its patience
 function withPatience(promise: Promise<void>, patience: number): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -70,7 +79,10 @@ function withPatience(promise: Promise<void>, patience: number): Promise<void> {
 }
 
 // nodes of the loaded processors; one that fails to be made said once, then none
-function madeFrom(loaded: ReadonlySet<string>, { warn, construct }: Required<Omit<Loading, 'patience'>>): Worklets {
+function madeFrom(
+  loaded: ReadonlySet<ProcessorName>,
+  { warn, construct }: Required<Omit<Loading, 'patience'>>,
+): Worklets {
   const said = new Set<string>();
   return {
     node(context, processor, options) {
@@ -89,6 +101,6 @@ function madeFrom(loaded: ReadonlySet<string>, { warn, construct }: Required<Omi
     },
   };
 }
-function made(context: BaseAudioContext, processor: string, options: AudioWorkletNodeOptions): AudioWorkletNode {
+function made(context: BaseAudioContext, processor: ProcessorName, options: AudioWorkletNodeOptions): AudioWorkletNode {
   return new AudioWorkletNode(context, processor, options);
 }

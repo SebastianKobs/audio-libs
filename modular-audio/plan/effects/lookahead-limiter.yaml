@@ -1,0 +1,37 @@
+# The Lookahead limiter: its gain into it, in dB, its true peak held under its ceiling, in dBTP, looking 5 ms ahead.
+#   1. its sound into the lookahead limiter block, out.
+# Its gain, ceiling, release and clip macros onto the block's. The block soft-clips what is over the ceiling by up to `clip` dB first, so the gain
+# has less to take; the sound comes out 5.5 ms late (264 samples at 48 kHz), as a lookahead must. The Limiter (a compressor at its
+# ceiling in dBFS) stands in where the block's worklet is missing.
+# Its values to start: no gain, a ceiling of -1 dBTP, a release of 0.3 s as the Limiter's, a clip of 3 dB (an estimate, until the master's is set by ear).
+kind: Lookahead limiter
+form: effect
+inputs: [{ name: in, channels: 2 }]
+outputs: [{ name: out, channels: 2 }]
+children:
+  - { name: limiter, kind: lookahead limiter }
+wires:
+  - { from: { input: in }, to: { node: limiter, input: in } }
+  - { from: { node: limiter, output: out }, to: { output: out } }
+macros:
+  - name: gain
+    value: 0
+    hint: >-
+      The limiter: how much it lifts the sum before it, in dB. Each dB more is a dB louder, until it
+      reaches the ceiling, which holds it.
+    maps: [{ to: [limiter, gain], factor: 1, offset: 0 }]
+  - name: ceiling
+    value: -1
+    hint: >-
+      The limiter: the true peak it holds the sound under, in dBTP, between the samples too.
+    maps: [{ to: [limiter, ceiling], factor: 1, offset: 0 }]
+  - name: release
+    value: 0.3
+    hint: >-
+      The limiter: how quickly it lets go, in seconds, once what went past the ceiling is gone.
+    maps: [{ to: [limiter, release], factor: 1, offset: 0 }]
+  - name: clip
+    value: 3
+    hint: >-
+      The limiter: how far over the ceiling a peak may go before the gain takes it, in dB: that much is taken by a soft clip instead.
+    maps: [{ to: [limiter, clip], factor: 1, offset: 0 }]

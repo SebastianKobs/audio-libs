@@ -16,6 +16,8 @@ const heard = [new Float32Array(128)];
 live.render([new Float32Array(128)], heard, 128, { gain: 0, ceiling: -1, release: 0.1, clip: 3 }); // a block, `live.latency` samples late
 ```
 
+The kernel runs live in an audio worklet, as a processor of `modular-audio/build/web-audio`: a block of the browser's audio, its soft clip and its true-peak hold in the stream.
+
 The cost is a filter of 24 taps for each of the 7 points between two samples: about 170 multiply-adds once a sample for the kernel, then once a pass for the meter, one pass where the kernel held, as it does in every normal setup. Ten minutes of stereo takes seconds, not milliseconds.
 
 | Export | What it does |

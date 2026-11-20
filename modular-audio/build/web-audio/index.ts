@@ -12,9 +12,10 @@
 //   - buffers.ts: the buffers a noise or a reverb plays, each made once;
 //   - meters.ts: a meter on a node, its peak; output.ts, the output after what's built, faded in and out;
 //   - worklets.ts: processors' modules loaded into a context, a node made of each that loaded;
+//   - processors/: each processor, an AudioWorklet module of its own, reached by its URL;
 //   - blocks/: each block made in Web Audio, by its kind (makers.ts).
 export { WebAudioBuilder, type WebAudioOptions, type WebAudioWhere } from './builder.ts';
-export { loadWorklets, NO_WORKLETS, type ProcessorModules, type Worklets } from './worklets.ts';
+export { loadWorklets, NO_WORKLETS, type ProcessorModules, type ProcessorName, type Worklets } from './worklets.ts';
 export { WebAudioBuilt, type Building } from './built.ts';
 export { CROSSFADE, RING_OUT } from './rebuild.ts';
 export { BuiltNode, type WebAudioNode } from './built-node.ts';

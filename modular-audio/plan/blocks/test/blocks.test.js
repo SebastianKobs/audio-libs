@@ -1,5 +1,5 @@
 // The blocks' unit tests (mockup/src/libs/modular-audio/plan/blocks): the contract every builder meets.
-//   - the ten blocks, each declared by its kind;
+//   - the eleven blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its choices, units and defaults;
@@ -12,7 +12,19 @@ import { near } from '../../../../base/util/test/near.js';
 import { onControl } from '../../../../base/params/test/on-control.js';
 import { FADER_GAIN, isSwitch, NOTE_VALUES, timeParamsIn } from '../../../../base/params/index.ts';
 
-const KINDS = ['oscillator', 'gain', 'filter', 'pan', 'delay', 'reverb', 'noise', 'limiter', 'envelope', 'select'];
+const KINDS = [
+  'oscillator',
+  'gain',
+  'filter',
+  'pan',
+  'delay',
+  'reverb',
+  'noise',
+  'limiter',
+  'lookahead limiter',
+  'envelope',
+  'select',
+];
 const MONO = 1;
 const STEREO = 2;
 
@@ -42,7 +54,7 @@ function declared({ params, settings, inputs, outputs }) {
   };
 }
 
-test('the ten blocks, each declared by its kind, the contract every builder meets', () => {
+test('the eleven blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -98,6 +110,12 @@ test("what each block declares, in short standard terms: its params and settings
       outputs: [`out ${MONO}`],
     },
     limiter: { params: ['gain dB', 'ceiling dBFS', 'release s'], settings: [], inputs: ['in'], outputs: ['out'] },
+    'lookahead limiter': {
+      params: ['gain dB =0', 'ceiling dBTP =-1', 'release s =0.1', 'clip dB =3'],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
     envelope: {
       params: [
         'gate =0',

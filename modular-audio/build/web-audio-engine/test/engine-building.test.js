@@ -2,13 +2,16 @@
 // an instrument is made at its first note:
 //   - the Web Audio builder in the engine's context once the audio runs, into where it's told, the time now the
 //     context's, a clock's time on it;
-//   - the noise's buffers made once, shared by every builder in that context.
+//   - the noise's buffers made once, shared by every builder in that context;
+//   - the processors loaded into the context made into nodes, a lookahead limiter a worklet where its module loaded, the library's
+//     limiter where it hasn't.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ClockedContext, EngineBuilding, buildingIn } from '../index.ts';
 import { Buffers } from '../../web-audio/index.ts';
 import { StandInContext } from '../../web-audio/test/audio-stand-in.js';
 import { oneBlockPlan } from '../../web-audio/test/blocks.js';
+import { installWorkletNodes } from '../../web-audio/test/worklet-nodes.js';
 
 // an engine on a stand-in context at 4 s, a clock's time 1 s behind it; none until the audio starts
 function buildingOn() {
@@ -49,4 +52,23 @@ test("building in a context of its own: the time now its context's, the clock's 
   const buffers = new Buffers(context, () => 0.5);
   const made = buildingIn({ context, into: context.destination, at: (t) => t + 3, beat: () => 0.5, buffers });
   assert.deepEqual([made.now(), made.at(1)], [2, 4]);
+});
+
+test("a lookahead limiter built through into(): a worklet node where the engine's processors have loaded, the library's limiter where they haven't", async () => {
+  const uninstall = installWorkletNodes();
+  try {
+    const { engine, building } = buildingOn();
+    const kindsBuilt = () => {
+      const made = building.into(engine.audioContext.destination);
+      made.builder.build(oneBlockPlan('lookahead limiter'), { into: made.into });
+      return engine.audioContext.rec.nodes
+        .map((node) => node.kind)
+        .filter((kind) => kind === 'worklet' || kind === 'compressor');
+    };
+    assert.deepEqual(kindsBuilt(), ['compressor'], 'before the processors loaded');
+    await engine.loadProcessors({ 'lookahead limiter': 'limiter.js' });
+    assert.deepEqual(kindsBuilt(), ['compressor', 'worklet'], 'once they have');
+  } finally {
+    uninstall();
+  }
 });

@@ -5,6 +5,7 @@ import envelope from './envelope.ts';
 import filter from './filter.ts';
 import gain from './gain.ts';
 import limiter from './limiter.ts';
+import lookaheadLimiter from './lookahead-limiter.ts';
 import noise from './noise.ts';
 import oscillator from './oscillator.ts';
 import pan from './pan.ts';
@@ -26,6 +27,7 @@ export const BLOCKS = frozen({
   reverb,
   noise,
   limiter,
+  'lookahead limiter': lookaheadLimiter,
   envelope,
   select,
 }) satisfies Readonly<Record<string, Block>>;

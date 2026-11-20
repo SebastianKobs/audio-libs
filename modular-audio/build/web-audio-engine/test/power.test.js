@@ -8,16 +8,20 @@
 // Woken: back on after the browser stopped the sound, the audio never started by it.
 // Warmed up, before the first touch: the engine made and its processors loading, nothing built, the clock not on its time, nothing
 // told; the first start builds in it and resumes it, faded in from silence, whether the processors have loaded or not.
+// What's built there makes a worklet node of a processor that had loaded, the library's limiter in place of one that hadn't.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { AudioPower, STOP_AFTER } from '../index.ts';
 import { FADE_IN, FADE_OUT, NO_WORKLETS } from '../../web-audio/index.ts';
 import { into, StandInContext } from '../../web-audio/test/audio-stand-in.js';
+import { oneBlockPlan } from '../../web-audio/test/blocks.js';
+import { installWorkletNodes } from '../../web-audio/test/worklet-nodes.js';
 
 // The power on the stand-in's audio, the browser's as it's handed in; the contexts made, what's built, the clock's audio and
 // what's told kept. session: iOS's audio session, where the browser has one. suspended: contexts made suspended, as a browser makes
-// them before a touch. behave: how a module is added to the contexts' worklets, as the stand-in's `behave` has it.
-function powerOn(session, { suspended = false, behave } = {}) {
+// them before a touch. behave: how a module is added to the contexts' worklets, as the stand-in's `behave` has it. building: a plan
+// built as the desk is, where there is one.
+function powerOn(session, { suspended = false, behave, building } = {}) {
   const kept = { engines: [], builds: [], clocks: [], told: [] };
   const AudioContext = class extends StandInContext {
     constructor() {
@@ -32,7 +36,12 @@ function powerOn(session, { suspended = false, behave } = {}) {
     }
   };
   const browser = () => ({ AudioContext, audioSession: session });
-  const build = (make) => kept.builds.push(make);
+  const build = (make) => {
+    kept.builds.push(make);
+    if (building) {
+      make(building);
+    }
+  };
   const clock = { useAudio: (context) => kept.clocks.push(context), audio: { toContext: (t) => t - 1 } };
   const power = new AudioPower({ browser, build, beat: () => 0.5, clock });
   power.onStart(() => kept.told.push(kept.clocks.length));
@@ -185,6 +194,32 @@ test('started while its processors are still loading: built at once with none, t
   await loading;
   assert.equal(power.engine.audioContext, kept.engines[0].context);
   assert.notEqual(power.engine.worklets, NO_WORKLETS, 'those loaded by then');
+});
+
+test("what's built made with the engine's processors: a lookahead limiter a worklet where the warm-up had loaded them, the library's limiter where the start came first", async () => {
+  const uninstall = installWorkletNodes();
+  try {
+    const modules = { 'lookahead limiter': 'limiter.js' };
+    const kindsBuilt = (kept) =>
+      kept.engines[0].context.rec.nodes
+        .map((node) => node.kind)
+        .filter((kind) => kind === 'worklet' || kind === 'compressor');
+    const building = oneBlockPlan('lookahead limiter');
+    const loaded = powerOn(undefined, { suspended: true, building });
+    await loaded.power.warmUp(modules);
+    loaded.power.start();
+    assert.deepEqual(kindsBuilt(loaded.kept), ['worklet']);
+    let release;
+    const held = new Promise((resolve) => (release = resolve));
+    const early = powerOn(undefined, { suspended: true, building, behave: () => held });
+    const loading = early.power.warmUp(modules);
+    early.power.start();
+    assert.deepEqual(kindsBuilt(early.kept), ['compressor'], 'the loading not ended at the start');
+    release();
+    await loading;
+  } finally {
+    uninstall();
+  }
 });
 
 test('warmed up once: another warm-up, or one after the start, makes no engine', async () => {
