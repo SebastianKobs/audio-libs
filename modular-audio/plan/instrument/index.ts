@@ -14,8 +14,9 @@
 //   - patch-plans.ts: a patch's instrument planned from a file of instruments, by its name, and
 //     the planner of its voice cards;
 //   - test-note.ts: a device view's test note, and its message, pressed and let go;
-//   - content.ts, modules/: the modules, VCO, Noise source, LFO, FM, Envelope generator,
-//     VCA, VCF, Tremolo, Ring, Out; none named as a block is; imported apart.
+//   - content.ts, modules/: the modules, VCO, Noise source, SyncVCO, Operators, PhaseVCO,
+//     LFO, FM, Envelope generator, VCA, VCF, SaturatingVCF, Saturator, Tremolo, Ring, Out,
+//     Panned out; none named as a block is; imported apart.
 // Its content read as it loads, its shape checked, every failure said, naming its file.
 // Handed to the planner, with the forms.
 export { NOTE_SETTINGS, NOTE_SOURCES, OWN_NOTE_VALUES, type GlideCurve, type NoteSource } from './note.ts';

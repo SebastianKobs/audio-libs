@@ -1,0 +1,36 @@
+# A SyncVCO: a sync oscillator and its level, a source. As the VCO (vco.yaml),
+# its master's pitch the note's, its tune in semitones onto its detune in cents; and its sync, how far the slave sits
+# above the master, in semitones: its timbre, the pitch heard staying the note's. An envelope wired into its sync
+# sweeps it, the sync lead's tear.
+kind: SyncVCO
+form: source
+outputs: [{ name: out, channels: 1 }]
+children:
+  - { name: osc, kind: sync oscillator }
+  - { name: level, kind: gain }
+wires:
+  - { from: { node: osc, output: out }, to: { node: level, input: in } }
+  - { from: { node: level, output: out }, to: { output: out } }
+macros:
+  - name: frequency
+    hint: "Its frequency, in hertz, the master's: the note's, which the voice card sets."
+    maps: [{ to: [osc, frequency], factor: 1, offset: 0 }]
+  - name: tune
+    hint: 'Semitones from the note.'
+    spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
+    maps: [{ to: [osc, detune], factor: 100, offset: 0 }]
+  - name: sync
+    hint: >-
+      How far the slave sits above the master, in semitones: 0 a plain wave, higher a brighter, tearing one at the same
+      pitch.
+    maps: [{ to: [osc, sync], factor: 1, offset: 0 }]
+  - name: wave
+    hint: "The slave's wave, sawtooth or square."
+    maps: [{ to: [osc, wave], factor: 1, offset: 0 }]
+  - name: level
+    hint: 'How loud it goes into the chain, a share, 1 as it comes.'
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [level, gain], factor: 1, offset: 0 }]
+  - name: stop
+    hint: "When it stops, in seconds from the note's start; at 0 it plays until its voice is let go."
+    maps: [{ to: [osc, stop], factor: 1, offset: 0 }]

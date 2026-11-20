@@ -1,0 +1,80 @@
+# An Operators: four phase-modulation operators, a source. A DX's way: each operator a wave at a ratio of the note, a modulator
+# shifting a carrier's phase so the pitch holds as the brightness moves; the algorithm says which modulate which and which are
+# heard. A modulator's level is its index in radians (dsp/operator-levels/ has a DX's 0 to 99), a carrier's its loudness: the
+# voice card cables an envelope into each level. Its frequency the note's, its tune in semitones onto its detune in cents.
+# The algorithm and the phase are read as a voice is made, not changed as it plays.
+kind: Operators
+form: source
+outputs: [{ name: out, channels: 1 }]
+children:
+  - { name: osc, kind: operators }
+wires:
+  - { from: { node: osc, output: out }, to: { output: out } }
+macros:
+  - name: frequency
+    hint: "Its frequency, in hertz, the note's: which the voice card sets."
+    maps: [{ to: [osc, frequency], factor: 1, offset: 0 }]
+  - name: tune
+    hint: 'Semitones from the note.'
+    spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
+    maps: [{ to: [osc, detune], factor: 100, offset: 0 }]
+  - name: algorithm
+    hint: 'Which operators modulate which and which are heard, 1 to 8: 1 a chain of four, 8 four carriers. Read as the voice is made.'
+    maps: [{ to: [osc, algorithm], factor: 1, offset: 0 }]
+  - name: feedback
+    hint: "How much operator 4 feeds itself, a share of its own output in radians: Yamaha's 0 to 7 is operatorFeedback()."
+    maps: [{ to: [osc, feedback], factor: 1, offset: 0 }]
+  - name: phase
+    hint: 'Whether the operators start at zero (reset) or each where it happens to be (free). Read as the voice is made.'
+    maps: [{ to: [osc, phase], factor: 1, offset: 0 }]
+  - name: stop
+    hint: "When it stops, in seconds from the note's start; at 0 it plays until its voice is let go."
+    maps: [{ to: [osc, stop], factor: 1, offset: 0 }]
+  - name: ratio 1
+    hint: "Operator 1's frequency as a multiple of the note."
+    maps: [{ to: [osc, ratio1], factor: 1, offset: 0 }]
+  - name: detune 1
+    hint: "Operator 1's detune, in cents."
+    maps: [{ to: [osc, detune1], factor: 1, offset: 0 }]
+  - name: level 1
+    hint: "Operator 1's level: a carrier's loudness, a modulator's index in radians. An envelope wired in moves it from here."
+    maps: [{ to: [osc, level1], factor: 1, offset: 0 }]
+  - name: wave 1
+    hint: "Operator 1's wave, one of the TX81Z's eight, W1 a sine."
+    maps: [{ to: [osc, wave1], factor: 1, offset: 0 }]
+  - name: ratio 2
+    hint: "Operator 2's frequency as a multiple of the note."
+    maps: [{ to: [osc, ratio2], factor: 1, offset: 0 }]
+  - name: detune 2
+    hint: "Operator 2's detune, in cents."
+    maps: [{ to: [osc, detune2], factor: 1, offset: 0 }]
+  - name: level 2
+    hint: "Operator 2's level: a carrier's loudness, a modulator's index in radians. An envelope wired in moves it from here."
+    maps: [{ to: [osc, level2], factor: 1, offset: 0 }]
+  - name: wave 2
+    hint: "Operator 2's wave, one of the TX81Z's eight, W1 a sine."
+    maps: [{ to: [osc, wave2], factor: 1, offset: 0 }]
+  - name: ratio 3
+    hint: "Operator 3's frequency as a multiple of the note."
+    maps: [{ to: [osc, ratio3], factor: 1, offset: 0 }]
+  - name: detune 3
+    hint: "Operator 3's detune, in cents."
+    maps: [{ to: [osc, detune3], factor: 1, offset: 0 }]
+  - name: level 3
+    hint: "Operator 3's level: a carrier's loudness, a modulator's index in radians. An envelope wired in moves it from here."
+    maps: [{ to: [osc, level3], factor: 1, offset: 0 }]
+  - name: wave 3
+    hint: "Operator 3's wave, one of the TX81Z's eight, W1 a sine."
+    maps: [{ to: [osc, wave3], factor: 1, offset: 0 }]
+  - name: ratio 4
+    hint: "Operator 4's frequency as a multiple of the note."
+    maps: [{ to: [osc, ratio4], factor: 1, offset: 0 }]
+  - name: detune 4
+    hint: "Operator 4's detune, in cents."
+    maps: [{ to: [osc, detune4], factor: 1, offset: 0 }]
+  - name: level 4
+    hint: "Operator 4's level: a carrier's loudness, a modulator's index in radians. An envelope wired in moves it from here."
+    maps: [{ to: [osc, level4], factor: 1, offset: 0 }]
+  - name: wave 4
+    hint: "Operator 4's wave, one of the TX81Z's eight, W1 a sine."
+    maps: [{ to: [osc, wave4], factor: 1, offset: 0 }]

@@ -1,0 +1,25 @@
+# A Saturator: a shaper and its level, a stage, in a voice card before or after its filter, a voice's own grit. Its
+# shaper bends a loud sound from 1 / drive of full scale and passes a quiet one clean (dsp/saturation/ shaperCurve()),
+# unlike the Drive's saturation (effects/drive.yaml), which drives a quiet one dirty too.
+kind: Saturator
+form: stage
+inputs: [{ name: in }]
+outputs: [{ name: out }]
+children:
+  - { name: shaper, kind: shaper }
+  - { name: level, kind: gain }
+wires:
+  - { from: { input: in }, to: { node: shaper, input: in } }
+  - { from: { node: shaper, output: out }, to: { node: level, input: in } }
+  - { from: { node: level, output: out }, to: { output: out } }
+macros:
+  - name: drive
+    hint: "How hard it's driven, in dB; it never comes out louder."
+    maps: [{ to: [shaper, drive], factor: 1, offset: 0 }]
+  - name: shape
+    hint: 'The knee, 0 soft, 1 hard.'
+    maps: [{ to: [shaper, shape], factor: 1, offset: 0 }]
+  - name: level
+    hint: 'How loud it passes the sound on, a share, 1 as it comes.'
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [level, gain], factor: 1, offset: 0 }]

@@ -1,0 +1,30 @@
+# The Panned out: the Out (out.yaml), then a pan, so each voice sits where its
+# note says: MIDI 2.0's per-note #10, Pan, -1 left to 1 right, the voice card's pan macro (instrument.ts hands it the
+# note's). Its law the pan pot's, constant power: a mono voice panned as it comes, a side at √2·cos / √2·sin of the voice,
+# so the note is as loud at the side as in the middle. The volume's factor √2 keeps the middle at 1 and 1, as loud as the
+# Out, so a card that's never panned sounds as it did.
+kind: Panned out
+form: output
+inputs: [{ name: in }]
+outputs: [{ name: out }]
+children:
+  - { name: volume, kind: gain }
+  - { name: note volume, kind: gain }
+  - { name: pan, kind: pan, settings: { law: pan pot } }
+wires:
+  - { from: { input: in }, to: { node: volume, input: in } }
+  - { from: { node: volume, output: out }, to: { node: note volume, input: in } }
+  - { from: { node: note volume, output: out }, to: { node: pan, input: in } }
+  - { from: { node: pan, output: out }, to: { output: out } }
+macros:
+  - name: volume
+    hint: "The instrument's volume at its output, after everything else, a share, 1 at 0 dB."
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [volume, gain], factor: 1.4142135623730951, offset: 0 }]
+  - name: note volume
+    hint: "The note's own volume, MIDI 2.0's per-note #7."
+    spec: { range: [0, 1, 0.001], default: 1 }
+    maps: [{ to: [note volume, gain], factor: 1, offset: 0 }]
+  - name: pan
+    hint: "Where the note sits, -1 left to 1 right, MIDI 2.0's per-note #10."
+    maps: [{ to: [pan, pan], factor: 1, offset: 0 }]

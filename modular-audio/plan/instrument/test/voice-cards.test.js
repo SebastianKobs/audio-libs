@@ -69,14 +69,20 @@ test('the modules, a YAML template each, of its form: the sources, the modulator
     [
       ['VCO', 'source'],
       ['Noise source', 'source'],
+      ['SyncVCO', 'source'],
+      ['Operators', 'source'],
+      ['PhaseVCO', 'source'],
       ['LFO', 'modulator'],
       ['FM', 'modulator'],
       ['Envelope generator', 'modulator'],
       ['VCA', 'stage'],
       ['VCF', 'stage'],
+      ['SaturatingVCF', 'stage'],
+      ['Saturator', 'stage'],
       ['Tremolo', 'stage'],
       ['Ring', 'stage'],
       ['Out', 'output'],
+      ['Panned out', 'output'],
     ],
   );
 });
@@ -93,6 +99,20 @@ test("each module's params, its macros by name, at their values as each starts",
     Tremolo: ['gain'],
     Ring: ['frequency', 'tune', 'stop'],
     Out: ['volume', 'note volume'],
+    SyncVCO: ['frequency', 'tune', 'sync', 'wave', 'level', 'stop'],
+    Operators: [
+      'frequency',
+      'tune',
+      'algorithm',
+      'feedback',
+      'phase',
+      'stop',
+      ...[1, 2, 3, 4].flatMap((operator) => ['ratio', 'detune', 'level', 'wave'].map((name) => `${name} ${operator}`)),
+    ],
+    PhaseVCO: ['frequency', 'tune', 'dcw', 'wave', 'phase', 'level', 'stop'],
+    SaturatingVCF: ['cutoff', 'resonance', 'tune', 'drive', 'compensation', 'mode'],
+    Saturator: ['drive', 'shape', 'level'],
+    'Panned out': ['volume', 'note volume', 'pan'],
   });
   const lfo = planner.plan('LFO', { values: { sync: 1, note: '1/8', hz: 0.06 } });
   assert.deepEqual(
@@ -118,6 +138,23 @@ test("every module's macro its hint, in its YAML, as a view shows it beside its 
       .map(({ spec }) => `${kind}/${spec.name}`),
   );
   assert.deepEqual(unhinted, []);
+});
+
+test("the added modules' macros onto their blocks: a tune in semitones onto a detune in cents, a pan onto its pan block at constant power, the volume's factor √2 keeping the middle as loud as the Out", () => {
+  const detunes = [
+    ['SyncVCO', 'osc'],
+    ['Operators', 'osc'],
+    ['PhaseVCO', 'osc'],
+    ['SaturatingVCF', 'filter'],
+  ];
+  for (const [kind, block] of detunes) {
+    assert.equal(paramAt(planner.plan(kind, { values: { tune: 2.5 } }), [block, 'detune']).value, 250, kind);
+  }
+  assert.equal(paramAt(planner.plan('Operators', { values: { 'level 3': 0.7 } }), ['osc', 'level3']).value, 0.7);
+  const panned = planner.plan('Panned out', { values: { pan: -0.5, volume: 1 } });
+  assert.equal(paramAt(panned, ['pan', 'pan']).value, -0.5);
+  assert.equal(settingAt(panned, ['pan', 'law']).value, 'pan pot');
+  assert.equal(paramAt(panned, ['volume', 'gain']).value, Math.SQRT2, 'unity at the macro is √2 of the gain');
 });
 
 test("a module's params onto its blocks: a tune in semitones onto a detune in cents; a ring's gain at 0, its oscillator moving it; each module's settings its blocks'", () => {

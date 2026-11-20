@@ -33,14 +33,20 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 |---|---|---|---|---|
 | `VCO` | source | an oscillator into its level | frequency, the note's; tune (semitones, onto its detune); level; stop | `osc/wave` |
 | `Noise source` | source | a noise through a filter into its level | level; cutoff, resonance; tune (onto the filter's detune, an offset from the keys); offset; stop | `noise/color`, `noise/loop`, `filter/type`, `filter/slope` |
+| `SyncVCO` | source | a sync oscillator into its level | frequency, the master's; tune; sync, the slave's semitones above the master; wave; level; stop | |
+| `Operators` | source | four phase-modulation operators | frequency; tune; algorithm; feedback; phase; stop; each operator's ratio, detune, level and wave | |
+| `PhaseVCO` | source | a phase-distortion oscillator into its level | frequency; tune; dcw, how far the phase is bent; wave; phase; level; stop | |
 | `LFO` | modulator | an oscillator into its depth into a scale | sync, note, hz, its oscillator's rate; depth, in its target's units; scale, 1, or the note's frequency | `osc/wave`, `osc/phase` |
 | `FM` | modulator | an oscillator into a scale, the note's frequency, into its index | frequency; tune, its ratio; scale; index; stop | `osc/wave` |
 | `Envelope generator` | modulator | an envelope into a gain its note's velocity sets | gate, the note's; delay, attack, hold, decay, sustain, release; amount, in its target's units; velocity | `envelope/mode` |
 | `VCA` | stage | a gain an envelope moves into its level | gain, open at 1, at 0 where an envelope opens it; level | |
 | `VCF` | stage | a filter | cutoff, resonance; tune (onto its detune, a sweep in semitones, an offset from the keys) | `filter/type`, `filter/slope` |
+| `SaturatingVCF` | stage | a saturating filter | cutoff; resonance, 0 to 1; tune; drive; compensation; mode | |
+| `Saturator` | stage | a shaper into its level | drive, in dB; shape; level | |
 | `Tremolo` | stage | a gain an LFO moves | gain | |
 | `Ring` | stage | the sound into a gain at 0, an oscillator moving it | frequency; tune; stop | `osc/wave` |
 | `Out` | output | its volume, then the note's own (MIDI 2.0's per-note #7) | volume, note volume | |
+| `Panned out` | output | the Out, then a pan at constant power for the note's own (MIDI 2.0's per-note #10) | volume, note volume, pan | |
 
 | Export | What it does |
 |---|---|
@@ -53,7 +59,7 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 | `PresetMessage`, `edited()` | What's asked of a bank's patch by its name, as a bus carries it: `preset edited` sets a value or a setting by its address, `preset reset` puts it back where it started. `edited(preset, message)` makes a new preset, the one handed in left alone (`preset.ts`). |
 | `instrumentsOf(data, source, modules)`, `Instruments`, `RackPad` | A file of instruments read as a person writes it: the instruments by their names, the patches (each the instrument it plays, as a preset), the racks (each pad a key and a patch). Its shape is checked as it loads, every failure under the file's name (`instruments-file.ts`). |
 | `LiveBank` | A bank's patches as they play, a synth's edit buffer: each a live copy of its start, `edit(message)` setting a value or a setting or resetting the patch, each change told (`live-bank.ts`). |
-| `MODULE_TEMPLATES` | The ten modules read from their YAML, each checked for its shape as it loads and frozen; imported apart from `content.ts`. |
+| `MODULE_TEMPLATES` | The sixteen modules read from their YAML, each checked for its shape as it loads and frozen; imported apart from `content.ts`. |
 | `cardPlanner()`, `patchPlan()`, `chainsOf()` | `cardPlanner(instruments, more)` is the planner of voice cards. `patchPlan(name, instruments)` plans a patch's instrument from a file by its name, a pool of voices or a drum rack; `chainsOf()` gives its chains, each with its key (`patch-plans.ts`). |
 | `TestNote`, `TestNoteMessage` | A test note, its pitch, velocity, time and own values; pressed on a key's instrument or let go, as a message on a bus (`test-note.ts`). |
 

@@ -1,0 +1,38 @@
+# A SaturatingVCF: a saturating filter, a stage. As the library's VCF (vcf.yaml),
+# its cutoff in Hz, the voice card's frequency wired in where it follows the keys, its tune in semitones onto its detune in
+# cents. Its resonance is 0 to 1, not a Q: it sings out of nothing past 0.909. Its drive pushes the sound into the clip,
+# its compensation gives back the ladder's thinned lows, its mode a value ('filter/mode': 'bandpass'), not a setting.
+kind: SaturatingVCF
+form: stage
+inputs: [{ name: in }]
+outputs: [{ name: out }]
+children:
+  - { name: filter, kind: saturating filter }
+wires:
+  - { from: { input: in }, to: { node: filter, input: in } }
+  - { from: { node: filter, output: out }, to: { output: out } }
+macros:
+  - name: cutoff
+    hint: >-
+      Its cutoff, in hertz: past it the sound is taken away; following the keys where the note's frequency is wired in.
+    maps: [{ to: [filter, frequency], factor: 1, offset: 0 }]
+  - name: resonance
+    hint: >-
+      How much it rings at its cutoff, 0 to 1: it sings by itself, a sine at its cutoff, from 0.909.
+    maps: [{ to: [filter, resonance], factor: 1, offset: 0 }]
+  - name: tune
+    hint: >-
+      Its cutoff moved in semitones: a sweep, or an offset from the keys (1.4 times the note is +5.83).
+    spec: { unit: semitones, range: [-96, 96, 0.01], default: 0 }
+    maps: [{ to: [filter, detune], factor: 100, offset: 0 }]
+  - name: drive
+    hint: >-
+      How hard the sound is pushed into the clip, and taken back after it: more, a rounder, grittier ring.
+    maps: [{ to: [filter, drive], factor: 1, offset: 0 }]
+  - name: compensation
+    hint: >-
+      How much of the lows the ladder loses as it rings is given back: 0 none, 1 all.
+    maps: [{ to: [filter, compensation], factor: 1, offset: 0 }]
+  - name: mode
+    hint: "Its shape: the ladder (24 dB), or the state-variable's lowpass, bandpass or highpass (12 dB)."
+    maps: [{ to: [filter, mode], factor: 1, offset: 0 }]

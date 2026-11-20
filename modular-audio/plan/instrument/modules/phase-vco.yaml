@@ -1,0 +1,36 @@
+# A PhaseVCO: one line of a CZ and its level, a source. As the VCO (vco.yaml), its pitch the
+# note's, its tune in semitones onto its detune in cents; and its dcw, how far the phase is bent: 0 a sine, 1 a saw or a square (its wave).
+# An envelope wired into its dcw is the sweep: the brightness falling as the note rings, no filter. The phase is read as a voice is made.
+kind: PhaseVCO
+form: source
+outputs: [{ name: out, channels: 1 }]
+children:
+  - { name: osc, kind: phase distortion }
+  - { name: level, kind: gain }
+wires:
+  - { from: { node: osc, output: out }, to: { node: level, input: in } }
+  - { from: { node: level, output: out }, to: { output: out } }
+macros:
+  - name: frequency
+    hint: "Its frequency, in hertz: the note's, which the voice card sets."
+    maps: [{ to: [osc, frequency], factor: 1, offset: 0 }]
+  - name: tune
+    hint: 'Semitones from the note.'
+    spec: { unit: semitones, range: [-48, 48, 0.01], default: 0 }
+    maps: [{ to: [osc, detune], factor: 100, offset: 0 }]
+  - name: dcw
+    hint: 'How far the phase is bent, 0 to 1: 0 a sine, 1 as bright as the wave goes. An envelope wired in sweeps it.'
+    maps: [{ to: [osc, dcw], factor: 1, offset: 0 }]
+  - name: wave
+    hint: 'The wave the phase bends toward, saw or square.'
+    maps: [{ to: [osc, wave], factor: 1, offset: 0 }]
+  - name: phase
+    hint: 'Whether the line starts at zero (reset) or where it happens to be (free). Read as the voice is made.'
+    maps: [{ to: [osc, phase], factor: 1, offset: 0 }]
+  - name: level
+    hint: 'How loud it goes into the chain, a share, 1 as it comes.'
+    spec: { range: [0, 2, 0.001], default: 1 }
+    maps: [{ to: [level, gain], factor: 1, offset: 0 }]
+  - name: stop
+    hint: "When it stops, in seconds from the note's start; at 0 it plays until its voice is let go."
+    maps: [{ to: [osc, stop], factor: 1, offset: 0 }]
