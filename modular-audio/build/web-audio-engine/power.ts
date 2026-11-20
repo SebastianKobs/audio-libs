@@ -48,6 +48,7 @@ export class AudioPower {
   readonly #events = new Events<{ start: [] }>();
   #engine: ClockedContext | null = null; // made at the first start
   #warm: ClockedContext | null = null; // made by warmUp(), the first start's
+  #modules: ProcessorModules | null = null; // handed to warmUp(), loaded into an engine built alone too
   #output: Output | null = null; // after what's built, faded in as the audio starts
   #paused = false; // a transport's stop
   // suspends the context once the output has faded
@@ -77,6 +78,7 @@ export class AudioPower {
       return Promise.resolve();
     }
     this.#warm = this.#makeEngine();
+    this.#modules = modules;
     return this.#warm.loadProcessors(modules);
   }
   // The audio started, once, then told; back on once started. Neither while paused.
@@ -97,8 +99,13 @@ export class AudioPower {
   }
   // An engine of its own made and what's built built in it, into the output, with no clock on it and
   // nothing told, as a desk's offline render asks; the warmed-up engine is left for the first start.
-  build(): ClockedContext {
-    return this.#buildIn(this.#makeEngine());
+  // The processors the warm-up was handed are loaded into it first, so a render hears them.
+  async build(): Promise<ClockedContext> {
+    const engine = this.#makeEngine();
+    if (this.#modules) {
+      await engine.loadProcessors(this.#modules);
+    }
+    return this.#buildIn(engine);
   }
   pause(): void {
     this.#paused = true;

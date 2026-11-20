@@ -81,9 +81,9 @@ test("the engine: the clock's time onto the audio's; iOS's audio session, where 
   assert.equal(none.started, true, 'none: the platform as it is');
 });
 
-test("built alone: the engine and what's built, no clock on it, nothing told, as a desk's offline render asks", () => {
+test("built alone: the engine and what's built, no clock on it, nothing told, as a desk's offline render asks", async () => {
   const { power, kept } = powerOn();
-  assert.equal(power.build(), power.engine);
+  assert.equal(await power.build(), power.engine);
   assert.equal(kept.builds.length, 1);
   assert.deepEqual([kept.clocks, kept.told], [[], []]);
 });
@@ -234,8 +234,31 @@ test('warmed up once: another warm-up, or one after the start, makes no engine',
 test('built alone after a warm-up: in an engine of its own, as an offline render asks; the warmed-up one left for the first start', async () => {
   const { power, kept } = powerOn(undefined, { suspended: true });
   await power.warmUp(MODULES);
-  const own = power.build();
+  const own = await power.build();
   assert.equal(kept.engines.length, 2, 'its own engine made');
   assert.equal(own.audioContext, kept.engines[1].context);
   assert.notEqual(own.audioContext, kept.engines[0].context, 'not the warmed-up one');
+});
+
+test('built alone after a warm-up: the processors it was handed loaded into its own engine before it builds, so an offline render hears them', async () => {
+  const uninstall = installWorkletNodes();
+  try {
+    const modules = { 'lookahead limiter': 'limiter.js' };
+    const { power, kept } = powerOn(undefined, { suspended: true, building: oneBlockPlan('lookahead limiter') });
+    await power.warmUp(modules);
+    const own = await power.build();
+    assert.deepEqual(own.audioContext.audioWorklet.added, ['limiter.js'], 'loaded into its own engine');
+    const kinds = own.audioContext.rec.nodes.map((node) => node.kind);
+    assert.ok(kinds.includes('worklet'), 'the limiter a worklet');
+    assert.ok(!kinds.includes('compressor'), "not the library's");
+    assert.equal(kept.engines.length, 2);
+  } finally {
+    uninstall();
+  }
+});
+
+test('built alone with no warm-up: nothing to load, built with none', async () => {
+  const { power } = powerOn();
+  const own = await power.build();
+  assert.equal(own.worklets, NO_WORKLETS);
 });
