@@ -2,7 +2,7 @@
 
 The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds the plan and hands back what's built, a `Built`. It knows no planner, channel, desk, effect or instrument, and is the only code that makes Web Audio nodes. What's built is fed, metered and taken apart.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `dsp/filters`, `dsp/measures`, `dsp/saturation`, `dsp/true-peak`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/filters`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
 
 ```ts
 import { WebAudioBuilder } from './index.ts';
@@ -40,6 +40,9 @@ How a block is made:
 | `one pole` | An IIR filter of the cutoff's coefficients, 6 dB an octave; a new cutoff makes a new filter in its place between the same neighbors, the old one let go. |
 | `tilt` | A low shelf into a high shelf at the pivot, the lows down and the highs up by half the tilt each, in dB. |
 | `shaper lag` | A delay as long as a waveshaper's oversampling holds the wet back, so a dry mixed under it doesn't comb: the lag the builder was handed when it was made, Chromium's where none was measured. |
+| `sync oscillator` | A worklet source of its processor, no input, one mono output, its frequency, detune, sync and wave its AudioParams, started and stopped by message; the library's `oscillator` at the note, its wave the slave's, where the worklet hasn't loaded, its sync held and heard nowhere. |
+| `operators` | A worklet source of its processor, its nineteen params its AudioParams, its algorithm's routes and carriers and its four start phases (four draws of the builder's random at `free`) handed over as it's made, started and stopped by message; the library's `oscillator`, a sine at the note, into a gain that is the first carrier's level where the worklet hasn't loaded, every other param held and heard nowhere. |
+| `phase distortion` | A worklet source of its processor, its frequency, detune, dcw and wave its AudioParams, its start phase (one draw of the builder's random at `free`) handed over as it's made, started and stopped by message; the library's `oscillator`, a triangle for the saw and a square for the square, where the worklet hasn't loaded, its dcw held and heard nowhere. |
 | `envelope` | A constant source following the curve from its gate, added to the params it's wired into. |
 | `select` | A gain at 1 on the input its setting names. |
 
@@ -62,7 +65,7 @@ How a block is made:
 | `measuredLags()`, `CHROMIUM_LAGS`, `Lags`, `OfflineContexts` | How late a waveshaper comes out at each oversampling, in samples, as the browser's own: `measuredLags(sampleRate, Offline)` renders a click through one offline, once for each oversampling, and gives Chromium's `CHROMIUM_LAGS` where a render fails. Nothing is kept between calls: the context that asks keeps what it found (`shaper-lags.ts`). |
 | `Copies`, `Editable` | Every built copy of one template, an edit reaching each: a value at its address under each copy, settings changed in one change so what's built is built again once (`copies.ts`). |
 
-A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports, the `dsp/true-peak` kernel for the lookahead limiter's.
+A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports: the `dsp/true-peak` kernel for the lookahead limiter's, the `dsp/oscillators` kernels for the three sources', each a `ScheduledVoice` told `{ start }` and `{ stop }`.
 
 What a studio needs of what's built, beyond the contract, is Web Audio's own, not every builder's:
 
@@ -70,4 +73,4 @@ What a studio needs of what's built, beyond the contract, is Web Audio's own, no
 - A meter on a node's main output by its address, or at a point inside a block (a limiter's `in` and `out`), made at its first read.
 - What a block says of itself by name (a limiter's `reduction`, an envelope's `faded`), and the nodes under an address.
 
-Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js`, `test/drive-blocks.test.js`, `test/shaper-lags.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.
+Tests: `test/builder.test.js`, `test/set.test.js`, `test/pool.test.js`, `test/rebuild.test.js`, `test/copies.test.js`, `test/output.test.js`, `test/buffers.test.js`, `test/limiter.test.js`, `test/envelope.test.js`, `test/sources.test.js`, `test/worklets.test.js`, `test/lookahead-limiter.test.js`, `test/drive-blocks.test.js`, `test/worklet-sources.test.js`, `test/shaper-lags.test.js` and `test/stand-in.test.js`, in node on the stand-in for Web Audio in `test/audio-stand-in.js`.

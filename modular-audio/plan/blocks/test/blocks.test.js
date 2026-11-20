@@ -1,5 +1,5 @@
 // The blocks' unit tests (mockup/src/libs/modular-audio/plan/blocks): the contract every builder meets.
-//   - the fifteen blocks, each declared by its kind;
+//   - the eighteen blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its choices, units and defaults;
@@ -28,7 +28,11 @@ const KINDS = [
   'one pole',
   'tilt',
   'shaper lag',
+  'sync oscillator',
+  'operators',
+  'phase distortion',
 ];
+const WAVES = 'W1|W2|W3|W4|W5|W6|W7|W8';
 const MONO = 1;
 const STEREO = 2;
 
@@ -58,7 +62,7 @@ function declared({ params, settings, inputs, outputs }) {
   };
 }
 
-test('the fifteen blocks, each declared by its kind, the contract every builder meets', () => {
+test('the eighteen blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -151,6 +155,50 @@ test("what each block declares, in short standard terms: its params and settings
     'one pole': { params: ['frequency Hz =24000'], settings: [], inputs: ['in'], outputs: ['out'] },
     tilt: { params: ['tilt =1', 'frequency Hz =800'], settings: [], inputs: ['in'], outputs: ['out'] },
     'shaper lag': { params: ['oversample none|2x|4x =4x'], settings: [], inputs: ['in'], outputs: ['out'] },
+    'sync oscillator': {
+      params: [
+        'frequency Hz =440',
+        'detune cents =0',
+        'sync semitones =0',
+        'wave sawtooth|square =sawtooth',
+        'stop s =0',
+      ],
+      settings: [],
+      inputs: [],
+      outputs: [`out ${MONO}`],
+    },
+    operators: {
+      params: [
+        'frequency Hz =440',
+        'detune cents =0',
+        'feedback =0',
+        ...[1, 2, 3, 4].flatMap((n) => [
+          `ratio${n} =1`,
+          `detune${n} cents =0`,
+          `level${n} =${n === 1 ? 1 : 0}`,
+          `wave${n} ${WAVES} =W1`,
+        ]),
+        'algorithm =1',
+        'phase reset|free =reset',
+        'stop s =0',
+      ],
+      settings: [],
+      inputs: [],
+      outputs: [`out ${MONO}`],
+    },
+    'phase distortion': {
+      params: [
+        'frequency Hz =440',
+        'detune cents =0',
+        'dcw =0',
+        'wave saw|square =saw',
+        'phase reset|free =reset',
+        'stop s =0',
+      ],
+      settings: [],
+      inputs: [],
+      outputs: [`out ${MONO}`],
+    },
   });
   const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
   for (const [kind, name] of [
@@ -198,4 +246,18 @@ test("a saturation's oversampling and a shaper lag's the one spec, so the dry is
   assert.deepEqual(oversample('shaper lag'), OVERSAMPLE);
   assert.deepEqual(OVERSAMPLE.choices, ['none', '2x', '4x'], "Web Audio's own names");
   assert.equal(OVERSAMPLE.default, '4x');
+});
+
+test("the worklet sources' choices are params, changed as they play or read once as a voice is made: no settings; each a source with a stop", () => {
+  for (const kind of ['sync oscillator', 'operators', 'phase distortion']) {
+    assert.deepEqual(BLOCKS[kind].settings, [], `${kind}: no settings`);
+    assert.deepEqual(BLOCKS[kind].inputs, [], `${kind}: a source`);
+    assert.equal(BLOCKS[kind].params.at(-1).name, 'stop', `${kind}: its stop last, as an oscillator's`);
+  }
+  const param = (kind, name) => BLOCKS[kind].params.find((spec) => spec.name === name);
+  for (const kind of ['sync oscillator', 'operators', 'phase distortion']) {
+    assert.equal(param(kind, 'frequency').taper, 'octaves', `${kind}: its frequency by octaves`);
+    const [low, high] = param(kind, 'detune').range;
+    assert.ok(low <= -4800 && high >= 4800, `${kind}: a tune of four octaves either way`);
+  }
 });

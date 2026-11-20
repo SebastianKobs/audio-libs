@@ -8,12 +8,15 @@ import limiter from './limiter.ts';
 import lookaheadLimiter from './lookahead-limiter.ts';
 import noise from './noise.ts';
 import onePole from './one-pole.ts';
+import operators from './operators.ts';
 import oscillator from './oscillator.ts';
 import pan from './pan.ts';
+import phaseDistortion from './phase-distortion.ts';
 import reverb from './reverb.ts';
 import saturation from './saturation.ts';
 import select from './select.ts';
 import shaperLag from './shaper-lag.ts';
+import syncOscillator from './sync-oscillator.ts';
 import tilt from './tilt.ts';
 import { frozen } from '../../../base/util/index.ts';
 import type { Block } from './block.ts';
@@ -38,4 +41,7 @@ export const BLOCKS = frozen({
   'one pole': onePole,
   tilt,
   'shaper lag': shaperLag,
+  'sync oscillator': syncOscillator,
+  operators,
+  'phase distortion': phaseDistortion,
 }) satisfies Readonly<Record<string, Block>>;

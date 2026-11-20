@@ -33,6 +33,9 @@ Each block declares its kind, its inputs and outputs, and its params and setting
 | `one pole` | frequency (Hz, by octaves, wide open to start): a lowpass at 6 dB an octave, gentler than any filter | | in; out |
 | `tilt` | tilt (a share shown in dB, -12 to +12: the highs up by half of it, the lows down by half), frequency (the pivot, 800 Hz to start) | | in; out |
 | `shaper lag` | oversample (none, 2x, 4x), the saturation's, so a dry is held back as long as the oversampled wet | | in; out |
+| `sync oscillator` | frequency (Hz, by octaves), detune (cents, four octaves either way), sync (semitones the slave sits over the master, whose phase resets it), wave (sawtooth, square, the slave's, changed as it plays), stop | | none; out, mono |
+| `operators` | four phase-modulation operators: frequency, detune, feedback (the fourth's, on itself) and for each operator its ratio of the note, detune (cents), level (a modulator's index in radians, a carrier's loudness) and wave, one of eight named W1 to W8; algorithm (1 to 8, which operators modulate which and which are heard) and phase (reset or free), read once as a voice is made; stop | | none; out, mono |
+| `phase distortion` | frequency, detune, dcw (0 a sine, 1 the bright wave), wave (saw, square, changed as it plays), phase (reset or free, read once as a voice is made), stop | | none; out, mono |
 
 How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a resistor and a capacitor charging) done at its time, on numbers its caller resolved.
 
@@ -53,6 +56,7 @@ How an envelope moves, as automation, as an ARP's: every stage is an RC curve (a
 | `NOISE_SECONDS` | Each noise color's buffer length for a builder that plays it from a looping buffer: noise 2 s, breath 0.2 s (`noise.ts`). |
 | `WAVE`, `DETUNE` | An oscillator's wave and its detune (`oscillator.ts`). |
 | `FILTER_SLOPE`, `RESONANCE`, `biquadQs()`, `FilterStages` | A filter's slope and its resonance, Q as a plain ratio, 0.707 flat. `biquadQs({ type, resonance, slope })` gives the Qs of the biquads in series that build it: one at 12 dB an octave, two at 24, a 4th-order Butterworth's for a lowpass or a highpass (`filter.ts`). |
+| `SYNC_OSCILLATOR_SPECS`, `OPERATORS_SPECS`, `PHASE_DISTORTION_SPECS` | The params of the worklet sources by name, a builder reading a choice's index from them (`sync-oscillator.ts`, `operators.ts`, `phase-distortion.ts`). |
 | `REVERB_LENGTH` | How long a reverb's tail is (`reverb.ts`). |
 | `SATURATION_SPECS`, `OVERSAMPLE` | A saturation's drive, punish, style, auto and oversample; the oversampling a saturation and a shaper lag share, named as Web Audio names it, 4x to start (`saturation.ts`). |
 | `envelopeStages()`, `envelopeRelease()`, `envelopeCurve()`, `EnvelopeTimes` | An envelope's stages from its gate opening, its release from its gate closing and when it has faded, and its whole curve from a gate opening at a time, released where the gate has closed (`envelope-curve.ts`). |

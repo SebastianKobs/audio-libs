@@ -5,8 +5,10 @@
 //   - block.ts: a block, its inputs and outputs, its params' and settings' specs;
 //   - blocks.ts: every block by its kind;
 //   - one file each: oscillator, gain, filter, pan, delay, reverb, noise, limiter, lookahead limiter,
-//     envelope, select, saturation, one pole, tilt, shaper lag, with the specs other code shares (a delay's
-//     time, a limiter's, an envelope's, a source's stop, a saturation's and its oversampling);
+//     envelope, select, saturation, one pole, tilt, shaper lag, sync oscillator, operators,
+//     phase distortion, with the specs other code shares (a delay's time, a limiter's, an envelope's,
+//     a source's stop, a saturation's and its oversampling, a sync oscillator's, the operators',
+//     a phase distortion's);
 //   - envelope-curve.ts: how an envelope moves, stage by stage from its gate, as automation, as
 //     an ARP's.
 export { STOP, type Block, type Jack } from './block.ts';
@@ -18,6 +20,9 @@ export { biquadQs, FILTER_SLOPE, RESONANCE, type FilterStages } from './filter.t
 export { LIMITER_SPECS } from './limiter.ts';
 export { LOOKAHEAD_LIMITER_SPECS } from './lookahead-limiter.ts';
 export { NOISE_SECONDS } from './noise.ts';
+export { OPERATORS_SPECS } from './operators.ts';
 export { DETUNE, WAVE } from './oscillator.ts';
+export { PHASE_DISTORTION_SPECS } from './phase-distortion.ts';
 export { REVERB_LENGTH } from './reverb.ts';
 export { OVERSAMPLE, SATURATION_SPECS } from './saturation.ts';
+export { SYNC_OSCILLATOR_SPECS } from './sync-oscillator.ts';
