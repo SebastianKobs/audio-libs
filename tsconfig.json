@@ -29,7 +29,6 @@
     "base/**/*",
     "dsp/**/*",
     "formats/**/*",
-    "generative/**/*",
     "midi/**/*",
     "midi-devices/**/*",
     "modular-audio/**/*",
