@@ -8,7 +8,7 @@
 //   - matrices.ts: the dense matrices that model is worked out with, once.
 //   - rangemaster.ts: the Dallas Rangemaster's circuit as a netlist, as built and full range.
 //   - pnp-stage.ts: a one-transistor circuit run sample by sample, its transistor solved by damped Newton.
-//   - germanium-drive.ts: the Rangemaster as a drive, a circuit a channel, at 8 × the rate.
+//   - germanium-drive.ts: the Rangemaster as a drive, a circuit a channel, at 4 × the rate.
 export { DkModel, type Netlist, type Terminals } from './dk-model.ts';
 export { EbersMollPnp, type EbersMollValues, type PnpCurrents } from './ebers-moll-pnp.ts';
 export { RANGEMASTER, RANGEMASTER_FULL_RANGE } from './rangemaster.ts';

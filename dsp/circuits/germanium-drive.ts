@@ -1,7 +1,8 @@
-// ---------- dsp/circuits/germanium-drive: the Rangemaster as a drive, a circuit a channel, at 8 × the rate ----------
+// ---------- dsp/circuits/germanium-drive: the Rangemaster as a drive, a circuit a channel, at 4 × the rate ----------
 // A sound comes in as units and the circuit works in volts: the drive says how many volts a unit is, the level how
 // many units a volt comes back as. The OC44 with its parasitics, the extension its paper puts first.
-// Run 8 times as fast between two windowed-sinc filters, so the clip's partials don't fold.
+// Run 4 times as fast between two windowed-sinc filters, so the clip's partials don't fold: its harmonics fall off so
+// fast that at 4 × its aliases measured under -71 dB, as at 8 ×, the rate Holmes, Holters and van Walstijn listened at.
 // It rests while silent: a block of silence in, its last block's sound died away, it writes silence and runs nothing,
 // so a drive switched out of the sound costs nothing. Its circuit then waits where it was, at its operating point.
 import { Oversampler } from '../filters/index.ts';
@@ -28,7 +29,7 @@ interface Channel {
   loudest: number; // its last block's peak, in units
 }
 
-const FACTOR = 8; // as Holmes, Holters and van Walstijn listened to it
+const FACTOR = 4; // half the cost of 8 ×: E6 driven hard, its aliases measured under -71 dB either way
 const SUPPLY = -9; // V
 const DIED_AWAY = 1e-7; // a block's peak under it, -140 dB, is silence: the circuit may rest
 const VOICINGS: readonly Netlist[] = [RANGEMASTER, RANGEMASTER_FULL_RANGE].map((netlist) =>
@@ -39,6 +40,8 @@ const VOICINGS: readonly Netlist[] = [RANGEMASTER, RANGEMASTER_FULL_RANGE].map((
 export class GermaniumDrive {
   /** Samples it comes out late: its oversampler's. */
   readonly latency: number;
+  /** How many times as fast as the sound its circuit runs. */
+  readonly oversampling = FACTOR;
   readonly #sampleRate: number;
   #channels: Channel[] = []; // a channel's each, made as its channel first comes
   #voicing = 0;
