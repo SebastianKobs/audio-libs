@@ -1,4 +1,4 @@
-// ---------- libs/base/params: a param as a plugin describes its own, and where its value lies on a control ----------
+// ---------- base/params: a param as a plugin describes its own, and where its value lies on a control ----------
 // Its parts:
 //   - a param's name, unit, range, choices, default, whether a gain in dB, and its taper; a choice
 //     by its index, as a controller carries it, and whether it's set at its time, not glided (spec.ts);

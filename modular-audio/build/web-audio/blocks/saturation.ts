@@ -1,7 +1,7 @@
 // ---------- build/web-audio/blocks/saturation: the Drive's heart in Web Audio ----------
 // Its style's color before (a low shelf, a peak, a high shelf), the push (a GainNode: the drive, punish and heat over the
 // curve's span), a WaveShaper of the style's curve, a DC block, its color after (a low shelf, a one pole, a lowpass),
-// its level (a GainNode: the auto gain c(g)^auto). Colors and curves libs/dsp/saturation/'s.
+// its level (a GainNode: the auto gain c(g)^auto). Colors and curves dsp/saturation/'s.
 // The drive moves the push and the level together, a glide the same on both; punish, style and auto set them again at
 // the drive held. A curve made each time a style is set, each WaveShaper its own.
 import { choiceAt, choiceIndex } from '../../../../base/params/index.ts';

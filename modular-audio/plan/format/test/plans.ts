@@ -13,7 +13,7 @@ const LENGTH = { name: 'length', unit: 's', range: [0.2, 8, 0.1] } as const;
 const GAIN = { unit: 'dB', range: [-60, 6, 0.1], dB: true, taper: 'fader', default: 1 } as const;
 
 // a gain into a pan, as the Utility is: its level and its pan, macros onto the two's; its blocks as
-// libs/modular-audio/plan/blocks/ declares them, so the planner's tests hold its Utility to this one
+// modular-audio/plan/blocks/ declares them, so the planner's tests hold its Utility to this one
 export const UTILITY: Plan = {
   version: 1,
   node: {

@@ -1,11 +1,11 @@
 // ---------- view/tracks/readout/arrangement: what the arrangement reads, in its own words ----------
 // Types only. Whatever answers fits them by its shape:
-//   - the recording (RecordingReadout): a MIDI sequencer's recorder (libs/sequencing/midi-sequencer/), its regions and lanes;
+//   - the recording (RecordingReadout): a MIDI sequencer's recorder (sequencing/midi-sequencer/), its regions and lanes;
 //   - the tracks (TracksReadout): the control surface that played them, its groups and its clips' names;
 //     the session's tracks read them too;
 //   - the playhead (PlayheadReadout): the transport, a cue sent on a bus;
 //   - the declarations (DeclaredReadout): the desk's view models (declaredBy());
-//   - the clock: the one clock (libs/sequencing/clock/), its song time now, its 16ths and its grid.
+//   - the clock: the one clock (sequencing/clock/), its song time now, its 16ths and its grid.
 import type { TimedValue } from '../../../../base/automation/index.ts';
 import type { Clock, HeardGrid } from '../../../../sequencing/clock/index.ts';
 import type { Seconds } from '../../../../base/util/index.ts';

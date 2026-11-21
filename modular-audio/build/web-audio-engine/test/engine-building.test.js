@@ -1,4 +1,4 @@
-// Building in the engine's context (mockup/src/libs/modular-audio/build/web-audio-engine/engine-building.ts), on the stand-in for Web Audio, as
+// Building in the engine's context (modular-audio/build/web-audio-engine/engine-building.ts), on the stand-in for Web Audio, as
 // an instrument is made at its first note:
 //   - the Web Audio builder in the engine's context once the audio runs, into where it's told, the time now the
 //     context's, a clock's time on it;

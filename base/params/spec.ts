@@ -1,5 +1,5 @@
-// ---------- libs/base/params/spec: a param as a plugin describes its own, apart from any view ----------
-// Every part of a sound declares its params so: a block its values (libs/modular-audio/plan/blocks/), a template
+// ---------- base/params/spec: a param as a plugin describes its own, apart from any view ----------
+// Every part of a sound declares its params so: a block its values (modular-audio/plan/blocks/), a template
 // its macros, a desk's strip its own. Each one's name; its unit; its range and step in that unit; its choices, where it
 // picks among words; its default, where a block falls back to one, so the block reads it from here; for a gain, whether it's a share
 // shown in dB, its range in dB; and its taper, where a value lies on a control, a lane or a CC (taper.ts), its own as VST3 and AU declare

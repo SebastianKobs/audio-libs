@@ -1,4 +1,4 @@
-// The params every module shares (mockup/src/libs/base/params/): a gain in dB and back, the silence floor, and the specs a desk's strips,
+// The params every module shares (base/params/): a gain in dB and back, the silence floor, and the specs a desk's strips,
 // the FX modules and the synth's blocks each name as their own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

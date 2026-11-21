@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/playhead.ts: where a click in the ruler puts the
+// modular-audio/view/tracks/models/arrangement/playhead.ts: where a click in the ruler puts the
 // playhead, as Arrangement.press() places it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

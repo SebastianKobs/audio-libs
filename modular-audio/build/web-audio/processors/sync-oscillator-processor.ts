@@ -1,5 +1,5 @@
 // ---------- build/web-audio/processors/sync-oscillator-processor: hard sync, in the audio thread ----------
-// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of libs/dsp/oscillators/.
+// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of dsp/oscillators/.
 // A source: started and stopped by { start } and { stop } messages, in the context's seconds, as Web Audio's own sources are.
 // Its params are the block's: frequency, detune and sync a-rate, wave k-rate.
 import { ScheduledVoice, SyncVoice } from '../../../../dsp/oscillators/index.ts';

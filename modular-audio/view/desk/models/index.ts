@@ -1,5 +1,5 @@
-// ---------- libs/modular-audio/view/desk/models: a desk's view models, no DOM ----------
-// On a device's view models (libs/modular-audio/view/device/models/).
+// ---------- modular-audio/view/desk/models: a desk's view models, no DOM ----------
+// On a device's view models (modular-audio/view/device/models/).
 // Its parts: see README.md.
 export { DeskViewBuilder } from './desk-view-builder.ts';
 export { Strip, shortName, shownName } from './strip.ts';

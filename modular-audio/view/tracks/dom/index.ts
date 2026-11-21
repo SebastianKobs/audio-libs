@@ -1,4 +1,4 @@
-// ---------- libs/modular-audio/view/tracks/dom: the session view and the arrangement drawn in the DOM ----------
+// ---------- modular-audio/view/tracks/dom: the session view and the arrangement drawn in the DOM ----------
 // One implementation of the views, as Web Audio is of the sound.
 // Its parts: see README.md.
 export { ClipTracksView, type ClipHints } from './clip-tracks-view.ts';

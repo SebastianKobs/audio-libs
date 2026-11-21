@@ -1,4 +1,4 @@
-// The effects (libs/modular-audio/plan/effects/) planned, then built on the Web Audio builder's stand-in: each wired as its
+// The effects (modular-audio/plan/effects/) planned, then built on the Web Audio builder's stand-in: each wired as its
 // template says, its nodes where its blocks make them. The library's build tests can't import a template, so it's here.
 //   - the Drive: its sound into the wet chain and the held-back dry, the curve between, both into its trim;
 //   - the Align's one delay at the lag it waits for; the Crusher's and the Grains' worklets;

@@ -1,4 +1,4 @@
-// ---------- libs/dsp/true-peak: a limiter that leaves no point of the wave over its ceiling, on whole channels ----------
+// ---------- dsp/true-peak: a limiter that leaves no point of the wave over its ceiling, on whole channels ----------
 import { LookaheadLimiter, MOST_LOOKAHEAD } from './lookahead-limiter.ts';
 import { betweenSamplePeaks, INTERPOLATION_REACH } from './oversampling.ts';
 

@@ -1,4 +1,4 @@
-// The compressor curve's unit tests (mockup/src/libs/dsp/dynamics/): the level a browser's compressor node brings
+// The compressor curve's unit tests (dsp/dynamics/): the level a browser's compressor node brings
 // a steady sound to, and its make-up. No audio in node: each a number in and a number out.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

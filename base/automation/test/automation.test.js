@@ -1,4 +1,4 @@
-// The automation library's unit tests (mockup/src/libs/base/automation):
+// The automation library's unit tests (base/automation):
 //   - a param's level as Web Audio plays its automation, alone or at rising times in one walk;
 //   - its level coming up to a time, a jump there not yet made;
 //   - an event's time, a param restarted;

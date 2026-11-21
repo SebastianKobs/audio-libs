@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/dom/arrangement/pixels.ts and note-drawing.ts: the time in view in pixels and
+// modular-audio/view/tracks/dom/arrangement/pixels.ts and note-drawing.ts: the time in view in pixels and
 // each note at its pitch, as the arrangement's drawer lays them out, read from what ArrangementView drew on a
 // canvas stand-in
 import { test } from 'node:test';

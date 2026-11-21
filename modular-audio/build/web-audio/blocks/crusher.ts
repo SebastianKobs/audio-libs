@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/crusher: a crusher in Web Audio ----------
-// A worklet of its processor (processors/crusher-processor.ts, the kernel of libs/dsp/crusher/): its bits and rate its AudioParams,
+// A worklet of its processor (processors/crusher-processor.ts, the kernel of dsp/crusher/): its bits and rate its AudioParams,
 // set, automated and cabled into as any.
 // Where its worklet isn't loaded: nothing stands for it, a placeholder passes the sound through.
 import type { Node } from '../../../plan/format/index.ts';

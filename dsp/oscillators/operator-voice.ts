@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators/operator-voice: phase modulation, up to four operators ----------
+// ---------- dsp/oscillators/operator-voice: phase modulation, up to four operators ----------
 import { OPERATOR_ALGORITHMS } from './operator-algorithms.ts';
 import { noteAt, paramAt, phaseStep, type Voice, type VoiceParams } from './voice.ts';
 

@@ -1,5 +1,5 @@
 // ---------- view/device/models/model: the plan and its values by address, as the views read them ----------
-// Read through the plan's readout (PlanReadout, libs/modular-audio/view/device/readout/):
+// Read through the plan's readout (PlanReadout, modular-audio/view/device/readout/):
 //   - each value as it plays, worked out from what it was told; the plan's where none was;
 //   - each value's start, which a reset brings back;
 //   - how each is set: live here, automated by what its track plays, or fixed as built;

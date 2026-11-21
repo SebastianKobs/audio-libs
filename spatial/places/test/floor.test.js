@@ -1,4 +1,4 @@
-// A point and a box on the floor (mockup/src/libs/spatial/places/floor.ts): where they lie and meet
+// A point and a box on the floor (spatial/places/floor.ts): where they lie and meet
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boxAround, circleCrossings, contains, distanceToBox, overlaps, pointAlong } from '../index.ts';

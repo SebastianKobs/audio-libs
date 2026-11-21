@@ -1,4 +1,4 @@
-// phrasing's unit tests (mockup/src/libs/music/phrasing/): a speed for how fast you play and a line's feel,
+// phrasing's unit tests (music/phrasing/): a speed for how fast you play and a line's feel,
 // the transforms, on a grid of the tests' own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

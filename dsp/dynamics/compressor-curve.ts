@@ -1,4 +1,4 @@
-// ---------- libs/dsp/dynamics/compressor-curve: where a browser's compressor node brings a steady sound ----------
+// ---------- dsp/dynamics/compressor-curve: where a browser's compressor node brings a steady sound ----------
 // The level the node brings a steady sound to, and the make-up gain it adds.
 // Written from memory of Chromium's DynamicsCompressorKernel, not opened.
 // Everything in dBFS; the curve itself is worked out in linear gain, as the node does.

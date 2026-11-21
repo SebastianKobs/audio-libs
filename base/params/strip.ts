@@ -1,4 +1,4 @@
-// ---------- libs/base/params/strip: a channel strip's own params, as a plugin declares them ----------
+// ---------- base/params/strip: a channel strip's own params, as a plugin declares them ----------
 // Each with its name, its range and its taper.
 // So a knob, a lane and a controller's CC each turn a position into a value the same way.
 // A gain is a share, shown in dB, its range in dB.

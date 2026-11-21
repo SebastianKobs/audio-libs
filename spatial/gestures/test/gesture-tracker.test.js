@@ -1,5 +1,5 @@
-// The gesture tracker (mockup/src/libs/spatial/gestures/), a tracker for each test on a clock and settings of its own, in the
-// clock's fake mode. The cases of the shared test vectors (shared/test-vectors/gestures/): first that the tracker emits exactly
+// The gesture tracker (spatial/gestures/), a tracker for each test on a clock and settings of its own, in the
+// clock's fake mode. The cases of the shared test vectors (test-vectors/gestures/): first that the tracker emits exactly
 // what they say, then what that means; and what a case can't say, its input handed to the tracker directly
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -229,7 +229,7 @@ test('a circle becomes a loop, once, centred on it, and then only drags on', () 
   assert.ok(after.slice(0, -1).every((e) => e.state === 'looping'));
 });
 
-// directly: a tower plays its rhythm only while you circle (mockup/architecture/sequencer.md, 10a), so it asks how long a loop has been still
+// directly: a tower plays its rhythm only while you circle, so it asks how long a loop has been still
 test('a loop counts how long it has stayed still, as a drag does', () => {
   const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);
@@ -254,7 +254,7 @@ test('a loop counts how long it has stayed still, as a drag does', () => {
   tracker.up({ ...at(7, pts[0][0] + 20, pts[0][1]), t: t + 0.15 });
 });
 
-// directly: a vine's energy (mockup/architecture/sequencer.md, 10a) is how fast the hand moves on the screen, in screen heights a second, smoothed
+// directly: a vine's energy is how fast the hand moves on the screen, in screen heights a second, smoothed
 test("a drag's hand speed: screen heights a second, smoothed; from the press or a standstill not known until a move gives it, then that move's own", () => {
   const { tracker, clock } = trackerOnItsOwnClock();
   clock.useFake(0);

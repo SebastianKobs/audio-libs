@@ -1,4 +1,4 @@
-// The session view and the arrangement as a model (mockup/src/libs/modular-audio/view/tracks/models/views.ts): one open at a time, or none, a tab each
+// The session view and the arrangement as a model (modular-audio/view/tracks/models/views.ts): one open at a time, or none, a tab each
 // opening and closing it; another's closing as this one opens leaves it shown; whoever listens told as it changes
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

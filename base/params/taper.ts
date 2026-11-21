@@ -1,4 +1,4 @@
-// ---------- libs/base/params/taper: where a param's value lies on a control, a lane or a CC, and back ----------
+// ---------- base/params/taper: where a param's value lies on a control, a lane or a CC, and back ----------
 // A param's taper is its own, declared with it (spec.ts's ParamSpec), as VST3 and AU declare theirs, so a knob, a lane and a
 // controller's CC turn a position into a value one way. A position runs 0 at the bottom to 1 at the top.
 //   fader: a gain, a share, by the fader law, as a console's and Ableton's: unity two thirds up, +6 dB at the top;

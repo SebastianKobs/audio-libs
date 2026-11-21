@@ -1,5 +1,5 @@
-// The cards of an instrument (mockup/src/libs/modular-audio/view/instrument/models/cards.ts), as the device view edits them, on the tests' file of
-// instruments (libs/modular-audio/plan/instrument/test/pluck.js):
+// The cards of an instrument (modular-audio/view/instrument/models/cards.ts), as the device view edits them, on the tests' file of
+// instruments (modular-audio/plan/instrument/test/pluck.js):
 //   - a card for each patch an instrument plays: the patch alone, or a rack's pads, each its key;
 //   - its preset on its voice card, read through a preset's readout: each value its preset's, values from outside over its own
 //     where its card has them;

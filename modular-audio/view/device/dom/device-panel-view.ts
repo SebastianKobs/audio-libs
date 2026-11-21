@@ -6,7 +6,7 @@ import type { CustomView } from './custom-view.ts';
 import { makeElement } from '../../../../base/html/index.ts';
 import { KnobDrag, refreshKnobs } from './knob-view.ts';
 
-// The device view drawn from its model (DevicePanel, libs/modular-audio/view/device/models/device-panel.ts), as
+// The device view drawn from its model (DevicePanel, modular-audio/view/device/models/device-panel.ts), as
 // Ableton's detail view: below the tracks, a track's own devices left to right, drawn again as
 // its model changes. Each kind of opening a chain of devices (DeviceChain):
 //   - the owner's: a clip track's instruments, by their roles;

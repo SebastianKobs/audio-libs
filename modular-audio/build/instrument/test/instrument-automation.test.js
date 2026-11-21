@@ -1,4 +1,4 @@
-// The instrument's automation (libs/modular-audio/build/instrument/instrument-automation.ts), on a stand-in bank
+// The instrument's automation (modular-audio/build/instrument/instrument-automation.ts), on a stand-in bank
 // and a clock of the test's own: a patch's value set at its time as the bank's edit, by its patch and
 // its address; one already due set at once.
 import { test } from 'node:test';

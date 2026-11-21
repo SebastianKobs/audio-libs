@@ -5,7 +5,7 @@
 //   - the clock: its time now, its grid's place for a time, its meter;
 //   - the playhead's place, where it's set back, the arrangement's.
 // What ▶ and ■ do isn't the model's: its drawer sends them
-//   (libs/sequencing/view/transport/dom/transport-lane-view.ts).
+//   (sequencing/view/transport/dom/transport-lane-view.ts).
 import { barTicks, beatTicks, STEP, type Meter } from '../../../clock/index.ts';
 
 // The transport as the lane reads it: whether the music plays.

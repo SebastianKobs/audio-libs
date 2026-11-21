@@ -1,5 +1,5 @@
-// The desk's own control surface, a strip's control moved by hand (libs/modular-audio/build/desk/automation/desk-surface.ts), on the desk on a stand-in for what's built
-// (libs/modular-audio/build/desk/mixing/test/built.js) and the desk library's small studio, played into an input of the test's own:
+// The desk's own control surface, a strip's control moved by hand (modular-audio/build/desk/automation/desk-surface.ts), on the desk on a stand-in for what's built
+// (modular-audio/build/desk/mixing/test/built.js) and the desk library's small studio, played into an input of the test's own:
 //   - played in as a controller on the strip's track, now, with the stream's label its owner hands in, none for a
 //     strip of the desk's own, gliding there where the desk says, a switch at once, each move told to whoever
 //     listens;

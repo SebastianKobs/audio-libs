@@ -1,5 +1,5 @@
 // ---------- build/web-audio-engine: the Web Audio builder run in a browser, on the one clock ----------
-// libs/modular-audio/build/web-audio/ builds a plan into any audio context; this makes the context and runs it:
+// modular-audio/build/web-audio/ builds a plan into any audio context; this makes the context and runs it:
 //   - context.ts: the audio context a plan is built in, made at a low latency, on a clock;
 //   - power.ts: the audio's power: started, what's built into the output, the clock on its time;
 //     the output faded out and the context suspended, and back on;

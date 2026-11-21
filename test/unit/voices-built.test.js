@@ -1,4 +1,4 @@
-// The voices (libs/modular-audio/build/instrument/) on the real Web Audio builder, on its stand-in, an instrument planned from
+// The voices (modular-audio/build/instrument/) on the real Web Audio builder, on its stand-in, an instrument planned from
 // the tests' voice card: a note's voice added at its time, its pitch and envelope set; its sources stopped once it has rung out.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

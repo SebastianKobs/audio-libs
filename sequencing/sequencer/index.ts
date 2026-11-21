@@ -1,6 +1,6 @@
-// ---------- libs/sequencing/sequencer: events of any kind, sequenced on a beat grid ----------
+// ---------- sequencing/sequencer: events of any kind, sequenced on a beat grid ----------
 // Modelled on Ableton's session view. Runs on the clock alone.
-// The MIDI sequencer (notes and their messages) sits on top of it: libs/sequencing/midi-sequencer/.
+// The MIDI sequencer (notes and their messages) sits on top of it: sequencing/midi-sequencer/.
 // Patterns: like a clip, { meter, bars, loop, events }.
 //   - meter: the time signature; the master's when left out.
 //   - bars: the pattern's length. loop: repeats, or plays once when triggered.

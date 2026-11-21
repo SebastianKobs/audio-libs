@@ -1,4 +1,4 @@
-// Where a level shows on a meter's scale (libs/modular-audio/view/device/dom/meter-view.ts), in node: even in dB, a console's.
+// Where a level shows on a meter's scale (modular-audio/view/device/dom/meter-view.ts), in node: even in dB, a console's.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { meterPosition } from '../index.ts';

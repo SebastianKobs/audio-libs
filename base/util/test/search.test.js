@@ -1,4 +1,4 @@
-// libs/base/util/search.ts and due.ts: where a time falls in a list rising by its key, a value between
+// base/util/search.ts and due.ts: where a time falls in a list rising by its key, a value between
 // timed points, things due at a time, an item put in time order among others
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

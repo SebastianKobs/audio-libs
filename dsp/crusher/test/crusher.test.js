@@ -1,4 +1,4 @@
-// The crusher's unit tests (mockup/src/libs/dsp/crusher/): a channel's samples taken at a rate and held, each rounded to a
+// The crusher's unit tests (dsp/crusher/): a channel's samples taken at a rate and held, each rounded to a
 // number of bits' steps, and the same on each channel of a block. No audio: fed Float32Arrays, its output read.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

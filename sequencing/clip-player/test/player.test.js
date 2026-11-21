@@ -1,4 +1,4 @@
-// The clip player (mockup/src/libs/sequencing/clip-player/player.ts), as Ableton's session view: tracks of clip slots, a clip launched from its
+// The clip player (sequencing/clip-player/player.ts), as Ableton's session view: tracks of clip slots, a clip launched from its
 // slot, a pattern looping on its track, its notes sent into the sequencer's input as they come due, each with its note on and its note
 // off together, a fresh index each; straight under the swing or on it; its velocity read as each note comes due, none leaving it out;
 // its notes sent as pitches, transposed by its semitones as it's launched

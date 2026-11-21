@@ -1,4 +1,4 @@
-// The phase distortion voice's unit tests (mockup/src/libs/dsp/oscillators/): one line of a CZ, a cosine read through a phase bent at a
+// The phase distortion voice's unit tests (dsp/oscillators/): one line of a CZ, a cosine read through a phase bent at a
 // knee, a saw or a square, brighter as the DCW rises. No audio: fed numbers and arrays, its output read. Every reading said in the
 // test's output, so a miss shows each beside what it should be.
 import { test } from 'node:test';

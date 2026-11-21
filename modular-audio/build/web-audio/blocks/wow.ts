@@ -1,6 +1,6 @@
 // ---------- build/web-audio/blocks/wow: a tape's wow in Web Audio ----------
 // A looping AudioBufferSourceNode of 64 s of drift: 512000 frames at 8000 Hz, as it moves under 10 Hz, so a low rate holds it.
-// Made from a generator of its own (libs/dsp/wow/), seeded by one draw from the builder's random: the desk draws from one
+// Made from a generator of its own (dsp/wow/), seeded by one draw from the builder's random: the desk draws from one
 // stream, and 512000 draws would move every noise and impulse made after it.
 // Its frequency the node's playback rate, a rate of 1 being the curve at about 1 Hz. Started with the rest.
 import { seeded } from '../../../../base/util/index.ts';

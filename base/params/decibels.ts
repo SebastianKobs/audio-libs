@@ -1,4 +1,4 @@
-// ---------- libs/base/params/decibels: a gain in dB and back, and the floor of silence ----------
+// ---------- base/params/decibels: a gain in dB and back, and the floor of silence ----------
 
 // -80 dB: as near silence as an exponential ramp goes, and where a meter shows none
 export const SILENCE = 1e-4;

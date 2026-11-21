@@ -1,6 +1,6 @@
 // ---------- build/web-audio/shaper-lags: how late an oversampled WaveShaper comes out ----------
 // No spec fixes its resampling filters, so each browser's lag differs: a click rendered offline through a WaveShaper at each
-// oversampling, read back (libs/dsp/measures/'s lagOf()).
+// oversampling, read back (dsp/measures/'s lagOf()).
 // Measured once a context, by whoever owns it (ClockedContext), and handed to the builder; until then, and where nothing can
 // render offline, Chromium's.
 // It reads no globals: the browser's OfflineAudioContext class is handed in.

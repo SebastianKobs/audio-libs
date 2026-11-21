@@ -1,4 +1,4 @@
-// An envelope's curve as a view draws it (mockup/src/libs/modular-audio/view/device/models/envelope.ts), from its knobs as they're set, an ARP's:
+// An envelope's curve as a view draws it (modular-audio/view/device/models/envelope.ts), from its knobs as they're set, an ARP's:
 //   - its stages from its gate opening, released at the note's end; a trigger's running on past it;
 //   - sampled over a time, a level each step, a share of its amount; where its delay ends and its note's end, marked.
 import { test } from 'node:test';

@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/declared.ts: what the desk declares, as the arrangement
+// modular-audio/view/tracks/models/arrangement/declared.ts: what the desk declares, as the arrangement
 // asks it: a lane's param by its strip and controller, and a strip's controllers in signal order
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

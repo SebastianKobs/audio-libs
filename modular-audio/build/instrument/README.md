@@ -32,7 +32,7 @@ A voice has rung out, worked out from its voice card's plan as a synth stops a n
 1. A gain resting at nothing, opened only by envelopes, closes once they have all faded, what's built saying when each has (`Built.faded()`); an LFO opens one too, and never closes it.
 2. A block is silent from where a gain it feeds closes, or as late as the latest of where its sound goes, followed across composites and through macros. The voice's own output never is.
 3. A source nothing closes is silent as its note's last envelope fades: a gate's release, or a trigger's run, which goes on past the note off.
-4. A stage with a tail, a delay or a reverb, sounds on past its input (its block's `tail`, `libs/modular-audio/plan/blocks/`).
+4. A stage with a tail, a delay or a reverb, sounds on past its input (its block's `tail`, `modular-audio/plan/blocks/`).
 5. The voice has rung out once every source is: an oscillator, a noise, an envelope.
 
 | Export | What it does |

@@ -1,5 +1,5 @@
-// ---------- libs/modular-audio/view/device/dom: a plan's devices drawn in the DOM ----------
-// Drawn from the device models, on the views' HTML (libs/base/html/).
+// ---------- modular-audio/view/device/dom: a plan's devices drawn in the DOM ----------
+// Drawn from the device models, on the views' HTML (base/html/).
 // Its parts: see README.md.
 export { Bound, CONTROL_MARKS } from './bound.ts';
 export { controlHint } from './hint.ts';

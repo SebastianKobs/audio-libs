@@ -1,4 +1,4 @@
-// The audio context a plan is built in, on a clock (mockup/src/libs/modular-audio/build/web-audio-engine/context.ts), on the
+// The audio context a plan is built in, on a clock (modular-audio/build/web-audio-engine/context.ts), on the
 // stand-in for Web Audio: made at a low latency; a clock's time put on the context's, never into its past.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

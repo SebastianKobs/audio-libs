@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators/phase-distortion-voice: one line of a CZ, a cosine through a bent phase ----------
+// ---------- dsp/oscillators/phase-distortion-voice: one line of a CZ, a cosine through a bent phase ----------
 import { noteAt, paramAt, phaseStep, type Voice, type VoiceParams } from './voice.ts';
 
 /** What a phase distortion voice is made with. */

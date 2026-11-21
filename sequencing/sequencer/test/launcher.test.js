@@ -1,4 +1,4 @@
-// The clip launcher (mockup/src/libs/sequencing/sequencer/launcher.ts), on events of their own, not notes: a light's
+// The clip launcher (sequencing/sequencer/launcher.ts), on events of their own, not notes: a light's
 // cues, each a color on a 16th, looping on a track, handed on as each comes due, on the swing or straight under it; one clip a track, each
 // launch numbered
 import { test } from 'node:test';

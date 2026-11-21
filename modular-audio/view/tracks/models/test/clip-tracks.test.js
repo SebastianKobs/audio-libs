@@ -1,4 +1,4 @@
-// The clip tracks as a model (mockup/src/libs/modular-audio/view/tracks/models/clip-tracks.ts), in node:
+// The clip tracks as a model (modular-audio/view/tracks/models/clip-tracks.ts), in node:
 //   - each clip track's clips, read from what holds them, a clip player's slots and the
 //     surface's own, in the order held, each once, its name, its notes and whether it plays;
 //   - a clip's ▶, and its ×, asking first, a second click after a moment deleting it.

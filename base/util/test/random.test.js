@@ -1,4 +1,4 @@
-// libs/base/util/random.ts: a seeded generator, a seed from a text, an item picked from a list or by its weight,
+// base/util/random.ts: a seeded generator, a seed from a text, an item picked from a list or by its weight,
 // draws kept to draw again, a seeded source of draws, a slice of a record
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

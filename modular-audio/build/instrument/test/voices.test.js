@@ -1,4 +1,4 @@
-// The voices (libs/modular-audio/build/instrument/), MIDI's notes played into an instrument's plan, on a stand-in for what's built:
+// The voices (modular-audio/build/instrument/), MIDI's notes played into an instrument's plan, on a stand-in for what's built:
 //   - a note on: a voice added at its time from its pool, its note's sources set by the pool's addresses, its gate last;
 //   - a note off: its gate closed, no sooner than its shortest; a note held until its note off, closed at its longest
 //     only where its voice card writes one;

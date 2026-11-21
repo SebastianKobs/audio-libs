@@ -1,4 +1,4 @@
-// The worklets (mockup/src/libs/modular-audio/build/web-audio/worklets.ts), on the stand-in for Web Audio: the processors' modules
+// The worklets (modular-audio/build/web-audio/worklets.ts), on the stand-in for Web Audio: the processors' modules
 // loaded into a context, each by the URL it's handed, and a node made of each that loaded.
 // Never breaking the sound: a module that failed or took too long, a context with no audio worklet, a node that fails to be
 // made: said once, its node none.

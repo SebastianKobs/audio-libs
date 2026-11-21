@@ -1,4 +1,4 @@
-// ---------- libs/dsp/impulse/impulse: a reverb's impulse response, designed rather than recorded ----------
+// ---------- dsp/impulse/impulse: a reverb's impulse response, designed rather than recorded ----------
 // 1. A pre-delay, then a few early taps.
 // 2. Echoes whose rate grows with the square of time until it is dense: velvet noise,
 //    single clicks of random sign.

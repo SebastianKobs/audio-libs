@@ -4,4 +4,4 @@ MIDI's devices: inserts on a track's notes, as an audio effect is an insert on i
 
 - [`scale/`](scale/README.md): the Scale device.
 
-Reads: `libs/base/` (`params`, `util`), `libs/midi/protocol/`, `libs/music/music-theory/`.
+Reads: `base/` (`params`, `util`), `midi/protocol/`, `music/music-theory/`.

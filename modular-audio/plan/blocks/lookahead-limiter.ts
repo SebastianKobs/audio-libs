@@ -1,5 +1,5 @@
 // ---------- plan/blocks/lookahead-limiter: a limiter that looks ahead and holds the true peak ----------
-// A soft clip, then the gain brought down ahead of what would go over the ceiling, as libs/dsp/true-peak plans it, run in the stream.
+// A soft clip, then the gain brought down ahead of what would go over the ceiling, as dsp/true-peak plans it, run in the stream.
 // Its gain into it in dB, its ceiling in dBTP: the true peak, between the samples too, held under it; its release in s; its clip in dB,
 // how far over the ceiling the soft clip lets a peak go before the gain takes the rest.
 // The lookahead is each builder's own, 5 ms, not a param. The limiter (limiter.ts) holds a ceiling in dBFS.

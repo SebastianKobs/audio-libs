@@ -1,4 +1,4 @@
-// A time with a sync switch (mockup/src/libs/base/params/time.ts), as Ableton's: synced, a note value;
+// A time with a sync switch (base/params/time.ts), as Ableton's: synced, a note value;
 // free, in ms or Hz; declared as three params side by side.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

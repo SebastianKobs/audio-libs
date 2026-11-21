@@ -63,6 +63,6 @@ A voice card is wired as a hardware synth's: its sources into its chain's stages
 | `cardPlanner()`, `patchPlan()`, `chainsOf()` | `cardPlanner(instruments, more)` is the planner of voice cards. `patchPlan(name, instruments)` plans a patch's instrument from a file by its name, a pool of voices or a drum rack; `chainsOf()` gives its chains, each with its key (`patch-plans.ts`). |
 | `TestNote`, `TestNoteMessage` | A test note, its pitch, velocity, time and own values; pressed on a key's instrument or let go, as a message on a bus (`test-note.ts`). |
 
-The instruments a theme plays are its own file of instruments (`themes/`), read by `instrumentsOf()`; this library has none.
+The instruments a project plays are its own file of instruments, read by `instrumentsOf()`; this library has none.
 
 Tests: `test/voice-cards.test.js`, `test/instrument.test.js`, `test/instruments-file.test.js` and `test/patch-plans.test.js`, on the tests' voice card and file of instruments in `test/pluck.js`.

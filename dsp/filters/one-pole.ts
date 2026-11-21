@@ -1,4 +1,4 @@
-// ---------- libs/dsp/filters/one-pole: a first-order lowpass's coefficients, 6 dB an octave ----------
+// ---------- dsp/filters/one-pole: a first-order lowpass's coefficients, 6 dB an octave ----------
 // No biquad type falls 6 dB an octave, so it's an IIRFilterNode's.
 // It is the bilinear transform of 1 / (1 + s/ω), its cutoff prewarped so it's -3 dB where asked.
 // A cutoff past what the rate holds is kept a little under it: a pole past Nyquist is unstable.

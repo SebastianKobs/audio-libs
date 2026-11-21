@@ -1,4 +1,4 @@
-// The limiter as the builder makes it (mockup/src/libs/modular-audio/build/web-audio/blocks/limiter.ts), on the
+// The limiter as the builder makes it (modular-audio/build/web-audio/blocks/limiter.ts), on the
 // stand-in for Web Audio:
 //   - Web Audio's own makeup for a hard knee, taken back after it;
 //   - built: its gain into a compressor held at its ceiling, set live in its own units;

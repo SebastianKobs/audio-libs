@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/arrangement.ts: the model itself, on a clock of the tests'
+// modular-audio/view/tracks/models/arrangement/arrangement.ts: the model itself, on a clock of the tests'
 // own: looked at on every beat while it shows, its folds, its lanes opened, the playhead placed and cued,
 // scrolled back
 import { test } from 'node:test';

@@ -1,4 +1,4 @@
-// A note's frequency (mockup/src/libs/music/music-theory/pitch.ts): equal temperament from A4 = 440 Hz
+// A note's frequency (music/music-theory/pitch.ts): equal temperament from A4 = 440 Hz
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mtof } from '../index.ts';

@@ -1,6 +1,6 @@
-// The recording player's regions (mockup/src/libs/sequencing/midi-sequencer/recording-player.ts): each note sent as it was heard,
+// The recording player's regions (sequencing/midi-sequencer/recording-player.ts): each note sent as it was heard,
 // offset to now, once it comes due, to the track it was recorded on, marked played back; when each comes due, the hold taken out
-// and how it ends, the timeline player's (libs/sequencing/timeline/)
+// and how it ends, the timeline player's (sequencing/timeline/)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RecordingPlayer } from '../index.ts';

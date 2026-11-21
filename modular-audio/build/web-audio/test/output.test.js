@@ -1,4 +1,4 @@
-// The output after what's built (mockup/src/libs/modular-audio/build/web-audio/output.ts), on the stand-in for Web Audio: a gain of its own into where
+// The output after what's built (modular-audio/build/web-audio/output.ts), on the stand-in for Web Audio: a gain of its own into where
 // the sound goes, from silence, faded in, never at full volume; faded out to pause, in again from where the fade got to, or from silence
 // once the audio was off
 import { test } from 'node:test';

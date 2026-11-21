@@ -1,5 +1,5 @@
-// A group of a composite's children drawn (libs/modular-audio/view/device/dom/group-view.ts), as HTML, in node, on the view
-// models' voice card of the tests' own (libs/modular-audio/view/device/models/test/card.js): its title, a tab each where it
+// A group of a composite's children drawn (modular-audio/view/device/dom/group-view.ts), as HTML, in node, on the view
+// models' voice card of the tests' own (modular-audio/view/device/models/test/card.js): its title, a tab each where it
 // has more than one, the chosen one's controls, a view of its own first.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

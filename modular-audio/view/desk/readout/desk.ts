@@ -1,5 +1,5 @@
 // ---------- view/desk/readout/desk: a desk as it plays, the plan's readout ----------
-// The plan's readout (PlanReadout) for a desk (libs/modular-audio/build/desk/mixing/), as PresetReadout is for a preset.
+// The plan's readout (PlanReadout) for a desk (modular-audio/build/desk/mixing/), as PresetReadout is for a preset.
 // What the views' models read of the desk, by address:
 //   - a value as it plays, the desk's; a strip's mute and solo, its live mix's;
 //   - its start, the desk's, which a reset brings back;

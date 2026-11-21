@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/sequencer/phrases: phrases of events sent as each 16th comes, so a hold pauses them ----------
+// ---------- sequencing/sequencer/phrases: phrases of events sent as each 16th comes, so a hold pauses them ----------
 // A phrase kept by its places on the grid, each event sent as its 16th comes, as a performer at a
 // controller plays in real time, not the whole phrase as it starts.
 // A hold or Stop hands out no 16th, so a phrase waits with the music,

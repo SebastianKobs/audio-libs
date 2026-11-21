@@ -1,4 +1,4 @@
-// The live mix's mute and solo (libs/modular-audio/build/desk/mixing/mix.ts), the mixing desk's own, set by its mute() and
+// The live mix's mute and solo (modular-audio/build/desk/mixing/mix.ts), the mixing desk's own, set by its mute() and
 // solo(), on the mixing desk on a stand-in for what's built (test/built.js) and the desk library's small studio:
 //   - a mute: its channel cut, gliding, once the desk is built; let go, back;
 //   - a mute taking along the strips its setup says, a bus's with what feeds it;

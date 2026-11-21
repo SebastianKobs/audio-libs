@@ -1,4 +1,4 @@
-// ---------- libs/dsp/loudness/loudness: an integrated loudness in LUFS, after ITU-R BS.1770-4 ----------
+// ---------- dsp/loudness/loudness: an integrated loudness in LUFS, after ITU-R BS.1770-4 ----------
 // K-weighting first: a shelf lifting the highs about 4 dB, then a highpass near 38 Hz, so the number
 // follows what's heard. Then the mean square of 400 ms blocks overlapping 75%, gated.
 // Each biquad is worked out from its analog values for the sample rate at hand,

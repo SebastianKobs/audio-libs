@@ -1,6 +1,6 @@
 # sequencing/clip-player
 
-The clip player, as Ableton's session view holds and plays clips: tracks of clip slots, each slot holding a clip, a pattern of notes. A clip launched from its slot plays on its track, one a track, looping on the grid or once from the next beat. Its notes are sent into the input a control surface plays into, so they reach their instrument and the stream as a played note does. No DOM: its port and its view model are the views' (`libs/modular-audio/view/tracks/`).
+The clip player, as Ableton's session view holds and plays clips: tracks of clip slots, each slot holding a clip, a pattern of notes. A clip launched from its slot plays on its track, one a track, looping on the grid or once from the next beat. Its notes are sent into the input a control surface plays into, so they reach their instrument and the stream as a played note does. No DOM: its port and its view model are the views' (`modular-audio/view/tracks/`).
 
 Depends on: `base/util`, `midi/protocol`, `sequencing/clock`, `sequencing/midi-sequencer`, `sequencing/sequencer`.
 

@@ -1,6 +1,6 @@
 // ---------- view/tracks/readout/clips: the clip slots, as a view's clip tracks read them ----------
 // Types only. Whatever answers fits them by its shape:
-//   - a clip player (libs/sequencing/clip-player/), for the slots it holds;
+//   - a clip player (sequencing/clip-player/), for the slots it holds;
 //   - a control surface, for the clips it holds on no player, and its clip tracks' names.
 
 // Clips in slots on tracks, as what holds them knows them; a clip track names them (held):

@@ -1,4 +1,4 @@
-// ---------- libs/dsp/operator-levels/operator-levels: a DX's 0 to 99 as a modulation index, its feedback as a share ----------
+// ---------- dsp/operator-levels/operator-levels: a DX's 0 to 99 as a modulation index, its feedback as a share ----------
 // An FM operator kernel takes a modulator's level in radians.
 // The published patches give Yamaha's 0 to 99 and a feedback of 0 to 7:
 // these turn them into the kernel's numbers.

@@ -1,4 +1,4 @@
-// The view models (mockup/src/libs/modular-audio/view/device/models), in node, on a plan's readout of the tests' own:
+// The view models (modular-audio/view/device/models), in node, on a plan's readout of the tests' own:
 //   - a composite as a device: its macros as knobs, in its template's order, then its settings within;
 //     a block as a device, its params; none where nothing's there;
 //   - a knob: its value as it plays, where it lies on its control by its taper, its text in its unit;

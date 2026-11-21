@@ -1,6 +1,18 @@
 # The libraries
 
-The libraries in `mockup/src/libs/`, and how they fit together. Each is a folder: its entry (`libs/base/util/index.ts`), and a content file where it holds templates as data (`libs/modular-audio/plan/effects/content.ts`); its README; its tests in a folder beside it (`libs/base/util/test/`). A library imports only those its row in the import test names (`mockup/test/module-rules.js`), each through its entry, and nothing above the libraries. So a project takes the layers it needs: a plan without a builder, a builder without a view, a view of a plan without the desk.
+The libraries, and how they fit together. Each is a folder: its entry (`base/util/index.ts`), and a content file where it holds templates as data (`modular-audio/plan/effects/content.ts`); its README; its tests in a folder beside it (`base/util/test/`). A library imports only those its row in the import test names (`test/module-rules.js`), each through its entry, and nothing above the libraries. So a project takes the layers it needs: a plan without a builder, a builder without a view, a view of a plan without the desk.
+
+## Using them
+
+Take the layers you need: copy their folders, or mount this repo as a git submodule, and import each library through its entry. The TypeScript runs as it is: Node strips the types, and a bundler such as Vite reads it. The only npm package the libraries need is `yaml`, for the loader below.
+
+- **Templates as YAML.** A template is written as a `.yaml` file and imported as its data. In a Vite project add `yamlPlugin()` from `tools/yaml.js` to its config; in Node register the hooks, `node --import ./tools/yaml-hooks.js`. The types of such an import are in `types/yaml.d.ts`.
+- **Worklets by their URLs.** A processor is a module of its own, loaded into an audio context from its URL by `loadWorklets()` (`modular-audio/build/web-audio/worklets.ts`). Import each with Vite's `?worker&url` (`types/worker-url.d.ts`), so it is bundled into a file of its own and can import what it shares. A page opened from `file://` can't load them: serve it over http. Without a worklet, its block passes the sound through or falls back.
+- **Web Audio only in the builder.** Everything else runs in Node with no audio and no DOM, so a plan, a sequencer and a view model are tested without a browser.
+
+## How they're tested
+
+`make test-unit` runs the type check, the format check, the linter, Knip, the class members check and the clone finder, then every library's tests (`*/*/test/`) and those across libraries (`test/unit/`) in Node, their memory capped. The checks come from `ts-code-checks`, an optional dependency: without it they're skipped. The scenarios of `test/scenarios/` are the code a user writes, run by `test/unit/library-layers.test.js`. The clock's, the gestures' and the space's test vectors are in `test-vectors/`, recorded on purpose by the writers in `tools/`. The docs are held by `test/unit/docs-rules.test.js`: every path exists, each README's face is its library's exports and its `Depends on:` line its row in `test/module-rules.js`, American spelling.
 
 ## By role
 
@@ -13,7 +25,7 @@ Ten groups, each a folder, read bottom up. A group reads only those before it. E
 - [`music/`](music/README.md): notes, keys, scales and a play style, a phrase played as a player would.
 - [`midi-devices/`](midi-devices/README.md): inserts on a track's notes, as an audio effect is on its sound, the Scale device.
 - [`spatial/`](spatial/README.md): places perceived from where you are, hearing by distance, pointer input as gestures.
-- [`modular-audio/`](modular-audio/README.md): a sound as data (`libs/modular-audio/plan/`), built (`libs/modular-audio/build/`) and shown (`libs/modular-audio/view/`), and its way through them.
+- [`modular-audio/`](modular-audio/README.md): a sound as data (`modular-audio/plan/`), built (`modular-audio/build/`) and shown (`modular-audio/view/`), and its way through them.
 - [`dsp/`](dsp/README.md): signal processing on sample arrays, free of any audio API: measuring, saturating, filtering, a designed impulse, oscillator voices, crushing and granular effects, a true-peak limiter.
 - [`formats/`](formats/README.md): files other programs read, written from what the groups before it make, a WAV file.
 
@@ -35,15 +47,15 @@ A library's layer is one more than the highest of those it uses; it can be taken
 
 ## Scenarios
 
-Five scenarios, each the code a user of the libraries writes, in `mockup/test/scenarios/`. `mockup/test/unit/library-layers.test.js` runs each and checks it reaches only the libraries it needs, so a layer can be taken alone.
+Five scenarios, each the code a user of the libraries writes, in `test/scenarios/`. `test/unit/library-layers.test.js` runs each and checks it reaches only the libraries it needs, so a layer can be taken alone.
 
-1. `mockup/test/scenarios/plan-in-code.js`: an oscillator and an envelope planned and wired in code, `plan/planner` alone.
-2. `mockup/test/scenarios/build-a-plan.js`: that plan built for Web Audio, with no view, clock or engine.
-3. `mockup/test/scenarios/device-view.js`: a plan's device drawn, through `view/device`'s readout, models and dom.
-4. `mockup/test/scenarios/desk-alone.js`: a desk planned, built and mixed, with no clock, MIDI or sequencer.
-5. `mockup/test/scenarios/instrument-played.js`: an instrument planned from a file of instruments, built and played by MIDI's notes.
+1. `test/scenarios/plan-in-code.js`: an oscillator and an envelope planned and wired in code, `plan/planner` alone.
+2. `test/scenarios/build-a-plan.js`: that plan built for Web Audio, with no view, clock or engine.
+3. `test/scenarios/device-view.js`: a plan's device drawn, through `view/device`'s readout, models and dom.
+4. `test/scenarios/desk-alone.js`: a desk planned, built and mixed, with no clock, MIDI or sequencer.
+5. `test/scenarios/instrument-played.js`: an instrument planned from a file of instruments, built and played by MIDI's notes.
 
-Scenario 2, its imports written from `libs/`:
+Scenario 2, its imports written from the repo's root:
 
 ```js
 import { planVoice } from './plan-in-code.js';

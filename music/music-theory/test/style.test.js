@@ -1,4 +1,4 @@
-// A play style (mockup/src/libs/music/music-theory/style.ts): its contours and its rhythms, and the style as it plays.
+// A play style (music/music-theory/style.ts): its contours and its rhythms, and the style as it plays.
 // Its rhythms here plain objects of the test's own: a style is generic over a rhythm's type.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

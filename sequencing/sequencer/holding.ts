@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/sequencer/holding: how long the plays on one track hold it ----------
+// ---------- sequencing/sequencer/holding: how long the plays on one track hold it ----------
 // Pure. Times are the caller's.
 // A track is held for good while any play on it is held open (its end not known yet).
 // Otherwise it is held until the latest end of the plays on it.

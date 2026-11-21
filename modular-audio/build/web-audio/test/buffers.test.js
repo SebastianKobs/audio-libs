@@ -1,4 +1,4 @@
-// The buffers a noise or a reverb plays (mockup/src/libs/modular-audio/build/web-audio/buffers.ts):
+// The buffers a noise or a reverb plays (modular-audio/build/web-audio/buffers.ts):
 // a reverb's impulse response, two channels darkening as they decay, made once; a noise by its length;
 // a room's, an impulse of a design, made once for each design.
 import { test } from 'node:test';

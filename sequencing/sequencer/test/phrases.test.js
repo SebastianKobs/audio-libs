@@ -1,4 +1,4 @@
-// Phrases of events sent as each 16th comes (mockup/src/libs/sequencing/sequencer/phrases.ts): a phrase kept by its places on the grid, so a hold pauses it
+// Phrases of events sent as each 16th comes (sequencing/sequencer/phrases.ts): a phrase kept by its places on the grid, so a hold pauses it
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Phrases } from '../index.ts';

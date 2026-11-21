@@ -1,6 +1,6 @@
 # modular-audio/build/desk/mixing
 
-A desk built and set by address: what a desk does as it plays, on what any builder hands back, with no clock and no sequencer. Its owner plans it, makes it once and hands it a function that builds the plan where it wants it, a builder of its owner's choice. The desk's automation (`libs/modular-audio/build/desk/automation/`) is fitted to it, not part of it. Mute and solo are part of it, and a way into each track's channel.
+A desk built and set by address: what a desk does as it plays, on what any builder hands back, with no clock and no sequencer. Its owner plans it, makes it once and hands it a function that builds the plan where it wants it, a builder of its owner's choice. The desk's automation (`modular-audio/build/desk/automation/`) is fitted to it, not part of it. Mute and solo are part of it, and a way into each track's channel.
 
 Depends on: `base/automation`, `base/params`, `base/util`, `modular-audio/build/contract`, `modular-audio/plan/desk`, `modular-audio/plan/format`.
 
@@ -17,7 +17,7 @@ desk.kept(); // { values: { 'tap/volume': 0.5 }, settings: {} }, copies
 The live mix works as Ableton's, on every track by its key:
 
 1. A mute takes along what feeds the strip muted, its sends among them.
-2. A solo keeps what a soloed strip needs to be heard, never silencing an FX bus (`silenced()` in `libs/modular-audio/plan/desk/`).
+2. A solo keeps what a soloed strip needs to be heard, never silencing an FX bus (`silenced()` in `modular-audio/plan/desk/`).
 3. What's silenced is cut on its channel, gliding, as the desk is built and as each track's channel is added.
 
 | Export | What it does |
@@ -29,6 +29,6 @@ The live mix works as Ableton's, on every track by its key:
 
 The desk keeps every value set by its address, a choice by its index kept as its choice, and tells what's built where it plays. `Wiring`, the channels and wires `wiring()` hands back, and `Mix`, the live mix's mute and solo, are internal, not exported.
 
-`DeskSetup` lives here, in `setup.ts`, though the desk's automation (`libs/modular-audio/build/desk/automation/`) and the desk view's readout (`libs/modular-audio/view/desk/readout/`) read it too.
+`DeskSetup` lives here, in `setup.ts`, though the desk's automation (`modular-audio/build/desk/automation/`) and the desk view's readout (`modular-audio/view/desk/readout/`) read it too.
 
-Tests: `test/desk.test.js` and `test/mix.test.js`, through the mixing desk alone, on a stand-in for what's built in `test/built.js` and the desk library's small studio in `libs/modular-audio/plan/desk/test/desks.js`.
+Tests: `test/desk.test.js` and `test/mix.test.js`, through the mixing desk alone, on a stand-in for what's built in `test/built.js` and the desk library's small studio in `modular-audio/plan/desk/test/desks.js`.

@@ -1,4 +1,4 @@
-// The one-pole lowpass's unit tests (mockup/src/libs/dsp/filters/): the coefficients of a first-order lowpass, 6 dB
+// The one-pole lowpass's unit tests (dsp/filters/): the coefficients of a first-order lowpass, 6 dB
 // an octave, read as their frequency response.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

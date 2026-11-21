@@ -1,4 +1,4 @@
-// ---------- libs/dsp/filters/biquad: a second-order filter run over samples ----------
+// ---------- dsp/filters/biquad: a second-order filter run over samples ----------
 // The direct form I difference equation, with its state in doubles:
 // a low corner at 32 bit float would ring with rounding.
 

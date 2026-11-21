@@ -1,4 +1,4 @@
-// ---------- libs/dsp/true-peak: the points between a channel's samples, as a DAC rebuilds the wave ----------
+// ---------- dsp/true-peak: the points between a channel's samples, as a DAC rebuilds the wave ----------
 import { windowedSinc } from '../filters/index.ts';
 
 // samples each side of a point that are read to compute it

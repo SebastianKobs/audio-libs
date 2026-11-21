@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/rows.ts: the arrangement's rows, read from
+// modular-audio/view/tracks/models/arrangement/rows.ts: the arrangement's rows, read from
 // Arrangement.rows, regions and lanes:
 //   - the tracks as the session view groups them, the desk's strips below them, a track's lanes under it;
 //   - where a region and a lane go, and which none.

@@ -1,4 +1,4 @@
-// An envelope's curve (mockup/src/libs/modular-audio/plan/blocks/envelope-curve.ts), on numbers, as an ARP's:
+// An envelope's curve (modular-audio/plan/blocks/envelope-curve.ts), on numbers, as an ARP's:
 //   - its stages from its gate opening: after its delay up over its attack, held, down to its sustain;
 //   - its attack charging toward 1.3 times its peak, cut there at its time;
 //   - its decay and its release approaching where they go, done at their time, within the floor of silence, never set there;

@@ -1,4 +1,4 @@
-// The Drive curves' unit tests (mockup/src/libs/dsp/saturation/): its styles' curves, the auto gain after them. A
+// The Drive curves' unit tests (dsp/saturation/): its styles' curves, the auto gain after them. A
 // sine fed through the curve as a WaveShaper reads its table, its harmonics read off one period.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

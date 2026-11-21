@@ -1,4 +1,4 @@
-// libs/base/util/address.ts: an address, a path of names, as text and back, and one under another
+// base/util/address.ts: an address, a path of names, as text and back, and one under another
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { addressOf, addressText, isUnder, under } from '../index.ts';

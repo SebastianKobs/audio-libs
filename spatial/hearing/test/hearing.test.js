@@ -1,5 +1,5 @@
-// The hearing (mockup/src/libs/spatial/hearing/), through its space, with a listener of the test's own:
-//   - the model against its test vectors (shared/test-vectors/space/hearing.json);
+// The hearing (spatial/hearing/), through its space, with a listener of the test's own:
+//   - the model against its test vectors (test-vectors/space/hearing.json);
 //   - an emitter: what it hears handed on as values, from a note's time, as the listener moves.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

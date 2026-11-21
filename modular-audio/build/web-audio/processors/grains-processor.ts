@@ -1,5 +1,5 @@
 // ---------- build/web-audio/processors/grains-processor: granular freeze and smear, in the audio thread ----------
-// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of libs/dsp/grains/.
+// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of dsp/grains/.
 // The kernel keeps the input and plays grains from it; this makes it a node: its six params k-rate, one value a block.
 // Its memory and its seed come from its options: the same seed, the same cloud; none, and it draws on Math.random.
 // Always kept running: a desk's insert, as the crusher's.

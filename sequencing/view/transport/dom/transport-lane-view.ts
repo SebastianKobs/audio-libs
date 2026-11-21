@@ -1,6 +1,6 @@
 // ---------- view/transport/dom/transport-lane-view: the transport's lane drawn ----------
 // ▶ and ■, and where the music is, bar and beat, its model's (TransportLane).
-// Model: libs/sequencing/view/transport/models/transport-lane.ts.
+// Model: sequencing/view/transport/models/transport-lane.ts.
 // Put at the top of the element it's handed, as a DAW's transport bar.
 // What ▶ and ■ do is the owner's: sent as messages, play and stop.
 // Its hints the owner's, in its own words.

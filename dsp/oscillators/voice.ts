@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators/voice: what a voice is handed, and the numbers they all read ----------
+// ---------- dsp/oscillators/voice: what a voice is handed, and the numbers they all read ----------
 
 /** A voice's params for a block: each a number for the whole block, or an array a sample each (a-rate). */
 export type VoiceParams = Readonly<Record<string, number | ArrayLike<number>>>;

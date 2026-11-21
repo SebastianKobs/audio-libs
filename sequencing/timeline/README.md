@@ -4,7 +4,7 @@ What happened, laid out in time, and played back, for events of any kind: the ge
 
 Depends on: `base/util`, `sequencing/clock`.
 
-The clock's song time is the timeline time of music, handed in as a `TimeMap`. Regions, lanes, a note's index, Web Audio's glide curve and putting lanes back after playback are the MIDI sequencer's, its own views of the timeline's events and their playback (`libs/sequencing/midi-sequencer/recorder.ts`, `libs/sequencing/midi-sequencer/track-lanes.ts`, `libs/sequencing/midi-sequencer/note-lanes.ts`, `libs/sequencing/midi-sequencer/lanes.ts` and `libs/sequencing/midi-sequencer/recording-player.ts`).
+The clock's song time is the timeline time of music, handed in as a `TimeMap`. Regions, lanes, a note's index, Web Audio's glide curve and putting lanes back after playback are the MIDI sequencer's, its own views of the timeline's events and their playback (`sequencing/midi-sequencer/recorder.ts`, `sequencing/midi-sequencer/track-lanes.ts`, `sequencing/midi-sequencer/note-lanes.ts`, `sequencing/midi-sequencer/lanes.ts` and `sequencing/midi-sequencer/recording-player.ts`).
 
 ```ts
 import { Player, Timeline } from './index.ts';

@@ -1,4 +1,4 @@
-// The instruments as the device view shows them (mockup/src/libs/modular-audio/view/instrument/models/instrument-racks.ts), in node, on instruments of
+// The instruments as the device view shows them (modular-audio/view/instrument/models/instrument-racks.ts), in node, on instruments of
 // the tests' own, a pluck's cards:
 //   - a role's instrument a rack of its cards, a pad each, its status the patch it plays; none with no cards;
 //   - its reset: every card of its patches put back, as the app's messages;

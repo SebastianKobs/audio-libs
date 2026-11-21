@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/room: a designed room in Web Audio ----------
-// One ConvolverNode playing libs/dsp/impulse/'s impulse, which has energy 1 a side: normalizing is off, so a click comes
+// One ConvolverNode playing dsp/impulse/'s impulse, which has energy 1 a side: normalizing is off, so a click comes
 // back with energy 1 and the level after it is the room's level. The node's own normalizing scales an impulse by a rule of
 // its own, and the reverb takes it.
 // One channel in, explicit: left and right summed before the room, as the PCM-60's input was; the two sides of the impulse

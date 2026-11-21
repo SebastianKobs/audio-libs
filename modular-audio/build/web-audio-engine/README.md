@@ -47,4 +47,4 @@ Once started, a start turns the audio back on; while paused it does nothing. A p
 | `new EngineBuilding({ engine, beat })`: `into()` | A `BuildingIn` once the audio runs: the Web Audio builder in the engine's context with the worklets loaded into it and the shapers' lags measured in it, into where it's told, with its own draws where it has them. The noise's buffers are made with the first and shared by every builder in that context (`engine-building.ts`). |
 | `BuildingIn`, `buildingIn()` | A builder in a context, where its sound goes, the time now and a clock's time on it. `buildingIn()` makes one in a context of its own, as an offline render asks (`engine-building.ts`). |
 
-Tests: `test/context.test.js`, `test/power.test.js` and `test/engine-building.test.js`, on the stand-in for Web Audio in `libs/modular-audio/build/web-audio/test/audio-stand-in.js`.
+Tests: `test/context.test.js`, `test/power.test.js` and `test/engine-building.test.js`, on the stand-in for Web Audio in `modular-audio/build/web-audio/test/audio-stand-in.js`.

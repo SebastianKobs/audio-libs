@@ -1,4 +1,4 @@
-// ---------- libs/dsp/grains/grain-cloud: granular freeze and smear, on sample arrays ----------
+// ---------- dsp/grains/grain-cloud: granular freeze and smear, on sample arrays ----------
 
 /** What a cloud is made with. */
 export interface GrainCloudSetup {

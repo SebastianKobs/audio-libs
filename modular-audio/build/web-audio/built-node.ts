@@ -1,4 +1,4 @@
-// ---------- libs/modular-audio/build/web-audio/built-node: a node built from a plan, in one shape ----------
+// ---------- modular-audio/build/web-audio/built-node: a node built from a plan, in one shape ----------
 // A plan's node is one of Web Audio's (BuiltNode.of()), or one the engine builds from
 // several (a limiter, blocks/limiter.ts). Either way it has:
 //   - input, output: where its sound comes in and goes out; a Web Audio node is both;

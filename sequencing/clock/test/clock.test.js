@@ -1,4 +1,4 @@
-// The clock (mockup/src/libs/sequencing/clock/), on a clock and settings of its own, in fake mode: time moves
+// The clock (sequencing/clock/), on a clock and settings of its own, in fake mode: time moves
 // only when a test says, so every result is exact. Audio contexts are stand-ins that say what time they think it is (fake-audio.js)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

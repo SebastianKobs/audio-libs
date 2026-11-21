@@ -1,4 +1,4 @@
-// libs/base/util/events.ts and bus.ts: events by name and messages by type, each to whoever listens
+// base/util/events.ts and bus.ts: events by name and messages by type, each to whoever listens
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Bus, Events } from '../index.ts';

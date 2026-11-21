@@ -19,4 +19,4 @@ const readout: InstrumentsReadout = {
 | `InstrumentsReadout`: `instruments`, `cardsOf()` | The instruments as the device view asks for them: the patch each role plays, and a role's instrument's cards, one for each patch it plays (`instruments.ts`). |
 | `InstrumentCard` | A card of an instrument: the patch it edits, a drum rack's pad's key, its plan's readout and its `send`, which sends what's done on it as a message on a bus (`instruments.ts`). |
 
-Tests: none, as types only: what answers them is tested in `libs/modular-audio/view/instrument/models/test/cards.test.js`.
+Tests: none, as types only: what answers them is tested in `modular-audio/view/instrument/models/test/cards.test.js`.

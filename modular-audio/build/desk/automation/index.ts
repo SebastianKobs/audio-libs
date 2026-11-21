@@ -1,5 +1,5 @@
 // ---------- build/desk/automation: the desk's automation, a package fitted to a desk ----------
-// What plays a mixing desk (libs/modular-audio/build/desk/mixing/) on time, on the clock, as a copy of whoever
+// What plays a mixing desk (modular-audio/build/desk/mixing/) on time, on the clock, as a copy of whoever
 // operates it; the desk works without it:
 //   - desk-automation.ts: a strip's controller set on the desk on time, held on the clock's cues,
 //     a track's channel's where its notes set it, a strip's mute and solo the live mix's;

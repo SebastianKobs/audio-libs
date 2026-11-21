@@ -1,6 +1,6 @@
 // ---------- view/device/models/saturation: a saturation's curve, as a view draws it ----------
 // From its device's knobs and its style as they're set, what the sound comes out at across its input, -1 to 1: its curve
-// driven, its level taken back (libs/dsp/saturation/), colors aside.
+// driven, its level taken back (dsp/saturation/), colors aside.
 // For a view of its own, registered by the saturation's kind (CustomViews).
 import { autoGain, curveGain, DRIVE_STYLES, styleBent, type DriveStyle } from '../../../../dsp/saturation/index.ts';
 import { Choice } from './choice.ts';

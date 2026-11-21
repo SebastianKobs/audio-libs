@@ -1,4 +1,4 @@
-// ---------- libs/music/music-theory/scales: scales, and a degree's note in a key ----------
+// ---------- music/music-theory/scales: scales, and a degree's note in a key ----------
 // A scale is its steps in semitones from its root, in one octave; a key is { root, scale }, the root a MIDI note. A degree counts
 // the scale's steps from an octave below the root, so degree 0 is the root an octave down, one scale's length on is the root itself, and
 // a negative degree goes on down

@@ -33,7 +33,7 @@ A channel is a console's, its parts in one order:
 4. Its pan, where it has one.
 5. Its sends, one child (`send`).
 
-Its own params are a strip's (`STRIP_PARAMS` in `libs/base/params/`): `volume`, `pan`, `mute` and `solo`. Mute and solo are switches wired to nothing; what they silence is the desk's rule (`silenced()`), set on each channel's `cut` by its address.
+Its own params are a strip's (`STRIP_PARAMS` in `base/params/`): `volume`, `pan`, `mute` and `solo`. Mute and solo are switches wired to nothing; what they silence is the desk's rule (`silenced()`), set on each channel's `cut` by its address.
 
 A send goes to a return:
 

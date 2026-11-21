@@ -1,4 +1,4 @@
-// Drawn elements bound to their models (libs/modular-audio/view/device/dom/bound.ts): each element marked with an address, bound as it's
+// Drawn elements bound to their models (modular-audio/view/device/dom/bound.ts): each element marked with an address, bound as it's
 // drawn to the model there, by whoever drew it from its models; found again by the element alone
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

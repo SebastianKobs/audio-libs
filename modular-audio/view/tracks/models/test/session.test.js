@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/session.ts: what a session view shows of the stream, each kind's replay tracks and what plays on them, looked at now and then
+// modular-audio/view/tracks/models/session.ts: what a session view shows of the stream, each kind's replay tracks and what plays on them, looked at now and then
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Session } from '../index.ts';

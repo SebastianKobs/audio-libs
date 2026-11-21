@@ -1,4 +1,4 @@
-// The transport's lane as a model (libs/sequencing/view/transport/models/transport-lane.ts):
+// The transport's lane as a model (sequencing/view/transport/models/transport-lane.ts):
 // whether the music plays, and where it is,
 // bar and beat, counted from bar 1 as the arrangement's ruler numbers them; the playhead's place while it's set back
 import { test } from 'node:test';

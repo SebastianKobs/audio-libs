@@ -1,5 +1,5 @@
-// The desk view's parts that need no page (mockup/src/libs/modular-audio/view/desk/dom/desk-html.ts), in node, on the models' small
-// desk (libs/modular-audio/view/desk/models/test/desk.js):
+// The desk view's parts that need no page (modular-audio/view/desk/dom/desk-html.ts), in node, on the models' small
+// desk (modular-audio/view/desk/models/test/desk.js):
 //   - the desk's own channels drawn: its buses, a bus with those that go into it in a group's box; its returns;
 //     its master; each strip opening its devices by its address, its sends labelled by their returns' short labels;
 //   - a track's strip drawn: the name it's handed, what plays on it, empty while it plays nothing;

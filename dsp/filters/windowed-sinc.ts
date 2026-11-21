@@ -1,4 +1,4 @@
-// ---------- libs/dsp/filters/windowed-sinc: the tap of an interpolating filter, a sinc under a Kaiser window ----------
+// ---------- dsp/filters/windowed-sinc: the tap of an interpolating filter, a sinc under a Kaiser window ----------
 
 const KAISER_BETA = 8; // a stopband near -70 dB: the error of a point stays far under a hundredth of a dB
 

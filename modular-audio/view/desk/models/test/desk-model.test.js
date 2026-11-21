@@ -1,4 +1,4 @@
-// The strips and the desk model (mockup/src/libs/modular-audio/view/desk/models), in node, on a small desk (test/desk.js) and a plan's
+// The strips and the desk model (modular-audio/view/desk/models), in node, on a small desk (test/desk.js) and a plan's
 // readout of the tests' own:
 //   - a channel as a strip, by its form: its shown name, where it goes, its inserts as devices, its sends'
 //     knobs, its fader, pan, mute and solo, its level; quiet where its cut is at 0; a pool's copy too;

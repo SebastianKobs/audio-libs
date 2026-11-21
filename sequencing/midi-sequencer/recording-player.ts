@@ -6,7 +6,7 @@
 // there rings out as it was recorded. And each lane's points, a controller on the lane's track, picked up where it starts at its value
 // then, as a sounding note is chased, a glide where it had got to; a lane moved by hand while it plays back passed over, the move
 // overriding it until playback ends, as Ableton's override; and the strips back as they were when it started, but one moved by hand, once
-// it ends. On the timeline's player (libs/sequencing/timeline/), one for both: here only the music's mapping onto it, a note's start a note
+// it ends. On the timeline's player (sequencing/timeline/), one for both: here only the music's mapping onto it, a note's start a note
 // on with its values then, its glides and changes per-note controllers, its end a note off, each note a fresh index, a region's address; a
 // lane's point a controller, its value where it's picked up by Web Audio's curve; the strips put back; the recording in song time, the
 // timeline time of music (recorder.ts), so a hold is already out of it

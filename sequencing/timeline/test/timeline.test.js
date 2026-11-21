@@ -1,4 +1,4 @@
-// The timeline (mockup/src/libs/sequencing/timeline/; mockup/architecture/tests.md), on events of their own, not notes: a hand's presses, each with
+// The timeline (sequencing/timeline/), on events of their own, not notes: a hand's presses, each with
 // its own length or held open until its release, and a pointer's pressure, events that hold until the next of their key
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

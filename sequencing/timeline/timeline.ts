@@ -4,7 +4,7 @@
 // minutes unless told: an event that ended before it let go, one still in effect kept, of each key's the one in effect where the window
 // starts, those who went told (onLetGo); an event that holds what the one before it of its key held, by the caller's equality, thinned
 // once it's settled. What's in effect at a time, and what starts in a range. The sequencer's recorder keeps what's heard on it, its
-// regions and lanes its own views of it (libs/sequencing/midi-sequencer/recorder.ts)
+// regions and lanes its own views of it (sequencing/midi-sequencer/recorder.ts)
 import { HISTORY } from '../clock/index.ts';
 import { entryOf, lastAtOrBefore, placeInOrder, type Seconds } from '../../base/util/index.ts';
 

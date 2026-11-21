@@ -17,7 +17,7 @@ desk.mixState(); // { muted: Set {'tap'}, soloed: Set {} }
 
 How a controller reaches the desk:
 
-1. It is set as its param's address on the strip (`controlAddress()` in `libs/modular-audio/plan/desk/`), or on a track's channel where the setup says its notes set it (`setBy()`).
+1. It is set as its param's address on the strip (`controlAddress()` in `modular-audio/plan/desk/`), or on a track's channel where the setup says its notes set it (`setBy()`).
 2. A strip's mute and solo are the live mix's, any other controller the desk's. One no strip has is refused, naming it.
 3. It is held on the clock's cues. A change that glides is set its lead ahead of its time; a switch, a choice and a param its spec says never glides (a delay line's time) are set at their time.
 
@@ -27,4 +27,4 @@ How a controller reaches the desk:
 | `Change`, `whenOf()` | A change to a param by its address: its value, when it lands, gliding where it says. `whenOf()` puts it on the audio's clock, at its time if it's to come, else now (`change.ts`). |
 | `new DeskSurface({ desk, automation, clock, input, label })`: `control()`, `edit()`, `onControl()` | The desk's own control surface: a strip's control moved by hand, played into the input handed in (a sequencer) as a controller on the strip's track, so it's recorded as every controller is. `edit()` takes a desk's edit by address as a message on a bus; `onControl()` tells each move, so the playback can pass that lane over (`desk-surface.ts`). |
 
-Tests: `test/desk-automation.test.js` and `test/desk-surface.test.js`, on a mixing desk, the stand-in for what's built in `libs/modular-audio/build/desk/mixing/test/built.js` and the desk library's small studio in `libs/modular-audio/plan/desk/test/desks.js`.
+Tests: `test/desk-automation.test.js` and `test/desk-surface.test.js`, on a mixing desk, the stand-in for what's built in `modular-audio/build/desk/mixing/test/built.js` and the desk library's small studio in `modular-audio/plan/desk/test/desks.js`.

@@ -1,4 +1,4 @@
-// The planner's unit tests (mockup/src/libs/modular-audio/plan/planner): templates made into plans.
+// The planner's unit tests (modular-audio/plan/planner): templates made into plans.
 //   - a template planned: its blocks' specs, values and settings as they start, its macros onto its children;
 //   - values and settings changed by address, a preset's; a template of templates; a pool's child ready;
 //   - a jack's channels as they come, by what's wired into it;

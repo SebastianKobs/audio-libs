@@ -1,7 +1,7 @@
 // ---------- view/tracks/dom/clip-tracks-view: the clip tracks drawn, a column each ----------
 // A section that folds, as the desk's do, a clip track a column, a chip a clip.
 // A chip lights while its clip sounds; a played track's chips have ▶ and ×.
-// Its clicks are handed to its model (libs/modular-audio/view/tracks/models/clip-tracks.ts).
+// Its clicks are handed to its model (modular-audio/view/tracks/models/clip-tracks.ts).
 import type { ClipTrack } from '../readout/index.ts';
 import type { ClipTracks, ShownClip } from '../models/index.ts';
 import type { Toggles } from '../../desk/models/index.ts';

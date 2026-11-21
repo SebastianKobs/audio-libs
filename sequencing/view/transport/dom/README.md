@@ -20,4 +20,4 @@ view.draw(); // each frame, as a key may play and stop it too
 | `new TransportLaneView({ lane, within, hints, send })`: `draw()` | The lane drawn at the top of the element it's handed. `draw()` lights ▶ and writes the position only as it changes (`transport-lane-view.ts`). |
 | `TransportHints` | The hints on ▶, ■ and the position, in the owner's words (`transport-lane-view.ts`). |
 
-Tests: none of its own; the end-to-end tests drive the lane (`mockup/test/e2e/page.spec.js`).
+Tests: none of its own; a project's end-to-end tests drive the lane.

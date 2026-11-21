@@ -1,4 +1,4 @@
-// An envelope in Web Audio (mockup/src/libs/modular-audio/build/web-audio/blocks/envelope.ts), on the stand-in:
+// An envelope in Web Audio (modular-audio/build/web-audio/blocks/envelope.ts), on the stand-in:
 //   - a constant source, started as it's built, silent until its gate opens;
 //   - its gate opened at a time: its curve drawn from 0 there, an ARP's (plan/blocks/envelope-curve.ts), by its amount;
 //   - closed: a gate's released from where it is then; a trigger's running on;

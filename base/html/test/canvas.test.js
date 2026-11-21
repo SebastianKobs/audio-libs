@@ -1,4 +1,4 @@
-// libs/base/html/canvas.ts: a canvas sized for the screen's pixels, so it's sharp on any screen,
+// base/html/canvas.ts: a canvas sized for the screen's pixels, so it's sharp on any screen,
 // its context drawing in CSS pixels
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

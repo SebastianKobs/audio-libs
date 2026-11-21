@@ -1,4 +1,4 @@
-// A file of instruments read (mockup/src/libs/modular-audio/plan/instrument/instruments-file.ts), in node, on a small file of the tests' own, its
+// A file of instruments read (modular-audio/plan/instrument/instruments-file.ts), in node, on a small file of the tests' own, its
 // instrument the tests' voice card (pluck.js):
 //   - each instrument a template of a voice card's form, its name its kind, one stereo output;
 //   - each patch a preset, by a name of its own, the instrument it plays its kind; each rack its pads;

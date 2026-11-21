@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/sequencer/playing: a pattern played: its events due on the grid, upcoming round its loop, whole, live at a speed, ----------
+// ---------- sequencing/sequencer/playing: a pattern played: its events due on the grid, upcoming round its loop, whole, live at a speed, ----------
 // under way, placed
 import { lengthOf } from './pattern.ts';
 import type { Pattern, PatternEvent } from './pattern.ts';

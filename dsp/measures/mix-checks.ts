@@ -1,4 +1,4 @@
-// ---------- libs/dsp/measures/mix-checks: what "not cheap" is measured by ----------
+// ---------- dsp/measures/mix-checks: what "not cheap" is measured by ----------
 // Three numbers a render is held to: what a mono sum loses, the spectrum's slope,
 // and whether two hits of one drum differ.
 // Fed Float32Arrays, they return a dB figure or a boolean; nothing here touches audio.

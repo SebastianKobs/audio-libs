@@ -1,5 +1,5 @@
-// A device's controls drawn (libs/modular-audio/view/device/dom/: knob-view.ts, meter-view.ts, device-view.ts, choice-view.ts),
-// as HTML, in node, on the device view models of the desk library's small studio (libs/modular-audio/plan/desk/test/desks.js)
+// A device's controls drawn (modular-audio/view/device/dom/: knob-view.ts, meter-view.ts, device-view.ts, choice-view.ts),
+// as HTML, in node, on the device view models of the desk library's small studio (modular-audio/plan/desk/test/desks.js)
 // and a delay's plan of the tests' own:
 //   - a knob: its label, its bar by its taper, a gain's unity marked, a pan's from its middle, its text; a live one
 //     marked with its address; a pan that does nothing;

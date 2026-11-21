@@ -1,4 +1,4 @@
-// The recording as data (mockup/src/libs/sequencing/midi-sequencer/recording-data.ts): the recorder's regions and lanes out as
+// The recording as data (sequencing/midi-sequencer/recording-data.ts): the recorder's regions and lanes out as
 // plain data, JSON-safe, and loaded back into another recorder, which keeps what the first kept
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

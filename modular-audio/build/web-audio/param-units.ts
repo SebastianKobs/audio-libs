@@ -1,4 +1,4 @@
-// ---------- libs/modular-audio/build/web-audio/param-units: a param in a plan's units, moving Web Audio's ----------
+// ---------- modular-audio/build/web-audio/param-units: a param in a plan's units, moving Web Audio's ----------
 // A node built from several of Web Audio's (a limiter, blocks/limiter.ts) has params in the plan's units, a gain in dB, a ceiling
 // in dBFS: each change to one moves the Web Audio params behind it, each by how a value in the plan's units becomes its own
 

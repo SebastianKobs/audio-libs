@@ -1,4 +1,4 @@
-// The true-peak meter's and limiter's unit tests (mockup/src/libs/dsp/true-peak/): the points between the samples
+// The true-peak meter's and limiter's unit tests (dsp/true-peak/): the points between the samples
 // counted on an upsampled copy, and a limiter that leaves none of them over its ceiling
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

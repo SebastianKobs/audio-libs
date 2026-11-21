@@ -1,6 +1,6 @@
 # base
 
-The libraries every other library may read, at the bottom of `libs/`. Part of [the libraries](../README.md).
+The libraries every other library may read, at the bottom of the libraries. Part of [the libraries](../README.md).
 
 - [`util/`](util/README.md): small helpers every library shares.
 - [`automation/`](automation/README.md): what a param is told as it plays.

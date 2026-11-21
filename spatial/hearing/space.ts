@@ -1,4 +1,4 @@
-// ---------- libs/spatial/hearing/space: where you listen, and the emitters it keeps, each heard from there ----------
+// ---------- spatial/hearing/space: where you listen, and the emitters it keeps, each heard from there ----------
 import { Emitter } from './emitter.ts';
 import type { EmitterOptions } from './emitter.ts';
 import { hearMax, hearing, moved } from './hearing.ts';

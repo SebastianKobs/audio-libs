@@ -1,5 +1,5 @@
-// ---------- libs/modular-audio/view/device/models: a plan's devices as view models, no DOM ----------
-// Handed a plan and its values through the plan's readout (libs/modular-audio/view/device/readout/), hands back
+// ---------- modular-audio/view/device/models: a plan's devices as view models, no DOM ----------
+// Handed a plan and its values through the plan's readout (modular-audio/view/device/readout/), hands back
 // what a device view shows and what it can do.
 // Its parts: see README.md.
 export { Choice } from './choice.ts';

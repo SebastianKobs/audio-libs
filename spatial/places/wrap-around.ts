@@ -1,4 +1,4 @@
-// ---------- libs/spatial/places/wrap-around: a world that wraps round, as a torus does: off one edge, in at the other ----------
+// ---------- spatial/places/wrap-around: a world that wraps round, as a torus does: off one edge, in at the other ----------
 // A size for each axis, read live, Infinity where it doesn't wrap
 // (a floor's x and z, never y).
 // The short way round from one place to another, and its distance.

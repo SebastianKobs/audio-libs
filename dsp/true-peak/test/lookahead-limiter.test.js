@@ -1,4 +1,4 @@
-// The lookahead limiter's unit tests (mockup/src/libs/dsp/true-peak/): a soft clip into a limiter looking ahead
+// The lookahead limiter's unit tests (dsp/true-peak/): a soft clip into a limiter looking ahead
 // 1.5 to 5 ms, run in the stream, a sample in and a sample out, its ceiling -1 dB true peak judged by the meter.
 // Fed Float32Arrays in blocks of 128 and its output read. Every reading is said in the test's output, so a miss
 // shows each beside what it should be.

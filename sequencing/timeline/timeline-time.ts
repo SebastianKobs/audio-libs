@@ -1,6 +1,6 @@
 // ---------- timeline/timeline-time: a time along the timeline, its holds taken out, and where playback starts ----------
 // Timeline time, as Web Animations names it: the time the timeline played, a stop's or a pause's holds taken out; a clock time to it
-// (toTimeline()) and back (fromTimeline()), the clock's TimeMap. The clock's song time is one (libs/sequencing/clock/, grid.song)
+// (toTimeline()) and back (fromTimeline()), the clock's TimeMap. The clock's song time is one (sequencing/clock/, grid.song)
 import type { TimeMap } from '../clock/index.ts';
 import type { Seconds } from '../../base/util/index.ts';
 

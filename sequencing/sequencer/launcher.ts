@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/sequencer/launcher: clips launched on tracks, their events handed on as they come due ----------
+// ---------- sequencing/sequencer/launcher: clips launched on tracks, their events handed on as they come due ----------
 // As Ableton's session view launches a clip: a pattern on a track, one a track.
 // A clip loops on the beat grid, or plays once from the next beat, its first event to its last.
 // Each 16th (step()): every clip's events due there handed on at the clock times they fall at,

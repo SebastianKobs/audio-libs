@@ -27,4 +27,4 @@ readout.roleOf(['osc 1', 'tune']); // { by: 'live' }, where no macro moves it
 | `Command` | What's done in a view, by address: a param's value, which its owner records through the sequencer and sets, or a setting's, which builds what's built again, not recorded (`plan.ts`). |
 | `new PresetReadout(owner)`: `plan`, `valueOf()`, `startOf()`, `roleOf()` | A plan's readout for a plan whose values a preset gives, as a patch gives its voice card's: each value the preset's, its start as it began. How it's set is its owner's word, else the macro that moves it, else live; it hears no sound, holds no copies and fills no slots (`preset.ts`). |
 
-Tests: none of its own, as types and a thin reader: the models' tests drive it (`libs/modular-audio/view/device/models/test/moves.test.js`).
+Tests: none of its own, as types and a thin reader: the models' tests drive it (`modular-audio/view/device/models/test/moves.test.js`).

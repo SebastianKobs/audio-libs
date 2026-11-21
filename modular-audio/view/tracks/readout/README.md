@@ -26,4 +26,4 @@ const tracks: TracksReadout = {
 | `DeclaredReadout` | What the desk declares, by a strip's name: `specOf()` a controller's range and taper, `isMidiDevice()` and `controllersOf()`, the strip's controllers in the order the sound goes through it (`arrangement.ts`). |
 | `ArrangementClock` | The clock as the arrangement reads it: the song time now (`songNow`), each 16th as it's scheduled (`onStep`) and the grid as it was heard, which lays a song time on it (`arrangement.ts`). |
 
-Tests: none, as types only: what answers them is tested in `libs/modular-audio/view/tracks/models/test/`.
+Tests: none, as types only: what answers them is tested in `modular-audio/view/tracks/models/test/`.

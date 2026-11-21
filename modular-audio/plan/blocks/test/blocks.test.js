@@ -1,4 +1,4 @@
-// The blocks' unit tests (mockup/src/libs/modular-audio/plan/blocks): the contract every builder meets.
+// The blocks' unit tests (modular-audio/plan/blocks): the contract every builder meets.
 //   - the twenty-six blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;

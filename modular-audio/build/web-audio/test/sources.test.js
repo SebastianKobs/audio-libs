@@ -1,4 +1,4 @@
-// Sources in Web Audio, started and stopped at their times (mockup/src/libs/modular-audio/build/web-audio), on the stand-in:
+// Sources in Web Audio, started and stopped at their times (modular-audio/build/web-audio), on the stand-in:
 //   - a plan's sources started as it's built; a pool's copy's at the time it's added, a free
 //     oscillator's as it's built, running free;
 //   - a source that isn't a node, one a processor is told of by message: started and stopped by its times as a node is;

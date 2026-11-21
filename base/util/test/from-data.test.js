@@ -1,4 +1,4 @@
-// Data read from a file, its shape checked (mockup/src/libs/base/util/from-data.ts): handed back as it is where it has the shape,
+// Data read from a file, its shape checked (base/util/from-data.ts): handed back as it is where it has the shape,
 // else refused, every problem said where it is, under the file's name and what it should have been
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

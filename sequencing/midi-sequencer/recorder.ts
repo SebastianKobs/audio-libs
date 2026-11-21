@@ -1,15 +1,15 @@
 // ---------- midi-sequencer/recorder: what was heard, kept as regions, the last 30 minutes of song time, for an arrangement to show ----------
-// As Ableton records the session into its arrangement (mockup/architecture/views.md): every play the stream carries, live or not,
+// As Ableton records the session into its arrangement: every play the stream carries, live or not,
 // into the region it's of (play.region), told apart by its element and its number, a region's number its
 // source's; a play with none, a region of its own; a launched clip's plays left out, as nothing a user launches is recorded. A region
 // runs from its first note to the end of its last; a held note open until its note off comes, a play of its own by the note's index, its
 // glides added to it; one still held as its element's next region begins, a held part's as its key changes, ends there and starts
 // again in the new region, as it sounds on. Kept for the last 30 minutes, in memory: a note ended before then let go, and a region with none.
 // In song time: the plays carry clock times, as they're scheduled, and each is turned into song time as it's heard, through the TimeMap it's
-// handed (libs/sequencing/clock/); so a hold, a stop's, leaves no gap, and everything it hands out or is asked, its regions, lanes, data and
+// handed (sequencing/clock/); so a hold, a stop's, leaves no gap, and everything it hands out or is asked, its regions, lanes, data and
 // the now it lets go by, is song time. The 30 minutes are 30 minutes of the music, not of the clock: a long stop doesn't spend them.
 // What moves as it's heard: a track's lanes (track-lanes.ts), a note's own (note-lanes.ts).
-// On the timeline (libs/sequencing/timeline/): each note an event with its own length or open until its note off, each lane's point one that
+// On the timeline (sequencing/timeline/): each note an event with its own length or open until its note off, each lane's point one that
 // holds until the next of its lane, kept for the 30 minutes, what's in effect kept; the regions and lanes the music's own views of them
 import { ALONG_THE_CLOCK, endOf, LATEST, Timeline, type TimedEvent } from '../timeline/index.ts';
 import type { TimeMap } from '../clock/index.ts';

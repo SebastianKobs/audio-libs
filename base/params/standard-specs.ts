@@ -1,4 +1,4 @@
-// ---------- libs/base/params/standard-specs: the standard controls' specs every module shares, each naming its own copy ----------
+// ---------- base/params/standard-specs: the standard controls' specs every module shares, each naming its own copy ----------
 // A desk's strip, an FX module and a synth's block declare these alike; each spreads one under its own name.
 import { frozen } from '../util/index.ts';
 import type { RangedSpec, ParamSpec } from './spec.ts';

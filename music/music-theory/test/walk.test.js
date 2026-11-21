@@ -1,4 +1,4 @@
-// A contour walked (mockup/src/libs/music/music-theory/walk.ts), a step at a time, from a root that moves
+// A contour walked (music/music-theory/walk.ts), a step at a time, from a root that moves
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { walkOn } from '../index.ts';

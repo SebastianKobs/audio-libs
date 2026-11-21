@@ -1,4 +1,4 @@
-// A patch planned from a file of instruments (mockup/src/libs/modular-audio/plan/instrument/patch-plans.ts), in node, on the tests' file
+// A patch planned from a file of instruments (modular-audio/plan/instrument/patch-plans.ts), in node, on the tests' file
 // (pluck.js):
 //   - the planner of its voice cards: the modules' templates and the file's own;
 //   - a patch's chains: the patch alone, or its rack's pads, each its key;

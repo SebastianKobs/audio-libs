@@ -1,4 +1,4 @@
-// The loudness meter's unit tests (mockup/src/libs/dsp/loudness/): an integrated loudness in LUFS after ITU-R
+// The loudness meter's unit tests (dsp/loudness/): an integrated loudness in LUFS after ITU-R
 // BS.1770-4, fed Float32Arrays, its number read. No audio in node; a level is compared as a number, never a buffer.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -1,4 +1,4 @@
-// What's built built again (mockup/src/libs/modular-audio/build/web-audio), on the stand-in for Web Audio:
+// What's built built again (modular-audio/build/web-audio), on the stand-in for Web Audio:
 //   - the new beside the old, the inputs moved over to it, the old let go once it has rung out;
 //   - the old faded where it makes sound of its own, the new faded in; one only processing left to ring out;
 //   - the values told and the copies added kept; a preset changing a setting, built again with it.

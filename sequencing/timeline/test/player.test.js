@@ -1,4 +1,4 @@
-// The timeline's player (mockup/src/libs/sequencing/timeline/), on events of their own, not notes: a hand's presses
+// The timeline's player (sequencing/timeline/), on events of their own, not notes: a hand's presses
 // played back, each its start, its pressure's points and its release, as a performer is told them; a pointer's tilt, events that hold
 // until the next of theirs, each told as it comes due, the one in effect where playback starts picked up from there
 import { test } from 'node:test';

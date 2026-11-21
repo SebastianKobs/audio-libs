@@ -1,4 +1,4 @@
-// The designed impulse's unit tests (mockup/src/libs/dsp/impulse/): a pre-delay, early taps, echoes growing denser,
+// The designed impulse's unit tests (dsp/impulse/): a pre-delay, early taps, echoes growing denser,
 // noise in three bands each with its own decay time, a seed a side. Fed a seeded random, its two arrays read as
 // numbers, never as buffers. Every reading said in the test's output, so a miss shows each beside what it should be.
 import { test } from 'node:test';

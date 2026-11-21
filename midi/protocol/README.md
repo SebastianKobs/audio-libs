@@ -1,6 +1,6 @@
 # midi/protocol
 
-MIDI 2.0's channel voice messages as values: the protocol alone, as a synth and a sequencer share it. The notes among them, each a fresh index, and what they're played into. So an instrument speaks MIDI without a sequencer. Pure: no Web Audio. Why the messages are MIDI 2.0's: `mockup/architecture/sequencer.md`.
+MIDI 2.0's channel voice messages as values: the protocol alone, as a synth and a sequencer share it. The notes among them, each a fresh index, and what they're played into. So an instrument speaks MIDI without a sequencer. Pure: no Web Audio. They're MIDI 2.0's, so any control surface, a MIDI keyboard among them, can play into a sequencer, and the stream carries what was sent.
 
 Depends on: `base/automation`, `base/util`.
 

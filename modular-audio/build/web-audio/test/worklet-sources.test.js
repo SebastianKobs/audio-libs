@@ -1,4 +1,4 @@
-// The worklet sources as the builder makes them (mockup/src/libs/modular-audio/build/web-audio/blocks/), on the stand-in for Web Audio:
+// The worklet sources as the builder makes them (modular-audio/build/web-audio/blocks/), on the stand-in for Web Audio:
 // the sync oscillator, the operators and phase distortion.
 //   - a worklet of its processor where the worklets have loaded: no input, one mono output, its params at their values, started
 //     and stopped by message as its copy's time and its silence say, none of them a node the builder disconnects;

@@ -1,4 +1,4 @@
-// ---------- libs/dsp/filters/saturating-filter: a filter that saturates and sings ----------
+// ---------- dsp/filters/saturating-filter: a filter that saturates and sings ----------
 import { windowedSinc } from './windowed-sinc.ts';
 
 /** What a block is rendered at: each param a number for the block, or an array a sample each (a-rate). */

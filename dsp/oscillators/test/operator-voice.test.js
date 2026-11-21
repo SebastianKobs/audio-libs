@@ -1,4 +1,4 @@
-// The operator voice's unit tests (mockup/src/libs/dsp/oscillators/): a phase-modulation voice of up to four operators with feedback,
+// The operator voice's unit tests (dsp/oscillators/): a phase-modulation voice of up to four operators with feedback,
 // eight waves, and the eight algorithms' routes. No audio: fed numbers and arrays, its output read. Every reading said in the test's
 // output, so a miss shows each beside what it should be.
 import { test } from 'node:test';

@@ -1,4 +1,4 @@
-// Runs one case of the gesture test vectors (shared/test-vectors/gestures/) through the gesture tracker, in the clock's fake mode, and
+// Runs one case of the gesture test vectors (test-vectors/gestures/) through the gesture tracker, in the clock's fake mode, and
 // returns the events it emitted. Used by the tracker's unit tests and by make-gesture-vectors.js, which writes the vectors.
 // A case: its settings, the screen's height, and its input, in order. Before each input, time runs on to its t in the clock's ticks: one
 // every 25 ms after the previous input, and one at the input's own time. Then the input is applied: down, move, up or cancel, or none, when

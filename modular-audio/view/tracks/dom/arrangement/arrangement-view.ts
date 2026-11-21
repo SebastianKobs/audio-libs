@@ -1,6 +1,6 @@
 // ---------- view/tracks/dom/arrangement/arrangement-view: the arrangement on the page, what was heard laid out in time ----------
-// As Ableton's arrangement (mockup/architecture/views.md): the names in the page, the time on a
-// canvas, both from its model (libs/modular-audio/view/tracks/models/arrangement/), which keeps the rows, the regions,
+// As Ableton's arrangement: the names in the page, the time on a
+// canvas, both from its model (modular-audio/view/tracks/models/arrangement/), which keeps the rows, the regions,
 // the time in view and the playhead.
 // Here:
 //   - the page's parts, shown or hidden;

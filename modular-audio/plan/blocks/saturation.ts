@@ -2,7 +2,7 @@
 // The Drive's heart: its style's color before, the drive a gain into a knee fixed at full scale, the curve, a DC block,
 // the style's color after, the auto gain.
 // Its drive a share shown in dB, 0 to +36; punish +20 dB on top, for a quiet sound to get past the knee; its style a curve and
-// its colors (libs/dsp/saturation/); auto how much of the level the drive adds is taken back, 1 all of it against a sine at
+// its colors (dsp/saturation/); auto how much of the level the drive adds is taken back, 1 all of it against a sine at
 // -18 dBFS, 0 none; its oversampling against the harmonics folding back, none the grit option.
 // Auto follows the drive through a curve, no straight line: no macro can map it, so it's the block's own.
 import type { ParamSpecs } from '../../../base/params/index.ts';

@@ -1,6 +1,6 @@
-// The spatial part's unit tests (mockup/src/libs/spatial/places), on places written by
+// The spatial part's unit tests (spatial/places), on places written by
 // hand, perceived as nothing but a distance: a place with a lifetime, perceived from a listener as it moves, its moves from a time on, and
-// what follows them; a world that wraps round. What the sound makes of them is the hearing's (libs/spatial/hearing/)
+// what follows them; a world that wraps round. What the sound makes of them is the hearing's (spatial/hearing/)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Place, Places, WrapAround, shifted } from '../index.ts';

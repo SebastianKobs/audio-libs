@@ -1,7 +1,7 @@
 // ---------- plan/blocks/crusher: a bit and sample-rate reducer ----------
 // Its bits, the steps each sample is rounded to, fractions between: 16 near clean, 4 a grit.
 // Its rate, how often a sample is taken and held, in Hz: the sampler's aliasing, an SP-1200's at 26 kHz, a toy's at 4 kHz.
-// Its dsp is libs/dsp/crusher/; a builder runs it in a processor.
+// Its dsp is dsp/crusher/; a builder runs it in a processor.
 import type { ParamSpecs } from '../../../base/params/index.ts';
 import type { Block } from './block.ts';
 

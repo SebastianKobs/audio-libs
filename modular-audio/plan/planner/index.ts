@@ -3,7 +3,7 @@
 // an editor among them, never by a builder or a view.
 // Its parts:
 //   - template.ts: a composite's description, written short, and a preset on one, either read
-//     from data, its shape checked (libs/base/util/'s fromData()); extend.ts, a template built on
+//     from data, its shape checked (base/util/'s fromData()); extend.ts, a template built on
 //     another, merged; presets.ts, a child written with a preset;
 //   - planner.ts: the planner, handed the templates once, a plan for any of them;
 //   - check.ts: a template checked well-formed as it's handed in, then held to its form, every failure said;

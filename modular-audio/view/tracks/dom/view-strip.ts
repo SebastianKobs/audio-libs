@@ -4,7 +4,7 @@ import type { ArrangementView } from './arrangement/arrangement-view.ts';
 import { makeElement } from '../../../../base/html/index.ts';
 
 // The session view and the arrangement drawn, as Ableton's two views, from which one is open
-// (Views, libs/modular-audio/view/tracks/models/views.ts):
+// (Views, modular-audio/view/tracks/models/views.ts):
 //   - one open at a time, in the one strip along the bottom, shown while either is open;
 //   - drawn again as which one is open changes.
 // The strip (strip): the session view's sections in one row (flow), as the sound flows, then

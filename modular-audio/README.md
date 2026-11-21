@@ -27,9 +27,9 @@ A sound as data (`plan/`), built (`build/`) and shown (`view/`), as a modular st
 - [`view/tracks/models`](view/tracks/models/README.md): their view models.
 - [`view/tracks/dom`](view/tracks/dom/README.md): the session view and the arrangement drawn.
 
-`tracks` is here, not in `libs/sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
+`tracks` is here, not in `sequencing/`: it draws the desk's strips and the device view's inserts, and its lanes are named by the desk's addresses.
 
-Reads: `libs/base/` (`util`, `params`, `automation`, `html`); of `libs/dsp/`, `saturation` (`plan/blocks`, `build/web-audio`, `view/device/models`), `filters` and `measures` (`build/web-audio`) and `true-peak` (`build/web-audio`); of `libs/sequencing/` only `clock` (`build/web-audio-engine`, `build/instrument`, `build/desk/automation`, `view/tracks`); `libs/midi/protocol/` (`build/instrument`, `build/desk/automation`); `libs/music/music-theory/` (`build/instrument`). Nothing of `libs/spatial/`.
+Reads: `base/` (`util`, `params`, `automation`, `html`); of `dsp/`, `saturation` (`plan/blocks`, `build/web-audio`, `view/device/models`), `filters` and `measures` (`build/web-audio`) and `true-peak` (`build/web-audio`); of `sequencing/` only `clock` (`build/web-audio-engine`, `build/instrument`, `build/desk/automation`, `view/tracks`); `midi/protocol/` (`build/instrument`, `build/desk/automation`); `music/music-theory/` (`build/instrument`). Nothing of `spatial/`.
 
 ## The words
 
@@ -58,7 +58,7 @@ A sound is data until it's built, and built only by a builder:
 5. **Powered** (`build/web-audio-engine`): the audio context started on a first touch, what's built built into an output that fades in, the clock on the audio's time.
 6. **Played by notes** (`build/instrument`): MIDI's notes played into an instrument on what's built, a voice a pool's copy, a sound module an instrument for each patch, any number of tracks playing into it by an input of its own. A patch's value is set on its bank at its time (`InstrumentAutomation`), and moved by hand as a controller on its own track (`InstrumentSurface`).
 7. **Mixed** (`build/desk/mixing`, `build/desk/automation`): a desk built, set by address, its mute and solo; a track's channel and its way in. The desk's automation is fitted to it: a strip's controllers set on time (`DeskAutomation`), a move by hand played in as a controller on the strip's track (`DeskSurface`).
-8. **Patched** (`app/`'s wiring): a track's notes into its role's instrument by an input of its own, each voice into the track's channel, its controllers onto its strip.
+8. **Patched** (a project's wiring, in the app): a track's notes into its role's instrument by an input of its own, each voice into the track's channel, its controllers onto its strip.
 
 Beside it, `spatial/hearing` hears a place from where you listen and hands on what it hears as values: a track's controllers, a strip's, a note's own. The notes come through `sequencing/midi-sequencer` (its input plays the instruments and records what's heard), from a control surface, a clip (`sequencing/clip-player`) or a recording played back.
 
@@ -70,7 +70,7 @@ Only two kinds of library touch a platform, each an edge: `build/web-audio` and 
 
 ## Units at the edges
 
-Inside, a plan's values are in the units their params declare; MIDI's integers belong to the edges. The units and where each edge converts are in [`mockup/architecture/instruments.md`](../../../architecture/instruments.md)'s Units rows.
+Inside, a plan's values are in the units their params declare; MIDI's integers belong to the edges. A plan's values are Web Audio's physical units: seconds, hertz, cents, a pan from −1 to 1, a gain as a share, shown in dB by the fader law; the builder turns them into Web Audio's own. At the edges the messages (`midi/protocol`) carry a velocity and a controller's value from 0 to 1 and a note's pitch as its note number: a velocity of 1 to 127 is `v / 127`, a pan (CC 10) is `(max(cc, 1) − 64) / 63`, MIDI's equal-power curve on Web Audio's panner.
 
 ## Sends are taken after the pan
 

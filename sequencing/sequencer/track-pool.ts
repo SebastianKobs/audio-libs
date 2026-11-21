@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/sequencer/track-pool: overlapping plays shared out over tracks ----------
+// ---------- sequencing/sequencer/track-pool: overlapping plays shared out over tracks ----------
 // Pure. Times are the caller's. Works as a polysynth shares out its voices.
 // A track holds one play at a time, until the play's tail has died away,
 // so a play never cuts off another's tail.

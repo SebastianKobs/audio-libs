@@ -1,4 +1,4 @@
-// ---------- libs/dsp/saturation/shaper-curve: a waveshaper's curve, from its drive and its shape ----------
+// ---------- dsp/saturation/shaper-curve: a waveshaper's curve, from its drive and its shape ----------
 // y = sat(drive · x) / drive, sat(u) = u / (1 + |u|^k)^(1/k).
 // A quiet sound passes at unity. A loud one is bent from its knee at 1 / drive of full scale.
 // It never comes out louder than it went in: headroom is kept, however hard it's driven.

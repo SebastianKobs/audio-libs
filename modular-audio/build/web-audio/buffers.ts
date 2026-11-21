@@ -1,10 +1,10 @@
-// ---------- libs/modular-audio/build/web-audio/buffers: the buffers a noise, a reverb or a room plays, their samples ----------
+// ---------- modular-audio/build/web-audio/buffers: the buffers a noise, a reverb or a room plays, their samples ----------
 // Their samples are pure, one array a channel, made with rand() (Math.random, or a seeded one in tests).
 // Each buffer is made once, when it's first asked for (Buffers).
 // noise: so many seconds of white noise, one channel (a noise block's 'noise', 2 s, and 'breath', 0.2 s).
 // impulse: a reverb's impulse response, two channels of noise that darkens as it decays: a lowpass on it closes over its length, and
 // it fades as (1 − t)^2.5
-// room: a room's impulse by its design (libs/dsp/impulse/), made once for each design.
+// room: a room's impulse by its design (dsp/impulse/), made once for each design.
 
 import { designedImpulse, type ImpulseDesign } from '../../../dsp/impulse/index.ts';
 

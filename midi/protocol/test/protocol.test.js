@@ -1,6 +1,6 @@
-// MIDI's protocol (mockup/src/libs/midi/protocol/): a note's index handed out by note rotation, and
+// MIDI's protocol (midi/protocol/): a note's index handed out by note rotation, and
 // MIDI 2.0's note messages as values, a note's messages and the note they read back as.
-// The sequencer's input, which passes them on, is tested in libs/sequencing/midi-sequencer/test/input.test.js
+// The sequencer's input, which passes them on, is tested in sequencing/midi-sequencer/test/input.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { NoteRotation, noteMessages, notesIn, retimed } from '../index.ts';

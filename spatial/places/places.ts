@@ -1,4 +1,4 @@
-// ---------- libs/spatial/places/places: the places a listener follows, each let go once past its time ----------
+// ---------- spatial/places/places: the places a listener follows, each let go once past its time ----------
 // Generic, the spatial part's. The live list (all), the same array for as long as it runs, of anything with a place (Placed): each
 // told what its place is perceived as now, when that has changed enough (perceivedAs()), and let go once past its time (letGo()).
 // place() makes a place perceived as its user asks (Perceiving); add() puts what has it on the list. update(t) on every tick; shift()

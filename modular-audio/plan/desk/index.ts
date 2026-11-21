@@ -10,7 +10,7 @@
 //   - desk.ts: a desk written short, its channels and pools, read from data;
 //   - desk-templates.ts: a desk written short, made into templates;
 //   - mute-solo.ts: which channels a mute or a solo silences, over a plan's wires;
-// A channel's own params, as a strip's, are libs/base/params/'s (STRIP_PARAMS, SEND_PARAM).
+// A channel's own params, as a strip's, are base/params/'s (STRIP_PARAMS, SEND_PARAM).
 import { CHANNEL_FORM } from './channel-form.ts';
 import { DESK_FORM } from './desk-form.ts';
 import { frozen } from '../../../base/util/index.ts';

@@ -1,6 +1,6 @@
 # sequencing/midi-sequencer
 
-The MIDI sequencer: the input a control surface plays into, which alone plays the instruments; the stream every play goes through; the recorder, what's heard kept as regions and lanes; and the recording player. Its messages are MIDI 2.0's channel voice messages as values, each note a fresh index. Pure: no Web Audio. Why it's built so: `mockup/architecture/sequencer.md`.
+The MIDI sequencer: the input a control surface plays into, which alone plays the instruments; the stream every play goes through; the recorder, what's heard kept as regions and lanes; and the recording player. Its messages are MIDI 2.0's channel voice messages as values, each note a fresh index. Pure: no Web Audio. One stream carries everything heard, a player's own playing as it's played too, so the recorder listens to it without rework.
 
 Depends on: `base/automation`, `base/util`, `midi/protocol`, `sequencing/clock`, `sequencing/sequencer`, `sequencing/timeline`.
 

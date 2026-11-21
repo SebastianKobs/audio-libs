@@ -1,4 +1,4 @@
-// ---------- libs/dsp/saturation: curves a waveshaper reads, and a drive's styles (its entry) ----------
+// ---------- dsp/saturation: curves a waveshaper reads, and a drive's styles (its entry) ----------
 // Its parts:
 //   - shaper-curve.ts: a curve from a drive and a shape;
 //   - drive-curve.ts: a drive's styles, their curves and the auto gain after them;

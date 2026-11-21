@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/grains: grains in Web Audio ----------
-// A worklet of its processor (processors/grains-processor.ts, the kernel of libs/dsp/grains/): its six params its AudioParams,
+// A worklet of its processor (processors/grains-processor.ts, the kernel of dsp/grains/): its six params its AudioParams,
 // set, automated and cabled into as any. It's handed what it keeps, the block's GRAINS_MEMORY seconds,
 // and a seed drawn once from the builder's random: one seed, one cloud.
 // Where its worklet isn't loaded: nothing stands for it, a placeholder passes the sound through.

@@ -1,4 +1,4 @@
-// The recorder (mockup/src/libs/sequencing/midi-sequencer/recorder.ts): every play the stream carries kept as the
+// The recorder (sequencing/midi-sequencer/recorder.ts): every play the stream carries kept as the
 // region it's of, and what moves as it's heard as lanes, for the last 30 minutes; the timeline keeps and thins them
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

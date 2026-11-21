@@ -1,4 +1,4 @@
-// Where each 16th fell (mockup/src/libs/sequencing/clock/grid-map.ts): a song time's place on the grid as it was
+// Where each 16th fell (sequencing/clock/grid-map.ts): a song time's place on the grid as it was
 // heard, the tempo as it was then, and back; a hold where no 16th fell taking no room, as song time has it out;
 // the 16ths skipped as the ticks lag counted; a locate, a jump in song time, kept apart: nothing stretched over it;
 // the grid held, the present standing still.

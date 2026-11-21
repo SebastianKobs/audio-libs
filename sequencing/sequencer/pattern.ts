@@ -1,4 +1,4 @@
-// ---------- libs/sequencing/sequencer/pattern: a pattern of events, as a clip, and its ticks: its length, a record as a pattern, a bank's patterns and their cycle ----------
+// ---------- sequencing/sequencer/pattern: a pattern of events, as a clip, and its ticks: its length, a record as a pattern, a bank's patterns and their cycle ----------
 import { barTicks, COMMON_TIME, type Meter, type Ticks } from '../clock/index.ts';
 
 // an event of a pattern: where it starts and how long it lasts, in ticks, and how far off its 16th it falls, as due() hands it on; and

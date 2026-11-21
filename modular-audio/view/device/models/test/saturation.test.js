@@ -1,4 +1,4 @@
-// A saturation's curve as a view draws it (mockup/src/libs/modular-audio/view/device/models/saturation.ts), from its knobs and its
+// A saturation's curve as a view draws it (modular-audio/view/device/models/saturation.ts), from its knobs and its
 // style as they're set: what the sound comes out at across its input, -1 to 1, its curve driven, its level taken back.
 // And each of the Drive's blocks a device of its own: a knob for each ranged param, a choice for each with choices, in its block's order.
 import { test } from 'node:test';

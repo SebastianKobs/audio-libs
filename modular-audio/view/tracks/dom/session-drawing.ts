@@ -1,4 +1,4 @@
-// ---------- libs/modular-audio/view/tracks/dom/session-drawing: when the session view is drawn ----------
+// ---------- modular-audio/view/tracks/dom/session-drawing: when the session view is drawn ----------
 // What it draws is its drawers': the clip tracks', the desk's, the device view's.
 // What it shows of the session is its models': what the stream played (Session), the groups of
 // tracks and what sounded (SessionTracks).

@@ -1,6 +1,6 @@
 // ---------- view/device/dom/meter-view: a level bar, and where a level shows on it ----------
 // What a view draws of a meter; the sound system measures its peaks without them (the
-// builder's meter, libs/modular-audio/build/web-audio/), its fall a model's (libs/modular-audio/view/device/models/meters.ts).
+// builder's meter, modular-audio/build/web-audio/), its fall a model's (modular-audio/view/device/models/meters.ts).
 // A strip's bar, and the limiter's history.
 import { clamp01 } from '../../../../base/util/index.ts';
 import { dBOf } from '../../../../base/params/index.ts';

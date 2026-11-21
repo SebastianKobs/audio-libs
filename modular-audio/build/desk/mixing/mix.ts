@@ -8,7 +8,7 @@ import type { DeskBuilt, DeskState } from './desk-state.ts';
 // whichever play lands on them:
 //   - a mute takes along what feeds the strip muted, its sends among them;
 //   - a solo keeps what a soloed strip needs to be heard, its way out and what feeds it;
-//     it never silences an FX bus (libs/modular-audio/plan/desk/'s silenced());
+//     it never silences an FX bus (modular-audio/plan/desk/'s silenced());
 //   - what's silenced is cut on its channel (its cut's gain), a track's channel as it's
 //     added.
 // A strip's other controls are the desk's (desk-changes.ts).

@@ -1,4 +1,4 @@
-// ---------- libs/dsp/saturation/drive-colors: each drive style's color, before its curve and after it ----------
+// ---------- dsp/saturation/drive-colors: each drive style's color, before its curve and after it ----------
 // Before: what it feeds the curve fuller, so that part breaks up first.
 // After: what it rounds off, the DC block between.
 // The numbers are starting points, estimates; EQ gains in dB, as a BiquadFilterNode takes them.

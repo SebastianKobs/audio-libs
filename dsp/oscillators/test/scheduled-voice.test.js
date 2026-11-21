@@ -1,4 +1,4 @@
-// The scheduled voice's unit tests (mockup/src/libs/dsp/oscillators/): a voice made a source, told its start and its stop by message
+// The scheduled voice's unit tests (dsp/oscillators/): a voice made a source, told its start and its stop by message
 // in the context's seconds: silent before its start, sounding from its first frame, silent and let go once stopped. No audio:
 // fed blocks of Float32Arrays, its output read.
 import { test } from 'node:test';

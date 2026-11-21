@@ -1,4 +1,4 @@
-// ---------- libs/dsp/measures/lag: how late a click comes back, in samples ----------
+// ---------- dsp/measures/lag: how late a click comes back, in samples ----------
 // An oversampled WaveShaper holds its sound back by its resampling filters.
 // No spec fixes the amount (Chromium 128 samples at 2x, 192 at 4x; Firefox 8).
 // It is measured by a click rendered through it, so a dry path can be held back to match.

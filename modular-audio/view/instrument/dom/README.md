@@ -27,4 +27,4 @@ const devices = new InstrumentDevices({
 | `new InstrumentDevices({ racks, look, head, shown })`: `fill()`, `head()` | Each role's instrument as a device, a chain of the device view's: its bar, the test note's button held as long as it is, its reset, a tab for each pad of a drum rack, the card's face and matrix. `shown()` is told which instruments are shown each time one is, to gray what none of them reads (`instrument-devices.ts`). |
 | `InstrumentLook` | How an instrument is shown, in its owner's words: the title of its own group, its modules' groups by role, the test note's button and the reset, each its label and hint (`instrument-devices.ts`). |
 
-Tests: none of its own; the end-to-end tests drive the device view (`mockup/test/e2e/device-view.spec.js`).
+Tests: none of its own; a project's end-to-end tests drive the device view.

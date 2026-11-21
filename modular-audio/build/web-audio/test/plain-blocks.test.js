@@ -1,4 +1,4 @@
-// The plain Web Audio blocks as the builder makes them (mockup/src/libs/modular-audio/build/web-audio/blocks/), on the stand-in
+// The plain Web Audio blocks as the builder makes them (modular-audio/build/web-audio/blocks/), on the stand-in
 // for Web Audio:
 //   - a shaper, a WaveShaper whose curve is made again as its drive and shape are told;
 //   - an eq band, one biquad of its type, a highpass's Q told in dB;

@@ -1,5 +1,5 @@
-// A knob's rings drawn (libs/modular-audio/view/device/dom/knob-view.ts), as HTML, in node, on the view models' voice card
-// of the tests' own (libs/modular-audio/view/device/models/test/card.js): under its bar, a ring for each source that moves it.
+// A knob's rings drawn (modular-audio/view/device/dom/knob-view.ts), as HTML, in node, on the view models' voice card
+// of the tests' own (modular-audio/view/device/models/test/card.js): under its bar, a ring for each source that moves it.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { knobHtml } from '../index.ts';

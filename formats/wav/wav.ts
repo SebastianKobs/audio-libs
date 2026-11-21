@@ -1,4 +1,4 @@
-// ---------- libs/formats/wav: float channels to a 16-bit PCM WAV file's bytes, TPDF-dithered ----------
+// ---------- formats/wav: float channels to a 16-bit PCM WAV file's bytes, TPDF-dithered ----------
 
 /** What a file is made from: its channels (floats, full scale ±1), their rate and the draws for the dither. */
 export interface WavSetup {

@@ -1,5 +1,5 @@
-// A matrix drawn (libs/modular-audio/view/device/dom/matrix-view.ts), as HTML, in node, on the view models' voice card of
-// the tests' own (libs/modular-audio/view/device/models/test/card.js): a row a source and what it moves, how much: a macro's
+// A matrix drawn (modular-audio/view/device/dom/matrix-view.ts), as HTML, in node, on the view models' voice card of
+// the tests' own (modular-audio/view/device/models/test/card.js): a row a source and what it moves, how much: a macro's
 // map as text, a modulator's reach a knob of its own.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

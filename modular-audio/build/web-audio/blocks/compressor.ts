@@ -1,7 +1,7 @@
 // ---------- build/web-audio/blocks/compressor: a compressor in Web Audio ----------
 // One DynamicsCompressorNode into a gain (back) that takes the node's make-up back, so a quiet sound passes at its level;
 // the limiter does the same, for a hard knee.
-// The make-up is worked out from the three params that set it (libs/dsp/dynamics/), so each of them holds its value and
+// The make-up is worked out from the three params that set it (dsp/dynamics/), so each of them holds its value and
 // tells the node's param and back the same way, set, ramped or glided.
 import { gainOf } from '../../../../base/params/index.ts';
 import { compressorMakeup, type CompressorSettings } from '../../../../dsp/dynamics/index.ts';

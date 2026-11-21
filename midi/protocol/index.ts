@@ -1,4 +1,4 @@
-// ---------- libs/midi/protocol: MIDI 2.0's channel voice messages as values, its entry ----------
+// ---------- midi/protocol: MIDI 2.0's channel voice messages as values, its entry ----------
 // The protocol alone, as a synth and a sequencer share it and nothing else: the messages and the notes among them (messages.ts), each
 // note a fresh index (rotation.ts), and what they're played into (receiver.ts). Apart from the MIDI sequencer, so an instrument speaks
 // MIDI without a sequencer

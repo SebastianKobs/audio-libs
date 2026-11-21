@@ -1,4 +1,4 @@
-// ---------- libs/dsp/crusher/crusher: a bit and sample-rate reducer, on sample arrays ----------
+// ---------- dsp/crusher/crusher: a bit and sample-rate reducer, on sample arrays ----------
 
 /** What a channel carries from one block to the next: where its rate's phase is, and the sample it holds. */
 export interface CrusherState {

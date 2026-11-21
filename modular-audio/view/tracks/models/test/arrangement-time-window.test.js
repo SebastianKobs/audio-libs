@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/time-window.ts: the time in view, in 16ths, as
+// modular-audio/view/tracks/models/arrangement/time-window.ts: the time in view, in 16ths, as
 // Arrangement.frame() and scrollBy() move it: following the present or the playhead, or scrolled back.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

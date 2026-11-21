@@ -1,4 +1,4 @@
-// ---------- libs/dsp/true-peak: the true peak of channels, the points between the samples counted ----------
+// ---------- dsp/true-peak: the true peak of channels, the points between the samples counted ----------
 import { betweenSamplePeaks } from './oversampling.ts';
 
 const DEFAULT_OVERSAMPLING = 8; // BS.1770 asks for 4 at least, which can under-read by a fraction of a dB

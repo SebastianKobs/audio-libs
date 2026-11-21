@@ -1,4 +1,4 @@
-// An instrument, a preset's changes and a live bank (mockup/src/libs/modular-audio/plan/instrument), in node, on the tests' voice card (pluck.js):
+// An instrument, a preset's changes and a live bank (modular-audio/plan/instrument), in node, on the tests' voice card (pluck.js):
 //   - an instrument of one patch: a pool of voices, each a copy of its voice card, the patch's preset on its
 //     architecture; the note's addresses its sources' macros; of the instrument's form;
 //   - a drum rack: a pool for each pad, played by its key, each its own patch;

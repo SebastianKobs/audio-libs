@@ -1,4 +1,4 @@
-// ---------- libs/dsp/true-peak: a soft clip into a limiter that looks ahead, run in the stream ----------
+// ---------- dsp/true-peak: a soft clip into a limiter that looks ahead, run in the stream ----------
 import { INTERPOLATION_REACH, interpolationKernels, loudestPointIn } from './oversampling.ts';
 
 /** What a lookahead limiter is made with. */

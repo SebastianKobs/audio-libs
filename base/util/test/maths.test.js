@@ -1,4 +1,4 @@
-// libs/base/util/maths.ts: a value clamped, eased, approaching a target or stepped toward it,
+// base/util/maths.ts: a value clamped, eased, approaching a target or stepped toward it,
 // and an angle or a place wrapped, as each is promised to every package
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

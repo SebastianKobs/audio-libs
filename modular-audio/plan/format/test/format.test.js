@@ -1,4 +1,4 @@
-// The plan format's unit tests (mockup/src/libs/modular-audio/plan/format):
+// The plan format's unit tests (modular-audio/plan/format):
 //   - a stored plan's version: this format's, or refused, naming what was found;
 //   - a node, a param or a setting found by its address;
 //   - a macro's value onto its targets; a pool's copies, their names and their wires;

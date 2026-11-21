@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/lane-shapes.ts: a lane's line as Web Audio plays its
+// modular-audio/view/tracks/models/arrangement/lane-shapes.ts: a lane's line as Web Audio plays its
 // points, a jump a step, a glide setTargetAtTime's curve
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

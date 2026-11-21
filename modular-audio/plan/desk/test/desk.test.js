@@ -1,4 +1,4 @@
-// The desk's unit tests (mockup/src/libs/modular-audio/plan/desk): a desk written short made into templates of its forms.
+// The desk's unit tests (modular-audio/plan/desk): a desk written short made into templates of its forms.
 //   - a channel of the channel's form: its inserts, mute, fader, pan and sends, wired in that order; its own params;
 //   - the master: its inserts and its fader alone;
 //   - a send for each return before a channel, none that feeds it, its tap post unless said;

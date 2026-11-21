@@ -1,4 +1,4 @@
-// The biquad kernel's unit tests (mockup/src/libs/dsp/filters/): a second-order filter run over samples, into a new
+// The biquad kernel's unit tests (dsp/filters/): a second-order filter run over samples, into a new
 // array or in place, its state kept in doubles. Fed short arrays whose output follows from the difference equation.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

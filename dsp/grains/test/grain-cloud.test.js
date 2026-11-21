@@ -1,4 +1,4 @@
-// The grain cloud's unit tests (mockup/src/libs/dsp/grains/): an input kept in a ring and played back as short overlapping grains,
+// The grain cloud's unit tests (dsp/grains/): an input kept in a ring and played back as short overlapping grains,
 // frozen or listening, pitched, strayed by a random handed in. No audio: fed Float32Arrays, its output read.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

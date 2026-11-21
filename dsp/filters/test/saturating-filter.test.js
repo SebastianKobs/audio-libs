@@ -1,4 +1,4 @@
-// The saturating filter's unit tests (mockup/src/libs/dsp/filters/): a ladder (24 dB) and a state-variable (12 dB) with a soft clip
+// The saturating filter's unit tests (dsp/filters/): a ladder (24 dB) and a state-variable (12 dB) with a soft clip
 // in the loop, oversampled 2x, singing from its own noise; and the filter a channel, let go once told to stop. No audio: fed
 // Float32Arrays, its output read. Every reading said in the test's output, so a miss shows each beside what it should be.
 import { test } from 'node:test';

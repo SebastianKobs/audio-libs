@@ -1,6 +1,6 @@
 // ---------- plan/blocks/saturating-filter: a filter that saturates and sings ----------
 // A ladder (24 dB) or a state-variable (12 dB: lowpass, bandpass, highpass) with a tanh where its input meets its feedback
-// (its dsp is libs/dsp/filters/saturating-filter.ts, run by a builder in a processor).
+// (its dsp is dsp/filters/saturating-filter.ts, run by a builder in a processor).
 // Its resonance 0 to 1, not the library filter's Q: past 0.909 it sings out of nothing, a sine at its cutoff,
 // its level held by the clip. Its drive pushes the sound into the clip and takes it back,
 // its compensation gives the ladder's thinned lows back as the resonance rises.

@@ -15,4 +15,4 @@ Signal processing on sample arrays, free of any audio API. Part of [the librarie
 - [`oscillators/`](oscillators/README.md): oscillator voices rendered sample by sample, hard sync, phase modulation and phase distortion, and a way to start and stop one.
 - [`true-peak/`](true-peak/README.md): a true-peak meter and a limiter that keeps every point of the wave under a ceiling.
 
-Reads: `libs/base/util/` alone, for `impulse/`'s seeded random, and in `grains/`'s tests. Inside the group, `loudness/`, `impulse/` and `true-peak/` read `filters/`; `impulse/` reads `measures/` and `true-peak/` reads `loudness/`, both in their tests.
+Reads: `base/util/` alone, for `impulse/`'s seeded random, and in `grains/`'s tests. Inside the group, `loudness/`, `impulse/` and `true-peak/` read `filters/`; `impulse/` reads `measures/` and `true-peak/` reads `loudness/`, both in their tests.

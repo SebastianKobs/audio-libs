@@ -1,5 +1,5 @@
-// The desk as it plays (libs/modular-audio/build/desk/mixing/mixing-desk.ts), on a stand-in for what's built (test/built.js) and the desk
-// library's small studio (libs/modular-audio/plan/desk/test/desks.js):
+// The desk as it plays (modular-audio/build/desk/mixing/mixing-desk.ts), on a stand-in for what's built (test/built.js) and the desk
+// library's small studio (modular-audio/plan/desk/test/desks.js):
 //   - built from its plan by the function handed in, the settings changed before in it; a way into each of its own inputs;
 //     the values set before told it;
 //   - a track's channel, its pool's copy, added the first time it's asked for once built, what was set on it before told;

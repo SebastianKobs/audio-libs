@@ -1,4 +1,4 @@
-// What moves each param, as a mod matrix shows it (libs/modular-audio/view/device/models/: device.ts's moves, knob.ts's rings, view-builder.ts's matrix and groups), on a voice card of the tests' own:
+// What moves each param, as a mod matrix shows it (modular-audio/view/device/models/: device.ts's moves, knob.ts's rings, view-builder.ts's matrix and groups), on a voice card of the tests' own:
 //   - a macro's maps: each target it moves, by its factor and offset, within its range's ends;
 //   - a child wired into a param: a modulator moving it, as CV, its reach its own amount where it has one;
 //   - a knob's rings: the range each moves it through, where it lies on its control by its taper;

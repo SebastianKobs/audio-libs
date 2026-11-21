@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators: oscillator voices rendered sample by sample, and a way to start and stop one (its entry) ----------
+// ---------- dsp/oscillators: oscillator voices rendered sample by sample, and a way to start and stop one (its entry) ----------
 // Its parts:
 //   - voice.ts: what a voice is handed, `VoiceParams`, and the numbers they all read;
 //   - sync-voice.ts: a slave oscillator reset by a master;

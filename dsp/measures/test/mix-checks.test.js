@@ -1,4 +1,4 @@
-// The mix checks' unit tests (mockup/src/libs/dsp/measures/): what's lost in the mono sum, the spectrum's slope,
+// The mix checks' unit tests (dsp/measures/): what's lost in the mono sum, the spectrum's slope,
 // whether two hits of a drum differ. Fed Float32Arrays, read as numbers and booleans, never a buffer.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

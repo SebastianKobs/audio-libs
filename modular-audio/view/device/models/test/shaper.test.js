@@ -1,4 +1,4 @@
-// A shaper's curve as a view draws it (mockup/src/libs/modular-audio/view/device/models/shaper.ts), from its knobs as they're set:
+// A shaper's curve as a view draws it (modular-audio/view/device/models/shaper.ts), from its knobs as they're set:
 // what the sound comes out at across its input, -1 to 1, bent as it's driven.
 // And each of the plain blocks a device of its own: a knob for each ranged param, a choice for each with choices, in its block's order.
 import { test } from 'node:test';

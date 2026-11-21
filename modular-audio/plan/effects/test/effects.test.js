@@ -1,4 +1,4 @@
-// The effects' unit tests (mockup/src/libs/modular-audio/plan/effects): each a template, as its YAML writes it.
+// The effects' unit tests (modular-audio/plan/effects): each a template, as its YAML writes it.
 //   - every effect, each of the effect's form, one input and one output, its label where it has one, planned with no failure;
 //     the Tape delay the Delay's;
 //   - their params macros by the names a desk keys them, the Utility's level the fader's;

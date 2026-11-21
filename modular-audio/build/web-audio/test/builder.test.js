@@ -1,4 +1,4 @@
-// The Web Audio builder's unit tests (mockup/src/libs/modular-audio/build/web-audio), on the stand-in for Web Audio beside them:
+// The Web Audio builder's unit tests (modular-audio/build/web-audio), on the stand-in for Web Audio beside them:
 //   - a plan built between where its sound comes from and where it goes, a composite opened, its wires by names;
 //   - each block made by its kind, at its values and settings; a signal into a delay's time;
 //   - a placeholder for a block it can't make, said by its address, its sound passed straight through, a source silent;

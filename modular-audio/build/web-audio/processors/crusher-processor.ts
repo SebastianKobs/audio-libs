@@ -1,5 +1,5 @@
 // ---------- build/web-audio/processors/crusher-processor: the crusher, in the audio thread ----------
-// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of libs/dsp/crusher/.
+// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of dsp/crusher/.
 // The kernel crushes each channel with a state of its own; this makes it a node: its bits and rate k-rate, one value a block.
 // Always kept running: a desk's insert lives as long as the page, and Chrome never calls again a processor that once said it's done,
 // though its input comes back.

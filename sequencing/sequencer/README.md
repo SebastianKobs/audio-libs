@@ -1,10 +1,10 @@
 # sequencing/sequencer
 
-Patterns played on the grid, after Ableton's session view, for events of any kind. A pattern is a clip: its time signature, its length in bars, whether it loops, and its events. Pure: no Web Audio. It's given the clock's grid as functions, so a pattern placed again is always the same. Why it's built so: `mockup/architecture/sequencer.md`. Clips loop on tracks, and tracks come in pools.
+Patterns played on the grid, after Ableton's session view, for events of any kind. A pattern is a clip: its time signature, its length in bars, whether it loops, and its events. Pure: no Web Audio. It's given the clock's grid as functions, so a pattern placed again is always the same. It imports nothing of what performs its events, so it runs and is tested in node. Clips loop on tracks, and tracks come in pools.
 
 Depends on: `base/util`, `sequencing/clock`.
 
-The MIDI sequencer, with notes and their messages, the input, the stream, the recorder and the recording player, is on top of it (`libs/sequencing/midi-sequencer/`).
+The MIDI sequencer, with notes and their messages, the input, the stream, the recorder and the recording player, is on top of it (`sequencing/midi-sequencer/`).
 
 ```ts
 import { ClipLauncher, TrackPool, patternOf, upcoming } from './index.ts';

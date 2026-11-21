@@ -1,6 +1,6 @@
 # spatial/places
 
-Anything placed and perceived from where you are, a sound or not: where it is, how long it's needed, what it's perceived as from a listener that moves, a change told once it matters, and a world that wraps round. What's perceived is its user's: the hearing hears a place as a level, a cutoff and a room (`libs/spatial/hearing/`); a view could see one as a size, or a haptic layer feel one as a strength.
+Anything placed and perceived from where you are, a sound or not: where it is, how long it's needed, what it's perceived as from a listener that moves, a change told once it matters, and a world that wraps round. What's perceived is its user's: the hearing hears a place as a level, a cutoff and a room (`spatial/hearing/`); a view could see one as a size, or a haptic layer feel one as a strength.
 
 Depends on: `base/util`.
 

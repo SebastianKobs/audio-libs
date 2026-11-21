@@ -1,4 +1,4 @@
-// When the session view is drawn (mockup/src/libs/modular-audio/view/tracks/dom/session-drawing.ts), in node, on a clock, views and drawers of
+// When the session view is drawn (modular-audio/view/tracks/dom/session-drawing.ts), in node, on a clock, views and drawers of
 // the test's own:
 //   - on every beat while it's shown, the clip tracks told the beat; none while it's hidden;
 //   - as it's shown, with what sounded in the last beat; the device view closed as both views hide;

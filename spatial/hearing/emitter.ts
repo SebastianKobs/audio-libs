@@ -1,4 +1,4 @@
-// ---------- libs/spatial/hearing/emitter: where a sound comes from, how long it's needed, and what it hears ----------
+// ---------- spatial/hearing/emitter: where a sound comes from, how long it's needed, and what it hears ----------
 // An emitter is a place, heard from where you listen.
 // It hands on what it hears there to its caller, as values:
 //   - cutoff: its lowpass's cutoff, in Hz;

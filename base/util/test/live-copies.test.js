@@ -1,4 +1,4 @@
-// libs/base/util/live-copies.ts: values kept live by name, as a device's, copies of their start
+// base/util/live-copies.ts: values kept live by name, as a device's, copies of their start
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LiveCopies } from '../index.ts';

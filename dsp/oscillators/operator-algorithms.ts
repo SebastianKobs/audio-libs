@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators/operator-algorithms: which operators modulate which, and which are heard ----------
+// ---------- dsp/oscillators/operator-algorithms: which operators modulate which, and which are heard ----------
 
 /** One algorithm: the operators that modulate each operator, and the operators heard. */
 export interface OperatorAlgorithm {

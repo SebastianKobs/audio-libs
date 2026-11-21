@@ -1,4 +1,4 @@
-// The instrument's control surface (libs/modular-audio/build/instrument/instrument-surface.ts), on a stand-in bank, a clock and an
+// The instrument's control surface (modular-audio/build/instrument/instrument-surface.ts), on a stand-in bank, a clock and an
 // input of the test's own: a patch's value moved by hand:
 //   - played in as a controller on the patch's track, now, gliding, told to whoever listens; a choice by its index,
 //     at once;

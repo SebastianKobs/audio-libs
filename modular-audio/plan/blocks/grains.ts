@@ -4,7 +4,7 @@
 //   - position: how far back from now a grain starts; size, its length; density, grains a second;
 //   - pitch: a grain's playback, in semitones; spray: how far a grain's start strays from its position, a smear.
 // Its output the grains alone: a template mixes them with the dry. A tail: its grains ring on past its input.
-// Its dsp is libs/dsp/grains/; a builder runs it in a processor.
+// Its dsp is dsp/grains/; a builder runs it in a processor.
 import { SWITCH, type ParamSpecs } from '../../../base/params/index.ts';
 import type { Block } from './block.ts';
 

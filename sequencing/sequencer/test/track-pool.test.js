@@ -1,4 +1,4 @@
-// The track pool (mockup/src/libs/sequencing/sequencer/track-pool.ts): plays go on a pool's tracks as a
+// The track pool (sequencing/sequencer/track-pool.ts): plays go on a pool's tracks as a
 // polysynth's notes go on its voices, one play at a time on each, free again once its tail has died away
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

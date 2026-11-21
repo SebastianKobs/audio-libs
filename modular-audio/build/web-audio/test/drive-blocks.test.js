@@ -1,4 +1,4 @@
-// The Drive's blocks as the builder makes them (mockup/src/libs/modular-audio/build/web-audio/blocks/), on the stand-in for Web Audio:
+// The Drive's blocks as the builder makes them (modular-audio/build/web-audio/blocks/), on the stand-in for Web Audio:
 //   - a saturation: its style's colors, the drive into its curve over ±8, a DC block, its level taken back; its drive glided;
 //   - a tilt, two shelves about its pivot; a one pole, an IIR filter made again as its cutoff moves;
 //   - a shaper lag, a delay at the lag the builder is handed, Chromium's where none.

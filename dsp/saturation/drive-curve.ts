@@ -1,4 +1,4 @@
-// ---------- libs/dsp/saturation/drive-curve: a drive's curves, by style, and its auto gain after them ----------
+// ---------- dsp/saturation/drive-curve: a drive's curves, by style, and its auto gain after them ----------
 // After Decapitator's design: the drive is a gain into a knee fixed at full scale.
 // So a quiet sound driven harder gets dirtier, never cleaner.
 // The level is taken back after the curve, against a sine at -18 dBFS.

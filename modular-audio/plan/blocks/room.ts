@@ -1,6 +1,6 @@
 // ---------- plan/blocks/room: a room, a designed impulse through a convolver ----------
 // Beside the reverb, whose impulse is noise that fades as (1 - t)^2.5, its tail holding, then dropping: this one's dies
-// evenly from its start (libs/dsp/impulse/): a pre-delay, early taps, echoes growing dense, three bands each with a
+// evenly from its start (dsp/impulse/): a pre-delay, early taps, echoes growing dense, three bands each with a
 // time of its own, held between 20 Hz and 10 kHz, the PCM-60's path.
 // Mono in, stereo out. The six params are the design's; the rest of it stays the kernel's.
 // A new design is a new buffer, which cuts the tail that was ringing.

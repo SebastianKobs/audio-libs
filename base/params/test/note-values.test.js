@@ -1,5 +1,5 @@
 // A note value in beats, and a time with a sync switch in seconds by a beat's length
-// (mockup/src/libs/base/params/note-values.ts).
+// (base/params/note-values.ts).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { freeAt, NOTE_VALUES, noteValueBeats, timeSeconds } from '../index.ts';

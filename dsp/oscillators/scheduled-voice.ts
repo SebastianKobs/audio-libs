@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators/scheduled-voice: a voice made a source, started and stopped at its times ----------
+// ---------- dsp/oscillators/scheduled-voice: a voice made a source, started and stopped at its times ----------
 import type { Voice, VoiceParams } from './voice.ts';
 
 /** What the audio thread says of itself with each block: its sample rate and the context's time now, in seconds. */

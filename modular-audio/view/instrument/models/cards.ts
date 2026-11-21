@@ -1,6 +1,6 @@
 // ---------- view/instrument/models/cards: an instrument's patches as the device view edits them ----------
 // A card for each patch an instrument plays, its own, or a drum rack's pads, each by its key:
-// its preset on its voice card, read through a preset's readout (libs/modular-audio/view/device/readout/preset.ts). The patch is
+// its preset on its voice card, read through a preset's readout (modular-audio/view/device/readout/preset.ts). The patch is
 // edited in the bank, not an instrument playing it: an edit reaches every instrument that plays
 // it, and those still to come.
 //   - its voice card planned at its preset as the bank has it now, values from outside over its

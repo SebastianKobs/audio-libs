@@ -1,4 +1,4 @@
-// The device view as a model (mockup/src/libs/modular-audio/view/device/models/device-panel.ts): what's open, by a kind and what of it, its title and the
+// The device view as a model (modular-audio/view/device/models/device-panel.ts): what's open, by a kind and what of it, its title and the
 // slot marked; the chain of devices its kind is filled with; opened, opened over and closed, whoever listens told each time
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

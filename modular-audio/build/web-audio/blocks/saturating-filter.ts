@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/saturating-filter: a saturating filter in Web Audio ----------
-// A worklet of its processor (processors/saturating-filter-processor.ts, the kernel of libs/dsp/filters/), one input and one output,
+// A worklet of its processor (processors/saturating-filter-processor.ts, the kernel of dsp/filters/), one input and one output,
 // a filter a channel; its params its AudioParams, set, automated and cabled into as any, its mode by its index.
 // A seed drawn once from the builder's random: the filter's own noise is drawn in the audio thread.
 // Told { stop } as a source is: a voice's filter is a fresh node a note, and a processor never told to stop is never let go.

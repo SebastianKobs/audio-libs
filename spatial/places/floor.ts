@@ -1,4 +1,4 @@
-// ---------- libs/spatial/places/floor: a point and a box on the floor, x across, z deep: where they lie and meet ----------
+// ---------- spatial/places/floor: a point and a box on the floor, x across, z deep: where they lie and meet ----------
 
 import { firstAfter } from '../../base/util/index.ts';
 

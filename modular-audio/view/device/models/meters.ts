@@ -1,8 +1,8 @@
 // ---------- view/device/models/meters: a level bar's fall. Pure ----------
-// How a meter moves over time, its ballistics, apart from how it's drawn (libs/modular-audio/view/device/dom/):
+// How a meter moves over time, its ballistics, apart from how it's drawn (modular-audio/view/device/dom/):
 // a level bar's fall, as a DIN peak meter's, each bar's level kept by its key (Meters).
 // The limiter's history beside it (limiter-history.ts).
-// The sound system measures its peaks without them (the builder's meter, libs/modular-audio/build/web-audio/).
+// The sound system measures its peaks without them (the builder's meter, modular-audio/build/web-audio/).
 import { gainOf, SILENCE } from '../../../../base/params/index.ts';
 
 const FALL_RATE = 20 / 1.5; // dB a second, a DIN peak meter's: 20 dB in 1.5 s

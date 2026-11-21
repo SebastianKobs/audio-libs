@@ -9,4 +9,4 @@ Music's time, its events, the MIDI sequencer, and the transport's view. Part of 
 - [`clip-player/`](clip-player/README.md): clips launched into the input.
 - [`view/transport/`](view/transport/models/README.md): play, stop, where the music is.
 
-Reads: `libs/base/` (`util`, `params`, `automation`, `html`), `libs/midi/protocol/`, the messages the sequencers carry. `clock/` is the time every other library here stands on.
+Reads: `base/` (`util`, `params`, `automation`, `html`), `midi/protocol/`, the messages the sequencers carry. `clock/` is the time every other library here stands on.

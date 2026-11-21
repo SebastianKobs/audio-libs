@@ -1,4 +1,4 @@
-// How late an oversampled WaveShaper comes out (mockup/src/libs/modular-audio/build/web-audio/shaper-lags.ts), measured by a click
+// How late an oversampled WaveShaper comes out (modular-audio/build/web-audio/shaper-lags.ts), measured by a click
 // rendered offline through it at each oversampling: read from the offline context handed in, Chromium's where the render fails.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

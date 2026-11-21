@@ -1,4 +1,4 @@
-// The view models drawn (libs/modular-audio/view/desk/dom), as HTML, in node, on the models' small desk (libs/modular-audio/view/desk/models/test/desk.js):
+// The view models drawn (modular-audio/view/desk/dom), as HTML, in node, on the models' small desk (modular-audio/view/desk/models/test/desk.js):
 //   - a strip: its name, where it goes, its slots, its knobs, its fader, bar and value, its mute and solo; quiet
 //     where it's silent; the master's without mute and solo, its pan still.
 import { test } from 'node:test';

@@ -1,5 +1,5 @@
 // ---------- view/device/dom/envelope-view: an envelope's curve drawn ----------
-// As SVG, from its drawing (libs/modular-audio/view/device/models/'s envelopeDrawing()):
+// As SVG, from its drawing (modular-audio/view/device/models/'s envelopeDrawing()):
 //   - its line, and the area under it, a level of 1 at its top;
 //   - its delay's end dotted, where its attack starts;
 //   - the note's end dashed, none for a trigger's.

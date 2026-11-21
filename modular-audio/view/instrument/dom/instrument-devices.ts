@@ -1,6 +1,6 @@
 // ---------- view/instrument/dom/instrument-devices: each role's instrument as a device ----------
 // A chain of the device view's (DeviceChain, device-panel-view.ts), opened by a clip track's
-// roles, drawn from the instruments' model (InstrumentRacks, libs/modular-audio/view/instrument/models/) as a synth's
+// roles, drawn from the instruments' model (InstrumentRacks, modular-audio/view/instrument/models/) as a synth's
 // panel:
 //   1. its bar: what it is, the test note's button, held as long as it is, and its reset;
 //   2. a drum rack: a tab for each pad, by its key, the chosen pad's card shown;

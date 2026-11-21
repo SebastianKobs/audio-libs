@@ -1,4 +1,4 @@
-// ---------- libs/dsp/measures: what a rendered hit or mix is measured by (its entry) ----------
+// ---------- dsp/measures: what a rendered hit or mix is measured by (its entry) ----------
 // Its parts:
 //   - measures.ts: a hit's onset, level, fall, pitch, band level and share, partial level;
 //   - mix-checks.ts: the mono sum's loss, the spectrum's slope, whether two hits differ, and the FFT;

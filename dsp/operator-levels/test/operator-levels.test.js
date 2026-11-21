@@ -1,4 +1,4 @@
-// The operator levels' unit tests (mockup/src/libs/dsp/operator-levels/): a DX's 0 to 99 as a modulation index in
+// The operator levels' unit tests (dsp/operator-levels/): a DX's 0 to 99 as a modulation index in
 // radians, its feedback 0 to 7 as the kernel's share. The six-operator figures are the yala page's table (Chowning and
 // Bristow's); the four-operator top, 8π, is one forum post's, to check against the chip's manual.
 import { test } from 'node:test';

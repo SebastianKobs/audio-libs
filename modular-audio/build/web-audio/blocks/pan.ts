@@ -1,4 +1,4 @@
-// ---------- libs/modular-audio/build/web-audio/blocks/pan: a pan in Web Audio ----------
+// ---------- modular-audio/build/web-audio/blocks/pan: a pan in Web Audio ----------
 // By its law:
 //   - stereo: a stereo panner, a mono sound made stereo first, as loud in the middle, as the mixer's pans are;
 //   - pan pot: a mono sound panned as it comes, Web Audio's own way, constant power.

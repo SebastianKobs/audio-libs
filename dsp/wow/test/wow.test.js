@@ -1,4 +1,4 @@
-// The wow curve's unit tests (mockup/src/libs/dsp/wow/): a curve of slow drift, noise lowpassed at about 1 Hz and
+// The wow curve's unit tests (dsp/wow/): a curve of slow drift, noise lowpassed at about 1 Hz and
 // made to loop. Pure: numbers in, a Float32Array out, read by an rms, a mean, a step. Its draws from a generator written here.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

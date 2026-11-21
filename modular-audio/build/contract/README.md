@@ -31,4 +31,4 @@ function play(builder: Builder<AudioNode>, plan: Plan, destination: AudioNode, a
 
 A pool's copy, an instrument's voice or a desk's channel alike, is added by its own address, its sources started at a time and its outputs sent into a destination of its own where one is given. `stopBy()` stops its sources by the time it has gone silent; `letGo()` takes it apart once it has rung out. `rebuild()` builds a plan again with the old ringing out. `faded()` says when what a block makes, an envelope's, has faded for good, so a voice's owner knows when it has rung out. `placeholders` lists what the builder couldn't build, by address: a block's sound passed straight through, a source silent.
 
-Tests: none, as only types: what meets them is tested where it's built (`libs/modular-audio/build/web-audio`).
+Tests: none, as only types: what meets them is tested where it's built (`modular-audio/build/web-audio`).

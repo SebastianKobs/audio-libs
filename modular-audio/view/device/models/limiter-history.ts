@@ -1,5 +1,5 @@
 // ---------- view/device/models/limiter-history: the limiter's history. Pure ----------
-// As FabFilter's Pro-L keeps it, apart from how it's drawn (libs/modular-audio/view/device/dom/limiter-view.ts):
+// As FabFilter's Pro-L keeps it, apart from how it's drawn (modular-audio/view/device/dom/limiter-view.ts):
 // a column each interval, the loudest of its frames, what went in, what came out and what it
 // took away.
 

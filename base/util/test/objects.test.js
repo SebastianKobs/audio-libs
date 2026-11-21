@@ -1,4 +1,4 @@
-// libs/base/util/objects.ts: a key toggled in a set, a map's entry made when asked for, a chain of keys
+// base/util/objects.ts: a key toggled in a set, a map's entry made when asked for, a chain of keys
 // followed through a map, a list kept up to a cap, an object updated in place, data frozen or compared
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

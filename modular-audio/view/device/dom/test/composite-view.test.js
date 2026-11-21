@@ -1,5 +1,5 @@
-// A composite drawn (libs/modular-audio/view/device/dom/composite-view.ts), an instrument's and a strip's alike, as HTML, in node, on the view
-// models' voice card of the tests' own (libs/modular-audio/view/device/models/test/card.js):
+// A composite drawn (modular-audio/view/device/dom/composite-view.ts), an instrument's and a strip's alike, as HTML, in node, on the view
+// models' voice card of the tests' own (modular-audio/view/device/models/test/card.js):
 //   - with a face, as its look says: its own device as a group, its children grouped by role in tabs, in the look's order, its matrix;
 //   - a rack of them, a pad each, the chosen one's shown;
 //   - flat, its controls in a device of its own, as a strip's insert is;

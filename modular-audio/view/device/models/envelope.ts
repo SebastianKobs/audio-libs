@@ -1,5 +1,5 @@
 // ---------- view/device/models/envelope: an envelope's curve, as a view draws it ----------
-// From its knobs as they're set, the curve the instrument plays (libs/modular-audio/plan/blocks/'s, an ARP's):
+// From its knobs as they're set, the curve the instrument plays (modular-audio/plan/blocks/'s, an ARP's):
 //   1. its stages from its gate opening: after its delay up to its top, held, onto its sustain;
 //   2. released at the note's end, from where it is then; a trigger's running on past it.
 // Sampled over a time, a level each step, a share of its amount; where its delay ends and the

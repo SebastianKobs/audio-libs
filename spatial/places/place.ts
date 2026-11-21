@@ -1,4 +1,4 @@
-// ---------- libs/spatial/places/place: a place with a lifetime, perceived from a listener as it moves ----------
+// ---------- spatial/places/place: a place with a lifetime, perceived from a listener as it moves ----------
 // Generic, the spatial part's: what's perceived there (Perceived) is its user's, a sound's how it's heard. Where it is, and how
 // long it's needed: let go once past its time (until, close(at)), a time of its user's, never if kept. Moves from a time on (moveTo()):
 // perceived there as it's asked, queued until its time comes. update(t), on every tick: the moves whose time has come taken, then

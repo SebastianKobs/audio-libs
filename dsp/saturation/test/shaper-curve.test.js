@@ -1,4 +1,4 @@
-// The shaper curve's unit tests (mockup/src/libs/dsp/saturation/): a waveshaper's curve from its drive and its
+// The shaper curve's unit tests (dsp/saturation/): a waveshaper's curve from its drive and its
 // shape. No audio in node: the curve's table read as numbers.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

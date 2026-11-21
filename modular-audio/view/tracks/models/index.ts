@@ -1,6 +1,6 @@
-// ---------- libs/modular-audio/view/tracks/models: the session view's and the arrangement's view models, no DOM ----------
-// Handed what it reads through its readout (libs/modular-audio/view/tracks/readout/) and the desk's
-// view models (libs/modular-audio/view/desk/models/), hands back what a view shows and what it can do.
+// ---------- modular-audio/view/tracks/models: the session view's and the arrangement's view models, no DOM ----------
+// Handed what it reads through its readout (modular-audio/view/tracks/readout/) and the desk's
+// view models (modular-audio/view/desk/models/), hands back what a view shows and what it can do.
 // Its parts: see README.md.
 export { ClipTracks, type ShownClip } from './clip-tracks.ts';
 export { Session, type GroupShown, type TrackShown } from './session.ts';

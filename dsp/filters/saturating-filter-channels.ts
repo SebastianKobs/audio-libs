@@ -1,4 +1,4 @@
-// ---------- libs/dsp/filters/saturating-filter-channels: a saturating filter a channel, let go once told to stop ----------
+// ---------- dsp/filters/saturating-filter-channels: a saturating filter a channel, let go once told to stop ----------
 import { SaturatingFilter, type SaturatingParams } from './saturating-filter.ts';
 
 /** What the channels are made with. */

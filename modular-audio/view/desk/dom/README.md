@@ -39,4 +39,4 @@ Lights show on a folded section and on a group's dot while a hidden strip sounds
 | `new InsertDevices({ models })`: `fill()` | A strip's inserts, the master's too, as a chain of the device view's, opened by the strip's address. Each insert is a composite drawn flat in the order its sound goes through them, with a reset for what's live on it (`insert-devices.ts`). |
 | `stripHtml()`, `slotsHtml()`, `muteSoloHtml()`, `StripLook` | A strip drawn from its model: its name, where it goes, what plays on it, its slots, sends, pan, fader, level bar, mute and solo, quiet where it's silent. `StripLook` is what it's drawn with beside the strip (`strip-view.ts`). |
 
-Tests: `test/strip-view.test.js` and `test/desk-html.test.js`, on HTML as text and on values, on the models' small desk in `libs/modular-audio/view/desk/models/test/desk.js`.
+Tests: `test/strip-view.test.js` and `test/desk-html.test.js`, on HTML as text and on values, on the models' small desk in `modular-audio/view/desk/models/test/desk.js`.

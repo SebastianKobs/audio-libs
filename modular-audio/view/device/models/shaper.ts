@@ -1,6 +1,6 @@
 // ---------- view/device/models/shaper: a shaper's curve, as a view draws it ----------
 // As envelopeDrawing() draws an envelope's: from its device's knobs as they're set, the curve the builder bends the sound
-// through (libs/dsp/saturation/), sampled across its input, -1 to 1, a level each step.
+// through (dsp/saturation/), sampled across its input, -1 to 1, a level each step.
 // For a view of its own, registered by the shaper's kind (curveDrawings()).
 import { shaperCurve } from '../../../../dsp/saturation/index.ts';
 import type { Device } from './device.ts';

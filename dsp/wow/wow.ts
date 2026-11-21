@@ -1,4 +1,4 @@
-// ---------- libs/dsp/wow/wow: a tape's wow, slow drift that loops ----------
+// ---------- dsp/wow/wow: a tape's wow, slow drift that loops ----------
 // Noise lowpassed at a cutoff of about 1 Hz, as a curve of an rms of 1.
 // Scaled by a depth in seconds, it moves a delay line's time: a tape's speed wandering.
 // It runs twice round the same draws and keeps the second round,

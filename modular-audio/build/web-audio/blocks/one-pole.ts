@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/one-pole: a first-order lowpass in Web Audio ----------
-// An IIRFilterNode (libs/dsp/filters/'s onePoleLowpass()). Its coefficients are fixed once made, so a new cutoff makes a new
+// An IIRFilterNode (dsp/filters/'s onePoleLowpass()). Its coefficients are fixed once made, so a new cutoff makes a new
 // one in its place between the same neighbors, the old one let go: a cutoff lands as it's told, as a curve does.
 import { onePoleLowpass, type IirCoefficients } from '../../../../dsp/filters/index.ts';
 import type { Node } from '../../../plan/format/index.ts';

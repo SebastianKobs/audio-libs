@@ -1,4 +1,4 @@
-// Every built copy of one template, an edit reaching each (mockup/src/libs/modular-audio/build/web-audio/copies.ts), on an owner of the test's
+// Every built copy of one template, an edit reaching each (modular-audio/build/web-audio/copies.ts), on an owner of the test's
 // own that records what it's told: a value on every copy where the copies have it, settings on every copy in one change, the
 // copies as they are when the edit is made
 import { test } from 'node:test';

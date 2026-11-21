@@ -1,4 +1,4 @@
-// What's chosen in the composites a view shows (mockup/src/libs/modular-audio/view/device/models/chosen.ts): each rack's pad, by the rack's key; each group's
+// What's chosen in the composites a view shows (modular-audio/view/device/models/chosen.ts): each rack's pad, by the rack's key; each group's
 // tab, by its composite's key and the group's title; none until chosen; the device view's own, for the composites it shows
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

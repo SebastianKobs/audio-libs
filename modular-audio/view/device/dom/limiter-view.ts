@@ -6,7 +6,7 @@
 //     its gain, scrolling right to left, on the meters' scale (meterPosition()), its ceiling a
 //     line.
 // Its levels and its reduction read from the limiter block inside the device, by its address;
-// its history's columns a model's (LimiterHistory, libs/modular-audio/view/device/models/meters.ts).
+// its history's columns a model's (LimiterHistory, modular-audio/view/device/models/meters.ts).
 import { gainOf } from '../../../../base/params/index.ts';
 import type { Address } from '../../../../base/util/index.ts';
 import { Knob, LimiterHistory, type Device, type Peaks, type ViewBuilder } from '../models/index.ts';

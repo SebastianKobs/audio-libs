@@ -1,5 +1,5 @@
 // ---------- build/web-audio/processors/saturating-filter-processor: a filter that saturates and sings, in the audio thread ----------
-// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of libs/dsp/filters/.
+// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of dsp/filters/.
 // The kernel filters a channel; this makes it a node, a filter a channel, each on a seed of its own: seed + its channel's number
 // where its options hand one (one seed, one render), Math.random where they don't.
 // Its frequency, detune, resonance and drive a-rate, so an envelope can be cabled into each; its compensation and mode k-rate.

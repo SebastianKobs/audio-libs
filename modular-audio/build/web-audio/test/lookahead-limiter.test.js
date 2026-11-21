@@ -1,4 +1,4 @@
-// The lookahead limiter as the builder makes it (mockup/src/libs/modular-audio/build/web-audio/blocks/lookahead-limiter.ts), on the
+// The lookahead limiter as the builder makes it (modular-audio/build/web-audio/blocks/lookahead-limiter.ts), on the
 // stand-in for Web Audio:
 //   - a worklet of its processor where the worklets have loaded: its four params its own, its reduction as the processor posts it;
 //   - the library's limiter where they haven't, at the same gain, ceiling and release, its clip held.

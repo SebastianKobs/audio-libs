@@ -1,5 +1,5 @@
 // ---------- phrasing/transforms: a pattern reshaped, as a player would. Pure ----------
-// Notes: { start, deg, sounds, pitchBend, and a phrase's duration, vibrato, phrase, shape, k }, start and duration in ticks (libs/sequencing/sequencer/index.ts), sounds
+// Notes: { start, deg, sounds, pitchBend, and a phrase's duration, vibrato, phrase, shape, k }, start and duration in ticks (sequencing/sequencer/index.ts), sounds
 // in seconds; each transform changes them in place.
 // rand() is given, and each draws in a fixed order, so a phrase seeded again is always
 // the same. Which a player picks, and how often, is its owner's

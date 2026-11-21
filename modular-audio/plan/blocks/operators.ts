@@ -3,7 +3,7 @@
 // A modulator shifts a carrier's phase, so the pitch holds as the brightness moves; one operator feeds itself.
 // The carriers summed are the sound.
 // A modulator's level is its index in radians, a carrier's its loudness:
-// a card cables an envelope into each level (libs/dsp/operator-levels/ turns a DX's 0 to 99 into radians).
+// a card cables an envelope into each level (dsp/operator-levels/ turns a DX's 0 to 99 into radians).
 // Its wave is one of the TX81Z's eight, by its index.
 // The algorithm (which operators modulate which, which are heard) and the start phase are read once, as a voice is made:
 // they are params, and told later they hold the value and move nothing.

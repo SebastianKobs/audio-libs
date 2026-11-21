@@ -1,4 +1,4 @@
-// The lag reader's unit tests (mockup/src/libs/dsp/measures/): how late a click comes back, in samples, read off the
+// The lag reader's unit tests (dsp/measures/): how late a click comes back, in samples, read off the
 // loudest sample after where it went in.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -1,4 +1,4 @@
-// The WAV encoder's unit tests (mockup/src/libs/formats/wav/): float channels clamped, TPDF-dithered and
+// The WAV encoder's unit tests (formats/wav/): float channels clamped, TPDF-dithered and
 // rounded to 16-bit PCM after a RIFF header, the random handed in
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

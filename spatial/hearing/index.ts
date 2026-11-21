@@ -1,6 +1,6 @@
-// ---------- libs/spatial/hearing/: where a sound comes from, and how it's heard from where you listen ----------
-// Hearing by distance, on libs/spatial/places/'s places: a sound's level, top, room and side.
-// It imports libs/spatial/places/, libs/base/util/'s maths and libs/base/automation/'s When alone.
+// ---------- spatial/hearing/: where a sound comes from, and how it's heard from where you listen ----------
+// Hearing by distance, on spatial/places/'s places: a sound's level, top, room and side.
+// It imports spatial/places/, base/util/'s maths and base/automation/'s When alone.
 // A voice is what sounds; an emitter is where it sounds from: a place, and how long it's needed.
 // An emitter hands on what it hears there as values, for its caller to set where it will.
 // It knows nothing of the voices heard from it: many can sound from one, or none.

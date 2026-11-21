@@ -1,4 +1,4 @@
-// The generic sequencer (mockup/src/libs/sequencing/sequencer/): patterns and their lengths, placing
+// The generic sequencer (sequencing/sequencer/): patterns and their lengths, placing
 // and repeating on the grid, a bank's cycle, a replay's run unmuted, a rhythm played live and its speed, on a grid of the tests' own
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

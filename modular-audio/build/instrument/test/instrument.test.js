@@ -1,5 +1,5 @@
-// An instrument playing one patch (libs/modular-audio/build/instrument/instrument.ts), on a stand-in for what's built, its patch
-// from the tests' file of instruments (libs/modular-audio/plan/instrument/test/pluck.js):
+// An instrument playing one patch (modular-audio/build/instrument/instrument.ts), on a stand-in for what's built, its patch
+// from the tests' file of instruments (modular-audio/plan/instrument/test/pluck.js):
 //   - built from its patch's instrument, by the builder handed in, into where it's told;
 //   - its notes played by its voices, each message moved onto what's built's time, through
 //     its own input or an input of its own, each voice into the destination it's given;

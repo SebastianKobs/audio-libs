@@ -4,7 +4,7 @@ A phrase played as a player would, on the sequencer's patterns: a rhythm's speed
 
 Depends on: `base/util`, `sequencing/clock`, `sequencing/midi-sequencer`, `sequencing/sequencer`.
 
-A bank's patterns and their cycle, and a replay's run, are the sequencer's (`libs/sequencing/sequencer/`). Keeping and slicing a record's events are `base/util`'s `keep()` and `slice()`, and a record's phrases are the MIDI sequencer's (`libs/sequencing/midi-sequencer/`).
+A bank's patterns and their cycle, and a replay's run, are the sequencer's (`sequencing/sequencer/`). Keeping and slicing a record's events are `base/util`'s `keep()` and `slice()`, and a record's phrases are the MIDI sequencer's (`sequencing/midi-sequencer/`).
 
 ```ts
 import { feelFor, halfTime, holdLast, layBack, speedAt, type PhraseNote } from './index.ts';

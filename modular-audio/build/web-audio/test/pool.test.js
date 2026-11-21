@@ -1,4 +1,4 @@
-// A pool's copies on what's built (mockup/src/libs/modular-audio/build/web-audio), on the stand-in for Web Audio:
+// A pool's copies on what's built (modular-audio/build/web-audio), on the stand-in for Web Audio:
 //   - a copy added by its pool's address and its number, built from the pool's child, wired by its rule, set by its own address;
 //   - let go: its sources stopped, its nodes disconnected, its address no longer set;
 //   - a composite holding a pool a node at each of its own jacks, where copies come and go;

@@ -1,6 +1,6 @@
 # spatial/hearing
 
-Hearing by distance: how a sound is heard from where you listen, its level, its top, its room and its side, on the places of `libs/spatial/places/`. A voice is what sounds; an emitter is where it sounds from: a place, and how long it's needed. An emitter hands on what it hears there as values, and its caller sets them where it will: a track's controllers, a strip, a note's own stages. Values only: no Web Audio.
+Hearing by distance: how a sound is heard from where you listen, its level, its top, its room and its side, on the places of `spatial/places/`. A voice is what sounds; an emitter is where it sounds from: a place, and how long it's needed. An emitter hands on what it hears there as values, and its caller sets them where it will: a track's controllers, a strip, a note's own stages. Values only: no Web Audio.
 
 Depends on: `base/automation`, `base/util`, `spatial/places`.
 
@@ -36,6 +36,6 @@ How a sound is heard, like sound outdoors (`hearing.ts`, pure):
 | `EmitterOptions`, `Hears`, `HeardValue` | What an emitter is made with: where what it hears goes, how long it's needed, what's done as it's let go. `hears(name, value, when)` gets `'cutoff'` (Hz), `'level'`, `'side'` (−1 to 1, times `width`) and `'room'`, in that order, then its followers (`emitter.ts`). |
 | `Law`, `Follower` | `follow(follower, law, at)` sets a value of yours from what an emitter hears by its law, from `at`; with no law, it's handed on as 0, then left. A follower gets the value and its `when` (`emitter.ts`). |
 
-A `when` is `libs/base/automation/`'s `When`: `{}` for now, `{ at }` from a time of yours, or `{ glide }` gliding there from now by a time constant. Values are handed on now as an emitter is made, at a note's time, and gliding as you move, its side left where its note put it.
+A `when` is `base/automation/`'s `When`: `{}` for now, `{ at }` from a time of yours, or `{ glide }` gliding there from now by a time constant. Values are handed on now as an emitter is made, at a note's time, and gliding as you move, its side left where its note put it.
 
-Tests: `test/hearing.test.js`, the model against `shared/test-vectors/space/hearing.json`, and the space and its emitters, what each hears handed on as values, with a listener of the test's own.
+Tests: `test/hearing.test.js`, the model against `test-vectors/space/hearing.json`, and the space and its emitters, what each hears handed on as values, with a listener of the test's own.

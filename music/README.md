@@ -5,4 +5,4 @@ What the music knows, apart from its time and its sound. Part of [the libraries]
 - [`music-theory/`](music-theory/README.md): notes, keys, scales, a play style.
 - [`phrasing/`](phrasing/README.md): a phrase played as a player would.
 
-Reads: `libs/base/util/`; `phrasing/` also `libs/sequencing/` (`clock`, `sequencer`, `midi-sequencer`).
+Reads: `base/util/`; `phrasing/` also `sequencing/` (`clock`, `sequencer`, `midi-sequencer`).

@@ -1,4 +1,4 @@
-// The worklet effects as the builder makes them (mockup/src/libs/modular-audio/build/web-audio/blocks/), on the stand-in for Web Audio:
+// The worklet effects as the builder makes them (modular-audio/build/web-audio/blocks/), on the stand-in for Web Audio:
 // the crusher, the grains and the saturating filter.
 //   - a worklet of its processor where the worklets have loaded: one input and one output, its params at their values, set and
 //     automated as AudioParams; the grains and the filter handed a seed drawn once from the builder's random;

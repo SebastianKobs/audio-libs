@@ -1,4 +1,4 @@
-// The music theory's unit tests (mockup/src/libs/music/music-theory): scales, and a degree's note in a key
+// The music theory's unit tests (music/music-theory): scales, and a degree's note in a key
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SCALES, chordNote, degreeNote } from '../index.ts';

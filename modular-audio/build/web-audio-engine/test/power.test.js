@@ -1,4 +1,4 @@
-// The audio's power (mockup/src/libs/modular-audio/build/web-audio-engine/power.ts), on the stand-in for Web Audio: the audio started, paused and
+// The audio's power (modular-audio/build/web-audio-engine/power.ts), on the stand-in for Web Audio: the audio started, paused and
 // resumed, as a transport and a first touch ask.
 // Start: the engine made once, what's built built in it into the output after it, the clock on the audio's time, then
 // told; once started, back on; not while paused.

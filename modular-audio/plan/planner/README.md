@@ -58,4 +58,4 @@ A channel's and a desk's forms are the desk library's own; the tests have small 
 
 The planner's checks are internal, not exported: templates built on others are merged first (`extend.ts`); each template is checked well-formed (`check.ts`); every kind it knows, blocks and templates, is looked up as seen from outside (`catalog.ts`); a loose jack's channels come from `mono-stereo.ts`.
 
-Tests: `test/planner.test.js`, on small templates in `test/templates.js`: the Utility planned as `libs/modular-audio/plan/format/`'s tests wrote it out by hand, so the two are held to each other.
+Tests: `test/planner.test.js`, on small templates in `test/templates.js`: the Utility planned as `modular-audio/plan/format/`'s tests wrote it out by hand, so the two are held to each other.

@@ -1,4 +1,4 @@
-// The clock's cues (mockup/src/libs/sequencing/clock/cues.ts): items held until a tick brings their time,
+// The clock's cues (sequencing/clock/cues.ts): items held until a tick brings their time,
 // less a lead where one's given, then handed on in their order; the ticks the owner's.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

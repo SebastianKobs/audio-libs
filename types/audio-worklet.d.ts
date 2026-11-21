@@ -1,4 +1,4 @@
-// What an audio worklet's scope has that lib.dom lacks: a processor file (libs/modular-audio/build/web-audio/processors/, and the test's
+// What an audio worklet's scope has that lib.dom lacks: a processor file (modular-audio/build/web-audio/processors/, and the test's
 // test/clamped-processor.ts) is written in TypeScript and runs there, where registerProcessor(), the base class and the rate are globals
 // a param a processor declares, as the scope reads it
 interface AudioParamDescriptor {

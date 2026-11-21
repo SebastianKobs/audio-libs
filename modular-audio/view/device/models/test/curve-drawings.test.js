@@ -1,4 +1,4 @@
-// The curve blocks' drawings registered by their kinds (mockup/src/libs/modular-audio/view/device/models/custom-views.ts):
+// The curve blocks' drawings registered by their kinds (modular-audio/view/device/models/custom-views.ts):
 // a device of a shaper's kind gets a shaper's drawing, a saturation's its own, any other kind none.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

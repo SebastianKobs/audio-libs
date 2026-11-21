@@ -1,4 +1,4 @@
-// What's built set by address (mockup/src/libs/modular-audio/build/web-audio), on the stand-in for Web Audio:
+// What's built set by address (modular-audio/build/web-audio), on the stand-in for Web Audio:
 //   - a param set now, at a time or gliding there; a macro onto its targets; a filter's on every stage;
 //   - a delay's time, its sync switch, note and ms, moving its one delay line; following a new tempo while synced;
 //   - a param automated; a preset's values set together, a setting it keeps passed over;

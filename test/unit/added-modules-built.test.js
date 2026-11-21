@@ -1,4 +1,4 @@
-// The instrument modules the visual ideas added (libs/modular-audio/plan/instrument/modules/), played from a patch's plan on
+// The instrument modules the visual ideas added (modular-audio/plan/instrument/modules/), played from a patch's plan on
 // the Web Audio builder's stand-in, its worklets loaded:
 //   - a lead: a SyncVCO through a VCA, out through a Panned out, the note's pan handed to the card that has it;
 //   - the note's pan set on its own voice's panner as it starts, a note with none in the middle;

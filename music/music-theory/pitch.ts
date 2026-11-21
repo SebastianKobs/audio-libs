@@ -1,4 +1,4 @@
-// ---------- libs/music/music-theory/pitch: notes and frequencies ----------
+// ---------- music/music-theory/pitch: notes and frequencies ----------
 // A note is a MIDI note number. A key is { root, scale }, the root a note, the scale its steps in semitones from it (scales.ts)
 import { degreeNote, type Key } from './scales.ts';
 // a chord's note in a key: semitones from the root, or else a degree of the scale, counted from an octave below the root

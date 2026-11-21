@@ -1,4 +1,4 @@
-// The bench measures' unit tests (mockup/src/libs/dsp/measures/): what a recipe's numbers are read by. Fed
+// The bench measures' unit tests (dsp/measures/): what a recipe's numbers are read by. Fed
 // Float32Arrays, they return a time, a level or a pitch as a number; a reading is compared as a number, never a buffer.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -1,6 +1,6 @@
-// The sequencer's input (mockup/src/libs/sequencing/midi-sequencer/input.ts): a track's messages go to its
+// The sequencer's input (sequencing/midi-sequencer/input.ts): a track's messages go to its
 // instrument at once and into the stream as the play they make; each note comes back to its listeners.
-// The messages, and a note's index handed out by note rotation, are libs/midi/protocol/'s
+// The messages, and a note's index handed out by note rotation, are midi/protocol/'s
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Sequencer } from '../index.ts';

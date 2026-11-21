@@ -1,4 +1,4 @@
-// ---------- libs/dsp/measures/measures: what a recipe's numbers are read by ----------
+// ---------- dsp/measures/measures: what a recipe's numbers are read by ----------
 // A hit rendered into a Float32Array, read as a time, a level, a pitch or a share of the spectrum.
 // These are the numbers a recipe is held to ("rim 808 starts 50 ms in", "the lead sings G4").
 // Times are in s from the buffer's start, levels in dB re full scale; nothing here touches audio.

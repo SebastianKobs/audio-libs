@@ -1,4 +1,4 @@
-// The windowed sinc's unit tests (mockup/src/libs/dsp/filters/): a sinc under a Kaiser window, the tap of an interpolating
+// The windowed sinc's unit tests (dsp/filters/): a sinc under a Kaiser window, the tap of an interpolating
 // filter, read at its points: 1 at its middle, 0 at each whole sample, nearly 0 at the window's edge.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

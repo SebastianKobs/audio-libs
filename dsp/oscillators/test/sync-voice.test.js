@@ -1,4 +1,4 @@
-// The sync voice's unit tests (mockup/src/libs/dsp/oscillators/): a master oscillator at the note, a slave some semitones above it
+// The sync voice's unit tests (dsp/oscillators/): a master oscillator at the note, a slave some semitones above it
 // reset at each turn of the master's, the slave heard as a sawtooth or a square, band-limited. No audio: fed numbers, its output read.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

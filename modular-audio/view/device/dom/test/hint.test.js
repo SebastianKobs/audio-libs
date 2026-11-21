@@ -1,4 +1,4 @@
-// A control's hint, one wording for every view (mockup/src/libs/modular-audio/view/device/dom/hint.ts): its own words, how it's set, what moves it as the
+// A control's hint, one wording for every view (modular-audio/view/device/dom/hint.ts): its own words, how it's set, what moves it as the
 // note plays; an instrument's and a strip's insert's alike, each worded by the control alone
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

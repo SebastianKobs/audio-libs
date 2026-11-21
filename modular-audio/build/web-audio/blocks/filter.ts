@@ -1,4 +1,4 @@
-// ---------- libs/modular-audio/build/web-audio/blocks/filter: a filter in Web Audio, biquads in series ----------
+// ---------- modular-audio/build/web-audio/blocks/filter: a filter in Web Audio, biquads in series ----------
 // One at 12 dB an octave, two at 24, their Qs the filter block's (biquadQs()), its cutoff on each.
 // Its Q a plain ratio as a plan has it, 0.707 flat. Web Audio reads a lowpass's and a highpass's
 // in dB, its level at the cutoff, so it's turned there; a bandpass's is a ratio there too.

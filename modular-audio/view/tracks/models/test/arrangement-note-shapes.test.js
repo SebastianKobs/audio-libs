@@ -1,4 +1,4 @@
-// libs/modular-audio/view/tracks/models/arrangement/note-shapes.ts: a region's notes as drawn: each held at
+// modular-audio/view/tracks/models/arrangement/note-shapes.ts: a region's notes as drawn: each held at
 // its pitch, pieces at each glide, a line for each move, a slide in from its bend; a held one open to now; a
 // note as recorded in song time (read from Arrangement.regions); the region's pitch range.
 import { test } from 'node:test';

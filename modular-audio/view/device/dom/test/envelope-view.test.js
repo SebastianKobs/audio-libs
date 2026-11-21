@@ -1,4 +1,4 @@
-// An envelope's curve drawn (libs/modular-audio/view/device/dom/envelope-view.ts), as SVG, in node: its line and the area
+// An envelope's curve drawn (modular-audio/view/device/dom/envelope-view.ts), as SVG, in node: its line and the area
 // under it, a second 60 px across, 40 high; its delay's end dotted, the note's end dashed, a trigger's none.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

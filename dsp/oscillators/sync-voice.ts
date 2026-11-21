@@ -1,4 +1,4 @@
-// ---------- libs/dsp/oscillators/sync-voice: hard sync, a slave oscillator reset by a master ----------
+// ---------- dsp/oscillators/sync-voice: hard sync, a slave oscillator reset by a master ----------
 import { noteAt, paramAt, phaseStep, type Voice, type VoiceParams } from './voice.ts';
 
 const SQUARE = 1; // the wave's index: 0 sawtooth, 1 square

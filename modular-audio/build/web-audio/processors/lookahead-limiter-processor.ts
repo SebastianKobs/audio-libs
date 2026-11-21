@@ -1,5 +1,5 @@
 // ---------- build/web-audio/processors/lookahead-limiter-processor: the lookahead limiter, in the audio thread ----------
-// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of libs/dsp/true-peak/.
+// An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of dsp/true-peak/.
 // The kernel does the work, a sample in and a sample out; this makes it a node: its four params k-rate, one value a block, and what
 // it took off said every 2048 frames, as { reduction } in dB. Always kept running: a desk's insert.
 import { LookaheadLimiter, type LookaheadParams } from '../../../../dsp/true-peak/index.ts';

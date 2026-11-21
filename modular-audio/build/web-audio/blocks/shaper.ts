@@ -1,5 +1,5 @@
 // ---------- build/web-audio/blocks/shaper: a shaper in Web Audio ----------
-// A WaveShaper, its curve made from its drive and shape (libs/dsp/saturation/), made again each time either is told;
+// A WaveShaper, its curve made from its drive and shape (dsp/saturation/), made again each time either is told;
 // its oversampling Web Audio's own ('none', '2x', '4x'), as its choices are named.
 // A curve is no AudioParam: a change lands as it's told, at no time of its own; nothing is cabled into it.
 import { choiceAt, choiceIndex } from '../../../../base/params/index.ts';

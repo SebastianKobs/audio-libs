@@ -1,5 +1,5 @@
 // ---------- view/desk/dom/insert-devices: a strip's inserts, each a device as Ableton's are ----------
-// Drawn from the strip's model (libs/modular-audio/view/desk/models/), each a composite drawn flat, as the device
+// Drawn from the strip's model (modular-audio/view/desk/models/), each a composite drawn flat, as the device
 // view shows them, a chain of its own (DeviceChain, device-panel-view.ts), opened by a strip's address:
 //   - each insert whose slot its owner says something of: a Utility, a Filter, the limiter;
 //   - its status: its label and what it does there, and what sets it, where its notes do;
