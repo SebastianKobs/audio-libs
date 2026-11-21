@@ -10,7 +10,7 @@ import type { Block } from './block.ts';
 
 // its params, by their names; the voicing's choices in the order the processor reads their indexes
 export const GERMANIUM_STAGE_SPECS = {
-  drive: { name: 'drive', unit: 'dB', range: [-40, 20, 0.1], default: -10 },
+  drive: { name: 'drive', unit: 'dB', range: [-60, 20, 0.1], default: -10 }, // down to a millivolt a unit: a quiet source
   level: { name: 'level', unit: 'dB', range: [-60, 12, 0.1], default: -20 },
   voicing: { name: 'voicing', choices: ['treble booster', 'full range'], default: 'treble booster' },
 } as const satisfies ParamSpecs;
