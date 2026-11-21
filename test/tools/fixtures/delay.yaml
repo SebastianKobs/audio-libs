@@ -1,0 +1,6 @@
+# a delay line, as a theme might write one: its comments the reasons, left out of its data
+name: delay
+chain: [delay]
+params:
+  note: 1/8 # an 8th, following the tempo
+  feedback: 0.45

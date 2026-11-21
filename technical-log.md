@@ -1,0 +1,13 @@
+# Technical log
+
+A record of the libraries' changes: a change, its tests, its tooling and setup, and fixes to existing behavior. Newest first.
+
+Sources: **Plan** = from the plan of the project it came from (Stim Garden's `mockup/architecture/plan.md`, ADD6c1). **Request** = the user asked for it. **Default** = a starting value chosen while building.
+Files: by path from the repo root.
+Commits: the labels and their logs are in `.githooks/rule-based-commit-logging/labels.yml`, the entry form and the hash rule in `.githooks/rule-based-commit-logging/claude-rule.md`.
+
+---
+
+## 2026-11-21
+
+- `pending` TECHNICAL: **ADD6c1: audio-libs made, the libraries' history carried over by `git filter-repo` from Stim Garden's `mockup/src/libs/`, with its tooling, its tests across libraries and its vectors, its own `make test-unit` passing alone but the docs rules;** the libraries move into a project of their own, each user mounting or copying them. *(Source: Plan, ADD6c1)* Files: `package.json`, `Makefile`, `tsconfig.json`, `.oxlintrc.json`, `.prettierrc.json`, `.prettierignore`, `knip.json`, `.gitignore`, `.claude/settings.json`, `.githooks/`, `CLAUDE.md`, `technical-log.md`, `tools/`, `types/`, `test/`, `test-vectors/`, `sequencing/clock/test/clock.test.js`, `spatial/gestures/test/gesture-tracker.test.js`, `spatial/hearing/test/hearing.test.js`

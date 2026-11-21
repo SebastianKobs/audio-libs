@@ -28,9 +28,7 @@ function stepsDuring(clock, fn) {
 
 test('the grid matches the shared test vectors', () => {
   const { clock, settings } = clockOf();
-  const { cases } = JSON.parse(
-    readFileSync(new URL('../../../../../../shared/test-vectors/clock/grid.json', import.meta.url), 'utf8'),
-  );
+  const { cases } = JSON.parse(readFileSync(new URL('../../../test-vectors/clock/grid.json', import.meta.url), 'utf8'));
   assert.ok(cases.length > 0);
   for (const c of cases) {
     Object.assign(settings, { bpm: c.bpm, swing: c.swing, swingOn: c.swingOn });
@@ -47,9 +45,7 @@ test('the grid matches the shared test vectors', () => {
 
 test('taps land as the shared test vectors say, on every tap grid, next and nearest, straight and swung', () => {
   const { clock, settings, fakeAudio } = clockOf();
-  const { cases } = JSON.parse(
-    readFileSync(new URL('../../../../../../shared/test-vectors/clock/taps.json', import.meta.url), 'utf8'),
-  );
+  const { cases } = JSON.parse(readFileSync(new URL('../../../test-vectors/clock/taps.json', import.meta.url), 'utf8'));
   assert.ok(cases.length > 0);
   clock.useAudio(fakeAudio());
   clock.advance(1); // a stand-in audio that can start at once, as the vectors have it, and taps from a bar, where every grid meets

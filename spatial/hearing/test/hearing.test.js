@@ -6,9 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { heardAs, nothing, onFloor, r10, setup } from './listening.js';
 
-const vectors = JSON.parse(
-  readFileSync(new URL('../../../../../../shared/test-vectors/space/hearing.json', import.meta.url), 'utf8'),
-);
+const vectors = JSON.parse(readFileSync(new URL('../../../test-vectors/space/hearing.json', import.meta.url), 'utf8'));
 // what an emitter hears, as the test sees it handed on: each value by its name, and when
 const heardSeen = () => {
   const calls = [];

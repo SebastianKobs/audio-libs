@@ -10,9 +10,7 @@ import { circle, rub, scribble, shake } from './strokes.js';
 import { near } from '../../../base/util/test/near.js';
 
 const vectors = (file) =>
-  JSON.parse(
-    readFileSync(new URL(`../../../../../../shared/test-vectors/gestures/${file}.json`, import.meta.url), 'utf8'),
-  );
+  JSON.parse(readFileSync(new URL(`../../../test-vectors/gestures/${file}.json`, import.meta.url), 'utf8'));
 const files = ['presses', 'strokes', 'loops'];
 const cases = Object.fromEntries(files.flatMap((f) => vectors(f).cases.map((c) => [c.name, c])));
 const events = (name) => {

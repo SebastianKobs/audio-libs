@@ -1,0 +1,270 @@
+{
+  "about": "Presses, holds, taps, drags, pans and cancels: pointer input in, the events the gesture tracker emits out. Written from mockup/src/libs/spatial/gestures/ by tools/make-gesture-vectors.js. Each case gives the settings and the screen's height, then its input in order. Before each input, time runs on to its t in ticks of the clock: one every 25 ms after the previous input, and one at the input's own time; holds and rests are seen on the ticks. Then the input is applied: down (with its button: 2 is the right), move, up or cancel, or none, when only time passes. A floor point g carries its zone, zone, which stands in for what a user hands in (zoneAt()). Each event gives its type, the pointer's id, the time, the pointer's state and where it was (x, y), and what the event says. Times and angles to 1e-9.",
+  "format": 1,
+  "cases": [
+    {
+      "name": "tap",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":400,"y":300,"button":0,"g":{"x":8,"z":-3,"zone":15}}},
+        {"t":0.1,"up":{"id":1,"x":400,"y":300,"g":{"x":8,"z":-3,"zone":15}}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":400,"y":300},
+        {"type":"tap","id":1,"t":0.1,"state":"pressed","x":400,"y":300},
+        {"type":"release","id":1,"t":0.1,"state":"pressed","x":400,"y":300}
+      ]
+    },
+    {
+      "name": "hold at 0.40 s, not at 0.39 s",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":400,"y":300,"button":0,"g":{"x":8,"z":-3,"zone":15}}},
+        {"t":0.39},
+        {"t":0.4},
+        {"t":0.5,"up":{"id":1,"x":400,"y":300,"g":{"x":8,"z":-3,"zone":15}}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":400,"y":300},
+        {"type":"hold","id":1,"t":0.4,"state":"holding","x":400,"y":300},
+        {"type":"release","id":1,"t":0.5,"state":"holding","x":400,"y":300}
+      ]
+    },
+    {
+      "name": "a hold stays a hold when it moves",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":400,"y":300,"button":0,"g":{"x":8,"z":-3,"zone":15}}},
+        {"t":0.1,"move":{"id":1,"x":405,"y":300,"g":{"x":8.1,"z":-3,"zone":15}}},
+        {"t":0.45},
+        {"t":0.5,"move":{"id":1,"x":460,"y":300,"g":{"x":9.2,"z":-3,"zone":15}}},
+        {"t":0.6,"up":{"id":1,"x":460,"y":300,"g":{"x":9.2,"z":-3,"zone":15}}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":400,"y":300},
+        {"type":"hold","id":1,"t":0.4,"state":"holding","x":400,"y":300},
+        {"type":"release","id":1,"t":0.6,"state":"holding","x":460,"y":300}
+      ]
+    },
+    {
+      "name": "drag threshold: 8 px is still a press, more is a drag",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":400,"y":300,"button":0,"g":{"x":8,"z":-3,"zone":15}}},
+        {"t":0.05,"move":{"id":1,"x":408,"y":300,"g":{"x":8.16,"z":-3,"zone":15}}},
+        {"t":0.1,"move":{"id":1,"x":400,"y":308,"g":{"x":8,"z":-2.84,"zone":14}}},
+        {"t":0.15,"move":{"id":1,"x":408.5,"y":300,"g":{"x":8.17,"z":-3,"zone":15}}},
+        {"t":0.5},
+        {"t":0.55,"up":{"id":1,"x":408.5,"y":300,"g":{"x":8.17,"z":-3,"zone":15}}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":400,"y":300},
+        {"type":"dragstart","id":1,"t":0.15,"state":"dragging","x":408.5,"y":300},
+        {"type":"move","id":1,"t":0.15,"state":"dragging","x":408.5,"y":300},
+        {"type":"dragmove","id":1,"t":0.15,"state":"dragging","x":408.5,"y":300},
+        {"type":"rest","id":1,"t":0.25,"state":"dragging","x":408.5,"y":300},
+        {"type":"release","id":1,"t":0.55,"state":"dragging","x":408.5,"y":300}
+      ]
+    },
+    {
+      "name": "cancel",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":400,"y":300,"button":0,"g":{"x":8,"z":-3,"zone":15}}},
+        {"t":0.016,"move":{"id":1,"x":405,"y":300,"g":{"x":8.1,"z":-3,"zone":15}}},
+        {"t":0.032,"move":{"id":1,"x":410,"y":300,"g":{"x":8.2,"z":-3,"zone":15}}},
+        {"t":0.048,"move":{"id":1,"x":415,"y":300,"g":{"x":8.3,"z":-3,"zone":15}}},
+        {"t":0.064,"move":{"id":1,"x":420,"y":300,"g":{"x":8.4,"z":-3,"zone":15}}},
+        {"t":0.08,"move":{"id":1,"x":425,"y":300,"g":{"x":8.5,"z":-3,"zone":15}}},
+        {"t":0.096,"move":{"id":1,"x":430,"y":300,"g":{"x":8.6,"z":-3,"zone":15}}},
+        {"t":0.112,"move":{"id":1,"x":435,"y":300,"g":{"x":8.7,"z":-3,"zone":15}}},
+        {"t":0.128,"move":{"id":1,"x":440,"y":300,"g":{"x":8.8,"z":-3,"zone":15}}},
+        {"t":0.144,"cancel":{"id":1}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":400,"y":300},
+        {"type":"dragstart","id":1,"t":0.032,"state":"dragging","x":410,"y":300},
+        {"type":"move","id":1,"t":0.032,"state":"dragging","x":410,"y":300},
+        {"type":"dragmove","id":1,"t":0.032,"state":"dragging","x":410,"y":300},
+        {"type":"dragmove","id":1,"t":0.048,"state":"dragging","x":415,"y":300},
+        {"type":"dragmove","id":1,"t":0.064,"state":"dragging","x":420,"y":300},
+        {"type":"dragmove","id":1,"t":0.08,"state":"dragging","x":425,"y":300},
+        {"type":"dragmove","id":1,"t":0.096,"state":"dragging","x":430,"y":300},
+        {"type":"dragmove","id":1,"t":0.112,"state":"dragging","x":435,"y":300},
+        {"type":"dragmove","id":1,"t":0.128,"state":"dragging","x":440,"y":300},
+        {"type":"cancel","id":1,"t":0.144,"state":"dragging","x":440,"y":300}
+      ]
+    },
+    {
+      "name": "two fingers at once: a pan",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":300,"y":300,"button":0,"g":{"x":6,"z":-3,"zone":15}}},
+        {"t":0.05,"down":{"id":2,"x":600,"y":300,"button":0,"g":{"x":12,"z":-3,"zone":15}}},
+        {"t":0.066,"move":{"id":2,"x":610,"y":300,"g":{"x":12.2,"z":-3,"zone":15}}},
+        {"t":0.082,"move":{"id":2,"x":620,"y":300,"g":{"x":12.4,"z":-3,"zone":15}}},
+        {"t":0.098,"move":{"id":2,"x":630,"y":300,"g":{"x":12.6,"z":-3,"zone":15}}},
+        {"t":0.114,"move":{"id":2,"x":640,"y":300,"g":{"x":12.8,"z":-3,"zone":15}}},
+        {"t":0.13,"move":{"id":2,"x":650,"y":300,"g":{"x":13,"z":-3,"zone":15}}},
+        {"t":0.146,"move":{"id":2,"x":660,"y":300,"g":{"x":13.2,"z":-3,"zone":15}}},
+        {"t":0.162,"move":{"id":2,"x":670,"y":300,"g":{"x":13.4,"z":-3,"zone":15}}},
+        {"t":0.178,"move":{"id":2,"x":680,"y":300,"g":{"x":13.6,"z":-3,"zone":15}}},
+        {"t":0.194,"move":{"id":2,"x":690,"y":300,"g":{"x":13.8,"z":-3,"zone":15}}},
+        {"t":0.21,"move":{"id":2,"x":700,"y":300,"g":{"x":14,"z":-3,"zone":15}}},
+        {"t":0.226,"up":{"id":2,"x":700,"y":300,"g":{"x":14,"z":-3,"zone":15}}},
+        {"t":0.6,"up":{"id":1,"x":300,"y":300,"g":{"x":6,"z":-3,"zone":15}}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":300,"y":300},
+        {"type":"takeback","id":1,"t":0.05,"state":"pressed","x":300,"y":300},
+        {"type":"panstart","id":1,"t":0.05,"state":"pair","x":450,"y":300},
+        {"type":"panmove","id":1,"t":0.066,"state":"pair","x":455,"y":300},
+        {"type":"panmove","id":1,"t":0.082,"state":"pair","x":460,"y":300},
+        {"type":"panmove","id":1,"t":0.098,"state":"pair","x":465,"y":300},
+        {"type":"panmove","id":1,"t":0.114,"state":"pair","x":470,"y":300},
+        {"type":"panmove","id":1,"t":0.13,"state":"pair","x":475,"y":300},
+        {"type":"panmove","id":1,"t":0.146,"state":"pair","x":480,"y":300},
+        {"type":"panmove","id":1,"t":0.162,"state":"pair","x":485,"y":300},
+        {"type":"panmove","id":1,"t":0.178,"state":"pair","x":490,"y":300},
+        {"type":"panmove","id":1,"t":0.194,"state":"pair","x":495,"y":300},
+        {"type":"panmove","id":1,"t":0.21,"state":"pair","x":500,"y":300},
+        {"type":"panend","id":1,"t":0.226,"state":"pair","x":500,"y":300}
+      ]
+    },
+    {
+      "name": "a second finger late: ignored",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":300,"y":500,"button":0,"g":{"x":6,"z":1,"zone":10}}},
+        {"t":0.025,"move":{"id":1,"x":307.5,"y":500,"g":{"x":6.15,"z":1,"zone":10}}},
+        {"t":0.05,"move":{"id":1,"x":315,"y":500,"g":{"x":6.3,"z":1,"zone":10}}},
+        {"t":0.075,"move":{"id":1,"x":322.5,"y":500,"g":{"x":6.45,"z":1,"zone":10}}},
+        {"t":0.1,"move":{"id":1,"x":330,"y":500,"g":{"x":6.6,"z":1,"zone":10}}},
+        {"t":0.125,"move":{"id":1,"x":337.5,"y":500,"g":{"x":6.75,"z":1,"zone":10}}},
+        {"t":0.15,"move":{"id":1,"x":345,"y":500,"g":{"x":6.9,"z":1,"zone":10}}},
+        {"t":0.175,"move":{"id":1,"x":352.5,"y":500,"g":{"x":7.05,"z":1,"zone":10}}},
+        {"t":0.2,"move":{"id":1,"x":360,"y":500,"g":{"x":7.2,"z":1,"zone":10}}},
+        {"t":0.225,"move":{"id":1,"x":367.5,"y":500,"g":{"x":7.35,"z":1,"zone":10}}},
+        {"t":0.25,"move":{"id":1,"x":375,"y":500,"g":{"x":7.5,"z":1,"zone":10}}},
+        {"t":0.275,"move":{"id":1,"x":382.5,"y":500,"g":{"x":7.65,"z":1,"zone":10}}},
+        {"t":0.3,"move":{"id":1,"x":390,"y":500,"g":{"x":7.8,"z":1,"zone":10}}},
+        {"t":0.325,"move":{"id":1,"x":397.5,"y":500,"g":{"x":7.95,"z":1,"zone":10}}},
+        {"t":0.35,"move":{"id":1,"x":405,"y":500,"g":{"x":8.1,"z":1,"zone":10}}},
+        {"t":0.375,"move":{"id":1,"x":412.5,"y":500,"g":{"x":8.25,"z":1,"zone":10}}},
+        {"t":0.4,"move":{"id":1,"x":420,"y":500,"g":{"x":8.4,"z":1,"zone":10}}},
+        {"t":0.425,"move":{"id":1,"x":427.5,"y":500,"g":{"x":8.55,"z":1,"zone":10}}},
+        {"t":0.45,"move":{"id":1,"x":435,"y":500,"g":{"x":8.7,"z":1,"zone":10}}},
+        {"t":0.475,"move":{"id":1,"x":442.5,"y":500,"g":{"x":8.85,"z":1,"zone":10}}},
+        {"t":0.5,"move":{"id":1,"x":450,"y":500,"g":{"x":9,"z":1,"zone":10}}},
+        {"t":0.5,"down":{"id":2,"x":700,"y":300,"button":0,"g":{"x":14,"z":-3,"zone":15}}},
+        {"t":0.516,"move":{"id":2,"x":710,"y":300,"g":{"x":14.2,"z":-3,"zone":15}}},
+        {"t":0.525,"move":{"id":1,"x":457.5,"y":500,"g":{"x":9.15,"z":1,"zone":10}}},
+        {"t":0.532,"move":{"id":2,"x":720,"y":300,"g":{"x":14.4,"z":-3,"zone":15}}},
+        {"t":0.548,"move":{"id":2,"x":730,"y":300,"g":{"x":14.6,"z":-3,"zone":15}}},
+        {"t":0.55,"move":{"id":1,"x":465,"y":500,"g":{"x":9.3,"z":1,"zone":10}}},
+        {"t":0.564,"move":{"id":2,"x":740,"y":300,"g":{"x":14.8,"z":-3,"zone":15}}},
+        {"t":0.575,"move":{"id":1,"x":472.5,"y":500,"g":{"x":9.45,"z":1,"zone":10}}},
+        {"t":0.58,"move":{"id":2,"x":750,"y":300,"g":{"x":15,"z":-3,"zone":15}}},
+        {"t":0.596,"move":{"id":2,"x":760,"y":300,"g":{"x":15.2,"z":-3,"zone":15}}},
+        {"t":0.6,"move":{"id":1,"x":480,"y":500,"g":{"x":9.6,"z":1,"zone":10}}},
+        {"t":0.612,"move":{"id":2,"x":770,"y":300,"g":{"x":15.4,"z":-3,"zone":15}}},
+        {"t":0.625,"move":{"id":1,"x":487.5,"y":500,"g":{"x":9.75,"z":1,"zone":10}}},
+        {"t":0.628,"move":{"id":2,"x":780,"y":300,"g":{"x":15.6,"z":-3,"zone":15}}},
+        {"t":0.644,"move":{"id":2,"x":790,"y":300,"g":{"x":15.8,"z":-3,"zone":15}}},
+        {"t":0.65,"move":{"id":1,"x":495,"y":500,"g":{"x":9.9,"z":1,"zone":10}}},
+        {"t":0.66,"move":{"id":2,"x":800,"y":300,"g":{"x":16,"z":-3,"zone":15}}},
+        {"t":0.675,"move":{"id":1,"x":502.5,"y":500,"g":{"x":10.05,"z":1,"zone":10}}},
+        {"t":0.676,"up":{"id":2,"x":800,"y":300,"g":{"x":16,"z":-3,"zone":15}}},
+        {"t":0.7,"move":{"id":1,"x":510,"y":500,"g":{"x":10.2,"z":1,"zone":10}}},
+        {"t":0.725,"move":{"id":1,"x":517.5,"y":500,"g":{"x":10.35,"z":1,"zone":10}}},
+        {"t":0.75,"move":{"id":1,"x":525,"y":500,"g":{"x":10.5,"z":1,"zone":10}}},
+        {"t":0.775,"move":{"id":1,"x":532.5,"y":500,"g":{"x":10.65,"z":1,"zone":10}}},
+        {"t":0.8,"move":{"id":1,"x":540,"y":500,"g":{"x":10.8,"z":1,"zone":10}}},
+        {"t":0.825,"move":{"id":1,"x":547.5,"y":500,"g":{"x":10.95,"z":1,"zone":10}}},
+        {"t":0.85,"move":{"id":1,"x":555,"y":500,"g":{"x":11.1,"z":1,"zone":10}}},
+        {"t":0.875,"move":{"id":1,"x":562.5,"y":500,"g":{"x":11.25,"z":1,"zone":10}}},
+        {"t":0.9,"move":{"id":1,"x":570,"y":500,"g":{"x":11.4,"z":1,"zone":10}}},
+        {"t":0.925,"move":{"id":1,"x":577.5,"y":500,"g":{"x":11.55,"z":1,"zone":10}}},
+        {"t":0.95,"move":{"id":1,"x":585,"y":500,"g":{"x":11.7,"z":1,"zone":10}}},
+        {"t":0.975,"move":{"id":1,"x":592.5,"y":500,"g":{"x":11.85,"z":1,"zone":10}}},
+        {"t":1,"move":{"id":1,"x":600,"y":500,"g":{"x":12,"z":1,"zone":10}}},
+        {"t":1.025,"up":{"id":1,"x":600,"y":500,"g":{"x":12,"z":1,"zone":10}}}
+      ],
+      "events": [
+        {"type":"press","id":1,"t":0,"state":"pressed","x":300,"y":500},
+        {"type":"dragstart","id":1,"t":0.05,"state":"dragging","x":315,"y":500},
+        {"type":"move","id":1,"t":0.05,"state":"dragging","x":315,"y":500},
+        {"type":"dragmove","id":1,"t":0.05,"state":"dragging","x":315,"y":500},
+        {"type":"dragmove","id":1,"t":0.075,"state":"dragging","x":322.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.1,"state":"dragging","x":330,"y":500},
+        {"type":"dragmove","id":1,"t":0.125,"state":"dragging","x":337.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.15,"state":"dragging","x":345,"y":500},
+        {"type":"dragmove","id":1,"t":0.175,"state":"dragging","x":352.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.2,"state":"dragging","x":360,"y":500},
+        {"type":"dragmove","id":1,"t":0.225,"state":"dragging","x":367.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.25,"state":"dragging","x":375,"y":500},
+        {"type":"dragmove","id":1,"t":0.275,"state":"dragging","x":382.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.3,"state":"dragging","x":390,"y":500},
+        {"type":"dragmove","id":1,"t":0.325,"state":"dragging","x":397.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.35,"state":"dragging","x":405,"y":500},
+        {"type":"dragmove","id":1,"t":0.375,"state":"dragging","x":412.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.4,"state":"dragging","x":420,"y":500},
+        {"type":"dragmove","id":1,"t":0.425,"state":"dragging","x":427.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.45,"state":"dragging","x":435,"y":500},
+        {"type":"dragmove","id":1,"t":0.475,"state":"dragging","x":442.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.5,"state":"dragging","x":450,"y":500},
+        {"type":"dragmove","id":1,"t":0.525,"state":"dragging","x":457.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.55,"state":"dragging","x":465,"y":500},
+        {"type":"dragmove","id":1,"t":0.575,"state":"dragging","x":472.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.6,"state":"dragging","x":480,"y":500},
+        {"type":"dragmove","id":1,"t":0.625,"state":"dragging","x":487.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.65,"state":"dragging","x":495,"y":500},
+        {"type":"dragmove","id":1,"t":0.675,"state":"dragging","x":502.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.7,"state":"dragging","x":510,"y":500},
+        {"type":"dragmove","id":1,"t":0.725,"state":"dragging","x":517.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.75,"state":"dragging","x":525,"y":500},
+        {"type":"dragmove","id":1,"t":0.775,"state":"dragging","x":532.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.8,"state":"dragging","x":540,"y":500},
+        {"type":"dragmove","id":1,"t":0.825,"state":"dragging","x":547.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.85,"state":"dragging","x":555,"y":500},
+        {"type":"dragmove","id":1,"t":0.875,"state":"dragging","x":562.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.9,"state":"dragging","x":570,"y":500},
+        {"type":"dragmove","id":1,"t":0.925,"state":"dragging","x":577.5,"y":500},
+        {"type":"dragmove","id":1,"t":0.95,"state":"dragging","x":585,"y":500},
+        {"type":"dragmove","id":1,"t":0.975,"state":"dragging","x":592.5,"y":500},
+        {"type":"dragmove","id":1,"t":1,"state":"dragging","x":600,"y":500},
+        {"type":"release","id":1,"t":1.025,"state":"dragging","x":600,"y":500}
+      ]
+    },
+    {
+      "name": "right button pans",
+      "settings": {"moveThreshold":8,"holdDelay":0.4,"handSmooth":0.25,"twoFinger":0.3,"shapeSpan":0.13,"cornerAngle":70,"bendAngle":90,"curveAngle":35,"circleTurn":0.8,"circleReversal":120,"circleOneWay":0.9,"circleMin":40,"circleRound":0.4,"circleSize":4},
+      "screen": {"height":900},
+      "input": [
+        {"t":0,"down":{"id":1,"x":640,"y":500,"button":2,"g":{"x":12.8,"z":1,"zone":10}}},
+        {"t":0.15,"move":{"id":1,"x":643,"y":500,"g":{"x":12.86,"z":1,"zone":10}}},
+        {"t":0.3,"move":{"id":1,"x":657.25,"y":487.5,"g":{"x":13.145,"z":0.75,"zone":10}}},
+        {"t":0.45,"move":{"id":1,"x":671.5,"y":475,"g":{"x":13.43,"z":0.5,"zone":10}}},
+        {"t":0.6,"move":{"id":1,"x":685.75,"y":462.5,"g":{"x":13.715,"z":0.25,"zone":10}}},
+        {"t":0.75,"move":{"id":1,"x":700,"y":450,"g":{"x":14,"z":0,"zone":11}}},
+        {"t":0.9,"up":{"id":1,"x":700,"y":450,"g":{"x":14,"z":0,"zone":11}}}
+      ],
+      "events": [
+        {"type":"panstart","id":1,"t":0,"state":"panning","x":640,"y":500},
+        {"type":"panmove","id":1,"t":0.15,"state":"panning","x":643,"y":500},
+        {"type":"panmove","id":1,"t":0.3,"state":"panning","x":657.25,"y":487.5},
+        {"type":"panmove","id":1,"t":0.45,"state":"panning","x":671.5,"y":475},
+        {"type":"panmove","id":1,"t":0.6,"state":"panning","x":685.75,"y":462.5},
+        {"type":"panmove","id":1,"t":0.75,"state":"panning","x":700,"y":450},
+        {"type":"panend","id":1,"t":0.9,"state":"panning","x":700,"y":450}
+      ]
+    }
+  ]
+}

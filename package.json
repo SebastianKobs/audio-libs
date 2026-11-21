@@ -1,0 +1,20 @@
+{
+  "name": "audio-libs",
+  "version": "0.0.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "Audio libraries in TypeScript: a sound as data, built for Web Audio and shown as a device view, a MIDI sequencer and its clock, notes and scales, signal processing, places heard by distance, gestures; each usable alone.",
+  "type": "module",
+  "devDependencies": {
+    "eslint-plugin-no-unsanitized": "^4.1.5",
+    "knip": "6.39.0",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2003",
+    "prettier": "3.9.9",
+    "typescript": "^7.0.2",
+    "yaml": "^2.9.1"
+  },
+  "optionalDependencies": {
+    "ts-code-checks": "git+ssh://git@github.com/SebastianKobs/ts-code-checks.git#2cacd737a5f626275767b9090dcb99627c983788"
+  }
+}
