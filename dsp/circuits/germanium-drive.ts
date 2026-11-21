@@ -2,6 +2,8 @@
 // A sound comes in as units and the circuit works in volts: the drive says how many volts a unit is, the level how
 // many units a volt comes back as. The OC44 with its parasitics, the extension its paper puts first.
 // Run 8 times as fast between two windowed-sinc filters, so the clip's partials don't fold.
+// It rests while silent: a block of silence in, its last block's sound died away, it writes silence and runs nothing,
+// so a drive switched out of the sound costs nothing. Its circuit then waits where it was, at its operating point.
 import { Oversampler } from '../filters/index.ts';
 import type { Netlist } from './dk-model.ts';
 import { withParasitics } from './parasitics.ts';
@@ -23,10 +25,12 @@ export interface GermaniumDriveParams {
 interface Channel {
   readonly oversampler: Oversampler;
   readonly shape: (volts: number) => number;
+  loudest: number; // its last block's peak, in units
 }
 
 const FACTOR = 8; // as Holmes, Holters and van Walstijn listened to it
 const SUPPLY = -9; // V
+const DIED_AWAY = 1e-7; // a block's peak under it, -140 dB, is silence: the circuit may rest
 const VOICINGS: readonly Netlist[] = [RANGEMASTER, RANGEMASTER_FULL_RANGE].map((netlist) =>
   withParasitics(netlist, OC44_PARASITICS),
 );
@@ -64,14 +68,30 @@ export class GermaniumDrive {
         return;
       }
       const channel = (this.#channels[index] ??= this.#channel());
+      if (channel.loudest < DIED_AWAY && isSilent(input, output.length)) {
+        output.fill(0);
+        return;
+      }
+      let loudest = 0;
       for (let i = 0; i < output.length; i++) {
         output[i] = units * channel.oversampler.process(volts * (input[i] ?? 0), channel.shape);
+        loudest = Math.max(loudest, Math.abs(output[i]!));
       }
+      channel.loudest = loudest;
     });
   }
 
   #channel(): Channel {
     const stage = new PnpStage(VOICINGS[this.#voicing]!, OC44_EBERS_MOLL, FACTOR * this.#sampleRate, SUPPLY);
-    return { oversampler: new Oversampler(FACTOR), shape: (volts) => stage.process(volts) };
+    return { oversampler: new Oversampler(FACTOR), shape: (volts) => stage.process(volts), loudest: 0 };
   }
+}
+
+function isSilent(input: ArrayLike<number>, length: number): boolean {
+  for (let i = 0; i < length; i++) {
+    if ((input[i] ?? 0) !== 0) {
+      return false;
+    }
+  }
+  return true;
 }

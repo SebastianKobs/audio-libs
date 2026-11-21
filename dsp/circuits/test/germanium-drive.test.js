@@ -107,3 +107,24 @@ test('each channel its own circuit: a silent channel stays silent beside a loud 
 test('names its latency, the oversampler’s', () => {
   assert.equal(new GermaniumDrive({ sampleRate: RATE }).latency, 32);
 });
+
+test('rests while silent: once its sound has died away, silence in is silence out, exactly, the circuit not run', () => {
+  const drive = new GermaniumDrive({ sampleRate: RATE });
+  const burst = sine(1000, 0.05, 0.5);
+  const quiet = new Float32Array(RATE); // a second: the circuit's ring under -140 dB long before
+  const [output] = rendered(drive, TREBLE, [Float32Array.from([...burst, ...quiet])]);
+  const tail = output.subarray(output.length - BLOCK);
+  assert.ok(
+    tail.every((x) => x === 0),
+    'exactly 0, not a dying ring',
+  );
+});
+
+test('wakes as from rest: a sound after a rest comes out as from a drive just made', () => {
+  const rested = new GermaniumDrive({ sampleRate: RATE });
+  rendered(rested, TREBLE, [new Float32Array(RATE / 10)]);
+  const note = sine(1000, 0.1, 0.1);
+  const [after] = rendered(rested, TREBLE, [note]);
+  const [fresh] = rendered(new GermaniumDrive({ sampleRate: RATE }), TREBLE, [note]);
+  after.forEach((x, n) => near(x, fresh[n], `sample ${n}`, 1e-6));
+});
