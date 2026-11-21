@@ -14,5 +14,6 @@ Signal processing on sample arrays, free of any audio API. Part of [the librarie
 - [`operator-levels/`](operator-levels/README.md): a DX's levels as an FM kernel's numbers.
 - [`oscillators/`](oscillators/README.md): oscillator voices rendered sample by sample, hard sync, phase modulation and phase distortion, and a way to start and stop one.
 - [`true-peak/`](true-peak/README.md): a true-peak meter and a limiter that keeps every point of the wave under a ceiling.
+- [`circuits/`](circuits/README.md): analog circuits modeled from their parts, starting with a transistor.
 
 Reads: `base/util/` alone, for `impulse/`'s seeded random, and in `grains/`'s tests. Inside the group, `loudness/`, `impulse/` and `true-peak/` read `filters/`; `impulse/` reads `measures/` and `true-peak/` reads `loudness/`, both in their tests.
