@@ -1,4 +1,4 @@
-// The germanium drive's unit tests (dsp/circuits/): the Rangemaster with the OC44 and its parasitics, run at 4 × the
+// The germanium drive's unit tests (dsp/circuits/): the Rangemaster with the OC44 and its parasitics, run at 2 × the
 // rate, a stage a channel, its input in volts by its drive and its output back in units by its level.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -56,7 +56,7 @@ test('silence comes out silent: it starts at its operating point, nothing to set
   );
 });
 
-test('distorts as the circuit does at 4 × the rate: a 1 kHz sine at 0.1 V its note, 2nd and 3rd as the stage alone makes them', () => {
+test('distorts as the circuit does at 2 × the rate: a 1 kHz sine at 0.1 V its note, 2nd and 3rd as the stage alone makes them', () => {
   const [output] = rendered(new GermaniumDrive({ sampleRate: RATE }), TREBLE, [sine(1000, 0.3, 0.1)]);
   const stage = new PnpStage(withParasitics(RANGEMASTER, OC44_PARASITICS), OC44_EBERS_MOLL, 8 * RATE, -9);
   const direct = Float32Array.from({ length: Math.round(0.3 * 8 * RATE) }, (_, n) =>
@@ -104,10 +104,10 @@ test('each channel its own circuit: a silent channel stays silent beside a loud 
   assert.ok(silent.every((x) => Math.abs(x) < 1e-6));
 });
 
-test('names its latency, the oversampler’s, and its oversampling: 4 ×, half the cost of 8 ×, its aliases as far under', () => {
+test('names its latency, the oversampler’s, and its oversampling: 2 ×, a quarter of the cost of 8 ×', () => {
   const drive = new GermaniumDrive({ sampleRate: RATE });
   assert.equal(drive.latency, 32);
-  assert.equal(drive.oversampling, 4);
+  assert.equal(drive.oversampling, 2);
 });
 
 test('rests while silent: once its sound has died away, silence in is silence out, exactly, the circuit not run', () => {

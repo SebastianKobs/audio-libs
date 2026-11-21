@@ -4,7 +4,7 @@
 // Not a curve: its bias shifts with the sound, its clip lopsided, its even harmonics leading at every level.
 // Its drive is how many volts a unit of the sound is, in dB (0: a full-scale sine at 1 V peak, a hot guitar);
 // its level how many units a volt comes back as. Its voicing the treble booster as built, or full range.
-// Its dsp is dsp/circuits/germanium-drive.ts; a builder runs it in a processor, at 4 × the rate.
+// Its dsp is dsp/circuits/germanium-drive.ts; a builder runs it in a processor, at 2 × the rate.
 import type { ParamSpecs } from '../../../base/params/index.ts';
 import type { Block } from './block.ts';
 

@@ -1,6 +1,6 @@
 // ---------- build/web-audio/processors/germanium-stage-processor: a germanium transistor stage, in the audio thread ----------
 // An AudioWorklet module, loaded by its URL (worklets.ts); Vite bundles it with what it imports, the kernel of dsp/circuits/.
-// The kernel runs each channel through a circuit of its own at 4 × the rate; this makes it a node: its drive, level
+// The kernel runs each channel through a circuit of its own at 2 × the rate; this makes it a node: its drive, level
 // and voicing k-rate, one value a block, the voicing by its index.
 // Always kept running: a desk's insert lives as long as the page, and Chrome never calls again a processor that once said
 // it's done, though its input comes back.

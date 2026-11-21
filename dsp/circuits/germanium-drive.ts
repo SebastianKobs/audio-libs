@@ -1,8 +1,8 @@
-// ---------- dsp/circuits/germanium-drive: the Rangemaster as a drive, a circuit a channel, at 4 × the rate ----------
+// ---------- dsp/circuits/germanium-drive: the Rangemaster as a drive, a circuit a channel, at 2 × the rate ----------
 // A sound comes in as units and the circuit works in volts: the drive says how many volts a unit is, the level how
 // many units a volt comes back as. The OC44 with its parasitics, the extension its paper puts first.
-// Run 4 times as fast between two windowed-sinc filters, so the clip's partials don't fold: its harmonics fall off so
-// fast that at 4 × its aliases measured under -71 dB, as at 8 ×, the rate Holmes, Holters and van Walstijn listened at.
+// Run 2 times as fast between two windowed-sinc filters, so the clip's partials hardly fold: its harmonics fall off so
+// fast that only a hard attack folds any back, under the harmonics it comes with (Holmes, Holters and van Walstijn listened at 8 ×).
 // It rests while silent: a block of silence in, its last block's sound died away, it writes silence and runs nothing,
 // so a drive switched out of the sound costs nothing. Its circuit then waits where it was, at its operating point.
 import { Oversampler } from '../filters/index.ts';
@@ -29,7 +29,7 @@ interface Channel {
   loudest: number; // its last block's peak, in units
 }
 
-const FACTOR = 4; // half the cost of 8 ×: E6 driven hard, its aliases measured under -71 dB either way
+const FACTOR = 2; // a quarter of 8 ×'s cost: aliases only on hard attacks, -52 dB at a loud chord's peak, picked by ear
 const SUPPLY = -9; // V
 const DIED_AWAY = 1e-7; // a block's peak under it, -140 dB, is silence: the circuit may rest
 const VOICINGS: readonly Netlist[] = [RANGEMASTER, RANGEMASTER_FULL_RANGE].map((netlist) =>
