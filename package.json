@@ -15,6 +15,6 @@
     "yaml": "^2.9.1"
   },
   "optionalDependencies": {
-    "ts-code-checks": "git+ssh://git@github.com/SebastianKobs/ts-code-checks.git#2cacd737a5f626275767b9090dcb99627c983788"
+    "ts-code-checks": "git+ssh://git@github.com/SebastianKobs/ts-code-checks.git#d896ef09be3528e3060469005f1fa22ccdfe6ecf"
   }
 }
