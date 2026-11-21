@@ -12,7 +12,7 @@ import { blockNode, composite, oneBlockPlan } from './blocks.js';
 import { standInWorklets } from './worklet-nodes.js';
 import { near } from '../../../../base/util/test/near.js';
 
-const LOADED = standInWorklets(['crusher', 'grains', 'saturating filter', 'sync oscillator']);
+const LOADED = standInWorklets(['crusher', 'grains', 'saturating filter', 'germanium stage', 'sync oscillator']);
 const MONO_OUT = [{ name: 'out', channels: 1 }];
 // a param's value as last told: set now, it's scheduled at the context's time
 const told = (param) => param.events.at(-1)?.[1] ?? param.value;
@@ -105,6 +105,32 @@ test('without its worklet a crusher is a placeholder: its sound passed through, 
   const [first] = outOf(context, source);
   assert.equal(first.kind, 'gain', 'a gain at 1 in its place');
   assert.doesNotThrow(() => built.set(['bits'], 4), "a placeholder's param left alone");
+});
+
+// ----- the germanium stage
+test('a germanium stage made a worklet of its processor, one input and one output, at its values, its voicing by its index', () => {
+  const { made, built, context, source } = effectOn('germanium stage', {
+    drive: -6,
+    level: -18,
+    voicing: 'full range',
+  });
+  const [stage, ...others] = made('worklet');
+  assert.equal(others.length, 0);
+  assert.equal(stage.extra.processor, 'germanium stage');
+  assert.deepEqual(stage.extra.options.parameterData, { drive: -6, level: -18, voicing: 1 });
+  assert.deepEqual([stage.extra.options.numberOfInputs, stage.extra.options.numberOfOutputs], [1, 1]);
+  assert.equal(into(context, stage).length, 1, 'fed by its source');
+  assert.deepEqual(outOf(context, source), [stage]);
+  built.set(['drive'], 3, { at: 3 });
+  assert.deepEqual(stage.parameters.get('drive').events.at(-1), ['set', 3, 3]);
+  assert.deepEqual(built.placeholders, []);
+});
+
+test('without its worklet a germanium stage is a placeholder: its sound passed through, said by its address', () => {
+  const { made, built, source, context } = effectOn('germanium stage', {}, { worklets: NO_WORKLETS });
+  assert.equal(made('worklet').length, 0);
+  assert.deepEqual(built.placeholders, [[]]);
+  assert.equal(outOf(context, source)[0].kind, 'gain', 'a gain at 1 in its place');
 });
 
 // ----- the grains

@@ -2,7 +2,7 @@
 
 The builder for Web Audio: handed a plan, where its sound goes and where its inputs come from, it builds the plan and hands back what's built, a `Built`. It knows no planner, channel, desk, effect or instrument, and is the only code that makes Web Audio nodes. What's built is fed, metered and taken apart.
 
-Depends on: `base/automation`, `base/params`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/grains`, `dsp/impulse`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `dsp/wow`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
+Depends on: `base/automation`, `base/params`, `base/util`, `dsp/circuits`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/grains`, `dsp/impulse`, `dsp/measures`, `dsp/oscillators`, `dsp/saturation`, `dsp/true-peak`, `dsp/wow`, `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/plan/format`.
 
 ```ts
 import { WebAudioBuilder } from './index.ts';
@@ -46,6 +46,7 @@ How a block is made:
 | `crusher` | A worklet node of its processor, one input and one output, its bits and rate its AudioParams; a placeholder where the worklet hasn't loaded. |
 | `grains` | A worklet node of its processor, one input and one output, its six params its AudioParams, handed what it keeps (2 s) and a seed drawn once from the builder's random; a placeholder where the worklet hasn't loaded. |
 | `saturating filter` | A worklet node of its processor, one input and one output, a filter a channel, its six params its AudioParams (its mode by its index), a seed drawn once from the builder's random, told `{ stop }` by message as a source is; the library's `filter` at the mode's type and slope where the worklet hasn't loaded, its resonance a Q by octaves from flat to 30, its drive, compensation and mode held and heard nowhere. |
+| `germanium stage` | A worklet node of its processor, one input and one output, a circuit a channel at 8 × the rate, its drive, level and voicing its AudioParams (its voicing by its index); a placeholder where the worklet hasn't loaded. |
 | `shaper` | A waveshaper of the curve its drive and shape make, made again each time either is told; its oversampling Web Audio's own. |
 | `eq band` | One biquad, its type Web Audio's own for each choice, its gain in dB; a highpass's Q told again in dB as the type changes. |
 | `compressor` | The browser's compressor into a gain that takes its make-up back, worked out from the threshold, the knee and the ratio (`dsp/dynamics`), each held and told to both, so a quiet sound passes at its level. |
@@ -73,7 +74,7 @@ How a block is made:
 | `measuredLags()`, `CHROMIUM_LAGS`, `Lags`, `OfflineContexts` | How late a waveshaper comes out at each oversampling, in samples, as the browser's own: `measuredLags(sampleRate, Offline)` renders a click through one offline, once for each oversampling, and gives Chromium's `CHROMIUM_LAGS` where a render fails. Nothing is kept between calls: the context that asks keeps what it found (`shaper-lags.ts`). |
 | `Copies`, `Editable` | Every built copy of one template, an edit reaching each: a value at its address under each copy, settings changed in one change so what's built is built again once (`copies.ts`). |
 
-A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports: the `dsp/true-peak` kernel for the lookahead limiter's, the `dsp/oscillators` kernels for the three sources', each a `ScheduledVoice` told `{ start }` and `{ stop }`; the `dsp/crusher`, `dsp/grains` and `dsp/filters` kernels for the three effects', each handed a random of its own made of `seeded()` from its options.
+A processor is a file under `processors/`, an AudioWorklet module of its own: it registers as it loads, and the page reaches it only by its URL, which Vite makes (`?worker&url`) bundling in what it imports: the `dsp/true-peak` kernel for the lookahead limiter's, the `dsp/oscillators` kernels for the three sources', each a `ScheduledVoice` told `{ start }` and `{ stop }`; the `dsp/crusher`, `dsp/grains` and `dsp/filters` kernels for the three effects', each handed a random of its own made of `seeded()` from its options; the `dsp/circuits` kernel for the germanium stage's, which draws nothing.
 
 What a studio needs of what's built, beyond the contract, is Web Audio's own, not every builder's:
 

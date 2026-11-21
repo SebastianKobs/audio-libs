@@ -1,5 +1,5 @@
 // The blocks' unit tests (modular-audio/plan/blocks): the contract every builder meets.
-//   - the twenty-six blocks, each declared by its kind;
+//   - the twenty-seven blocks, each declared by its kind;
 //   - each param and setting on a control, its default where it has one inside it, its name one of a kind;
 //   - each block's inputs and outputs, their channels where the block fixes them;
 //   - what each declares: its names in short standard terms, its choices, units and defaults;
@@ -44,6 +44,7 @@ const KINDS = [
   'crusher',
   'grains',
   'saturating filter',
+  'germanium stage',
   'shaper',
   'eq band',
   'compressor',
@@ -80,7 +81,7 @@ function declared({ params, settings, inputs, outputs }) {
   };
 }
 
-test('the twenty-six blocks, each declared by its kind, the contract every builder meets', () => {
+test('the twenty-seven blocks, each declared by its kind, the contract every builder meets', () => {
   assert.deepEqual(Object.keys(BLOCKS), KINDS);
   for (const [kind, block] of Object.entries(BLOCKS)) {
     assert.equal(block.kind, kind);
@@ -218,6 +219,12 @@ test("what each block declares, in short standard terms: its params and settings
       outputs: [`out ${MONO}`],
     },
     crusher: { params: ['bits =16', 'rate Hz =48000'], settings: [], inputs: ['in'], outputs: ['out'] },
+    'germanium stage': {
+      params: ['drive dB =-10', 'level dB =-20', 'voicing treble booster|full range =treble booster'],
+      settings: [],
+      inputs: ['in'],
+      outputs: ['out'],
+    },
     grains: {
       params: [
         'freeze =0',
@@ -333,7 +340,7 @@ test("the worklet sources' choices are params, changed as they play or read once
 });
 
 test("the worklet effects' choices are params, changed as they play: no settings; each a processor of one input and one output, grains a tail", () => {
-  for (const kind of ['crusher', 'grains', 'saturating filter']) {
+  for (const kind of ['crusher', 'grains', 'saturating filter', 'germanium stage']) {
     assert.deepEqual(BLOCKS[kind].settings, [], `${kind}: no settings`);
     assert.deepEqual(
       [BLOCKS[kind].inputs, BLOCKS[kind].outputs].map((jacks) => jacks.map(({ name }) => name)),

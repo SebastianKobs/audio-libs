@@ -19,6 +19,7 @@ import { pan } from './pan.ts';
 import { phaseDistortion } from './phase-distortion.ts';
 import { reverb } from './reverb.ts';
 import { room } from './room.ts';
+import { germaniumStage } from './germanium-stage.ts';
 import { saturatingFilter } from './saturating-filter.ts';
 import { saturation } from './saturation.ts';
 import { select } from './select.ts';
@@ -51,6 +52,7 @@ export const MAKERS: Readonly<Partial<Record<BlockKind, Maker>>> = Object.freeze
   crusher,
   grains,
   'saturating filter': saturatingFilter,
+  'germanium stage': germaniumStage,
   shaper,
   'eq band': eqBand,
   compressor,

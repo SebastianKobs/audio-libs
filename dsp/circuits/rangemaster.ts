@@ -28,3 +28,17 @@ export const RANGEMASTER: Netlist = Object.freeze({
   transistors: [{ emitter: 'emitter', base: 'base', collector: 'collector' }],
   output: ['output', 'ground'],
 } as const);
+
+/**
+ * The Rangemaster with its input and output capacitors 100 times larger (470 nF, 1 µF): flat within 1 dB from 200 Hz,
+ * the transistor, its bias and its gain as built. Its emitter's bypass is kept, for its bias's time: it takes 1.3 dB
+ * off 100 Hz. A choice outside its papers, for a sound with as much in its lows as in its highs.
+ */
+export const RANGEMASTER_FULL_RANGE: Netlist = Object.freeze({
+  ...RANGEMASTER,
+  capacitors: [
+    { between: ['input', 'base'], farads: 470e-9 },
+    { between: ['emitter', 'ground'], farads: 47e-6 },
+    { between: ['collector', 'output'], farads: 1e-6 },
+  ],
+} as const);

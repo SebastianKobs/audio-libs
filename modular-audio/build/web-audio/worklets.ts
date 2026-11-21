@@ -15,7 +15,8 @@ export type ProcessorName =
   | 'phase distortion'
   | 'crusher'
   | 'grains'
-  | 'saturating filter';
+  | 'saturating filter'
+  | 'germanium stage';
 // each processor's module URL, by the name it registers; those a caller has
 export type ProcessorModules = Readonly<Partial<Record<ProcessorName, string>>>;
 // a worklet node of a loaded processor, made in a context; none where it can't be

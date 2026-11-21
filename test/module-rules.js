@@ -81,7 +81,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'dsp/crusher/': [],
     'dsp/grains/': ['base/util/'],
     'dsp/true-peak/': ['dsp/filters/', 'dsp/loudness/'],
-    'dsp/circuits/': [],
+    'dsp/circuits/': ['dsp/filters/'],
     'formats/wav/': [],
     'modular-audio/plan/format/': ['base/params/', 'base/util/'],
     'modular-audio/plan/blocks/': [
@@ -146,6 +146,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'modular-audio/build/web-audio/': [
       'base/automation/',
       'base/params/',
+      'dsp/circuits/',
       'dsp/crusher/',
       'dsp/dynamics/',
       'dsp/filters/',

@@ -7,6 +7,7 @@ import eqBand from './eq-band.ts';
 import envelope from './envelope.ts';
 import filter from './filter.ts';
 import gain from './gain.ts';
+import germaniumStage from './germanium-stage.ts';
 import grains from './grains.ts';
 import limiter from './limiter.ts';
 import lookaheadLimiter from './lookahead-limiter.ts';
@@ -55,6 +56,7 @@ export const BLOCKS = frozen({
   crusher,
   grains,
   'saturating filter': saturatingFilter,
+  'germanium stage': germaniumStage,
   shaper,
   'eq band': eqBand,
   compressor,
