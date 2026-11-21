@@ -44,7 +44,7 @@ clones:   # the same code written twice: a new clone fails, the known ones liste
 # the faces: each library's entry, and DeskState's file, the base of the exported MixingDesk, whose members a user reaches through it;
 # not checked: the worklet processors, a class each whose static parameterDescriptors the browser's audio worklet reads
 class-members:   # a public class member only its own class uses, a library's faces aside
-	$(if $(INSTALLED),node $(CHECKS)/class-members.js tsconfig.json --faces '^(.+/)?index\.ts$$|^modular-audio/build/desk/mixing/desk-state\.ts$$' --checked '^(?!modular-audio/build/web-audio/processors/)(base|dsp|formats|generative|midi|midi-devices|modular-audio|music|sequencing|spatial)/',$(SKIPPED))
+	$(if $(INSTALLED),node $(CHECKS)/class-members.js tsconfig.json --faces '^(.+/)?index\.ts$$|^modular-audio/build/desk/mixing/desk-state\.ts$$' --checked '^(?!modular-audio/build/web-audio/processors/)(base|dsp|formats|midi|midi-devices|modular-audio|music|sequencing|spatial)/',$(SKIPPED))
 audit:    # known advisories, and the signatures; offline, it says so and passes
 	$(if $(INSTALLED),node $(CHECKS)/audit.js,$(SKIPPED))
 # what isn't committed yet, as one patch: the changes to what git tracks, staged or not, and the files it doesn't track yet (but those

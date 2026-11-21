@@ -17,10 +17,9 @@ Take the layers you need: copy their folders, or mount this repo as a git submod
 
 ## By role
 
-Ten groups, each a folder, read bottom up. A group reads only those before it. Each group's README names its libraries and what it reads, each library's what it offers.
+Nine groups, each a folder, read bottom up. A group reads only those before it. Each group's README names its libraries and what it reads, each library's what it offers.
 
 - [`base/`](base/README.md): words and helpers every library shares.
-- [`generative/`](generative/README.md): the rules the visual ideas found, medium-free.
 - [`midi/`](midi/README.md): MIDI 2.0's channel voice messages as values, and what they're played into.
 - [`sequencing/`](sequencing/README.md): time, events, the MIDI sequencer and the transport's view.
 - [`music/`](music/README.md): notes, keys, scales and a play style, a phrase played as a player would.
@@ -36,8 +35,8 @@ A library's layer is one more than the highest of those it uses; it can be taken
 
 | Layer | Libraries |
 |---|---|
-| 0 | `base/html`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/oscillators`, `dsp/saturation`, `dsp/wow`, `formats/wav`, `generative/randomness` |
-| 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `generative/articulation`, `generative/automata`, `generative/genetics`, `generative/rewriting`, `generative/sync`, `generative/trails`, `music/music-theory`, `spatial/places` |
+| 0 | `base/html`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/oscillators`, `dsp/saturation`, `dsp/wow`, `formats/wav` |
+| 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `music/music-theory`, `spatial/places` |
 | 2 | `dsp/true-peak`, `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
 | 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |

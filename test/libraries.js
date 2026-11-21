@@ -8,7 +8,6 @@ export const GROUPS = Object.freeze([
   'base',
   'dsp',
   'formats',
-  'generative',
   'midi',
   'midi-devices',
   'modular-audio',
