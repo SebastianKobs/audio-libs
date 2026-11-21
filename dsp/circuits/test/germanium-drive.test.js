@@ -67,9 +67,10 @@ test('distorts as the circuit does at 2 × the rate: a 1 kHz sine at 0.1 V its n
     1000,
   );
   const ours = harmonics(output, 1000);
-  near(db(ours[0]), db(theirs[0]), 'the note', 0.01);
-  near(db(ours[1] / ours[0]), db(theirs[1] / theirs[0]), 'the 2nd', 0.01);
-  near(db(ours[2] / ours[0]), db(theirs[2] / theirs[0]), 'the 3rd', 0.01);
+  // within 0.05 dB: the stage alone is taken every 2nd sample with no filter, the drive through its oversampler's
+  near(db(ours[0]), db(theirs[0]), 'the note', 0.05);
+  near(db(ours[1] / ours[0]), db(theirs[1] / theirs[0]), 'the 2nd', 0.05);
+  near(db(ours[2] / ours[0]), db(theirs[2] / theirs[0]), 'the 3rd', 0.05);
 });
 
 test('its drive is the input in volts per unit, its level the output in units per volt, both in dB', () => {
