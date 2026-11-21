@@ -34,6 +34,8 @@ export class DkModel {
     Matrix
   >;
   readonly #next: Record<'fromStates' | 'fromInputs' | 'fromCurrents', Matrix>;
+  readonly #capacitors: Record<'fromStates' | 'fromInputs' | 'fromCurrents', Matrix>;
+  readonly #conductances: readonly number[];
   readonly #states: Float64Array;
   readonly #updated: Float64Array;
   readonly #known: Float64Array;
@@ -50,8 +52,14 @@ export class DkModel {
       outFromInputs: through(circuit.outputPick, circuit.sourcePins),
       outFromCurrents: through(circuit.outputPick, circuit.currentInjections),
     };
+    this.#capacitors = {
+      fromStates: through(circuit.capacitorPicks, circuit.historyInjections),
+      fromInputs: through(circuit.capacitorPicks, circuit.sourcePins),
+      fromCurrents: through(circuit.capacitorPicks, circuit.currentInjections),
+    };
+    this.#conductances = circuit.capacitorConductances;
     // x[n] = 2·(2C/T)·v_C[n] - x[n-1]: the trapezoidal rule's history, carried on
-    const doubled = circuit.capacitorPicks;
+    const doubled = circuit.capacitorPicks; // its last use as picks: doubled in place
     circuit.capacitorConductances.forEach((conductance, k) => {
       for (let column = 0; column < doubled.columns; column++) {
         doubled.values[k * doubled.columns + column]! *= 2 * conductance;
@@ -96,6 +104,28 @@ export class DkModel {
     }
     this.#states.set(this.#updated);
     return output;
+  }
+
+  /**
+   * Each capacitor's voltage at these inputs and currents, from what the capacitors hold. Made at a rate of 0, the
+   * capacitors open, it is the circuit at DC: how a model at its real rate is started settled.
+   */
+  capacitorVoltages(inputs: ArrayLike<number>, currents: ArrayLike<number>): Float64Array {
+    const { fromStates, fromInputs, fromCurrents } = this.#capacitors;
+    return Float64Array.from(
+      { length: this.#states.length },
+      (_, row) =>
+        rowTimes(fromStates, row, this.#states)
+        + rowTimes(fromInputs, row, inputs)
+        + rowTimes(fromCurrents, row, currents),
+    );
+  }
+
+  /** The capacitors held at these voltages, no current through them: the circuit as it is after settling. */
+  settle(capacitorVoltages: ArrayLike<number>): void {
+    this.#conductances.forEach((conductance, k) => {
+      this.#states[k] = conductance * capacitorVoltages[k]!; // x = (2C/T)·v + i, and i is 0
+    });
   }
 }
 

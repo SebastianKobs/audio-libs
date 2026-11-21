@@ -5,7 +5,10 @@ Analog circuits modeled from their parts, for a drive that sounds like the circu
 Depends on: nothing.
 
 ```ts
-import { EbersMollPnp, OC44_EBERS_MOLL, type PnpCurrents } from './index.ts';
+import { EbersMollPnp, OC44_EBERS_MOLL, PnpStage, RANGEMASTER, type PnpCurrents } from './index.ts';
+
+const rangemaster = new PnpStage(RANGEMASTER, OC44_EBERS_MOLL, 384000, -9); // 8 × 48 kHz, on -9 V
+const out = rangemaster.process(0.1); // volts in, volts out
 
 const oc44 = new EbersMollPnp(OC44_EBERS_MOLL);
 const currents: PnpCurrents = {
@@ -24,9 +27,10 @@ oc44.currentsAt(0.128, 5.8, currents); // amplifying: about 0.23 mA at the colle
 | `EbersMollPnp` | A PNP transistor; `currentsAt()` writes its base and collector currents and their four slopes at an emitter-base and an emitter-collector voltage into the object it is handed, and hands it back (`ebers-moll-pnp.ts`). |
 | `EbersMollValues` | A transistor's saturation current, forward and reverse gains, forward and reverse ideality, and thermal voltage (`ebers-moll-pnp.ts`). |
 | `PnpCurrents` | The base and collector currents leaving the transistor, and each one's slope by each junction voltage (`ebers-moll-pnp.ts`). |
-| `DkModel` | A netlist as a state-space model by the nodal DK method at a sample rate, each capacitor by the trapezoidal rule; `knownVoltages()` gives the transistors' junction voltages before their own currents feed back, `feedback` how those currents move them, `advance()` the output at the solved currents, moving the capacitors on a sample (`dk-model.ts`). |
+| `DkModel` | A netlist as a state-space model by the nodal DK method at a sample rate, each capacitor by the trapezoidal rule; `knownVoltages()` gives the transistors' junction voltages before their own currents feed back, `feedback` how those currents move them, `advance()` the output at the solved currents, moving the capacitors on a sample; made at a rate of 0 it is the circuit at DC, `capacitorVoltages()` giving what `settle()` starts a model with (`dk-model.ts`). |
 | `Netlist`, `Terminals` | A circuit of resistors, capacitors, voltage sources (the model's inputs, in order) and PNP transistors, with its output across two nodes; a part's two ends by node name, `ground` the reference (`dk-model.ts`). |
+| `PnpStage` | A circuit of one PNP transistor, its first source the signal and its second the supply, run sample by sample: `process()` takes a signal voltage and gives the output voltage, the transistor solved by damped Newton at each sample (its steps limited as SPICE limits them), started at the circuit's DC operating point; `junctions` the last solved voltages, `stalls` the samples whose solve ran out of steps (`pnp-stage.ts`). |
 | `RANGEMASTER` | The Dallas Rangemaster Treble Booster: one PNP as a common-emitter stage on -9 V, its nominal parts; inputs the signal and the supply (`rangemaster.ts`). |
 | `OC44_EBERS_MOLL` | The Mullard OC44, a germanium PNP, as measured by Holmes, Holters and van Walstijn (DAFx-17), at a thermal voltage of 25.5 mV (`transistors.ts`). |
 
-Tests: `test/dk-model.test.js`, a divider at once, an RC lowpass equal to the bilinear recursion sample for sample, and the Rangemaster's parts settling at ngspice's junction voltages with its transistor's currents held. `test/ebers-moll-pnp.test.js`, no current with no voltage, the forward gain while amplifying, tenfold the current for each 62 mV, less than the gain when saturated, the slopes against finite differences, and the currents at the Rangemaster's operating point as ngspice finds them with the same values.
+Tests: `test/pnp-stage.test.js`, the Rangemaster started at ngspice's operating point, silence staying there, a quiet 1 kHz sine at ngspice's small-signal gain within 0.02 dB, and a square far past full scale never stalling the solve. `test/dk-model.test.js`, a divider at once, an RC lowpass equal to the bilinear recursion sample for sample, and the Rangemaster's parts settling at ngspice's junction voltages with its transistor's currents held. `test/ebers-moll-pnp.test.js`, no current with no voltage, the forward gain while amplifying, tenfold the current for each 62 mV, less than the gain when saturated, the slopes against finite differences, and the currents at the Rangemaster's operating point as ngspice finds them with the same values.
