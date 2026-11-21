@@ -6,7 +6,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { AUDIO_NODES, LIBRARY_LAYOUT, MODULE_STATE, SHORT_NAMES, TEST_FACE, THREE_JS } from '../module-rules.js';
 import { NOT_INSTALLED, whenMissing } from '../optional-checks.js';
-import { GROUPS, inGroups } from '../libraries.js';
+import { CODE_FOLDERS, inCodeFolders } from '../libraries.js';
 
 const rules = await import('ts-code-checks/tools/module-rules.js').catch(whenMissing);
 const check = (name, run) => test(name, { skip: rules === null && NOT_INSTALLED }, run);
@@ -25,8 +25,8 @@ const {
 } = rules ?? {};
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const LIBRARIES = rules === null ? null : inGroups(sourcesIn, ROOT);
-const LIBRARY_TESTS = rules === null ? null : inGroups(testsIn, ROOT);
+const LIBRARIES = rules === null ? null : inCodeFolders(sourcesIn, ROOT);
+const LIBRARY_TESTS = rules === null ? null : inCodeFolders(testsIn, ROOT);
 
 // the test files at the root (test/): those across libraries, the scenarios they run, their helpers; not test/tools/, the tools' own
 function rootTests() {
@@ -42,10 +42,10 @@ function testsInAFolder() {
 }
 
 check(
-  'the libraries are the groups in test/libraries.js, and each library the layout names is a folder with its entry',
+  'the libraries are the code folders in test/libraries.js, and each library the layout names is a folder with its entry',
   () => {
-    const grouped = new Set(LIBRARY_LAYOUT.order.map((path) => path.split('/')[0]));
-    assert.deepEqual([...grouped].sort(), [...GROUPS].sort());
+    const folders = new Set(LIBRARY_LAYOUT.order.map((path) => path.split('/')[0]));
+    assert.deepEqual([...folders].sort(), [...CODE_FOLDERS].sort());
     const entries = LIBRARY_LAYOUT.order.filter((path) => path.endsWith('/') && !LIBRARIES.has(`${path}index.ts`));
     assert.deepEqual(entries, [], 'each library has its index.ts');
   },

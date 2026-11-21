@@ -1,16 +1,16 @@
 // ---------- the clone finder over the libraries ----------
-// ts-code-checks' clones.js reads one folder; the libraries are read group by group (libraries.js), so a clone between two groups is found.
+// ts-code-checks' clones.js reads one folder; the libraries are read folder by folder (libraries.js), so a clone between two folders is found.
 // The clones there are, each by its two files, are in tools/known-clones.js, a list that only shrinks.
 //   node tools/find-clones.js
 import { fileURLToPath } from 'node:url';
 import { cloneProblems, clonesIn } from 'ts-code-checks/tools/clones.js';
 import { sourcesIn } from 'ts-code-checks/tools/module-rules.js';
 import { KNOWN_CLONES } from './known-clones.js';
-import { inGroups } from '../test/libraries.js';
+import { inCodeFolders } from '../test/libraries.js';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 
-const problems = cloneProblems(clonesIn(inGroups(sourcesIn, ROOT)), KNOWN_CLONES);
+const problems = cloneProblems(clonesIn(inCodeFolders(sourcesIn, ROOT)), KNOWN_CLONES);
 for (const problem of problems) {
   console.log(problem);
 }

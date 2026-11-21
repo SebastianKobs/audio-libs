@@ -7,14 +7,14 @@ import { posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LIBRARY_LAYOUT } from '../module-rules.js';
 import { NOT_INSTALLED, whenMissing } from '../optional-checks.js';
-import { inGroups } from '../libraries.js';
+import { inCodeFolders } from '../libraries.js';
 import { StandInContext, into } from '../../modular-audio/build/web-audio/test/audio-stand-in.js';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const rules = await import('ts-code-checks/tools/module-rules.js').catch(whenMissing);
 const check = (name, run) => test(name, { skip: rules === null && NOT_INSTALLED }, run);
 const { importsOf, packagesOf, reachedFrom, sourcesIn } = rules ?? {};
-const LIBRARIES = rules === null ? null : inGroups(sourcesIn, ROOT);
+const LIBRARIES = rules === null ? null : inCodeFolders(sourcesIn, ROOT);
 
 // the YAML files a package's entry loads, by their paths
 function yamlFrom(entry) {
