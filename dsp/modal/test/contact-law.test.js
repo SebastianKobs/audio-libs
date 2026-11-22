@@ -60,10 +60,10 @@ test('damping grows with how hard the contact is pressed, none apart', () => {
   near(law.dampingAt(1e-5), 50 * (law.restPenetration + 1e-5) ** EXPONENT, 1e-12, 'pressed');
 });
 
-test('the mean force and its slope written in one call, the potential at the start handed in', () => {
+test('the mean force and its slope written in one call', () => {
   const law = new ContactLaw({ stiffness: STIFFNESS, exponent: EXPONENT, preload: 2 });
   const into = { force: 0, slope: 0 };
-  assert.equal(law.meanForceInto(-2e-5, law.potential(-2e-5), 3e-5, into), into, 'written into the one handed in');
+  assert.equal(law.meanForceInto(-2e-5, 3e-5, into), into, 'written into the one handed in');
   near(into.force, law.averageForce(-2e-5, 3e-5), 1e-12, 'the force');
   near(into.slope, law.averageForceSlope(-2e-5, 3e-5), 1e-12, 'the slope');
 });
@@ -73,4 +73,16 @@ test('open where the parts no longer touch, past the rest penetration', () => {
   assert.equal(law.isOpen(0), false, 'at rest, pressed together');
   assert.equal(law.isOpen(-law.restPenetration / 2), false, 'lifted a little');
   assert.equal(law.isOpen(-law.restPenetration * 1.01), true, 'lifted past it');
+});
+
+test('the slope of the mean force stays true over a step far shorter than the rest penetration', () => {
+  // a stiff bridge under a large preload: rest penetration 0.024, a step of 10⁻¹⁰ near rest; a linear law's
+  // mean force rises by half its stiffness per unit of where the step ends
+  const linear = new ContactLaw({ stiffness: 2.45e8, exponent: 1, preload: 5.8e6 });
+  const from = -4.4803e-6;
+  near(linear.averageForceSlope(from, from + 1e-10), 2.45e8 / 2, 1e-6, 'linear');
+  near(linear.averageForce(from, from + 1e-10), linear.force(from + 5e-11), 1e-9, 'its mean force');
+  const curved = new ContactLaw({ stiffness: STIFFNESS, exponent: EXPONENT, preload: 2 });
+  const stiffnessThere = STIFFNESS * EXPONENT * (curved.restPenetration + 1e-6) ** (EXPONENT - 1);
+  near(curved.averageForceSlope(1e-6, 1e-6 + 1e-13), stiffnessThere / 2, 1e-6, 'a power of 1.5');
 });

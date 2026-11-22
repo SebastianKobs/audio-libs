@@ -26,9 +26,10 @@ export interface Contact {
   readonly facing?: 1 | -1;
 }
 
-// a solve stops once its steps are this small against the penetrations: rounding, not physics;
-// at 1e-12 a contact barely moving bounced on rounding's floor, 1e-16 against a rest penetration of 7e-6
+// a solve stops once its steps are this small against the penetrations, as they move: rounding, not physics;
+// and under a floor against the rest penetration, which the compression is rounded against
 const TOLERANCE = 1e-9;
+const ROUNDING_FLOOR = 1e-14;
 // more steps than this, and the sample counts as stalled
 const MOST_STEPS = 50;
 
@@ -53,7 +54,6 @@ export class Contacts {
   readonly #free: Float64Array;
   readonly #guess: Float64Array;
   readonly #damping: Float64Array;
-  readonly #startPotential: Float64Array;
   readonly #slopes: Float64Array;
   // the contacts in the solve, by index, and whether each is: one open over the whole step keeps its force
   readonly #solved: Int32Array;
@@ -83,7 +83,6 @@ export class Contacts {
     this.#free = new Float64Array(count);
     this.#guess = new Float64Array(count);
     this.#damping = new Float64Array(count);
-    this.#startPotential = new Float64Array(count);
     this.#slopes = new Float64Array(count);
     this.#solved = new Int32Array(count);
     this.#inSolve = new Uint8Array(count);
@@ -119,7 +118,6 @@ export class Contacts {
       this.#free[index] = this.#freePenetration(index);
       this.#guess[index] = this.#free[index]!;
       this.#damping[index] = law.dampingAt(now) / (2 * this.#step);
-      this.#startPotential[index] = law.potential(before);
       // open a sample back and now: its force stays what the open law gives, unless the solve shows it closing
       this.#inSolve[index] = law.isOpen(before) && law.isOpen(now) ? 0 : 1;
       if (!this.#inSolve[index]) {
@@ -216,13 +214,15 @@ export class Contacts {
     solveInPlace(this.#jacobian, this.#residual, size);
     let largest = 0;
     let scale = 0;
+    let floor = 0;
     for (let row = 0; row < size; row++) {
       const index = this.#solved[row]!;
       this.#guess[index]! -= this.#residual[row]!;
       largest = Math.max(largest, Math.abs(this.#residual[row]!));
-      scale = Math.max(scale, Math.abs(this.#guess[index]!), this.#contacts[index]!.law.restPenetration);
+      scale = Math.max(scale, Math.abs(this.#guess[index]!), Math.abs(this.#free[index]!));
+      floor = Math.max(floor, ROUNDING_FLOOR * this.#contacts[index]!.law.restPenetration);
     }
-    return largest <= TOLERANCE * scale;
+    return largest <= TOLERANCE * scale + floor;
   }
 
   // where a contact's penetration ends at the next sample under every force as it stands: free less their push
@@ -240,12 +240,7 @@ export class Contacts {
   #setForceAt(index: number): void {
     const before = this.#before[index]!;
     const guess = this.#guess[index]!;
-    const { force, slope } = this.#contacts[index]!.law.meanForceInto(
-      before,
-      this.#startPotential[index]!,
-      guess,
-      this.#mean,
-    );
+    const { force, slope } = this.#contacts[index]!.law.meanForceInto(before, guess, this.#mean);
     this.#forces[index] = force + this.#damping[index]! * (guess - before);
     this.#slopes[index] = slope + this.#damping[index]!;
   }

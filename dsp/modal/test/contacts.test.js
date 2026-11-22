@@ -183,3 +183,21 @@ test("a contact barely moving, long after a strike, never stalls on rounding's f
   run(contacts, 2 * RATE);
   assert.equal(contacts.stalls, 0);
 });
+
+test('a large preload solves as truly as a small one, while the contact holds', () => {
+  // a linear bridge that a soft strike never opens: the tongue moves alike under either preload
+  const swing = (preload) => {
+    const bank = tongue(1);
+    const contacts = new Contacts([bridge(bank, { stiffness: 1e9, exponent: 1, preload })], RATE);
+    bank.push(TIP, STRIKE / 100);
+    const positions = [];
+    run(contacts, RATE / 10, () => positions.push(bank.position(TIP)));
+    return positions;
+  };
+  const small = swing(2000);
+  const large = swing(2e9);
+  const peak = Math.max(...small.map(Math.abs));
+  const apart = Math.max(...small.map((x, i) => Math.abs(x - large[i])));
+  // the solve stops at 10⁻⁹ a sample, and its misses add up over the 4800 samples (it was 0.58 before the fix)
+  assert.ok(apart < 1e-7 * peak, `apart by ${apart / peak} of the swing`);
+});

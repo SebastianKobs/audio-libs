@@ -3,6 +3,8 @@
 // A preload is a force the parts press together with at rest (a negative gap, in the collision papers' terms):
 // measured from rest, the law then gives no force there, and gives the preload's pull once the contact opens.
 // The mean force over a step, from the potential, is what keeps a scheme's energy (Chatziioannou and van Walstijn).
+// Taken plainly, the potential's change over a short step is lost to rounding, the more so the larger the
+// preload, and its slope twice over: so while pressed, it is written as a power of the step's ratio, (1 + r)^p.
 
 /** A contact's values: stiffness k, exponent α (1 or more), damping λ, preload F0, all 0 or more. */
 export interface ContactLawValues {
@@ -17,6 +19,9 @@ export interface MeanForce {
   force: number;
   slope: number;
 }
+
+// a step's ratio under which the mean force is taken by its series: its error then under 10⁻⁹
+const SERIES_BELOW = 1e-3;
 
 /** The law, y the penetration measured from rest: k·[y0 + y]₊^α − F0, y0 where the preload is held. */
 export class ContactLaw {
@@ -51,34 +56,28 @@ export class ContactLaw {
 
   /** The mean force over a step from one penetration to another: the potential's change over the step. */
   averageForce(from: number, to: number): number {
-    return this.meanForceInto(from, this.potential(from), to, { force: 0, slope: 0 }).force;
+    return this.meanForceInto(from, to, { force: 0, slope: 0 }).force;
   }
 
   /** How the mean force changes with where the step ends: what a Newton solve steps along. */
   averageForceSlope(from: number, to: number): number {
-    return this.meanForceInto(from, this.potential(from), to, { force: 0, slope: 0 }).slope;
+    return this.meanForceInto(from, to, { force: 0, slope: 0 }).slope;
   }
 
-  /**
-   * The mean force over a step and its slope, written into `into` and handed back, the potential at the step's
-   * start given: a solve calls it many times a sample, the start fixed, so one power is taken a call.
-   */
-  meanForceInto(from: number, fromPotential: number, to: number, into: MeanForce): MeanForce {
-    if (this.#tooClose(from, to)) {
-      const middle = (from + to) / 2;
-      into.force = this.force(middle);
-      into.slope = this.#stiffnessAt(middle) / 2;
-      return into;
+  /** The mean force over a step and its slope, written into `into` and handed back: a solve calls it many times. */
+  meanForceInto(from: number, to: number, into: MeanForce): MeanForce {
+    const start = this.restPenetration + from;
+    const end = this.restPenetration + to;
+    if (start > 0 && end > 0) {
+      this.#meanWhilePressed(start, end, into);
+    } else if (start <= 0 && end <= 0) {
+      into.force = 0;
+      into.slope = 0;
+    } else {
+      this.#meanAcrossEdge(start, end, into);
     }
-    const compression = this.restPenetration + to;
-    let pressed = 0;
-    if (compression > 0) {
-      pressed = this.#stiffness * compression ** this.#exponent;
-    }
-    const potential =
-      (pressed * Math.max(0, compression)) / (this.#exponent + 1) - this.#preload * to - this.#restPotential;
-    into.force = (potential - fromPotential) / (to - from);
-    into.slope = (pressed - this.#preload - into.force) / (to - from);
+    // the preload's share is linear: its mean over any step is itself, its slope none
+    into.force -= this.#preload;
     return into;
   }
 
@@ -101,12 +100,39 @@ export class ContactLaw {
     return this.#stiffness * compression ** power;
   }
 
-  #stiffnessAt(penetration: number): number {
-    return this.#exponent * this.#pressed(penetration, this.#exponent - 1);
+  // Pressed at both ends: (k/p)·(end^p − start^p)/(end − start) = (k/p)·start^(p−1)·E(r), r = end/start − 1,
+  // E(r) = ((1 + r)^p − 1)/r, by expm1 and log1p, or by its series where r is tiny; the slope from E'(r).
+  #meanWhilePressed(start: number, end: number, into: MeanForce): void {
+    const power = this.#exponent + 1;
+    const ratio = (end - start) / start;
+    const pressed = this.#stiffness * start ** this.#exponent;
+    let mean: number;
+    let meanSlope: number;
+    if (Math.abs(ratio) < SERIES_BELOW) {
+      // (1 + r)^p's binomial terms past p·r: E = p + c2·r + c3·r² + c4·r³, E' = c2 + 2·c3·r + 3·c4·r²
+      const second = (power * (power - 1)) / 2;
+      const third = (second * (power - 2)) / 3;
+      const fourth = (third * (power - 3)) / 4;
+      mean = power + ratio * (second + ratio * (third + ratio * fourth));
+      meanSlope = second + ratio * (2 * third + ratio * 3 * fourth);
+    } else {
+      const logGrowth = Math.log1p(ratio);
+      const grown = Math.expm1(power * logGrowth);
+      mean = grown / ratio;
+      meanSlope = (power * Math.exp((power - 1) * logGrowth) * ratio - grown) / (ratio * ratio);
+    }
+    into.force = (pressed * mean) / power;
+    into.slope = (pressed * meanSlope) / (power * start);
   }
 
-  // a step so short that the potential's change over it is lost to rounding
-  #tooClose(from: number, to: number): boolean {
-    return Math.abs(to - from) <= 1e-9 * (Math.abs(from) + Math.abs(to) + this.restPenetration);
+  // Pressed at one end only: the stored energy there over the step, nothing at the other; no cancellation.
+  #meanAcrossEdge(start: number, end: number, into: MeanForce): void {
+    const power = this.#exponent + 1;
+    const stored = (compression: number): number =>
+      compression > 0 ? (this.#stiffness * compression ** power) / power : 0;
+    const step = end - start;
+    into.force = (stored(end) - stored(start)) / step;
+    const atEnd = end > 0 ? this.#stiffness * end ** this.#exponent : 0;
+    into.slope = (atEnd - into.force) / step;
   }
 }
