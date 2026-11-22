@@ -59,3 +59,18 @@ test('damping grows with how hard the contact is pressed, none apart', () => {
   assert.equal(law.dampingAt(-1), 0);
   near(law.dampingAt(1e-5), 50 * (law.restPenetration + 1e-5) ** EXPONENT, 1e-12, 'pressed');
 });
+
+test('the mean force and its slope written in one call, the potential at the start handed in', () => {
+  const law = new ContactLaw({ stiffness: STIFFNESS, exponent: EXPONENT, preload: 2 });
+  const into = { force: 0, slope: 0 };
+  assert.equal(law.meanForceInto(-2e-5, law.potential(-2e-5), 3e-5, into), into, 'written into the one handed in');
+  near(into.force, law.averageForce(-2e-5, 3e-5), 1e-12, 'the force');
+  near(into.slope, law.averageForceSlope(-2e-5, 3e-5), 1e-12, 'the slope');
+});
+
+test('open where the parts no longer touch, past the rest penetration', () => {
+  const law = new ContactLaw({ stiffness: STIFFNESS, exponent: EXPONENT, preload: 2 });
+  assert.equal(law.isOpen(0), false, 'at rest, pressed together');
+  assert.equal(law.isOpen(-law.restPenetration / 2), false, 'lifted a little');
+  assert.equal(law.isOpen(-law.restPenetration * 1.01), true, 'lifted past it');
+});

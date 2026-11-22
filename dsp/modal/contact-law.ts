@@ -12,6 +12,12 @@ export interface ContactLawValues {
   readonly preload?: number;
 }
 
+/** The mean force over a step and its slope by where the step ends, written by `meanForceInto()`. */
+export interface MeanForce {
+  force: number;
+  slope: number;
+}
+
 /** The law, y the penetration measured from rest: k·[y0 + y]₊^α − F0, y0 where the preload is held. */
 export class ContactLaw {
   /** How far the parts press into each other at rest, under the preload. */
@@ -45,18 +51,40 @@ export class ContactLaw {
 
   /** The mean force over a step from one penetration to another: the potential's change over the step. */
   averageForce(from: number, to: number): number {
-    if (this.#tooClose(from, to)) {
-      return this.force((from + to) / 2);
-    }
-    return (this.potential(to) - this.potential(from)) / (to - from);
+    return this.meanForceInto(from, this.potential(from), to, { force: 0, slope: 0 }).force;
   }
 
   /** How the mean force changes with where the step ends: what a Newton solve steps along. */
   averageForceSlope(from: number, to: number): number {
+    return this.meanForceInto(from, this.potential(from), to, { force: 0, slope: 0 }).slope;
+  }
+
+  /**
+   * The mean force over a step and its slope, written into `into` and handed back, the potential at the step's
+   * start given: a solve calls it many times a sample, the start fixed, so one power is taken a call.
+   */
+  meanForceInto(from: number, fromPotential: number, to: number, into: MeanForce): MeanForce {
     if (this.#tooClose(from, to)) {
-      return this.#stiffnessAt((from + to) / 2) / 2;
+      const middle = (from + to) / 2;
+      into.force = this.force(middle);
+      into.slope = this.#stiffnessAt(middle) / 2;
+      return into;
     }
-    return (this.force(to) - this.averageForce(from, to)) / (to - from);
+    const compression = this.restPenetration + to;
+    let pressed = 0;
+    if (compression > 0) {
+      pressed = this.#stiffness * compression ** this.#exponent;
+    }
+    const potential =
+      (pressed * Math.max(0, compression)) / (this.#exponent + 1) - this.#preload * to - this.#restPotential;
+    into.force = (potential - fromPotential) / (to - from);
+    into.slope = (pressed - this.#preload - into.force) / (to - from);
+    return into;
+  }
+
+  /** Whether the parts are apart at a penetration, the preload's pull all that acts. */
+  isOpen(penetration: number): boolean {
+    return this.restPenetration + penetration <= 0;
   }
 
   /** The damping at a penetration: force per unit of speed, growing as the contact is pressed. */

@@ -152,3 +152,34 @@ test('a stiff contact struck hard never stalls its solve', () => {
   assert.equal(contacts.stalls, 0);
   assert.ok(Number.isFinite(bank.position(TIP)));
 });
+
+test("a contact barely moving, long after a strike, never stalls on rounding's floor", () => {
+  // F3's tongue, six modes, a thumb resting on its tip: after 2 s the bridge moves by 10⁻⁸ against its
+  // rest penetration of 7·10⁻⁶, and Newton's steps bounce on rounding at 10⁻¹⁶
+  const ratios = [1, 1.0017, 6.5, 17.3, 34.4, 56.8];
+  const shapes = [
+    [1, 0.2],
+    [1, 0.2],
+    [0.9, -0.5],
+    [0.8, 0.6],
+    [0.7, -0.6],
+    [0.6, 0.5],
+  ];
+  const decays = [4, 4, 1, 0.3, 0.15, 0.1];
+  const bank = new ModeBank(
+    ratios.map((ratio, mode) => ({ frequency: 174.61 * ratio, decayTime: decays[mode], shape: shapes[mode] })),
+    RATE,
+  );
+  const thumb = {
+    law: new ContactLaw({ stiffness: 1e10, exponent: 1.5, damping: 1e3 }),
+    on: { bank, point: TIP },
+    barrier: 0,
+  };
+  const contacts = new Contacts(
+    [bridge(bank, { stiffness: 1e9, exponent: 1.5, damping: 1e4, preload: 20 }), thumb],
+    RATE,
+  );
+  bank.push(TIP, 3 * STRIKE);
+  run(contacts, 2 * RATE);
+  assert.equal(contacts.stalls, 0);
+});

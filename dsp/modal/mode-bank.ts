@@ -30,6 +30,9 @@ export class ModeBank {
   #now: Float64Array;
   #before: Float64Array;
   readonly #pushed: Float64Array;
+  // each mode at the next sample under the pushed forces alone: asked for at every contact, worked out once
+  readonly #free: Float64Array;
+  #freeKnown = false;
 
   constructor(modes: readonly Mode[], sampleRate: number) {
     this.modes = modes.filter(({ frequency }) => frequency < sampleRate / 2);
@@ -45,11 +48,13 @@ export class ModeBank {
     this.#now = new Float64Array(count);
     this.#before = new Float64Array(count);
     this.#pushed = new Float64Array(this.#points);
+    this.#free = new Float64Array(count);
   }
 
   /** A force at a point, held for the next sample: a strike, or a thumb that isn't solved as a contact. */
   push(point: number, force: number): void {
     this.#pushed[point]! += force;
+    this.#freeKnown = false;
   }
 
   /** Where a point is now. */
@@ -63,9 +68,10 @@ export class ModeBank {
 
   /** Where a point will be at the next sample, with only the forces pushed so far. */
   freePosition(point: number): number {
+    const free = this.#freeModes();
     let sum = 0;
     for (let mode = 0; mode < this.modes.length; mode++) {
-      sum += this.#shapeAt(point, mode) * this.#next(mode, this.#forceOn(mode, undefined));
+      sum += this.#shapeAt(point, mode) * free[mode]!;
     }
     return sum;
   }
@@ -81,14 +87,16 @@ export class ModeBank {
 
   /** The next sample, with the pushed forces and these, one a point; the pushed ones then let go. */
   advance(forces?: ArrayLike<number>): void {
+    const free = this.#freeModes();
     for (let mode = 0; mode < this.modes.length; mode++) {
-      this.#before[mode] = this.#next(mode, this.#forceOn(mode, forces));
+      this.#before[mode] = free[mode]! + this.#gain[mode]! * this.#forceOn(mode, forces);
     }
     // the array just written becomes now, the old now becomes before
     const before = this.#now;
     this.#now = this.#before;
     this.#before = before;
     this.#pushed.fill(0);
+    this.#freeKnown = false;
   }
 
   /** The energy in its modes, as the scheme keeps it: never negative, kept without damping, falling with it. */
@@ -123,6 +131,16 @@ export class ModeBank {
     return this.#shapes[point * this.modes.length + mode]!;
   }
 
+  #freeModes(): Float64Array {
+    if (!this.#freeKnown) {
+      for (let mode = 0; mode < this.modes.length; mode++) {
+        this.#free[mode] = this.#next(mode, this.#forceOn(mode, this.#pushed));
+      }
+      this.#freeKnown = true;
+    }
+    return this.#free;
+  }
+
   // the mode at the next sample under this force
   #next(mode: number, force: number): number {
     return (
@@ -132,12 +150,14 @@ export class ModeBank {
     );
   }
 
-  // the force on a mode: each point's force by the mode's shape there; the pushed ones always, these when given
+  // the force on a mode: each point's force by the mode's shape there
   #forceOn(mode: number, forces: ArrayLike<number> | undefined): number {
+    if (!forces) {
+      return 0;
+    }
     let sum = 0;
     for (let point = 0; point < this.#points; point++) {
-      const extra = forces?.[point] ?? 0;
-      sum += this.#shapeAt(point, mode) * (this.#pushed[point]! + extra);
+      sum += this.#shapeAt(point, mode) * (forces[point] ?? 0);
     }
     return sum;
   }
