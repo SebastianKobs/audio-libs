@@ -24,6 +24,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'dsp/grains/',
     'dsp/true-peak/',
     'dsp/circuits/',
+    'dsp/modal/',
     'formats/wav/',
     'modular-audio/plan/format/',
     'modular-audio/plan/blocks/',
@@ -82,6 +83,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'dsp/grains/': ['base/util/'],
     'dsp/true-peak/': ['dsp/filters/', 'dsp/loudness/'],
     'dsp/circuits/': ['dsp/filters/'],
+    'dsp/modal/': [],
     'formats/wav/': [],
     'modular-audio/plan/format/': ['base/params/', 'base/util/'],
     'modular-audio/plan/blocks/': [
