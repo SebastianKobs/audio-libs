@@ -3,6 +3,12 @@
 // are the exact ones (Bilbao, Numerical Sound Synthesis): any frequency below Nyquist rings true, never unstable.
 // Its response to a force is linear and known before it moves, so a contact can solve its force implicitly.
 
+/** A mode's motion: its displacement now and a sample before, all the scheme remembers. */
+export interface ModeState {
+  readonly now: number;
+  readonly before: number;
+}
+
 /** A mode: what it rings at, how long to fall 60 dB, and how far it moves at each of the bank's points. */
 export interface Mode {
   readonly frequency: number;
@@ -54,6 +60,18 @@ export class ModeBank {
   /** A force at a point, held for the next sample: a strike, or a thumb that isn't solved as a contact. */
   push(point: number, force: number): void {
     this.#pushed[point]! += force;
+    this.#freeKnown = false;
+  }
+
+  /** A mode's motion: handed to another model of the same object, as a linear one takes over a ringing tail. */
+  state(mode: number): ModeState {
+    return { now: this.#now[mode]!, before: this.#before[mode]! };
+  }
+
+  /** A mode's motion set, as handed back: the bank goes on from it. */
+  setState(mode: number, { now, before }: ModeState): void {
+    this.#now[mode] = now;
+    this.#before[mode] = before;
     this.#freeKnown = false;
   }
 

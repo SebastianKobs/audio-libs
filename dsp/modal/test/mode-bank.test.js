@@ -119,3 +119,29 @@ test('a mode at or above half the sample rate is left out: it would alias', () =
   assert.equal(peak(struck(bank, { samples: 100 }), 0, 100), 0);
   assert.equal(bank.energy(), 0);
 });
+
+test("a bank's state handed to another goes on as the first would have", () => {
+  const modes = [
+    { frequency: 262, decayTime: 2, shape: [1, 0.5] },
+    { frequency: 1703, decayTime: 0.5, shape: [-0.8, 1] },
+  ];
+  const first = new ModeBank(modes, RATE);
+  struck(first, { samples: 100 });
+  const second = new ModeBank(modes, RATE);
+  modes.forEach((_, mode) => second.setState(mode, first.state(mode)));
+  for (let i = 0; i < 1000; i++) {
+    assert.equal(second.position(1), first.position(1), `at sample ${i}`);
+    first.advance();
+    second.advance();
+  }
+});
+
+test("a mode's state is its displacement now and a sample before", () => {
+  const bank = new ModeBank([{ frequency: 262, decayTime: 2, shape: [2] }], RATE);
+  bank.setState(0, { now: 0.25, before: 0.2 });
+  assert.deepEqual(bank.state(0), { now: 0.25, before: 0.2 });
+  assert.equal(bank.position(0), 0.5, 'the point by its shape');
+  const free = bank.freePosition(0);
+  bank.advance();
+  assert.equal(bank.position(0), free, 'the next sample from it, as the free position said');
+});
