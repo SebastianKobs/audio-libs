@@ -8,6 +8,11 @@ Commits: the labels and their logs are in `.githooks/rule-based-commit-logging/l
 
 ---
 
+## 2026-11-22
+
+- `932e44e` TECHNICAL: **dsp/modal, a new library for physical models: an object's modes stepped exact in frequency and decay at any rate, pushed and read at points (`ModeBank`, `Mode`); Hunt and Crossley's contact law with a preload, the force over a step the potential's mean slope (`ContactLaw`, `ContactLawValues`); contacts between banks' points or a point and a moved barrier, every force solved at once by Newton each sample (`Contacts`, `Contact`, `ContactPoint`);** the seams a kalimba's thumb, bridge and finger need, and any struck, plucked or rattling object: a VCO can't be pushed by a force, a resonator with a state can. Without damping the energy is kept within 1 part in a million as a preloaded contact opens and closes; a linear contact under its preload scales exactly, over it not. *(Source: Request: "build the audio-lib components as suggested")* Files: `dsp/modal/`, `dsp/README.md`, `test/module-rules.js`
+- `932e44e` TECHNICAL: **dsp/oscillators: events told ahead, handed out in a block at their frames, a late one at the first, in time order (`TimedEvents`);** for a processor of objects that keep sounding, not voices that start and stop, beside `ScheduledVoice` and its `BlockClock`, rounded to frames as it rounds its start. *(Source: Request)* Files: `dsp/oscillators/`
+
 ## 2026-11-21
 
 - `36c01de` TECHNICAL: **the germanium drive's comparison with the stage alone within 0.05 dB, not 0.01;** its tests run after the switch to 2 × (`be9252b`, committed untested at the owner's asking): the 3rd off by 0.0104 dB, the test's own doing, the stage alone taken every 2nd sample with no filter, the drive through its oversampler's filters. All else passed. *(Source: Request)* Files: `dsp/circuits/test/germanium-drive.test.js`, `technical-log.md`
