@@ -39,6 +39,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'sequencing/timeline/',
     'sequencing/sequencer/',
     'midi/protocol/',
+    'midi/note-map/',
     'sequencing/midi-sequencer/',
     'spatial/hearing/',
     'music/music-theory/',
@@ -127,6 +128,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'sequencing/timeline/': ['sequencing/clock/', 'base/util/'],
     'sequencing/sequencer/': ['sequencing/clock/', 'base/util/'],
     'midi/protocol/': ['base/automation/', 'base/util/'],
+    'midi/note-map/': ['base/util/'],
     'sequencing/midi-sequencer/': [
       'base/automation/',
       'sequencing/clock/',

@@ -20,7 +20,7 @@ Take the layers you need: copy their folders, or mount this repo as a git submod
 Nine groups, each a folder, read bottom up. A group reads only those before it. Each group's README names its libraries and what it reads, each library's what it offers.
 
 - [`base/`](base/README.md): words and helpers every library shares.
-- [`midi/`](midi/README.md): MIDI 2.0's channel voice messages as values, and what they're played into.
+- [`midi/`](midi/README.md): MIDI 2.0's channel voice messages as values, and what they're played into; a note map for a sampler's articulations.
 - [`sequencing/`](sequencing/README.md): time, events, the MIDI sequencer and the transport's view.
 - [`music/`](music/README.md): notes, keys, scales and a play style, musical time in beats, a phrase played as a player would.
 - [`midi-devices/`](midi-devices/README.md): inserts on a track's notes, as an audio effect is on its sound, the Scale device.
@@ -36,7 +36,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | Layer | Libraries |
 |---|---|
 | 0 | `base/html`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/oscillators`, `dsp/saturation`, `dsp/wow`, `formats/midi-file`, `formats/wav` |
-| 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `music/meter`, `music/music-theory`, `spatial/places` |
+| 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `midi/note-map`, `music/meter`, `music/music-theory`, `spatial/places` |
 | 2 | `dsp/true-peak`, `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
 | 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
