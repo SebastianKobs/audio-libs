@@ -27,7 +27,7 @@ Nine groups, each a folder, read bottom up. A group reads only those before it. 
 - [`spatial/`](spatial/README.md): places perceived from where you are, hearing by distance, pointer input as gestures.
 - [`modular-audio/`](modular-audio/README.md): a sound as data (`modular-audio/plan/`), built (`modular-audio/build/`) and shown (`modular-audio/view/`), and its way through them.
 - [`dsp/`](dsp/README.md): signal processing on sample arrays, free of any audio API: measuring, saturating, filtering, a designed impulse, oscillator voices, crushing and granular effects, a true-peak limiter.
-- [`formats/`](formats/README.md): files other programs read, written from what the groups before it make, a WAV file.
+- [`formats/`](formats/README.md): files other programs read, written from what the groups before it make, a WAV file, a MIDI file read and written.
 
 ## By layer
 
@@ -35,7 +35,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 
 | Layer | Libraries |
 |---|---|
-| 0 | `base/html`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/oscillators`, `dsp/saturation`, `dsp/wow`, `formats/wav` |
+| 0 | `base/html`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/oscillators`, `dsp/saturation`, `dsp/wow`, `formats/midi-file`, `formats/wav` |
 | 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `music/meter`, `music/music-theory`, `spatial/places` |
 | 2 | `dsp/true-peak`, `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |

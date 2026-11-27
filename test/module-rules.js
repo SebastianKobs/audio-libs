@@ -26,6 +26,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'dsp/circuits/',
     'dsp/modal/',
     'formats/wav/',
+    'formats/midi-file/',
     'modular-audio/plan/format/',
     'modular-audio/plan/blocks/',
     'modular-audio/plan/planner/',
@@ -86,6 +87,7 @@ export const LIBRARY_LAYOUT = Object.freeze({
     'dsp/circuits/': ['dsp/filters/'],
     'dsp/modal/': [],
     'formats/wav/': [],
+    'formats/midi-file/': [],
     'modular-audio/plan/format/': ['base/params/', 'base/util/'],
     'modular-audio/plan/blocks/': [
       'base/automation/',
