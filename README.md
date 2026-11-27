@@ -22,7 +22,7 @@ Nine groups, each a folder, read bottom up. A group reads only those before it. 
 - [`base/`](base/README.md): words and helpers every library shares.
 - [`midi/`](midi/README.md): MIDI 2.0's channel voice messages as values, and what they're played into.
 - [`sequencing/`](sequencing/README.md): time, events, the MIDI sequencer and the transport's view.
-- [`music/`](music/README.md): notes, keys, scales and a play style, a phrase played as a player would.
+- [`music/`](music/README.md): notes, keys, scales and a play style, musical time in beats, a phrase played as a player would.
 - [`midi-devices/`](midi-devices/README.md): inserts on a track's notes, as an audio effect is on its sound, the Scale device.
 - [`spatial/`](spatial/README.md): places perceived from where you are, hearing by distance, pointer input as gestures.
 - [`modular-audio/`](modular-audio/README.md): a sound as data (`modular-audio/plan/`), built (`modular-audio/build/`) and shown (`modular-audio/view/`), and its way through them.
@@ -36,7 +36,7 @@ A library's layer is one more than the highest of those it uses; it can be taken
 | Layer | Libraries |
 |---|---|
 | 0 | `base/html`, `base/util`, `dsp/crusher`, `dsp/dynamics`, `dsp/filters`, `dsp/measures`, `dsp/operator-levels`, `dsp/oscillators`, `dsp/saturation`, `dsp/wow`, `formats/wav` |
-| 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `music/music-theory`, `spatial/places` |
+| 1 | `base/automation`, `base/params`, `dsp/grains`, `dsp/impulse`, `dsp/loudness`, `music/meter`, `music/music-theory`, `spatial/places` |
 | 2 | `dsp/true-peak`, `modular-audio/plan/format`, `sequencing/clock`, `midi/protocol`, `spatial/hearing` |
 | 3 | `modular-audio/build/contract`, `modular-audio/plan/blocks`, `modular-audio/view/device/readout`, `modular-audio/view/tracks/readout`, `midi-devices/scale`, `sequencing/sequencer`, `sequencing/timeline`, `sequencing/view/transport/models`, `spatial/gestures` |
 | 4 | `modular-audio/build/web-audio`, `modular-audio/plan/planner`, `modular-audio/view/device/models`, `modular-audio/view/instrument/readout`, `sequencing/midi-sequencer`, `sequencing/view/transport/dom` |
